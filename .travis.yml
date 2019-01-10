@@ -8,7 +8,7 @@ before_install:
 - go get -u github.com/alecthomas/gometalinter
 env:
   global:
-  - SNAP_PLUGIN_LIB_GO_SOURCE=/home/travis/gopath/src/github.com/intelsdi-x/snap-plugin-lib-go
+  - SNAP_PLUGIN_LIB_GO_SOURCE=/home/travis/gopath/src/github.com/librato/snap-plugin-lib-go
   matrix:
   - TEST_TYPE=small
   - TEST_TYPE=medium

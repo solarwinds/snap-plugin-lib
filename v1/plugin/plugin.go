@@ -41,7 +41,7 @@ import (
 
 	"text/tabwriter"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,7 +54,7 @@ var (
 		opts    []MetaOpt
 	}
 	// Flags required by the plugin lib flags - plugin authors can provide their
-	// own flags.  Checkout https://github.com/intelsdi-x/snap-plugin-lib-go/blob/master/examples/snap-plugin-collector-rand/rand/rand.go
+	// own flags.  Checkout https://github.com/librato/snap-plugin-lib-go/blob/master/examples/snap-plugin-collector-rand/rand/rand.go
 	// for an example of a plugin adding a custom flag.
 	Flags []cli.Flag = []cli.Flag{
 		flConfig,
@@ -944,7 +944,7 @@ func printRuntimeDetails(m meta) {
 }
 
 func printContactUs() {
-	fmt.Print("Thank you for using this Snap plugin. If you have questions or are running \ninto errors, please contact us on Github (github.com/intelsdi-x/snap) or \nour Slack channel (intelsdi-x.herokuapp.com). \nThe repo for this plugin can be found: github.com/intelsdi-x/<plugin-name>. \nWhen submitting a new issue on Github, please include this diagnostic \nprint out so that we have a starting point for addressing your question. \nThank you. \n\n")
+	fmt.Print("Thank you for using this Snap plugin. If you have questions or are running \ninto errors, please contact us on Github (github.com/librato/snap) or \nour Slack channel (intelsdi-x.herokuapp.com). \nThe repo for this plugin can be found: github.com/librato/<plugin-name>. \nWhen submitting a new issue on Github, please include this diagnostic \nprint out so that we have a starting point for addressing your question. \nThank you. \n\n")
 }
 
 func timeTrack(start time.Time, name string) {

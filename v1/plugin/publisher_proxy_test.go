@@ -26,7 +26,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

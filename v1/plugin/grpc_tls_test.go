@@ -39,7 +39,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
 var (
