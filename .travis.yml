@@ -9,7 +9,6 @@ env:
   global:
   - ORG_PATH=/home/travis/gopath/src/github.com/librato
   - SNAP_PLUGIN_SOURCE=/home/travis/gopath/src/github.com/${TRAVIS_REPO_SLUG}
-  - GLIDE_HOME="${HOME}/.glide"
 
 cache:
   directories:
