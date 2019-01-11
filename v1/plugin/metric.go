@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
 // Metric contains all info related to a Snap Metric

@@ -24,7 +24,7 @@ package plugin
 import (
 	"testing"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
 	"golang.org/x/net/context"
 )

@@ -1,4 +1,4 @@
-package: github.com/intelsdi-x/snap-plugin-lib-go
+package: github.com/librato/snap-plugin-lib-go
 import:
 - package: github.com/sirupsen/logrus
   version: ^1.0.2

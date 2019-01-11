@@ -21,7 +21,7 @@ package reverse
 import (
 	"strconv"
 
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
+	"github.com/librato/snap-plugin-lib-go/v1/plugin"
 )
 
 // RProcessor test processor

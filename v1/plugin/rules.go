@@ -19,7 +19,7 @@ limitations under the License.
 
 package plugin
 
-import "github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
+import "github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 
 type boolRuleOpt func(*rpc.BoolRule)
 
