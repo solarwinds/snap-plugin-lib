@@ -1,27 +1,38 @@
 sudo: false
+
 language: go
+
 go:
-- 1.7
-before_install:
-- go get github.com/Masterminds/glide
-- if [ ! -d $SNAP_PLUGIN_LIB_GO_SOURCE ]; then mkdir -p $HOME/gopath/src/github.com/intelsdi-x; ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_LIB_GO_SOURCE; fi # CI for forks not from intelsdi-x
-- go get -u github.com/alecthomas/gometalinter
+  - 1.11.x
+
 env:
   global:
-  - SNAP_PLUGIN_LIB_GO_SOURCE=/home/travis/gopath/src/github.com/librato/snap-plugin-lib-go
-  matrix:
-  - TEST_TYPE=small
-  - TEST_TYPE=medium
+  - ORG_PATH=/home/travis/gopath/src/github.com/librato
+  - SNAP_PLUGIN_SOURCE=/home/travis/gopath/src/github.com/${TRAVIS_REPO_SLUG}
+  - GLIDE_HOME="${HOME}/.glide"
+
+cache:
+  directories:
+  - $GOPATH/pkg/dep/sources
+
+before_install:
+  - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"
+
 install:
-  - export TMPDIR=$HOME/tmp
-  - mkdir -p $TMPDIR
-  - cd $SNAP_PLUGIN_LIB_GO_SOURCE 
-  - glide install
-  - gometalinter --install
-script:
-  - go test -tags=$TEST_TYPE $(glide novendor) -v
-  - gometalinter ./... || true
-notifications:
-  email: false
-  slack:
-    secure: VkbZLIc2RH8yf3PtIAxUNPdAu3rQQ7yQx0GcK124JhbEnZGaHyK615V0rbG7HcVmYKGPdB0cXqZiLBDKGqGKb2zR1NepOe1nF03jxGSpPq8jIFeEXSJGEYGL34ScDzZZGuG6qwbjFcXiW5lqn6t8igzp7v2+URYBaZo5ktCS2xY=
+  - cd $SNAP_PLUGIN_SOURCE
+  - make deps
+
+script: make check 2>&1
+
+jobs:
+  include:
+  - stage: lint
+    env: TEST_TYPE=lint
+  - stage: test
+    env: TEST_TYPE=small
+  - stage: test
+    env: TEST_TYPE=medium
+
+stages:
+- lint
+- test

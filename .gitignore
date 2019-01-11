@@ -6,39 +6,48 @@
 # Folders
 _obj
 _test
+**/.cache/
+**/.venv/
+**/__pycache__/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
 [568vq].out
 
+# Editor, OS files
+.idea/
+.DS_Store
+*.iml
+
+# dependency management files
+.glide/
+.glide-cache/
+
+# cgo output
 *.cgo1.go
 *.cgo2.c
 _cgo_defun.c
 _cgo_gotypes.go
 _cgo_export.*
-
 _testmain.go
 
 *.exe
 *.test
-.idea
-tmp/
+*.prof
+*.log
+*.out
+*.orig
 *.tmp
-scratch/
-*.swp
-profile.cov
-gin-bin
-tags
-.vscode/
-vendor/
+
+# Output of the go coverage tool
+*.out
+*.cov
 
 # we don't vendor godep _workspace
 **/Godeps/_workspace/**
+vendor/
 
-# OSX stuff
-.DS_Store
-
-*.cov
-
-# build and release artifacts
+# ignore build artifacts
 build/
+bin/
+pkg/

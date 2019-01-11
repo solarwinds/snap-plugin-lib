@@ -21,6 +21,7 @@ package plugin
 
 import (
 	"time"
+
 	"google.golang.org/grpc"
 )
 
@@ -124,17 +125,17 @@ type meta struct {
 	RPCType    metaRPCType
 	RPCVersion int
 
-	ConcurrencyCount    int
-	Exclusive           bool
-	Unsecure            bool
-	CacheTTL            time.Duration
-	RoutingStrategy     router
-	CertPath            string
-	KeyPath             string
-	TLSEnabled          bool
-	RootCertPaths       string
+	ConcurrencyCount int
+	Exclusive        bool
+	Unsecure         bool
+	CacheTTL         time.Duration
+	RoutingStrategy  router
+	CertPath         string
+	KeyPath          string
+	TLSEnabled       bool
+	RootCertPaths    string
 
-	grpcServerOptions   []grpc.ServerOption
+	grpcServerOptions []grpc.ServerOption
 }
 
 // newMeta sets defaults, applies options, and then returns a meta struct
