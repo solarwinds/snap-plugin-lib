@@ -64,11 +64,11 @@ func toProtoMetric(mt Metric) (*rpc.Metric, error) {
 		Config:      toProtoConfig(mt.Config),
 		Timestamp: &rpc.Time{
 			Sec:  mt.Timestamp.Unix(),
-			Nsec: int64(mt.Timestamp.UnixNano()),
+			Nsec: int64(mt.Timestamp.UnixNano() % 1e9),
 		},
 		LastAdvertisedTime: &rpc.Time{
 			Sec:  mt.lastAdvertisedTime.Unix(),
-			Nsec: int64(mt.lastAdvertisedTime.UnixNano()),
+			Nsec: int64(mt.lastAdvertisedTime.UnixNano() % 1e9),
 		},
 	}
 	switch t := mt.Data.(type) {
