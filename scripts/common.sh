@@ -1,4 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# File managed by pluginsync
+
+# http://www.apache.org/licenses/LICENSE-2.0.txt
+#
+#
+# Copyright 2016 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -e
 set -u
@@ -6,21 +24,13 @@ set -o pipefail
 
 LOG_LEVEL="${LOG_LEVEL:-6}"
 NO_COLOR="${NO_COLOR:-}"
+NO_GO_TEST=${NO_GO_TEST:-'-not -path "./.*" -not -path "*/_*" -not -path "./Godeps/*" -not -path "./vendor/*"'}
 
 trap_exitcode() {
   exit $?
 }
 
 trap trap_exitcode SIGINT
-
-_go_get() {
-  local _url=$1
-  local _util
-
-  _util=$(basename "${_url}")
-
-  type -p "${_util}" > /dev/null || go get "${_url}" && _debug "go get ${_util} ${_url}"
-}
 
 _fmt () {
   local color_debug="\x1b[35m"
@@ -45,10 +55,17 @@ _notice ()  { [ "${LOG_LEVEL}" -ge 5 ] && echo "$(_fmt notice) ${*}" 1>&2 || tru
 _warning () { [ "${LOG_LEVEL}" -ge 4 ] && echo "$(_fmt warning) ${*}" 1>&2 || true; }
 _error ()   { [ "${LOG_LEVEL}" -ge 3 ] && echo "$(_fmt error) ${*}" 1>&2 || true; exit 1; }
 
-test_dirs=$(find . -type f -name '*.go' -not -path "./.*" -not -path "*/_*" -not -path "./Godeps/*" -not -path "./vendor/*" -not -path "./scripts/*" -print0 | xargs -0 -n1 dirname | sort -u)
+_test_files() {
+  local test_files=$(sh -c "find . -type f -name '*.go' ${NO_GO_TEST} -print")
+  _debug "go source files ${test_files}"
+  echo "${test_files}"
+}
 
-_debug "go code directories:
-${test_dirs}"
+_test_dirs() {
+  local test_dirs=$(sh -c "find . -type f -name '*.go' ${NO_GO_TEST} -print0" | xargs -0 -n1 dirname | sort -u)
+  _debug "go code directories ${test_dirs}"
+  echo "${test_dirs}"
+}
 
 _go_get() {
   local _url=$1
@@ -59,41 +76,22 @@ _go_get() {
   type -p "${_util}" > /dev/null || go get "${_url}" && _debug "go get ${_util} ${_url}"
 }
 
-_path_prepend() {
-  if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
-    PATH="$1${PATH:+":$PATH"}"
-    _debug "Update PATH: ${PATH}"
-  fi
-}
-
-_go_path() {
-  [[ ! -z $GOPATH ]] || _error "Error \$GOPATH unset"
-
-  _debug "GOPATH: ${GOPATH}"
-  _debug "PATH: ${PATH}"
-
-  # NOTE: handles colon separated gopath
-  go_bin_path=${GOPATH//://bin:}/bin
-
-  _path_prepend "${go_bin_path}"
+_gofmt() {
+  test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
 }
 
 _goimports() {
   _go_get golang.org/x/tools/cmd/goimports
-  test -z "$(goimports -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") | tee /dev/stderr)"
-}
-
-_gofmt() {
-  test -z "$(gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") | tee /dev/stderr)"
+  test -z "$(goimports -l -d $(_test_files) | tee /dev/stderr)"
 }
 
 _golint() {
-  _go_get github.com/golang/lint/golint
-  golint ./...
+  _go_get golang.org/x/lint/golint
+  golint $(go list ./... | grep -v /vendor/)
 }
 
 _go_vet() {
-  go vet ${test_dirs}
+  go vet $(_test_dirs)
 }
 
 _go_race() {
@@ -103,30 +101,22 @@ _go_race() {
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
   # Standard go tooling behavior is to ignore dirs with leading underscors
-  for dir in $test_dirs;
+  for dir in $(_test_dirs);
   do
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
-      go test --tags="${TEST_TYPE}" -covermode=count -coverprofile="${dir}/profile.tmp" "${dir}"
+      go test -v --tags="${TEST_TYPE}" -covermode=count -coverprofile="${dir}/profile.tmp" "${dir}"
       if [ -f "${dir}/profile.tmp" ]; then
-        tail -n +2 "${dir}/profile.tmp" >> "profile-${TEST_TYPE}.cov"
+        tail -n +2 "${dir}/profile.tmp" >> profile.cov
         rm "${dir}/profile.tmp"
       fi
     else
       _debug "running go test without cover in ${dir}"
-      go test --tags="${TEST_TYPE}" "${dir}"
+      go test -v --tags="${TEST_TYPE}" "${dir}"
     fi
   done
 }
 
 _go_cover() {
-  go tool cover -func "profile-${TEST_TYPE}.cov"
-}
-
-_git_version() {
-  git_branch=$(git symbolic-ref HEAD 2> /dev/null | cut -b 12-)
-  git_branch="${git_branch:-test}"
-  git_sha=$(git log --pretty=format:"%h" -1)
-  git_version=$(git describe --always --exact-match 2> /dev/null || echo "${git_branch}-${git_sha}")
-  echo "${git_version}"
+  go tool cover -func profile.cov
 }

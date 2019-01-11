@@ -331,7 +331,7 @@ func buildGRPCServer(typeOfPlugin pluginType, name string, version int, arg *Arg
 	}
 	if m.TLSEnabled {
 		grpcOptions = append(grpcOptions, grpc.Creds(creds))
-	} 
+	}
 	server = grpc.NewServer(tlsSetup.updateServerOptions(grpcOptions...)...)
 	return server, m, nil
 }

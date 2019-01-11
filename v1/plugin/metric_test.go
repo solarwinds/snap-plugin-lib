@@ -375,8 +375,8 @@ func metricHasDefaultTimeTestCases() []testCaseMetric {
 					"user": "cindy",
 					"pw":   "12345Y",
 				},
-				Timestamp:          time.Now(),
-				lastAdvertisedTime: time.Now(),
+				Timestamp:          time.Now().Truncate(0),
+				lastAdvertisedTime: time.Now().Truncate(0),
 			},
 		},
 		{
@@ -384,8 +384,8 @@ func metricHasDefaultTimeTestCases() []testCaseMetric {
 				Namespace:          NewNamespace("x", "y", "z").AddStaticElement("d").AddDynamicElement("charm", "desc").AddStaticElements("r", "s"),
 				Data:               "abc",
 				Unit:               "string",
-				Timestamp:          time.Now(),
-				lastAdvertisedTime: time.Now(),
+				Timestamp:          time.Now().Truncate(0),
+				lastAdvertisedTime: time.Now().Truncate(0),
 			},
 		},
 	}

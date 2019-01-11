@@ -26,10 +26,11 @@ import (
 )
 
 const (
-	pluginName    = "test-rand-collector"
-	pluginVersion = 1
+	pluginName      = "test-rand-collector"
+	pluginVersion   = 1
+	maxGRPCMesgSize = 2 * 1024
 )
 
 func main() {
-	plugin.StartCollector(rand.RandCollector{}, pluginName, pluginVersion, plugin.GRPCServerOptions(grpc.MaxMsgSize(2 * 1024)))
+	plugin.StartCollector(rand.RandCollector{}, pluginName, pluginVersion, plugin.GRPCServerOptions(grpc.MaxMsgSize(maxGRPCMesgSize)))
 }
