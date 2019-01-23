@@ -20,6 +20,7 @@ limitations under the License.
 package plugin
 
 import (
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
@@ -34,44 +35,59 @@ type collectorProxy struct {
 }
 
 func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg) (*rpc.MetricsReply, error) {
-	metrics := []Metric{}
+	requestedMts := convertProtoToMetrics(arg.Metrics)
 
-	for _, mt := range arg.Metrics {
-		metric := fromProtoMetric(mt)
-		metrics = append(metrics, metric)
-	}
-	r, err := c.plugin.CollectMetrics(metrics)
+	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
 	if err != nil {
 		return nil, err
 	}
-	mts := []*rpc.Metric{}
-	for _, mt := range r {
-		metric, err := toProtoMetric(mt)
-		if err != nil {
-			return nil, err
-		}
-		mts = append(mts, metric)
+
+	protoMts, err := convertMetricsToProto(collectedMts)
+	if err != nil {
+		return nil, err
 	}
-	reply := &rpc.MetricsReply{Metrics: mts}
-	return reply, nil
+
+	return &rpc.MetricsReply{Metrics: protoMts}, nil
+}
+
+func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.Collector_CollectMetricsAsStreamServer) error {
+	logF := logrus.WithFields(logrus.Fields{"test": "adamiklib", "block": "CollectMetricsAsStream"})
+
+	requestedMts := convertProtoToMetrics(arg.Metrics)
+
+	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
+	if err != nil {
+		return err
+	}
+
+	splitMts := ChunkMetrics(collectedMts, DefaultMetricsChunkSize)
+
+	logF.Debugf("There are %d metrics to send. They might be send in chunks", len(collectedMts))
+	for _, chunkMts := range splitMts {
+		protoMts, err := convertMetricsToProto(chunkMts)
+		if err != nil {
+			return err
+		}
+
+		stream.Send(&rpc.MetricsReply{Metrics: protoMts})
+		logF.Debugf("Chunk sent to snap (len=%d)", len(protoMts))
+	}
+
+	return nil
 }
 
 func (c *collectorProxy) GetMetricTypes(ctx context.Context, arg *rpc.GetMetricTypesArg) (*rpc.MetricsReply, error) {
 	cfg := fromProtoConfig(arg.Config)
 
-	r, err := c.plugin.GetMetricTypes(cfg)
+	mts, err := c.plugin.GetMetricTypes(cfg)
 	if err != nil {
 		return nil, err
 	}
-	metrics := []*rpc.Metric{}
-	for _, mt := range r {
-		// We can ignore this error since we are not returning data from
-		// GetMetricTypes.
-		metric, _ := toProtoMetric(mt)
-		metrics = append(metrics, metric)
+
+	protoMts, err := convertMetricsToProto(mts)
+	if err != nil {
+		return nil, err
 	}
-	reply := &rpc.MetricsReply{
-		Metrics: metrics,
-	}
-	return reply, nil
+
+	return &rpc.MetricsReply{Metrics: protoMts}, nil
 }

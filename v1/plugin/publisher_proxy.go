@@ -45,5 +45,8 @@ func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc
 		return &rpc.ErrReply{Error: err.Error()}, nil
 	}
 	return &rpc.ErrReply{}, nil
+}
 
+func (p *publisherProxy) PublishAsStream(rpc.Publisher_PublishAsStreamServer) error {
+	panic("implement me")
 }

@@ -16,27 +16,39 @@
   revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
 
 [[projects]]
+  branch = "master"
   digest = "1:f14d1b50e0075fb00177f12a96dd7addf93d1e2883c25befd17285b779549795"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "UT"
-  revision = "2b1d432c8a82c9bff0b0baffaeb3ec6e92974112"
+  revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
-  digest = "1:1e15f4e455f94aeaedfcf9c75b3e1c449b5acba1551c58446b4b45be507c707b"
+  branch = "master"
+  digest = "1:52e7c0f79a0ffe9a887a9d483489233d7c774ddc3485302fd0f94740cab0c867"
+  name = "github.com/intelsdi-x/snap-plugin-lib-go"
+  packages = [
+    "v1/plugin",
+    "v1/plugin/rpc",
+  ]
+  pruneopts = "UT"
+  revision = "e15172330a819bd90c2dc6cc23f8c894eb6e9986"
+
+[[projects]]
+  digest = "1:4b63210654b1f2b664f74ec434a1bb1cb442b3d75742cc064a10808d1cca6361"
   name = "github.com/jtolds/gls"
   packages = ["."]
   pruneopts = "UT"
-  revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
-  version = "v4.2.1"
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
+  version = "v4.20"
 
 [[projects]]
-  digest = "1:ccfa094742ce1c97fd3f6481e1bf98f3d9862510eee2bc0eb56e2745396bd330"
+  digest = "1:f97285a3b0a496dcf8801072622230d513f69175665d94de60eb042d03387f6c"
   name = "github.com/julienschmidt/httprouter"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
-  version = "v1.1"
+  revision = "348b672cd90d8190f8240323e372ecd1e66b59dc"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
@@ -47,15 +59,23 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "AO-10423-library-for-mapping-json-to-metric"
+  digest = "1:605385d7da0c56f9453f5bebfcb492b80be5aa13cc031c854ae8972ec52c21bd"
+  name = "github.com/librato/snap-aoutils"
+  packages = ["metrics"]
+  pruneopts = "UT"
+  revision = "5fe691d6902623434bd3584a368c9e8c6c6c7013"
+
+[[projects]]
   branch = "master"
-  digest = "1:9c3c856c4bd09733de5727aeb85fc484b8b87a6eb9e6a632c47e3f17142757ee"
+  digest = "1:055e9061f587243aed1de11e44ea83a18bfc4604ca55ad81c91edd1ddd3eb81a"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "659e47340eafb203ad3c2ce461023fde46356615"
+  revision = "7d8d63893b994a654b3bc8d16ffd7fb6b9f884a4"
 
 [[projects]]
-  digest = "1:5c36363d7cb1ee2cffd182e95a1eb5bb2e4ab30d7ec9eca532152bfdc83bfd98"
+  digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
@@ -63,7 +83,8 @@
     "internal/oglematchers",
   ]
   pruneopts = "UT"
-  revision = "4ea54c1f28ad3ae597e76607dea3871fa177e263"
+  revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
+  version = "1.8.3"
 
 [[projects]]
   digest = "1:a3e081e593ee8e3b0a9af6a5dcac964c67a40c4f2034b5345b2ad78d05920728"
@@ -86,44 +107,52 @@
   version = "v1.20.0"
 
 [[projects]]
-  digest = "1:624a05c7c6ed502bf77364cd3d54631383dafc169982fddd8ee77b53c3d9cccf"
+  branch = "master"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "eb71ad9bd329b5ac0fd0148dd99bd62e8be8e035"
+  revision = "057139ce5d2bdbe6fe73c53679e24e9cf007f637"
 
 [[projects]]
-  digest = "1:e0cec8ae826cae3e38d7e26aa0c66b58aa580d9922b451de0fe21cdcc2eda367"
+  branch = "master"
+  digest = "1:fc7b6b4384e1e849d99eab58eca4f8c0a76bad4699117d5077a9a5c3c83e289e"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "lex/httplex",
     "trace",
   ]
   pruneopts = "UT"
-  revision = "f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
 
 [[projects]]
-  digest = "1:cd1af7f4bf55d59e42e880373a7e12fe3642e2667bdf4e1d23af4772e3118b5e"
+  branch = "master"
+  digest = "1:bb644db32f5bc1e327a0f748ec871edc4dc46f19b4fbbc15bfd95b1460646537"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "0f826bdd13b500be0f1d4004938ad978fcc6031e"
+  revision = "c6b37f3e92850b723493d63fd35aad34e19e048d"
 
 [[projects]]
-  digest = "1:97337ef8cb438f9e3a99ea91a300e916ed9a96fbf3ad50f9a020d30ea9f8692f"
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
   name = "golang.org/x/text"
   packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
     "internal/gen",
+    "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "language",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -132,18 +161,20 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "3bd178b88a8180be2df394a1fbb81313916f0e7b"
-
-[[projects]]
-  digest = "1:93180612a69db36a06d801302b867d53a50a8a5f0943b34db66adc0574ea57df"
-  name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
-  pruneopts = "UT"
-  revision = "b0a3dcfcd1a9bd48e63634bd8802960804cf8315"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:1e368b42a94a729041d73c5127a80b1e0b1bcdc30e9e74c43ff8e2cd5584efd3"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  pruneopts = "UT"
+  revision = "8819c946db4494a2259bf100a377f51aa585d893"
+
+[[projects]]
+  branch = "master"
+  digest = "1:83ef7fe0a9f25e4ef3c1a34f4c2f1ae3ac3c38fce3679deedf68feb4c83792ae"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -179,7 +210,7 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "ec9c18c8c6dda21490f4840e9c9946d883fd3037"
+  revision = "4cad6a62833044625feecb561a3e882be34097cc"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -187,6 +218,7 @@
   input-imports = [
     "github.com/golang/protobuf/proto",
     "github.com/julienschmidt/httprouter",
+    "github.com/librato/snap-aoutils/metrics",
     "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",
     "github.com/urfave/cli",
