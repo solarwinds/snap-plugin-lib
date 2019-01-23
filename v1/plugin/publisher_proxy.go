@@ -20,9 +20,12 @@ limitations under the License.
 package plugin
 
 import (
-	"golang.org/x/net/context"
+	"fmt"
+	"io"
+	"strings"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	"golang.org/x/net/context"
 )
 
 //TODO(danielscottt): plugin panics
@@ -34,19 +37,38 @@ type publisherProxy struct {
 }
 
 func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc.ErrReply, error) {
-	metrics := []Metric{}
-	for _, mt := range arg.Metrics {
-		metric := fromProtoMetric(mt)
-		metrics = append(metrics, metric)
-	}
+	mts := convertProtoToMetrics(arg.Metrics)
 	cfg := fromProtoConfig(arg.Config)
-	err := p.plugin.Publish(metrics, cfg)
+
+	err := p.plugin.Publish(mts, cfg)
 	if err != nil {
 		return &rpc.ErrReply{Error: err.Error()}, nil
 	}
 	return &rpc.ErrReply{}, nil
 }
 
-func (p *publisherProxy) PublishAsStream(rpc.Publisher_PublishAsStreamServer) error {
-	panic("implement me")
+func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamServer) error {
+	var errList []string
+
+	for {
+		protoMts, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			return fmt.Errorf("failure during reading from stream: %s", err.Error())
+		}
+
+		mts := convertProtoToMetrics(protoMts.Metrics)
+		cfg := fromProtoConfig(protoMts.Config)
+
+		err = p.plugin.Publish(mts, cfg)
+		if err != nil {
+			errList = append(errList, err.Error())
+		}
+	}
+
+	reply := &rpc.ErrReply{Error: strings.Join(errList, "")}
+	return stream.SendAndClose(reply)
 }
