@@ -37,6 +37,8 @@ type publisherProxy struct {
 }
 
 func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc.ErrReply, error) {
+	logF.Infof("LIB Publish start len=%d", len(arg.Metrics))
+
 	mts := convertProtoToMetrics(arg.Metrics)
 	cfg := fromProtoConfig(arg.Config)
 
@@ -48,6 +50,8 @@ func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc
 }
 
 func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamServer) error {
+	logF.Infof("LIB PublishAsStream start len")
+
 	var errList []string
 
 	for {
@@ -60,6 +64,8 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 			return fmt.Errorf("failure during reading from stream: %s", err.Error())
 		}
 
+		logF.Infof("LIB PublishAsStream chunk %d", len(protoMts.Metrics))
+
 		mts := convertProtoToMetrics(protoMts.Metrics)
 		cfg := fromProtoConfig(protoMts.Config)
 
@@ -68,6 +74,8 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 			errList = append(errList, err.Error())
 		}
 	}
+
+	logF.Infof("LIB PublishAsStream end")
 
 	reply := &rpc.ErrReply{Error: strings.Join(errList, "")}
 	return stream.SendAndClose(reply)

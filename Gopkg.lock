@@ -2,8 +2,7 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:3638dd58eb7a77bb1ed3f57e81f46ce636f0325f68e0900bb9170f71df93b9bc"
+  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -13,7 +12,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -22,17 +22,6 @@
   packages = ["js"]
   pruneopts = "UT"
   revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
-
-[[projects]]
-  branch = "master"
-  digest = "1:52e7c0f79a0ffe9a887a9d483489233d7c774ddc3485302fd0f94740cab0c867"
-  name = "github.com/intelsdi-x/snap-plugin-lib-go"
-  packages = [
-    "v1/plugin",
-    "v1/plugin/rpc",
-  ]
-  pruneopts = "UT"
-  revision = "e15172330a819bd90c2dc6cc23f8c894eb6e9986"
 
 [[projects]]
   digest = "1:4b63210654b1f2b664f74ec434a1bb1cb442b3d75742cc064a10808d1cca6361"
@@ -59,20 +48,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "AO-10423-library-for-mapping-json-to-metric"
-  digest = "1:605385d7da0c56f9453f5bebfcb492b80be5aa13cc031c854ae8972ec52c21bd"
-  name = "github.com/librato/snap-aoutils"
-  packages = ["metrics"]
-  pruneopts = "UT"
-  revision = "5fe691d6902623434bd3584a368c9e8c6c6c7013"
-
-[[projects]]
-  branch = "master"
-  digest = "1:055e9061f587243aed1de11e44ea83a18bfc4604ca55ad81c91edd1ddd3eb81a"
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "7d8d63893b994a654b3bc8d16ffd7fb6b9f884a4"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
@@ -128,7 +109,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "master"
@@ -139,7 +120,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c6b37f3e92850b723493d63fd35aad34e19e048d"
+  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -173,8 +154,7 @@
   revision = "8819c946db4494a2259bf100a377f51aa585d893"
 
 [[projects]]
-  branch = "master"
-  digest = "1:83ef7fe0a9f25e4ef3c1a34f4c2f1ae3ac3c38fce3679deedf68feb4c83792ae"
+  digest = "1:9ab5a33d8cb5c120602a34d2e985ce17956a4e8c2edce7e6961568f95e40c09a"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -210,7 +190,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "4cad6a62833044625feecb561a3e882be34097cc"
+  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
+  version = "v1.18.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -218,7 +199,6 @@
   input-imports = [
     "github.com/golang/protobuf/proto",
     "github.com/julienschmidt/httprouter",
-    "github.com/librato/snap-aoutils/metrics",
     "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",
     "github.com/urfave/cli",

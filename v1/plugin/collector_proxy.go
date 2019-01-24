@@ -34,7 +34,11 @@ type collectorProxy struct {
 	plugin Collector
 }
 
+var logF = logrus.WithFields(logrus.Fields{"test": "adamik_lib", "block": "CollectMetricsAsStream"})
+
 func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg) (*rpc.MetricsReply, error) {
+	logF.Infof("LIB CollectMetrics start len=%d", len(arg.Metrics))
+
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
 	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
@@ -47,11 +51,13 @@ func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg
 		return nil, err
 	}
 
+	logF.Infof("LIB CollectMetrics result len=%d", len(arg.Metrics))
+
 	return &rpc.MetricsReply{Metrics: protoMts}, nil
 }
 
 func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.Collector_CollectMetricsAsStreamServer) error {
-	logF := logrus.WithFields(logrus.Fields{"test": "adamiklib", "block": "CollectMetricsAsStream"})
+	logF.Infof("LIB CollectMetricsAsStream start len=%d", len(arg.Metrics))
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
