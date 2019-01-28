@@ -20,10 +20,9 @@ limitations under the License.
 package plugin
 
 import (
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
-
-	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
 // TODO(danielscottt): plugin panics
@@ -34,10 +33,8 @@ type collectorProxy struct {
 	plugin Collector
 }
 
-var logF = logrus.WithFields(logrus.Fields{"test": "adamik_lib", "block": "CollectMetricsAsStream"})
-
 func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg) (*rpc.MetricsReply, error) {
-	logF.Infof("LIB CollectMetrics start len=%d", len(arg.Metrics))
+	var logF = logrus.WithFields(logrus.Fields{"function": "CollectMetrics", "layer": "lib-go"})
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
@@ -51,13 +48,12 @@ func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg
 		return nil, err
 	}
 
-	logF.Infof("LIB CollectMetrics result len=%d", len(arg.Metrics))
-
+	logF.Debugf("Metrics will be sent to snap (len=%d)", len(arg.Metrics))
 	return &rpc.MetricsReply{Metrics: protoMts}, nil
 }
 
 func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.Collector_CollectMetricsAsStreamServer) error {
-	logF.Infof("LIB CollectMetricsAsStream start len=%d", len(arg.Metrics))
+	var logF = logrus.WithFields(logrus.Fields{"function": "CollectMetricsAsStream", "layer": "lib-go"})
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
@@ -67,8 +63,8 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 	}
 
 	splitMts := ChunkMetrics(collectedMts, DefaultMetricsChunkSize)
+	logF.Debugf("Metrics will be sent to snap (len=%d)", len(collectedMts))
 
-	logF.Debugf("There are %d metrics to send. They might be send in chunks", len(collectedMts))
 	for _, chunkMts := range splitMts {
 		protoMts, err := convertMetricsToProto(chunkMts)
 		if err != nil {
@@ -76,7 +72,7 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 		}
 
 		stream.Send(&rpc.MetricsReply{Metrics: protoMts})
-		logF.Debugf("Chunk sent to snap (len=%d)", len(protoMts))
+		logF.Debugf("Metrics chunk has been sent to snap (len=%d)", len(protoMts))
 	}
 
 	return nil
