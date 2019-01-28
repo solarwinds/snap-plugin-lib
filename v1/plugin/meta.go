@@ -123,7 +123,7 @@ type meta struct {
 	Name       string
 	Version    int
 	RPCType    metaRPCType
-	RPCVersion int
+	RPCVersion string
 
 	ConcurrencyCount int
 	Exclusive        bool
@@ -147,7 +147,7 @@ func newMeta(plType pluginType, name string, version int, opts ...MetaOpt) *meta
 		ConcurrencyCount: defaultConcurrencyCount,
 		RoutingStrategy:  LRURouter,
 		RPCType:          gRPC, // GRPC type
-		RPCVersion:       2,
+		RPCVersion:       "1.0.1",
 		Unsecure:         true,
 	}
 
