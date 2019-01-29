@@ -11,49 +11,59 @@ import (
 
 type splitTestCase struct {
 	length        int
-	paritalLength int
+	partialLength int
 	expectedSplit []Range
 }
 
 var splitTestCases = []splitTestCase{
 	{ // 0
 		length:        50,
-		paritalLength: 20,
+		partialLength: 20,
 		expectedSplit: []Range{{0, 20}, {20, 40}, {40, 50}},
 	},
 	{ // 1
 		length:        40,
-		paritalLength: 20,
+		partialLength: 20,
 		expectedSplit: []Range{{0, 20}, {20, 40}},
 	},
 	{ // 2
 		length:        39,
-		paritalLength: 20,
+		partialLength: 20,
 		expectedSplit: []Range{{0, 20}, {20, 39}},
 	},
 	{ // 3
 		length:        41,
-		paritalLength: 20,
+		partialLength: 20,
 		expectedSplit: []Range{{0, 20}, {20, 40}, {40, 41}},
 	},
 	{ // 4
 		length:        20,
-		paritalLength: 30,
+		partialLength: 30,
 		expectedSplit: []Range{{0, 20}},
 	},
 	{ // 5
 		length:        0,
-		paritalLength: 10,
+		partialLength: 10,
 		expectedSplit: []Range(nil),
 	},
 	{ // 6
 		length:        0,
-		paritalLength: 0,
+		partialLength: 0,
 		expectedSplit: []Range(nil),
 	},
 	{ // 7
 		length:        -1,
-		paritalLength: -2,
+		partialLength: -2,
+		expectedSplit: []Range(nil),
+	},
+	{ // 8
+		length:        1,
+		partialLength: -1,
+		expectedSplit: []Range(nil),
+	},
+	{ // 9
+		length:        -1,
+		partialLength: 2,
 		expectedSplit: []Range(nil),
 	},
 }
@@ -63,7 +73,7 @@ func TestCalculateChunkIndexes(t *testing.T) {
 		for id, testCase := range splitTestCases {
 			Convey(fmt.Sprintf("Scenario %d", id), func() {
 				// Act
-				result := CalculateChunkIndexes(testCase.length, testCase.paritalLength)
+				result := CalculateChunkIndexes(testCase.length, testCase.partialLength)
 
 				// Assert
 				So(len(result), ShouldEqual, len(testCase.expectedSplit))

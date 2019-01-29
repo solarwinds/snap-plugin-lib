@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -38,12 +38,12 @@ type publisherProxy struct {
 }
 
 func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc.ErrReply, error) {
-	var logF = logrus.WithFields(logrus.Fields{"function": "Publish", "layer": "lib-go"})
+	var logF = log.WithFields(log.Fields{"function": "Publish"})
 
 	mts := convertProtoToMetrics(arg.Metrics)
 	cfg := fromProtoConfig(arg.Config)
 
-	logF.Debugf("Metrics will be sent to appoptics (len=%d)", len(mts))
+	logF.WithFields(log.Fields{"length": len(mts)}).Debug("Metrics will be sent to appoptics")
 	err := p.plugin.Publish(mts, cfg)
 	if err != nil {
 		return &rpc.ErrReply{Error: err.Error()}, nil
@@ -52,7 +52,7 @@ func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc
 }
 
 func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamServer) error {
-	var logF = logrus.WithFields(logrus.Fields{"function": "PublishAsStream", "layer": "lib-go"})
+	var logF = log.WithFields(log.Fields{"function": "PublishAsStream"})
 
 	var errList []string
 
@@ -66,7 +66,7 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 			return fmt.Errorf("failure when reading from stream: %s", err.Error())
 		}
 
-		logF.Debugf("Metrics chunk will be sent to appoptics (len=%d)", len(protoMts.Metrics))
+		logF.WithFields(log.Fields{"length": len(protoMts.Metrics)}).Debug("Metrics chunk will be sent to appoptics")
 
 		mts := convertProtoToMetrics(protoMts.Metrics)
 		cfg := fromProtoConfig(protoMts.Config)

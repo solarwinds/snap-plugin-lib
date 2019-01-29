@@ -11,6 +11,10 @@ type Range struct {
 func CalculateChunkIndexes(length int, chunkLength int) []Range {
 	var indexes []Range
 
+	if length <= 0 || chunkLength <= 0 {
+		return indexes
+	}
+
 	for i := 0; i < length; i += chunkLength {
 		minIndex := i
 		maxIndex := i + chunkLength

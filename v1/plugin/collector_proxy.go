@@ -21,7 +21,7 @@ package plugin
 
 import (
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -34,7 +34,7 @@ type collectorProxy struct {
 }
 
 func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg) (*rpc.MetricsReply, error) {
-	var logF = logrus.WithFields(logrus.Fields{"function": "CollectMetrics", "layer": "lib-go"})
+	var logF = log.WithFields(log.Fields{"function": "CollectMetrics"})
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
@@ -48,12 +48,12 @@ func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg
 		return nil, err
 	}
 
-	logF.Debugf("Metrics will be sent to snap (len=%d)", len(arg.Metrics))
+	logF.WithFields(log.Fields{"length": len(arg.Metrics)}).Debug("Metrics will be sent to snap")
 	return &rpc.MetricsReply{Metrics: protoMts}, nil
 }
 
 func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.Collector_CollectMetricsAsStreamServer) error {
-	var logF = logrus.WithFields(logrus.Fields{"function": "CollectMetricsAsStream", "layer": "lib-go"})
+	var logF = log.WithFields(log.Fields{"function": "CollectMetricsAsStream"})
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
 
@@ -63,7 +63,7 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 	}
 
 	splitMts := ChunkMetrics(collectedMts, DefaultMetricsChunkSize)
-	logF.Debugf("Metrics will be sent to snap (len=%d)", len(collectedMts))
+	logF.WithFields(log.Fields{"length": len(collectedMts)}).Debug("Metrics will be sent to snap")
 
 	for _, chunkMts := range splitMts {
 		protoMts, err := convertMetricsToProto(chunkMts)
@@ -72,7 +72,7 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 		}
 
 		stream.Send(&rpc.MetricsReply{Metrics: protoMts})
-		logF.Debugf("Metrics chunk has been sent to snap (len=%d)", len(protoMts))
+		logF.WithFields(log.Fields{"length": len(protoMts)}).Debug("Metrics chunk has been sent to snap")
 	}
 
 	return nil
