@@ -63,7 +63,7 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 		return err
 	}
 
-	protoMts := []*rpc.Metric{}
+	protoMts := make([]*rpc.Metric, 0, maxCollectChunkSize)
 	for i, mt := range collectedMts {
 		protoMt, err := toProtoMetric(mt)
 		if err != nil {
@@ -77,7 +77,7 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 				return err
 			}
 			logF.WithFields(log.Fields{"length": len(protoMts)}).Debug("Metrics chunk has been sent to snap")
-			protoMts = []*rpc.Metric{}
+			protoMts = make([]*rpc.Metric, 0, maxCollectChunkSize)
 		}
 	}
 
