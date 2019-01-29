@@ -27,6 +27,8 @@ import (
 
 // TODO(danielscottt): plugin panics
 
+const maxCollectChunkSize = 100
+
 type collectorProxy struct {
 	pluginProxy
 
@@ -56,23 +58,27 @@ func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.
 	var logF = log.WithFields(log.Fields{"function": "CollectMetricsAsStream"})
 
 	requestedMts := convertProtoToMetrics(arg.Metrics)
-
 	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
 	if err != nil {
 		return err
 	}
 
-	splitMts := ChunkMetrics(collectedMts, DefaultMetricsChunkSize)
-	logF.WithFields(log.Fields{"length": len(collectedMts)}).Debug("Metrics will be sent to snap")
-
-	for _, chunkMts := range splitMts {
-		protoMts, err := convertMetricsToProto(chunkMts)
+	protoMts := []*rpc.Metric{}
+	for i, mt := range collectedMts {
+		protoMt, err := toProtoMetric(mt)
 		if err != nil {
 			return err
 		}
+		protoMts = append(protoMts, protoMt)
 
-		stream.Send(&rpc.MetricsReply{Metrics: protoMts})
-		logF.WithFields(log.Fields{"length": len(protoMts)}).Debug("Metrics chunk has been sent to snap")
+		if len(protoMts) == maxCollectChunkSize || i == len(collectedMts)-1 {
+			err := stream.Send(&rpc.MetricsReply{Metrics: protoMts})
+			if err != nil {
+				return err
+			}
+			logF.WithFields(log.Fields{"length": len(protoMts)}).Debug("Metrics chunk has been sent to snap")
+			protoMts = []*rpc.Metric{}
+		}
 	}
 
 	return nil
