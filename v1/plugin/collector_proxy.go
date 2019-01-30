@@ -20,12 +20,14 @@ limitations under the License.
 package plugin
 
 import (
-	"golang.org/x/net/context"
-
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/context"
 )
 
 // TODO(danielscottt): plugin panics
+
+const maxCollectChunkSize = 100
 
 type collectorProxy struct {
 	pluginProxy
@@ -34,44 +36,66 @@ type collectorProxy struct {
 }
 
 func (c *collectorProxy) CollectMetrics(ctx context.Context, arg *rpc.MetricsArg) (*rpc.MetricsReply, error) {
-	metrics := []Metric{}
+	var logF = log.WithFields(log.Fields{"function": "CollectMetrics"})
 
-	for _, mt := range arg.Metrics {
-		metric := fromProtoMetric(mt)
-		metrics = append(metrics, metric)
-	}
-	r, err := c.plugin.CollectMetrics(metrics)
+	requestedMts := convertProtoToMetrics(arg.Metrics)
+
+	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
 	if err != nil {
 		return nil, err
 	}
-	mts := []*rpc.Metric{}
-	for _, mt := range r {
-		metric, err := toProtoMetric(mt)
-		if err != nil {
-			return nil, err
-		}
-		mts = append(mts, metric)
+
+	protoMts, err := convertMetricsToProto(collectedMts)
+	if err != nil {
+		return nil, err
 	}
-	reply := &rpc.MetricsReply{Metrics: mts}
-	return reply, nil
+
+	logF.WithFields(log.Fields{"length": len(arg.Metrics)}).Debug("Metrics will be sent to snap")
+	return &rpc.MetricsReply{Metrics: protoMts}, nil
+}
+
+func (c *collectorProxy) CollectMetricsAsStream(arg *rpc.MetricsArg, stream rpc.Collector_CollectMetricsAsStreamServer) error {
+	var logF = log.WithFields(log.Fields{"function": "CollectMetricsAsStream"})
+
+	requestedMts := convertProtoToMetrics(arg.Metrics)
+	collectedMts, err := c.plugin.CollectMetrics(requestedMts)
+	if err != nil {
+		return err
+	}
+
+	protoMts := make([]*rpc.Metric, 0, maxCollectChunkSize)
+	for i, mt := range collectedMts {
+		protoMt, err := toProtoMetric(mt)
+		if err != nil {
+			return err
+		}
+		protoMts = append(protoMts, protoMt)
+
+		if len(protoMts) == maxCollectChunkSize || i == len(collectedMts)-1 {
+			err := stream.Send(&rpc.MetricsReply{Metrics: protoMts})
+			if err != nil {
+				return err
+			}
+			logF.WithFields(log.Fields{"length": len(protoMts)}).Debug("Metrics chunk has been sent to snap")
+			protoMts = make([]*rpc.Metric, 0, maxCollectChunkSize)
+		}
+	}
+
+	return nil
 }
 
 func (c *collectorProxy) GetMetricTypes(ctx context.Context, arg *rpc.GetMetricTypesArg) (*rpc.MetricsReply, error) {
 	cfg := fromProtoConfig(arg.Config)
 
-	r, err := c.plugin.GetMetricTypes(cfg)
+	mts, err := c.plugin.GetMetricTypes(cfg)
 	if err != nil {
 		return nil, err
 	}
-	metrics := []*rpc.Metric{}
-	for _, mt := range r {
-		// We can ignore this error since we are not returning data from
-		// GetMetricTypes.
-		metric, _ := toProtoMetric(mt)
-		metrics = append(metrics, metric)
+
+	protoMts, err := convertMetricsToProto(mts)
+	if err != nil {
+		return nil, err
 	}
-	reply := &rpc.MetricsReply{
-		Metrics: metrics,
-	}
-	return reply, nil
+
+	return &rpc.MetricsReply{Metrics: protoMts}, nil
 }

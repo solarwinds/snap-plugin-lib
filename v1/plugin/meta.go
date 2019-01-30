@@ -123,11 +123,11 @@ type meta struct {
 	Name       string
 	Version    int
 	RPCType    metaRPCType
-	RPCVersion int
+	RPCVersion string
 
 	ConcurrencyCount int
 	Exclusive        bool
-	Unsecure         bool
+	Unsecure         bool // legacy value not used for grpc, but needed to avoid calling SetKey needlessly
 	CacheTTL         time.Duration
 	RoutingStrategy  router
 	CertPath         string
@@ -147,10 +147,8 @@ func newMeta(plType pluginType, name string, version int, opts ...MetaOpt) *meta
 		ConcurrencyCount: defaultConcurrencyCount,
 		RoutingStrategy:  LRURouter,
 		RPCType:          gRPC, // GRPC type
-		RPCVersion:       1,    // This is v1 lib
-		// Unsecure is a legacy value not used for grpc, but needed to avoid
-		// calling SetKey needlessly.
-		Unsecure: true,
+		RPCVersion:       "1.0.1",
+		Unsecure:         true,
 	}
 
 	for _, opt := range opts {

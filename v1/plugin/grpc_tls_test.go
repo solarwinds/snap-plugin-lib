@@ -34,12 +34,11 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-
-	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
 var (

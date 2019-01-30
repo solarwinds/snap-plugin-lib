@@ -2,131 +2,210 @@
 
 
 [[projects]]
+  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
-    "ptypes/any"
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp",
   ]
-  revision = "748d386b5c1ea99658fd69fe9f03991ce86a90c1"
+  pruneopts = "UT"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:f14d1b50e0075fb00177f12a96dd7addf93d1e2883c25befd17285b779549795"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "2b1d432c8a82c9bff0b0baffaeb3ec6e92974112"
+  pruneopts = "UT"
+  revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
+  digest = "1:4b63210654b1f2b664f74ec434a1bb1cb442b3d75742cc064a10808d1cca6361"
   name = "github.com/jtolds/gls"
   packages = ["."]
-  revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
-  version = "v4.2.1"
+  pruneopts = "UT"
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
+  version = "v4.20"
 
 [[projects]]
+  digest = "1:f97285a3b0a496dcf8801072622230d513f69175665d94de60eb042d03387f6c"
   name = "github.com/julienschmidt/httprouter"
   packages = ["."]
-  revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
-  version = "v1.1"
+  pruneopts = "UT"
+  revision = "348b672cd90d8190f8240323e372ecd1e66b59dc"
+  version = "v1.2.0"
 
 [[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
-  version = "v1.0.3"
+  pruneopts = "UT"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
+  digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
     "internal/go-render/render",
-    "internal/oglematchers"
+    "internal/oglematchers",
   ]
-  revision = "4ea54c1f28ad3ae597e76607dea3871fa177e263"
+  pruneopts = "UT"
+  revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
+  version = "1.8.3"
 
 [[projects]]
+  digest = "1:a3e081e593ee8e3b0a9af6a5dcac964c67a40c4f2034b5345b2ad78d05920728"
   name = "github.com/smartystreets/goconvey"
   packages = [
     "convey",
     "convey/gotest",
-    "convey/reporting"
+    "convey/reporting",
   ]
+  pruneopts = "UT"
   revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
   version = "1.6.3"
 
 [[projects]]
+  digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
   name = "github.com/urfave/cli"
   packages = ["."]
+  pruneopts = "UT"
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "eb71ad9bd329b5ac0fd0148dd99bd62e8be8e035"
+  pruneopts = "UT"
+  revision = "057139ce5d2bdbe6fe73c53679e24e9cf007f637"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fc7b6b4384e1e849d99eab58eca4f8c0a76bad4699117d5077a9a5c3c83e289e"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "lex/httplex",
-    "trace"
+    "trace",
   ]
-  revision = "f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f"
+  pruneopts = "UT"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
+  branch = "master"
+  digest = "1:bb644db32f5bc1e327a0f748ec871edc4dc46f19b4fbbc15bfd95b1460646537"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
-  revision = "0f826bdd13b500be0f1d4004938ad978fcc6031e"
+  pruneopts = "UT"
+  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
 
 [[projects]]
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
   name = "golang.org/x/text"
   packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
     "internal/gen",
+    "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "language",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
     "unicode/cldr",
     "unicode/norm",
-    "unicode/rangetable"
+    "unicode/rangetable",
   ]
-  revision = "3bd178b88a8180be2df394a1fbb81313916f0e7b"
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "b0a3dcfcd1a9bd48e63634bd8802960804cf8315"
+  pruneopts = "UT"
+  revision = "8819c946db4494a2259bf100a377f51aa585d893"
 
 [[projects]]
+  digest = "1:9ab5a33d8cb5c120602a34d2e985ce17956a4e8c2edce7e6961568f95e40c09a"
   name = "google.golang.org/grpc"
   packages = [
     ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "binarylog/grpc_binarylog_v1",
     "codes",
+    "connectivity",
     "credentials",
-    "grpclb/grpc_lb_v1",
+    "credentials/internal",
+    "encoding",
+    "encoding/proto",
     "grpclog",
     "internal",
+    "internal/backoff",
+    "internal/binarylog",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/grpcsync",
+    "internal/syscall",
+    "internal/transport",
     "keepalive",
     "metadata",
     "naming",
     "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
     "stats",
     "status",
     "tap",
-    "transport"
   ]
-  revision = "b8669c35455183da6d5c474ea6e72fbf55183274"
-  version = "v1.5.1"
+  pruneopts = "UT"
+  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
+  version = "v1.18.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c44d57f874bef5bc69d14f5bc7fbbfef9728b8817093f7eab574140fc090dc76"
+  input-imports = [
+    "github.com/golang/protobuf/proto",
+    "github.com/julienschmidt/httprouter",
+    "github.com/sirupsen/logrus",
+    "github.com/smartystreets/goconvey/convey",
+    "github.com/urfave/cli",
+    "golang.org/x/net/context",
+    "google.golang.org/grpc",
+    "google.golang.org/grpc/credentials",
+    "google.golang.org/grpc/metadata",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
