@@ -4,10 +4,8 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
-const DefaultMetricsChunkSize = 100
-
 func convertMetricsToProto(mts []Metric) ([]*rpc.Metric, error) {
-	var protoMts []*rpc.Metric
+	protoMts := make([]*rpc.Metric, 0, len(mts))
 
 	for _, mt := range mts {
 		protoMt, err := toProtoMetric(mt)
@@ -21,7 +19,7 @@ func convertMetricsToProto(mts []Metric) ([]*rpc.Metric, error) {
 }
 
 func convertProtoToMetrics(protoMts []*rpc.Metric) []Metric {
-	var mts []Metric
+	mts := make([]Metric, 0, len(protoMts))
 
 	for _, protoMt := range protoMts {
 		mt := fromProtoMetric(protoMt)
