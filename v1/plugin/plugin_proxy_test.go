@@ -34,13 +34,13 @@ import (
 
 func TestPluginProxy(t *testing.T) {
 	p := newPluginProxy(newMockPlugin())
-	last := p.LastPing
+	last := p.lastPing
 
 	Convey("Test Plugin Proxy", t, func() {
 		Convey("Succeed while pinging", func() {
 			_, err := p.Ping(context.Background(), &rpc.Empty{})
 			So(err, ShouldBeNil)
-			So(p.LastPing.Sub(last), ShouldBeGreaterThan, 0)
+			So(p.lastPing.Sub(last), ShouldBeGreaterThan, 0)
 		})
 
 		var wg sync.WaitGroup
