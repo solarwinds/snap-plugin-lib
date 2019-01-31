@@ -21,6 +21,7 @@ package plugin
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -46,9 +47,11 @@ type pluginProxyConstructor func(Plugin) *pluginProxy
 
 type pluginProxy struct {
 	plugin              Plugin
-	LastPing            time.Time
 	PingTimeoutDuration time.Duration
 	halt                chan struct{}
+
+	lastPing   time.Time
+	lastPingMu sync.RWMutex
 }
 
 // pluginProxyCtor refers to function creating a new plugin proxy instance,
@@ -71,9 +74,13 @@ func defaultPluginProxyCtor(plugin Plugin) *pluginProxy {
 }
 
 func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, error) {
-	p.LastPing = time.Now()
+	p.lastPingMu.Lock()
+	p.lastPing = time.Now()
+	p.lastPingMu.Unlock()
+
 	//Change to log
-	fmt.Println("Heartbeat received at:", p.LastPing)
+	fmt.Println("Heartbeat received at:", p.lastPing)
+
 	return &rpc.ErrReply{}, nil
 }
 
@@ -92,11 +99,19 @@ func (p *pluginProxy) GetConfigPolicy(ctx context.Context, arg *rpc.Empty) (*rpc
 }
 
 func (p *pluginProxy) HeartbeatWatch() {
-	p.LastPing = time.Now()
+	p.lastPingMu.Lock()
+	p.lastPing = time.Now()
+	p.lastPingMu.Unlock()
+
 	fmt.Println("Heartbeat started")
+
 	count := 0
 	for {
-		if time.Since(p.LastPing) >= p.PingTimeoutDuration {
+		p.lastPingMu.RLock()
+		sincePing := time.Since(p.lastPing)
+		p.lastPingMu.RUnlock()
+
+		if sincePing >= p.PingTimeoutDuration {
 			count++
 			fmt.Printf("Heartbeat timeout %v of %v.  (Duration between checks %v)", count, PingTimeoutLimit, p.PingTimeoutDuration)
 			if count >= PingTimeoutLimit {
@@ -105,8 +120,6 @@ func (p *pluginProxy) HeartbeatWatch() {
 				return
 			}
 		} else {
-			fmt.Println("Heartbeat timeout reset")
-			// Reset count
 			count = 0
 		}
 		time.Sleep(p.PingTimeoutDuration)
