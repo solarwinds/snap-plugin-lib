@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin/runner"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )
 
 type myCollector struct {
 }
 
-func (*myCollector) Collect(ctx types.Context) error {
+func (*myCollector) Collect(ctx plugin.Context) error {
 	panic("implement me")
 }
 

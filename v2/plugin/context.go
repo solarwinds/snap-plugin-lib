@@ -1,4 +1,4 @@
-package types
+package plugin
 
 type Context interface {
 	Config(string) (string, bool)

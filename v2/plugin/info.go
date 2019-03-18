@@ -1,5 +1,4 @@
-package types
+package plugin
 
 type Info struct {
-
 }

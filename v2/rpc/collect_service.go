@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/proxy"
 	"golang.org/x/net/context"
 )
 

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"errors"
+
 	"golang.org/x/net/context"
 )
 

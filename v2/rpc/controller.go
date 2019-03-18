@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin/proxy"
-	"google.golang.org/grpc"
 	"net"
+
+	"github.com/librato/snap-plugin-lib-go/v2/proxy"
+	"google.golang.org/grpc"
 )
 
 type GRPCController struct {
