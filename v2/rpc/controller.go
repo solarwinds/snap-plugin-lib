@@ -18,7 +18,7 @@ func StartGRPCController(proxy proxy.Collector) {
 
 	lis, err := net.Listen("tcp", "0.0.0.0:56789")
 	if err != nil {
-		log.Fatal("can't create tcp connection (%v)", err)
+		log.Fatalf("can't create tcp connection (%s)", err)
 	}
 
 	grpcServer := grpc.NewServer()

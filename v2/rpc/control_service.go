@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"errors"
+
 	"golang.org/x/net/context"
 )
 
@@ -16,7 +17,7 @@ func newControlService(closeCh chan error) *controlService {
 }
 
 func (*controlService) Ping(context.Context, *PingRequest) (*PingResponse, error) {
-	log.Trace("GRPC Ping() received")
+	log.Trace("GRPC Ping() received ")
 	return &PingResponse{}, nil
 }
 
