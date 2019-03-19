@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-const GRCPGracefulStopTimeout = 10 * time.Second
+const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"module": "plugin-rpc"})
 
@@ -49,7 +49,7 @@ func shutdownPlugin(grpcServer *grpc.Server) {
 	select {
 	case <-stopped:
 		log.Debug("GRPC server stopped gracefully")
-	case <-time.After(GRCPGracefulStopTimeout):
+	case <-time.After(GRPCGracefulStopTimeout):
 		grpcServer.Stop()
 		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might be lost")
 	}

@@ -4,6 +4,7 @@ package runner
 
 import (
 	"context"
+	"io"
 	"testing"
 	"time"
 
@@ -18,20 +19,8 @@ import (
 
 /*****************************************************************************/
 
-const ExpectedGracefulShutdownTimeout = 3 * time.Second
-
-//const ExpectedForceShutdownTimeout = 15 * time.Second
-
-/*****************************************************************************/
-
-type simpleCollector struct {
-	collectCalls int
-}
-
-func (sc *simpleCollector) Collect(ctx plugin.Context) error {
-	sc.collectCalls++
-	return nil
-}
+const expectedGracefulShutdownTimeout = 2 * time.Second
+const expectedForceShutdownTimeout = 2*time.Second + rpc.GRPCGracefulStopTimeout
 
 /*****************************************************************************/
 
@@ -109,11 +98,19 @@ func (s *SuiteT) sendUnload() (*rpc.UnloadResponse, error) {
 }
 
 func (s *SuiteT) sendCollect() (*rpc.CollectResponse, error) {
-	response, err := s.collectorClient.Collect(context.Background(), &rpc.CollectRequest{
+	stream, err := s.collectorClient.Collect(context.Background(), &rpc.CollectRequest{
 		TaskId: 1,
 	})
 
-	_, _ = response.Recv()
+	for {
+		_, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return &rpc.CollectResponse{}, err
+		}
+	}
 
 	return &rpc.CollectResponse{}, err
 }
@@ -124,7 +121,18 @@ func TestMedium(t *testing.T) {
 	suite.Run(t, new(SuiteT))
 }
 
-func (s *SuiteT) Test_SimpleCollector() {
+/*****************************************************************************/
+
+type simpleCollector struct {
+	collectCalls int
+}
+
+func (sc *simpleCollector) Collect(ctx plugin.Context) error {
+	sc.collectCalls++
+	return nil
+}
+
+func (s *SuiteT) TestSimpleCollector() {
 	// Arrange
 	simpleCollector := &simpleCollector{}
 	s.startCollector(simpleCollector)
@@ -173,7 +181,52 @@ func (s *SuiteT) Test_SimpleCollector() {
 			select {
 			case <-s.endCh:
 			// ok
-			case <-time.After(ExpectedGracefulShutdownTimeout):
+			case <-time.After(expectedGracefulShutdownTimeout):
+				s.T().Fatal("plugin should have been ended")
+			}
+		})
+	})
+}
+
+/*****************************************************************************/
+
+type longRunningCollector struct {
+}
+
+func (c *longRunningCollector) Collect(ctx plugin.Context) error {
+	time.Sleep(1 * time.Minute)
+	return nil
+}
+
+func (s *SuiteT) TestKillLongRunningCollector() {
+	// Arrange
+	longRunningCollector := &longRunningCollector{}
+	s.startCollector(longRunningCollector)
+	s.startClient()
+
+	errCh := make(chan error, 1)
+
+	Convey("Validate ability to kill collector in case processing takes too much time", s.T(), func() {
+
+		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
+		go func() {
+			_, err := s.sendCollect()
+			errCh <- err
+		}()
+
+		Convey("Client is able to send kill request and receive no-error response", func() {
+			// Act
+			killResponse, killErr := s.sendKill()
+
+			// Assert (kill response)
+			So(killErr, ShouldBeNil)
+			So(killResponse, ShouldNotBeNil)
+
+			// Assert (plugin has stopped working)
+			select {
+			case <-errCh:
+				// ok
+			case <-time.After(expectedForceShutdownTimeout):
 				s.T().Fatal("plugin should have been ended")
 			}
 		})
