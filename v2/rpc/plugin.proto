@@ -49,7 +49,7 @@ message CollectResponse {
 message LoadRequest {
     int32 task_id = 1;
     string json_config = 2;
-    repeated Metric metric_set = 3;
+    repeated string metric_selector = 3;
 }
 
 message LoadResponse {

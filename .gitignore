@@ -32,6 +32,7 @@ _cgo_export.*
 _testmain.go
 
 *.exe
+*.bat
 *.test
 *.prof
 *.log
@@ -51,3 +52,4 @@ vendor/
 build/
 bin/
 pkg/
+temp/

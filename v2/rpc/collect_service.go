@@ -15,18 +15,27 @@ func newCollectService(proxy proxy.Collector) CollectorServer {
 	}
 }
 
-func (*collectService) Collect(*CollectRequest, Collector_CollectServer) error {
+func (*collectService) Collect(request *CollectRequest, stream Collector_CollectServer) error {
+	log.Trace("GRPC Collect() received")
+
+	_ = stream.Send(&CollectResponse{
+		MetricSet: nil,
+	})
+
 	return nil
 }
 
-func (*collectService) Load(context.Context, *LoadRequest) (*LoadResponse, error) {
-	return nil, nil
+func (*collectService) Load(ctx context.Context, request *LoadRequest) (*LoadResponse, error) {
+	log.Trace("GRPC Load() received")
+	return &LoadResponse{}, nil
 }
 
-func (*collectService) Unload(context.Context, *UnloadRequest) (*UnloadResponse, error) {
-	return nil, nil
+func (*collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
+	log.Trace("GRPC Unload() received")
+	return &UnloadResponse{}, nil
 }
 
-func (*collectService) Info(context.Context, *InfoRequest) (*InfoResponse, error) {
-	return nil, nil
+func (*collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
+	log.Trace("GRPC Info() received")
+	return &InfoResponse{}, nil
 }
