@@ -1,5 +1,8 @@
 package plugin
 
+// Type representing metric tags (additional information associated with metric)
+type Tags map[string]string
+
 // Context provides metric and configuration API to be used by custom code.
 type Context interface {
 	// Returns configuration value by providing path (representing its position in JSON tree)
