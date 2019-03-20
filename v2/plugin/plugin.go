@@ -10,5 +10,5 @@ type LoadableCollector interface {
 }
 
 type DefinableCollector interface {
-	DefineMetrics(CollectorContext) error
+	DefineMetrics(CollectorDefinition) error
 }

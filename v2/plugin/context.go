@@ -30,8 +30,14 @@ type Context interface {
 	ApplyTagsByRegExp(Namespace, Tags) error
 }
 
-type CollectorContext interface {
+// CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
+type CollectorDefinition interface {
+	// Define supported metric, its description and indication if metric is default
 	DefineMetric(Namespace, bool, string)
+
+	// Define description for dynamic element
 	DefineGroup(string, string)
+
+	// Define global tags that will be applied to all metrics
 	DefineGlobalTags(Namespace, Tags)
 }
