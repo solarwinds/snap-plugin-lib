@@ -16,7 +16,7 @@ var log = logrus.WithFields(logrus.Fields{"module": "plugin-rpc"})
 func StartGRPCController(proxy context_manager.Collector) {
 	closeChan := make(chan error, 1)
 
-	lis, err := net.Listen("tcp", "0.0.0.0:56789")
+	ln, err := net.Listen("tcp", "0.0.0.0:56789")
 	if err != nil {
 		log.Fatalf("can't create tcp connection (%s)", err)
 	}
@@ -26,7 +26,7 @@ func StartGRPCController(proxy context_manager.Collector) {
 	RegisterCollectorServer(grpcServer, newCollectService(proxy))
 
 	go func() {
-		err := grpcServer.Serve(lis)
+		err := grpcServer.Serve(ln)
 		if err != nil {
 			closeChan <- err
 		}
