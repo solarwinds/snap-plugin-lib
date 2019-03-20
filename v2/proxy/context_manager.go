@@ -56,6 +56,6 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	return nil
 }
 
-func (cm *ContextManager) RequestInfo() plugin.Info {
-	return plugin.Info{}
+func (cm *ContextManager) RequestInfo() info {
+	return info{}
 }
