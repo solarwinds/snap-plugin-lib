@@ -18,26 +18,26 @@ type Context interface {
 	Load(string) (interface{}, bool)
 
 	// Add concrete metric with calculated value
-	AddMetric(Namespace, MetricValue) error
+	AddMetric(string, interface{}) error
 
 	// Add concrete metric with calculated value and tags
-	AddMetricWithTags(Namespace, MetricValue, Tags) error
+	AddMetricWithTags(string, interface{}, Tags) error
 
 	// Add tags to specific metric
-	ApplyTagsByPath(Namespace, Tags) error
+	ApplyTagsByPath(string, Tags) error
 
 	// Add tags to all metrics matching regular expression
-	ApplyTagsByRegExp(Namespace, Tags) error
+	ApplyTagsByRegExp(string, Tags) error
 }
 
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
 type CollectorDefinition interface {
 	// Define supported metric, its description and indication if metric is default
-	DefineMetric(Namespace, bool, string)
+	DefineMetric(string, bool, string)
 
 	// Define description for dynamic element
 	DefineGroup(string, string)
 
 	// Define global tags that will be applied to all metrics
-	DefineGlobalTags(Namespace, Tags)
+	DefineGlobalTags(string, Tags)
 }

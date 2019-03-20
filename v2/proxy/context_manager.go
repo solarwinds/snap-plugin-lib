@@ -21,7 +21,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
+func (cm *ContextManager) RequestCollect(id int) ([]Metric, error) {
 	if context, ok := cm.contextMap[id]; ok {
 		cm.collector.Collect(context)
 	}
@@ -29,7 +29,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
 	return nil, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, config string, selectors []plugin.Namespace) error {
+func (cm *ContextManager) LoadTask(id int, config string, selectors []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}

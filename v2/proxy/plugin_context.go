@@ -25,18 +25,18 @@ func (pc *pluginContext) Load(string) (interface{}, bool) {
 	panic("implement me")
 }
 
-func (pc *pluginContext) AddMetric(plugin.Namespace, plugin.MetricValue) error {
+func (pc *pluginContext) AddMetric(string, interface{}) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) AddMetricWithTags(plugin.Namespace, plugin.MetricValue, plugin.Tags) error {
+func (pc *pluginContext) AddMetricWithTags(string, interface{}, plugin.Tags) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) ApplyTagsByPath(plugin.Namespace, plugin.Tags) error {
+func (pc *pluginContext) ApplyTagsByPath(string, plugin.Tags) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) ApplyTagsByRegExp(plugin.Namespace, plugin.Tags) error {
+func (pc *pluginContext) ApplyTagsByRegExp(string, plugin.Tags) error {
 	panic("implement me")
 }

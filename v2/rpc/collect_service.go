@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/proxy"
 	"golang.org/x/net/context"
 )
@@ -35,7 +34,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 
 	taskId := int(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
-	metrics := cs.toNamespaceArray(request.GetMetricSelector())
+	metrics := request.GetMetricSelector()
 
 	cs.proxy.LoadTask(taskId, jsonConfig, metrics)
 
@@ -58,12 +57,4 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 	cs.proxy.RequestInfo()
 
 	return &InfoResponse{}, nil
-}
-
-func (*collectService) toNamespaceArray(selector []string) []plugin.Namespace {
-	ns := make([]plugin.Namespace, 0, len(selector))
-	for _, el := range selector {
-		ns = append(ns, plugin.Namespace(el))
-	}
-	return ns
 }
