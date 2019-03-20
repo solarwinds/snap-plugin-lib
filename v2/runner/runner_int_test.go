@@ -149,6 +149,15 @@ func (s *SuiteT) TestSimpleCollector() {
 			So(pingResponse, ShouldNotBeNil)
 		})
 
+		Convey("Client is able to send load request", func() {
+			// Act
+			loadResponse, loadErr := s.sendLoad()
+
+			// Assert
+			So(loadErr, ShouldBeNil)
+			So(loadResponse, ShouldNotBeNil)
+		})
+
 		Convey("Client is able to send collect request", func() {
 			// Act
 			collectResponse, collectErr := s.sendCollect()
