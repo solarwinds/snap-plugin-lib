@@ -52,7 +52,7 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
-	log.Trace("GRPC nfo() received")
+	log.Trace("GRPC Info() received")
 
 	cs.proxy.RequestInfo()
 
