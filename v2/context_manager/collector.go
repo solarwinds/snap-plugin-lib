@@ -1,4 +1,4 @@
-package proxy
+package context_manager
 
 type Collector interface {
 	RequestCollect(id int) ([]Metric, error)

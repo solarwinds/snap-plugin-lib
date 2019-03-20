@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/context_manager"
 	"github.com/librato/snap-plugin-lib-go/v2/rpc"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -53,7 +53,7 @@ func (s *SuiteT) TearDownTest() {
 func (s *SuiteT) startCollector(collector plugin.Collector) {
 	s.startedCollector = collector
 	go func() {
-		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
+		contextManager := context_manager.NewContextManager(collector, "simple_collector", "1.0.0")
 		rpc.StartGRPCController(contextManager)
 		s.endCh <- true
 	}()

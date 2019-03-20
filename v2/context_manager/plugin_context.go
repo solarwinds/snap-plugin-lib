@@ -1,4 +1,4 @@
-package proxy
+package context_manager
 
 import "github.com/librato/snap-plugin-lib-go/v2/plugin"
 
