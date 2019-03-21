@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/context_manager"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/context_manager"
 	"golang.org/x/net/context"
 )
 

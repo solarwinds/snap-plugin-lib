@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/context_manager"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/context_manager"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
