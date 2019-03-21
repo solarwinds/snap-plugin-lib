@@ -1,3 +1,6 @@
+/*
+The package "runner" provides simple API to start plugins in different modes.
+*/
 package runner
 
 import (

@@ -1,3 +1,9 @@
+/*
+Package rpc:
+* contains Protocol Buffer types definitions
+* handles GRPC communication (server side), passing it to proxies.
+* contains Implementation of GRPC services.
+ */
 package rpc
 
 import (
