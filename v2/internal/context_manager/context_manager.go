@@ -6,6 +6,13 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
+type Collector interface {
+	RequestCollect(id int) ([]plugin.Metric, error)
+	LoadTask(id int, config string, selectors []string) error
+	UnloadTask(id int) error
+	RequestInfo()
+}
+
 type ContextManager struct {
 	collector  plugin.Collector
 	contextMap map[int]*pluginContext
@@ -21,7 +28,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]Metric, error) {
+func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
 	if context, ok := cm.contextMap[id]; ok {
 		cm.collector.Collect(context)
 	}
@@ -56,6 +63,6 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	return nil
 }
 
-func (cm *ContextManager) RequestInfo() info {
-	return info{}
+func (cm *ContextManager) RequestInfo() {
+	return
 }

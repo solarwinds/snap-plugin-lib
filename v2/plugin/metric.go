@@ -1,4 +1,4 @@
-package context_manager
+package plugin
 
 import (
 	"time"

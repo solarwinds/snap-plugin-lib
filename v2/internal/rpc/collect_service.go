@@ -1,15 +1,14 @@
 package rpc
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/internal/context_manager"
 	"golang.org/x/net/context"
 )
 
 type collectService struct {
-	proxy context_manager.Collector
+	proxy CollectorProxy
 }
 
-func newCollectService(proxy context_manager.Collector) CollectorServer {
+func newCollectService(proxy CollectorProxy) CollectorServer {
 	return &collectService{
 		proxy: proxy,
 	}

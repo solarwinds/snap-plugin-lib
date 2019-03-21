@@ -4,7 +4,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/context_manager"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -13,7 +12,7 @@ const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"module": "plugin-rpc"})
 
-func StartGRPCController(proxy context_manager.Collector) {
+func StartGRPCController(proxy CollectorProxy) {
 	closeChan := make(chan error, 1)
 
 	ln, err := net.Listen("tcp", "0.0.0.0:56789")
