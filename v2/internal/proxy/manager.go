@@ -43,7 +43,7 @@ func (cm *ContextManager) LoadTask(id int, config string, selectors []string) er
 
 	cm.contextMap[id] = &pluginContext{}
 
-	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
+	if loadable, ok := cm.collector.(LoadableCollector); ok {
 		loadable.Load(cm.contextMap[id])
 	}
 
@@ -55,7 +55,7 @@ func (cm *ContextManager) UnloadTask(id int) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
+	if loadable, ok := cm.collector.(LoadableCollector); ok {
 		loadable.Unload(cm.contextMap[id])
 	}
 
