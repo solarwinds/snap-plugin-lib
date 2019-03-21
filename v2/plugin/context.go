@@ -1,8 +1,5 @@
 package plugin
 
-// Type representing metric tags (additional information associated with metric)
-type Tags map[string]string
-
 // Context provides metric and configuration API to be used by custom code.
 type Context interface {
 	// Returns configuration value by providing path (representing its position in JSON tree)
@@ -24,13 +21,13 @@ type Context interface {
 	AddMetric(string, interface{}) error
 
 	// Add concrete metric with calculated value and tags
-	AddMetricWithTags(string, interface{}, Tags) error
+	AddMetricWithTags(string, interface{}, map[string]string) error
 
 	// Add tags to specific metric
-	ApplyTagsByPath(string, Tags) error
+	ApplyTagsByPath(string, map[string]string) error
 
 	// Add tags to all metrics matching regular expression
-	ApplyTagsByRegExp(string, Tags) error
+	ApplyTagsByRegExp(string, map[string]string) error
 }
 
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
@@ -42,5 +39,5 @@ type CollectorDefinition interface {
 	DefineGroup(string, string)
 
 	// Define global tags that will be applied to all metrics
-	DefineGlobalTags(string, Tags)
+	DefineGlobalTags(string, map[string]string)
 }

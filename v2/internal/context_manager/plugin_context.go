@@ -1,7 +1,5 @@
 package context_manager
 
-import "github.com/librato/snap-plugin-lib-go/v2/plugin"
-
 type pluginContext struct {
 }
 
@@ -29,14 +27,14 @@ func (pc *pluginContext) AddMetric(string, interface{}) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) AddMetricWithTags(string, interface{}, plugin.Tags) error {
+func (pc *pluginContext) AddMetricWithTags(string, interface{}, map[string]string) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) ApplyTagsByPath(string, plugin.Tags) error {
+func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
 	panic("implement me")
 }
 
-func (pc *pluginContext) ApplyTagsByRegExp(string, plugin.Tags) error {
+func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
 	panic("implement me")
 }

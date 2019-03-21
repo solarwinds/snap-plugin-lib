@@ -7,7 +7,6 @@ import (
 )
 
 func StartCollector(collector plugin.Collector, name string, version string) {
-
 	contextManager := context_manager.NewContextManager(collector, name, version)
 	rpc.StartGRPCController(contextManager)
 }
