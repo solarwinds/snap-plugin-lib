@@ -200,9 +200,11 @@ func (s *SuiteT) TestSimpleCollector() {
 /*****************************************************************************/
 
 type longRunningCollector struct {
+	collectCalls int
 }
 
 func (c *longRunningCollector) Collect(ctx plugin.Context) error {
+	c.collectCalls++
 	time.Sleep(1 * time.Minute)
 	return nil
 }
@@ -219,6 +221,7 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 
 		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
 		go func() {
+			_, _ = s.sendLoad()
 			_, err := s.sendCollect()
 			errCh <- err
 		}()
@@ -238,6 +241,9 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 			case <-time.After(expectedForceShutdownTimeout):
 				s.T().Fatal("plugin should have been ended")
 			}
+
+			// Assert that Collect was called
+			So(longRunningCollector.collectCalls, ShouldEqual, 1)
 		})
 	})
 }
