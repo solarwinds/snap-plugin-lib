@@ -97,6 +97,10 @@ func (s *SuiteT) sendCollect(taskID int) (*rpc.CollectResponse, error) {
 		TaskId: int32(taskID),
 	})
 
+	if err != nil {
+		return &rpc.CollectResponse{}, err
+	}
+
 	for {
 		_, err := stream.Recv()
 		if err == io.EOF {
@@ -107,7 +111,7 @@ func (s *SuiteT) sendCollect(taskID int) (*rpc.CollectResponse, error) {
 		}
 	}
 
-	return &rpc.CollectResponse{}, err
+	return &rpc.CollectResponse{}, nil
 }
 
 /*****************************************************************************/
