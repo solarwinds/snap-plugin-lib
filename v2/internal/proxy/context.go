@@ -10,6 +10,7 @@ type pluginContext struct {
 	rawConfig     string
 	flattenConfig map[string]string
 	mtsSelectors  []string
+	storedObjects map[string]interface{}
 }
 
 func NewPluginContext(config string, selectors []string) (*pluginContext, error) {
@@ -42,12 +43,13 @@ func (pc *pluginContext) RawConfig() string {
 	return pc.rawConfig
 }
 
-func (pc *pluginContext) Store(string, interface{}) {
-	panic("implement me")
+func (pc *pluginContext) Store(key string, obj interface{}) {
+	pc.storedObjects[key] = obj
 }
 
-func (pc *pluginContext) Load(string) (interface{}, bool) {
-	panic("implement me")
+func (pc *pluginContext) Load(key string) (interface{}, bool) {
+	obj, ok := pc.storedObjects[key]
+	return obj, ok
 }
 
 func (pc *pluginContext) AddMetric(string, interface{}) error {
