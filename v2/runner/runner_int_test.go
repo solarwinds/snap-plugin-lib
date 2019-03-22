@@ -251,7 +251,7 @@ type simpleConfiguredCollector struct {
 	loadCalls    int
 }
 
-func (c * simpleConfiguredCollector) Load(ctx plugin.Context) error {
+func (c *simpleConfiguredCollector) Load(ctx plugin.Context) error {
 	c.loadCalls++
 	return nil
 }
