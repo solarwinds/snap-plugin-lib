@@ -1,6 +1,6 @@
 // +build small
 
-package proxy
+package utils
 
 import (
 	"fmt"
@@ -96,7 +96,7 @@ func TestJSONToMap(t *testing.T) {
 		for i, testCase := range jsonScenarios {
 			Convey(fmt.Sprintf("Scenario %d - %s", i+1, testCase.description), func() {
 				// Act
-				result, err := JSONToMap(testCase.inputJSON)
+				result, err := JSONToFlatMap(testCase.inputJSON)
 
 				// Assert
 				So(err, ShouldBeNil)

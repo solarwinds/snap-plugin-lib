@@ -1,4 +1,4 @@
-package proxy
+package utils
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 // Covert json to string map (key are json path to access element, values are element), ie
 // input json = `{ "credentials": { "account_types": [ "admin", "management", "service", "debug" ], "name": "admin" }, "server": { "ip": "192.168.56.101", "port": 1234 }}`,
 // output     = map[string]string{"credentials.name":"admin", "credentials.account_types":"admin,management,service,debug", "server.ip":"192.168.56.101", "server.port":"1234"}
-func JSONToMap(rawConfig string) (map[string]string, error) {
+func JSONToFlatMap(rawConfig string) (map[string]string, error) {
 	retMap := map[string]string{}
 	m := map[string]interface{}{}
 
