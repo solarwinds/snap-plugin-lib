@@ -228,6 +228,7 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 
 		Convey("Client is able to send kill request and receive no-error response", func() {
 			// Act
+			time.Sleep(1 * time.Second) // wait for load and blocking collect to be executed from goroutine
 			killResponse, killErr := s.sendKill()
 
 			// Assert (kill response)
