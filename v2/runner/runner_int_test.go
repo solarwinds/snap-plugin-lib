@@ -76,30 +76,25 @@ func (s *SuiteT) sendKill() (*rpc.KillResponse, error) {
 	return response, err
 }
 
-func (s *SuiteT) sendLoad() (*rpc.LoadResponse, error) {
+func (s *SuiteT) sendLoad(taskID int, jsonConfig string, mtsSelector []string) (*rpc.LoadResponse, error) {
 	response, err := s.collectorClient.Load(context.Background(), &rpc.LoadRequest{
-		TaskId:     1,
-		JsonConfig: `{"address": {"ip": "127.0.2.3", "port": "12343"}}`,
-		MetricSelector: []string{
-			"/plugin/metric1",
-			"/plugin/metric2",
-			"/plugin/metric3",
-			"/plugin/group1/metric4",
-		},
+		TaskId:         int32(taskID),
+		JsonConfig:     jsonConfig, // `{"address": {"ip": "127.0.2.3", "port": "12343"}}`,
+		MetricSelector: mtsSelector,
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendUnload() (*rpc.UnloadResponse, error) {
+func (s *SuiteT) sendUnload(taskID int) (*rpc.UnloadResponse, error) {
 	response, err := s.collectorClient.Unload(context.Background(), &rpc.UnloadRequest{
-		TaskId: 1,
+		TaskId: int32(taskID),
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendCollect() (*rpc.CollectResponse, error) {
+func (s *SuiteT) sendCollect(taskID int) (*rpc.CollectResponse, error) {
 	stream, err := s.collectorClient.Collect(context.Background(), &rpc.CollectRequest{
-		TaskId: 1,
+		TaskId: int32(taskID),
 	})
 
 	for {
@@ -151,7 +146,7 @@ func (s *SuiteT) TestSimpleCollector() {
 
 		Convey("Client is able to send load request", func() {
 			// Act
-			loadResponse, loadErr := s.sendLoad()
+			loadResponse, loadErr := s.sendLoad(1, `{"address": {"ip": "127.0.2.3", "port": "12343"}}`, []string{""})
 
 			// Assert
 			So(loadErr, ShouldBeNil)
@@ -160,7 +155,7 @@ func (s *SuiteT) TestSimpleCollector() {
 
 		Convey("Client is able to send collect request", func() {
 			// Act
-			collectResponse, collectErr := s.sendCollect()
+			collectResponse, collectErr := s.sendCollect(1)
 
 			// Assert
 			So(collectErr, ShouldBeNil)
@@ -171,7 +166,7 @@ func (s *SuiteT) TestSimpleCollector() {
 		Convey("Client is able to send several collect request once after another", func() {
 			// Act
 			for i := 0; i < 5; i++ {
-				_, _ = s.sendCollect()
+				_, _ = s.sendCollect(1)
 			}
 
 			// Assert
@@ -221,8 +216,8 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 
 		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
 		go func() {
-			_, _ = s.sendLoad()
-			_, err := s.sendCollect()
+			_, _ = s.sendLoad(1, "{}", []string{})
+			_, err := s.sendCollect(1)
 			errCh <- err
 		}()
 
@@ -247,4 +242,25 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 			So(longRunningCollector.collectCalls, ShouldEqual, 1)
 		})
 	})
+}
+
+/*****************************************************************************/
+
+type simpleConfiguredCollector struct {
+	collectCalls int
+	loadCalls    int
+}
+
+func (c * simpleConfiguredCollector) Load(ctx plugin.Context) error {
+	c.loadCalls++
+	return nil
+}
+
+func (c *simpleConfiguredCollector) Collect(ctx plugin.Context) error {
+	c.collectCalls++
+	return nil
+}
+
+func TestCollectorWithConfiguration(t *testing.T) {
+
 }

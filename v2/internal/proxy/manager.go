@@ -7,6 +7,7 @@ package proxy
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -46,7 +47,11 @@ func (cm *ContextManager) LoadTask(id int, config string, selectors []string) er
 		return errors.New("context with given id was already defined")
 	}
 
-	cm.contextMap[id] = &pluginContext{}
+	newCtx, err := NewPluginContext(config, selectors)
+	if err != nil {
+		return fmt.Errorf("can't load task: %v", err)
+	}
+	cm.contextMap[id] = newCtx
 
 	if loadable, ok := cm.collector.(LoadableCollector); ok {
 		loadable.Load(cm.contextMap[id])

@@ -1,18 +1,45 @@
 package proxy
 
+import (
+	"fmt"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/utils"
+)
+
 type pluginContext struct {
+	rawConfig     string
+	flattenConfig map[string]string
+	mtsSelectors  []string
 }
 
-func (pc *pluginContext) Config(string) (string, bool) {
-	panic("implement me")
+func NewPluginContext(config string, selectors []string) (*pluginContext, error) {
+	flattenConfig, err := utils.JSONToFlatMap(config)
+	if err != nil {
+		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
+	}
+
+	return &pluginContext{
+		rawConfig:     config,
+		flattenConfig: flattenConfig,
+		mtsSelectors:  selectors,
+	}, nil
+}
+
+func (pc *pluginContext) Config(key string) (string, bool) {
+	v, ok := pc.flattenConfig[key]
+	return v, ok
 }
 
 func (pc *pluginContext) ConfigKeys() []string {
-	panic("implement me")
+	keysList := []string{}
+	for k := range pc.flattenConfig {
+		keysList = append(keysList, k)
+	}
+	return keysList
 }
 
 func (pc *pluginContext) RawConfig() string {
-	panic("implement me")
+	return pc.rawConfig
 }
 
 func (pc *pluginContext) Store(string, interface{}) {
