@@ -35,10 +35,12 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
-	if context, ok := cm.contextMap[id]; ok {
-		cm.collector.Collect(context)
+	context, ok := cm.contextMap[id]
+	if !ok {
+		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
 
+	cm.collector.Collect(context)
 	return nil, nil
 }
 
@@ -53,7 +55,7 @@ func (cm *ContextManager) LoadTask(id int, config string, selectors []string) er
 	}
 	cm.contextMap[id] = newCtx
 
-	if loadable, ok := cm.collector.(LoadableCollector); ok {
+	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
 		loadable.Load(cm.contextMap[id])
 	}
 
@@ -65,7 +67,7 @@ func (cm *ContextManager) UnloadTask(id int) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	if loadable, ok := cm.collector.(LoadableCollector); ok {
+	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
 		loadable.Unload(cm.contextMap[id])
 	}
 

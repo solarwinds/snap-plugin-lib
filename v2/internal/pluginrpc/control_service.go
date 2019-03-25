@@ -1,4 +1,4 @@
-package rpc
+package pluginrpc
 
 import (
 	"errors"
