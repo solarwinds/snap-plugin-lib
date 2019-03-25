@@ -33,16 +33,14 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/urfave/cli"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-
 	"text/tabwriter"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -72,6 +70,8 @@ var (
 		flMaxMetricsBuffer,
 	}
 )
+
+const GRPCGracefulStopTimeout = 10 * time.Second
 
 // Plugin is the base plugin type. All plugins must implement GetConfigPolicy.
 type Plugin interface {
@@ -569,7 +569,9 @@ func startPlugin(c *cli.Context) error {
 				log.Fatal(err)
 			}
 		}()
+
 		<-pluginProxy.halt
+		shutdownPlugin(server)
 
 	} else if libInputOutput.args() > 0 {
 		// snapteld is starting the plugin
@@ -580,7 +582,9 @@ func startPlugin(c *cli.Context) error {
 		}
 		libInputOutput.printOut(preamble)
 		go pluginProxy.HeartbeatWatch()
+
 		<-pluginProxy.halt
+		shutdownPlugin(server)
 
 	} else {
 		// no arguments provided - run and display diagnostics to the user
@@ -617,6 +621,25 @@ func startPlugin(c *cli.Context) error {
 		}
 	}
 	return nil
+}
+
+func shutdownPlugin(grpcServer *grpc.Server) {
+	stopped := make(chan bool, 1)
+
+	// try to complete all remaining rpc calls
+	go func() {
+		grpcServer.GracefulStop()
+		stopped <- true
+	}()
+
+	// If RPC calls lasting too much, stop server by force
+	select {
+	case <-stopped:
+		log.Debug("GRPC server stopped gracefully")
+	case <-time.After(GRPCGracefulStopTimeout):
+		grpcServer.Stop()
+		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might be lost")
+	}
 }
 
 func printPreambleAndServe(srv server, m *meta, p *pluginProxy, port string, isPprof bool) (string, error) {
