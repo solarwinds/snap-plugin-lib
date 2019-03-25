@@ -1,4 +1,4 @@
-package rpc
+package pluginrpc
 
 import "github.com/librato/snap-plugin-lib-go/v2/plugin"
 

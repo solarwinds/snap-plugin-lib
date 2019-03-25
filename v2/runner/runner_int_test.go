@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/rpc"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -20,7 +20,7 @@ import (
 /*****************************************************************************/
 
 const expectedGracefulShutdownTimeout = 2 * time.Second
-const expectedForceShutdownTimeout = 2*time.Second + rpc.GRPCGracefulStopTimeout
+const expectedForceShutdownTimeout = 2*time.Second + pluginrpc.GRPCGracefulStopTimeout
 
 /*****************************************************************************/
 
@@ -33,8 +33,8 @@ type SuiteT struct {
 
 	// grpc client side (snap)
 	grpcConnection  *grpc.ClientConn
-	controlClient   rpc.ControllerClient
-	collectorClient rpc.CollectorClient
+	controlClient   pluginrpc.ControllerClient
+	collectorClient pluginrpc.CollectorClient
 }
 
 func (s *SuiteT) SetupSuite() {
@@ -54,7 +54,7 @@ func (s *SuiteT) startCollector(collector plugin.Collector) {
 	s.startedCollector = collector
 	go func() {
 		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
-		rpc.StartGRPCController(contextManager)
+		pluginrpc.StartGRPCController(contextManager)
 		s.endCh <- true
 	}()
 }
@@ -62,22 +62,22 @@ func (s *SuiteT) startCollector(collector plugin.Collector) {
 func (s *SuiteT) startClient() {
 	s.grpcConnection, _ = grpc.Dial("localhost:56789", grpc.WithInsecure())
 
-	s.collectorClient = rpc.NewCollectorClient(s.grpcConnection)
-	s.controlClient = rpc.NewControllerClient(s.grpcConnection)
+	s.collectorClient = pluginrpc.NewCollectorClient(s.grpcConnection)
+	s.controlClient = pluginrpc.NewControllerClient(s.grpcConnection)
 }
 
-func (s *SuiteT) sendPing() (*rpc.PingResponse, error) {
-	response, err := s.controlClient.Ping(context.Background(), &rpc.PingRequest{})
+func (s *SuiteT) sendPing() (*pluginrpc.PingResponse, error) {
+	response, err := s.controlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
 	return response, err
 }
 
-func (s *SuiteT) sendKill() (*rpc.KillResponse, error) {
-	response, err := s.controlClient.Kill(context.Background(), &rpc.KillRequest{})
+func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
+	response, err := s.controlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
 	return response, err
 }
 
-func (s *SuiteT) sendLoad() (*rpc.LoadResponse, error) {
-	response, err := s.collectorClient.Load(context.Background(), &rpc.LoadRequest{
+func (s *SuiteT) sendLoad() (*pluginrpc.LoadResponse, error) {
+	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadRequest{
 		TaskId:     1,
 		JsonConfig: `{"address": {"ip": "127.0.2.3", "port": "12343"}}`,
 		MetricSelector: []string{
@@ -90,17 +90,20 @@ func (s *SuiteT) sendLoad() (*rpc.LoadResponse, error) {
 	return response, err
 }
 
-func (s *SuiteT) sendUnload() (*rpc.UnloadResponse, error) {
-	response, err := s.collectorClient.Unload(context.Background(), &rpc.UnloadRequest{
+func (s *SuiteT) sendUnload() (*pluginrpc.UnloadResponse, error) {
+	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadRequest{
 		TaskId: 1,
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendCollect() (*rpc.CollectResponse, error) {
-	stream, err := s.collectorClient.Collect(context.Background(), &rpc.CollectRequest{
+func (s *SuiteT) sendCollect() (*pluginrpc.CollectResponse, error) {
+	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc.CollectRequest{
 		TaskId: 1,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	for {
 		_, err := stream.Recv()
@@ -108,11 +111,11 @@ func (s *SuiteT) sendCollect() (*rpc.CollectResponse, error) {
 			break
 		}
 		if err != nil {
-			return &rpc.CollectResponse{}, err
+			return &pluginrpc.CollectResponse{}, err
 		}
 	}
 
-	return &rpc.CollectResponse{}, err
+	return &pluginrpc.CollectResponse{}, err
 }
 
 /*****************************************************************************/
