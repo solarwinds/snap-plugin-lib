@@ -7,6 +7,7 @@ package proxy
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -34,10 +35,12 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
-	if context, ok := cm.contextMap[id]; ok {
-		cm.collector.Collect(context)
+	context, ok := cm.contextMap[id]
+	if !ok {
+		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
 
+	cm.collector.Collect(context)
 	return nil, nil
 }
 
