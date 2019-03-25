@@ -131,8 +131,6 @@ func (sc *simpleCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestSimpleCollector() {
-	s.T().Skip()
-
 	// Arrange
 	simpleCollector := &simpleCollector{}
 	s.startCollector(simpleCollector)
@@ -307,8 +305,6 @@ func (cc *configurableCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestConfigurableCollector() {
-	//s.T().Skip()
-
 	// Arrange
 	configurableCollector := &configurableCollector{t: s.T()}
 	s.startCollector(configurableCollector)
