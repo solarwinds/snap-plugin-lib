@@ -1,0 +1,100 @@
+syntax = "proto3";
+package rpc;
+
+///////////////////////////////////////////////////////////////////////////////
+// Services
+
+service Controller {
+    rpc Ping (PingRequest) returns (PingResponse);
+    rpc Kill (KillRequest) returns (KillResponse);
+}
+
+service Collector {
+    rpc Collect (CollectRequest) returns (stream CollectResponse);
+    rpc Load (LoadRequest) returns (LoadResponse);
+    rpc Unload (UnloadRequest) returns (UnloadResponse);
+    rpc Info (InfoRequest) returns (InfoResponse);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Service Controller definition
+
+message PingRequest {
+    // empty
+}
+
+message PingResponse {
+    // empty
+}
+
+message KillRequest {
+    // empty
+}
+
+message KillResponse {
+    // empty
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Service Collector definition
+
+message CollectRequest {
+    int32 task_id = 1;
+}
+
+message CollectResponse {
+    repeated Metric metric_set = 1;
+}
+
+message LoadRequest {
+    int32 task_id = 1;
+    string json_config = 2;
+    repeated string metric_selector = 3;
+}
+
+message LoadResponse {
+    // empty
+}
+
+message UnloadRequest {
+    int32 task_id = 1;
+}
+
+message UnloadResponse {
+    // empty
+}
+
+message InfoRequest {
+}
+
+message InfoResponse {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Common messages definition
+
+message Metric {
+    string namespace = 1;
+    MetricValue value = 2;
+    map<string, string> tags = 3;
+    Time timestamp = 4;
+}
+
+message MetricValue {
+    oneof data_variant {
+        float v_float = 1;
+        double v_double = 2;
+        int32 v_int32 = 3;
+        int64 v_int64 = 4;
+        uint32 v_uint32 = 5;
+        uint64 v_uint64 = 6;
+        bool v_bool = 7;
+        bytes v_bytes = 8;
+        string v_string = 9;
+    }
+}
+
+message Time {
+    int64 sec = 1;
+    int64 nsec = 2;
+}

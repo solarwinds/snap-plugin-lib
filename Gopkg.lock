@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
@@ -48,6 +56,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -78,6 +94,18 @@
   pruneopts = "UT"
   revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
   version = "1.6.3"
+
+[[projects]]
+  digest = "1:8ff03ccc603abb0d7cce94d34b613f5f6251a9e1931eba1a3f9888a9029b055c"
+  name = "github.com/stretchr/testify"
+  packages = [
+    "assert",
+    "require",
+    "suite",
+  ]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
@@ -201,6 +229,7 @@
     "github.com/julienschmidt/httprouter",
     "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",
+    "github.com/stretchr/testify/suite",
     "github.com/urfave/cli",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
