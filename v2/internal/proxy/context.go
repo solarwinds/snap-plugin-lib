@@ -23,6 +23,7 @@ func NewPluginContext(config string, selectors []string) (*pluginContext, error)
 		rawConfig:     config,
 		flattenConfig: flattenConfig,
 		mtsSelectors:  selectors,
+		storedObjects: map[string]interface{}{},
 	}, nil
 }
 

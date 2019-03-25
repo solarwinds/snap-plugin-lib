@@ -121,6 +121,96 @@ func TestContextAPI_Config(t *testing.T) {
 	})
 }
 
-func TestContextAPI_Storage(t *testing.T) {
+type storedClient struct {
+	count int
+}
 
+func (sc *storedClient) Inc() {
+	sc.count++
+}
+
+func (sc *storedClient) Count() int {
+	return sc.count
+}
+
+func TestContextAPI_Storage(t *testing.T) {
+	Convey("Validate Context API for handling storage", t, func() {
+		// Arrange
+		emptyConfig := "{}"
+		ctx, cErr := NewPluginContext(emptyConfig, []string{})
+
+		So(cErr, ShouldBeNil)
+
+		Convey("Validate that object of basic type may be stored in context", func() {
+			// Arrange
+			ctx.Store("version", "1.0.1")
+			ctx.Store("apiVersion", 12)
+			ctx.Store("debugMode", true)
+
+			Convey("Validated that object of basic type may be read from context (1)", func() {
+				// Act
+				ver, ok := ctx.Load("version")
+
+				// Assert
+				So(ok, ShouldBeTrue)
+				So(ver, ShouldHaveSameTypeAs, "")
+				So(ver, ShouldEqual, "1.0.1")
+			})
+
+			Convey("Validated that object of basic type may be read from context (2)", func() {
+				// Act
+				ver, ok := ctx.Load("apiVersion")
+
+				// Assert
+				So(ok, ShouldBeTrue)
+				So(ver, ShouldHaveSameTypeAs, 11)
+				So(ver, ShouldEqual, 12)
+			})
+
+			Convey("Validated that object of basic type may be read from context (3)", func() {
+				// Act
+				ver, ok := ctx.Load("debugMode")
+
+				// Assert
+				So(ok, ShouldBeTrue)
+				So(ver, ShouldHaveSameTypeAs, false)
+				So(ver, ShouldEqual, true)
+			})
+
+			Convey("Validated that object of unknown key can't be read from context", func() {
+				// Act
+				_, ok := ctx.Load("serverAPI")
+
+				// Assert
+				So(ok, ShouldBeFalse)
+			})
+
+		})
+
+		Convey("Validate that object of complex type may be stored", func() {
+			// Arrange
+			obj := &storedClient{}
+			obj.Inc()
+
+			ctx.Store("client", obj)
+
+			Convey("Validated that object of complex type may be read from context", func() {
+				// Act
+				cli, ok := ctx.Load("client")
+
+				// Assert
+				So(ok, ShouldBeTrue)
+				So(cli, ShouldHaveSameTypeAs, &storedClient{})
+				So(cli.(*storedClient).Count(), ShouldEqual, 1)
+
+				// Act
+				sCli := cli.(*storedClient)
+				sCli.Inc()
+				sCli.Inc()
+
+				// Assert
+				So(cli.(*storedClient).Count(), ShouldEqual, 3)
+			})
+		})
+	})
 }
