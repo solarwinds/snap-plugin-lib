@@ -6,9 +6,13 @@ import (
 	"strings"
 )
 
-// Covert json to string map (key are json path to access element, values are element), ie
+// Covert json to string map (keys are json paths to access element, values are element), ie
 // input json = `{ "credentials": { "account_types": [ "admin", "management", "service", "debug" ], "name": "admin" }, "server": { "ip": "192.168.56.101", "port": 1234 }}`,
 // output     = map[string]string{"credentials.name":"admin", "credentials.account_types":"admin,management,service,debug", "server.ip":"192.168.56.101", "server.port":"1234"}
+//
+// Notes and limitations:
+// * Value is always represented as a string. To convert to int, bool or float use proper Go function from strconv module
+// * JSON arrays should contain only simple elements. If array contain other array or map those sub-elements are ignored during parsing (see. jsonScenarios[2])
 func JSONToFlatMap(rawConfig string) (map[string]string, error) {
 	retMap := map[string]string{}
 	m := map[string]interface{}{}
