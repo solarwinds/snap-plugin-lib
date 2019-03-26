@@ -44,12 +44,12 @@ func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
 	return nil, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, config string, selectors []string) error {
+func (cm *ContextManager) LoadTask(id int, config string, mtsSelectors []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(config, selectors)
+	newCtx, err := NewPluginContext(config, mtsSelectors)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}

@@ -2,39 +2,41 @@ package proxy
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/utils"
 )
 
 type pluginContext struct {
-	rawConfig     string
-	flattenConfig map[string]string
-	mtsSelectors  []string
-	storedObjects map[string]interface{}
+	rawConfig          string
+	flattenedConfig    map[string]string
+	mtsSelectors       []string
+	storedObjects      map[string]interface{}
+	storedObjectsMutex sync.RWMutex
 }
 
-func NewPluginContext(config string, selectors []string) (*pluginContext, error) {
+func NewPluginContext(config string, mtsSelectors []string) (*pluginContext, error) {
 	flattenConfig, err := utils.JSONToFlatMap(config)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
 	return &pluginContext{
-		rawConfig:     config,
-		flattenConfig: flattenConfig,
-		mtsSelectors:  selectors,
-		storedObjects: map[string]interface{}{},
+		rawConfig:       config,
+		flattenedConfig: flattenConfig,
+		mtsSelectors:    mtsSelectors,
+		storedObjects:   map[string]interface{}{},
 	}, nil
 }
 
 func (pc *pluginContext) Config(key string) (string, bool) {
-	v, ok := pc.flattenConfig[key]
+	v, ok := pc.flattenedConfig[key]
 	return v, ok
 }
 
 func (pc *pluginContext) ConfigKeys() []string {
 	keysList := []string{}
-	for k := range pc.flattenConfig {
+	for k := range pc.flattenedConfig {
 		keysList = append(keysList, k)
 	}
 	return keysList
@@ -45,10 +47,16 @@ func (pc *pluginContext) RawConfig() string {
 }
 
 func (pc *pluginContext) Store(key string, obj interface{}) {
+	pc.storedObjectsMutex.Lock()
+	defer pc.storedObjectsMutex.Unlock()
+
 	pc.storedObjects[key] = obj
 }
 
 func (pc *pluginContext) Load(key string) (interface{}, bool) {
+	pc.storedObjectsMutex.RLock()
+	defer pc.storedObjectsMutex.RUnlock()
+
 	obj, ok := pc.storedObjects[key]
 	return obj, ok
 }

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package rpc;
+package pluginrpc;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Services
@@ -49,7 +49,7 @@ message CollectResponse {
 message LoadRequest {
     int32 task_id = 1;
     string json_config = 2;
-    repeated string metric_selector = 3;
+    repeated string metric_selectors = 3;
 }
 
 message LoadResponse {
