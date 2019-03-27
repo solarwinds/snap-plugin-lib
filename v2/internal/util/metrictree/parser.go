@@ -5,6 +5,7 @@ import "regexp"
 const nsSeparator = '/'
 const regexBeginIndicator = '{'
 const regexEndIndicator = '}'
+const staticAnyMatcher = '*'
 const dynamicElementBeginIndicator = '['
 const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
@@ -23,6 +24,10 @@ func ParseNamespaceElement(s string) namespaceElement {
 			return nil
 		}
 		return newStaticRegexpElement(r)
+	}
+
+	if s == string(staticAnyMatcher) {
+		return newStaticAnyElement()
 	}
 
 	return nil
