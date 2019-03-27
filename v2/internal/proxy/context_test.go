@@ -19,14 +19,14 @@ type basicConfig struct {
 
 func TestContextAPI_Config(t *testing.T) {
 	// Arrange
-	jsonConfig := `{
+	jsonConfig := []byte(`{
     	"address": {
         	"ip": "192.153.25.123",
         	"port": 34245
     	},
     	"rights": ["admin", "logger", "runner", "reader", "writer"], 
     	"user": "admin"
-	}`
+	}`)
 
 	ctx, cErr := NewPluginContext(jsonConfig, []string{})
 
@@ -136,7 +136,7 @@ func (sc *storedClient) Count() int {
 func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
-		emptyConfig := "{}"
+		emptyConfig := []byte("{}")
 		ctx, cErr := NewPluginContext(emptyConfig, []string{})
 
 		So(cErr, ShouldBeNil)

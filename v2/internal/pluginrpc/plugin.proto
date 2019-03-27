@@ -48,7 +48,7 @@ message CollectResponse {
 
 message LoadRequest {
     int32 task_id = 1;
-    string json_config = 2;
+    bytes json_config = 2;
     repeated string metric_selectors = 3;
 }
 

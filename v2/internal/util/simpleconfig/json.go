@@ -1,4 +1,4 @@
-package utils
+package simpleconfig
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 // Notes and limitations:
 // * Value is always represented as a string. To convert to int, bool or float use proper Go function from strconv module
 // * JSON arrays should contain only simple elements. If array contain other array or map those sub-elements are ignored during parsing (see. jsonScenarios[2])
-func JSONToFlatMap(rawConfig string) (map[string]string, error) {
+func JSONToFlatMap(rawConfig []byte) (map[string]string, error) {
 	retMap := map[string]string{}
 	m := map[string]interface{}{}
 

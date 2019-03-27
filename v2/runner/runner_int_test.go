@@ -76,7 +76,7 @@ func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
 	return response, err
 }
 
-func (s *SuiteT) sendLoad(taskID int, configJSON string, selectors []string) (*pluginrpc.LoadResponse, error) {
+func (s *SuiteT) sendLoad(taskID int, configJSON []byte, selectors []string) (*pluginrpc.LoadResponse, error) {
 	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadRequest{
 		TaskId:          int32(taskID),
 		JsonConfig:      configJSON,
@@ -134,12 +134,12 @@ func (s *SuiteT) TestSimpleCollector() {
 	s.T().Skip()
 
 	// Arrange
-	jsonConfig := `{
+	jsonConfig := []byte(`{
 		"address": {
 			"ip": "127.0.2.3", 
 			"port": "12343"
 		}
-	}`
+	}`)
 
 	mtsSelector := []string{
 		"/plugin/metric1",
@@ -226,7 +226,7 @@ func (c *longRunningCollector) Collect(ctx plugin.Context) error {
 func (s *SuiteT) TestKillLongRunningCollector() {
 	s.T().Skip()
 	// Arrange
-	jsonConfig := `{}`
+	jsonConfig := []byte(`{}`)
 	var mtsSelector []string
 
 	longRunningCollector := &longRunningCollector{}
@@ -325,13 +325,13 @@ func (cc *configurableCollector) Collect(ctx plugin.Context) error {
 
 func (s *SuiteT) TestConfigurableCollector() {
 	// Arrange
-	jsonConfig := `{
+	jsonConfig := []byte(`{
 		"address": {
 			"ip": "127.0.2.3", 
 			"port": "12343"
 		},
 		"user": "admin"
-	}`
+	}`)
 
 	var mtsSelector []string
 

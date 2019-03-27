@@ -14,7 +14,7 @@ import (
 
 type Collector interface {
 	RequestCollect(id int) ([]plugin.Metric, error)
-	LoadTask(id int, config string, selectors []string) error
+	LoadTask(id int, config []byte, selectors []string) error
 	UnloadTask(id int) error
 	RequestInfo()
 }
@@ -44,12 +44,12 @@ func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
 	return nil, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, config string, mtsSelectors []string) error {
+func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsSelectors []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(config, mtsSelectors)
+	newCtx, err := NewPluginContext(rawConfig, mtsSelectors)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}

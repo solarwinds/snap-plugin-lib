@@ -1,6 +1,6 @@
 // +build small
 
-package utils
+package simpleconfig
 
 import (
 	"fmt"
@@ -10,21 +10,21 @@ import (
 )
 
 type jsonScenario struct {
-	inputJSON      string
+	inputJSON      []byte
 	expectedResult map[string]string
 	description    string
 }
 
 var jsonScenarios = []jsonScenario{
 	{ // 0
-		inputJSON: `{
+		inputJSON: []byte(`{
 			"address": {
 				"ip": "192.153.25.123",
 				"port": 34245
  		   	},
     		"credentials": "password",
     		"user": "admin" 
-		}`,
+		}`),
 		expectedResult: map[string]string{
 			"address.ip":   "192.153.25.123",
 			"address.port": "34245",
@@ -34,14 +34,14 @@ var jsonScenarios = []jsonScenario{
 		description: "Basic configuration",
 	},
 	{ // 1
-		inputJSON: `{
+		inputJSON: []byte(`{
 			"address": {
        			"ip": "192.153.25.123",
 				"port": 34245
     		},
   		    "user": "admin",
     		"rights": ["admin", "logger", "runner", "reader", "writer"]
-		}`,
+		}`),
 		expectedResult: map[string]string{
 			"address.ip":   "192.153.25.123",
 			"address.port": "34245",
@@ -51,7 +51,7 @@ var jsonScenarios = []jsonScenario{
 		description: "Configuration with leaf array of a simple type",
 	},
 	{ // 2
-		inputJSON: `{
+		inputJSON: []byte(`{
  		   "addresses": [ 
 				{
 					"protocol": "tcp",
@@ -65,7 +65,7 @@ var jsonScenarios = []jsonScenario{
         		}
     		],
     		"user": "admin"
-		}`,
+		}`),
 		expectedResult: map[string]string{
 			// addresses doesn't contain simple type and is ignored
 			"user": "admin",
@@ -92,14 +92,14 @@ func TestJSONToMap_PositiveScenarios(t *testing.T) {
 func TestJSONToFlatMap_FailingScenario(t *testing.T) {
 	Convey("Validate that wrong JSON configuration cause raturning error", t, func() {
 		// Arrange
-		wrongJson := `{
+		wrongJson := []byte(`{
 			"address": {
 				"ip": "192.153.25.123",
 				"port": 34245,
  		   	},
     		"credentials": *"password",
     		"user": "admin",
-		}`
+		}`)
 
 		// Act
 		result, err := JSONToFlatMap(wrongJson)

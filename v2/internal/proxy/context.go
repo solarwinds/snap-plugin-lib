@@ -4,25 +4,25 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/utils"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 )
 
 type pluginContext struct {
-	rawConfig          string
+	rawConfig          []byte
 	flattenedConfig    map[string]string
 	mtsSelectors       []string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
 }
 
-func NewPluginContext(config string, mtsSelectors []string) (*pluginContext, error) {
-	flattenConfig, err := utils.JSONToFlatMap(config)
+func NewPluginContext(rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
+	flattenConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
 	return &pluginContext{
-		rawConfig:       config,
+		rawConfig:       []byte(rawConfig),
 		flattenedConfig: flattenConfig,
 		mtsSelectors:    mtsSelectors,
 		storedObjects:   map[string]interface{}{},
@@ -42,7 +42,7 @@ func (pc *pluginContext) ConfigKeys() []string {
 	return keysList
 }
 
-func (pc *pluginContext) RawConfig() string {
+func (pc *pluginContext) RawConfig() []byte {
 	return pc.rawConfig
 }
 
