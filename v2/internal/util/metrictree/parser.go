@@ -1,6 +1,9 @@
 package metrictree
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 const nsSeparator = '/'
 const regexBeginIndicator = '{'
@@ -16,6 +19,20 @@ type Namespace struct {
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespaceElement(s string) namespaceElement {
+	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+		dynElem := s[1 : len(s)-1]
+		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+
+		if eqIndex != -1 {
+			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 {
+				groupName := dynElem[0:eqIndex]
+				groupValue := dynElem[eqIndex+1:]
+
+				return newDynamicSpecificElement(groupName, groupValue)
+			}
+		}
+	}
+
 	if isSurroundedWith(s, regexBeginIndicator, regexEndIndicator) {
 		regexStr := s[1 : len(s)-1]
 		r, err := regexp.Compile(regexStr)
@@ -30,6 +47,10 @@ func ParseNamespaceElement(s string) namespaceElement {
 		return newStaticAnyElement()
 	}
 
+	if isValidIdentifier(s) {
+		return newStaticSpecificElement(s)
+	}
+
 	return nil
 }
 
@@ -39,7 +60,11 @@ func isSurroundedWith(s string, prefix, postfix rune) bool {
 		return false
 	}
 	if r[0] != prefix || r[len(r)-1] != postfix {
-		return true
+		return false
 	}
 	return true
+}
+
+func isValidIdentifier(s string) bool {
+	return len(s) > 0 // todo: check is contains valid characters
 }

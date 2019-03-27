@@ -3,6 +3,7 @@ package metrictree
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type namespaceElement interface {
@@ -99,8 +100,26 @@ type dynamicSpecificElement struct {
 	value string
 }
 
-func (dse *dynamicSpecificElement) Match(string) bool {
-	return true // todo: calculate
+func (dse *dynamicSpecificElement) Match(s string) bool {
+	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+		dynElem := s[1 : len(s)-1]
+		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+
+		if eqIndex != -1 {
+			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+				groupName := dynElem[0:eqIndex]
+				groupValue := dynElem[eqIndex+1:]
+
+				return dse.group == groupName && dse.value == groupValue
+			}
+		}
+	} else {
+		if dse.value == s {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (dse *dynamicSpecificElement) String() string {
