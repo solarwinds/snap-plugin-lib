@@ -56,12 +56,7 @@ type staticRegexpElement struct {
 	regExp *regexp.Regexp
 }
 
-func newStaticRegexpElement(selector string) *staticRegexpElement {
-	r, err := regexp.Compile(selector)
-	if err != nil {
-		// todo: log error
-		return nil
-	}
+func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 	return &staticRegexpElement{
 		regExp: r,
 	}
