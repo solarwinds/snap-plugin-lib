@@ -31,6 +31,10 @@ func ParseNamespaceElement(s string) namespaceElement {
 				return newDynamicSpecificElement(groupName, groupValue)
 			}
 		}
+
+		if isValidIdentifier(dynElem) {
+			return newDynamicAnyElement(dynElem)
+		}
 	}
 
 	if isSurroundedWith(s, regexBeginIndicator, regexEndIndicator) {

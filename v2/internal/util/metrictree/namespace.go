@@ -85,7 +85,19 @@ func newDynamicAnyElement(group string) *dynamicAnyElement {
 }
 
 func (dae *dynamicAnyElement) Match(s string) bool {
-	return true // todo: calculate
+	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+		dynElem := s[1 : len(s)-1]
+		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+
+		if eqIndex != -1 {
+			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+				groupName := dynElem[0:eqIndex]
+				return groupName == dae.group
+			}
+		}
+	}
+
+	return true
 }
 
 func (dae *dynamicAnyElement) String() string {

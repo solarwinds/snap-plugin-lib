@@ -9,6 +9,19 @@ import (
 func TestParseNamespaceElement(t *testing.T) {
 	Convey("", t, func() {
 		{
+			// dynamic element - any
+			el := "[group]"
+			parsedEl := ParseNamespaceElement(el)
+			So(parsedEl, ShouldHaveSameTypeAs, &dynamicAnyElement{})
+			So(parsedEl.String(), ShouldEqual, el)
+
+			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
+			So(parsedEl.Match("[group=id3]"), ShouldBeTrue)
+			So(parsedEl.Match("id3"), ShouldBeTrue)
+
+			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
+		}
+		{
 			// dynamic element - concrete
 			el := "[group=id1]"
 			parsedEl := ParseNamespaceElement(el)
@@ -58,6 +71,7 @@ func TestParseNamespaceElement(t *testing.T) {
 			el := "group1"
 			parsedEl := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticSpecificElement{})
+			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("group1"), ShouldBeTrue)
 			So(parsedEl.Match("group2"), ShouldBeFalse)
