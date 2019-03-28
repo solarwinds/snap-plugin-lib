@@ -15,10 +15,6 @@ const dynamicElementBeginIndicator = '['
 const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
 
-type namespace struct {
-	elements []namespaceElement
-}
-
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string) (*namespace, error) {
 	ns := &namespace{}

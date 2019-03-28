@@ -6,9 +6,73 @@ import (
 	"strings"
 )
 
+type namespace struct {
+	elements []namespaceElement
+}
+
 type namespaceElement interface {
 	Match(string) bool
 	String() string
+}
+
+/*****************************************************************************/
+
+// Check is namespace selector can be used for metric definition
+// First and last element should be static names, middle elements can be group (ie. [group])
+func (ns *namespace) isUsableForDefinition() bool {
+	if len(ns.elements) < 2 {
+		return false
+	}
+
+	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
+		switch nsElem.(type) {
+		case *staticSpecificElement: // ok
+		default:
+			return false
+		}
+	}
+
+	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
+		switch nsElem.(type) {
+		case *staticSpecificElement: // ok
+		case *dynamicAnyElement: // ok
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+// Check is namespace selector can be used for metric addition ie. in ctx.AddMetric
+// First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
+func (ns *namespace) isUsableForAddition() bool {
+	if len(ns.elements) < 2 {
+		return false
+	}
+
+	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
+		switch nsElem.(type) {
+		case *staticSpecificElement: // ok
+		default:
+			return false
+		}
+	}
+
+	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
+		switch nsElem.(type) {
+		case *staticSpecificElement: // ok
+		case *dynamicSpecificElement: // ok
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func (ns *namespace) isUsableForSelection() bool {
+	return true // todo: https://swicloud.atlassian.net/browse/AO-12232
 }
 
 /*****************************************************************************/

@@ -1,3 +1,5 @@
+// +build small
+
 package metrictree
 
 import (
@@ -14,6 +16,10 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeTrue)
+			So(ns.isUsableForAddition(), ShouldBeTrue)
+
 		}
 		{
 			nsStr := "/plugin/[group2]/metric"
@@ -21,6 +27,9 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeTrue)
+			So(ns.isUsableForAddition(), ShouldBeFalse)
 		}
 		{
 			nsStr := "/plugin/[group2=id]/metric"
@@ -28,6 +37,9 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeFalse)
+			So(ns.isUsableForAddition(), ShouldBeTrue)
 		}
 		{
 			nsStr := "/plugin/[group2={id.*}]/metric"
@@ -35,6 +47,9 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeFalse)
+			So(ns.isUsableForAddition(), ShouldBeFalse)
 		}
 		{
 			nsStr := "/plugin/{id.*}/metric"
@@ -42,6 +57,9 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeFalse)
+			So(ns.isUsableForAddition(), ShouldBeFalse)
 		}
 		{
 			nsStr := "/plugin/*/metric"
@@ -49,6 +67,9 @@ func TestParseNamespace(t *testing.T) {
 
 			So(ns, ShouldNotBeNil)
 			So(err, ShouldBeNil)
+
+			So(ns.isUsableForDefinition(), ShouldBeFalse)
+			So(ns.isUsableForAddition(), ShouldBeFalse)
 		}
 		{
 			nsStr := "/"
