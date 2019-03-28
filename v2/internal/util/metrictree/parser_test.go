@@ -6,6 +6,73 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+func TestParseNamespace(t *testing.T) {
+	Convey("", t, func() {
+		{
+			nsStr := "/plugin/group1/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/plugin/[group2]/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/plugin/[group2=id]/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/plugin/[group2={id.*}]/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/plugin/{id.*}/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/plugin/*/metric"
+			ns, err := ParseNamespace(nsStr)
+
+			So(ns, ShouldNotBeNil)
+			So(err, ShouldBeNil)
+		}
+		{
+			nsStr := "/"
+			_, err := ParseNamespace(nsStr)
+			So(err, ShouldBeError)
+		}
+		{
+			nsStr := "sdd/"
+			_, err := ParseNamespace(nsStr)
+			So(err, ShouldBeError)
+		}
+		{
+			nsStr := "/sdd/sd//df"
+			_, err := ParseNamespace(nsStr)
+			So(err, ShouldBeError)
+		}
+		{
+			nsStr := ""
+			_, err := ParseNamespace(nsStr)
+			So(err, ShouldBeError)
+		}
+	})
+}
+
 func TestParseNamespaceElement(t *testing.T) {
 	Convey("", t, func() {
 		{

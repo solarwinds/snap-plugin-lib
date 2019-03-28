@@ -1,6 +1,7 @@
 package metrictree
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -21,11 +22,18 @@ type namespace struct {
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string) (*namespace, error) {
 	ns := &namespace{}
+	splitedNs := strings.Split(s, nsSeparator)
+	if len(splitedNs) < 2 {
+		return nil, errors.New("namespace doesn't contain valid numbers of elements")
+	}
+	if splitedNs[0] != "" {
+		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
+	}
 
-	for _, nsElem := range strings.Split(s, nsSeparator) {
+	for i, nsElem := range splitedNs[1:] {
 		parsedEl, err := ParseNamespaceElement(nsElem)
 		if err != nil {
-			return nil, fmt.Errorf("can't parse namespace (%s): %s", parsedEl, err)
+			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
 		}
 		ns.elements = append(ns.elements, parsedEl)
 	}
