@@ -16,8 +16,8 @@ const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
-func ParseNamespace(s string) (*namespace, error) {
-	ns := &namespace{}
+func ParseNamespace(s string) (*Namespace, error) {
+	ns := &Namespace{}
 	splitedNs := strings.Split(s, nsSeparator)
 	if len(splitedNs) < 2 {
 		return nil, errors.New("namespace doesn't contain valid numbers of elements")

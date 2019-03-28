@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type namespace struct {
+type Namespace struct {
 	elements []namespaceElement
 }
 
@@ -19,7 +19,7 @@ type namespaceElement interface {
 
 // Check is namespace selector can be used for metric definition
 // First and last element should be static names, middle elements can be group (ie. [group])
-func (ns *namespace) isUsableForDefinition() bool {
+func (ns *Namespace) isUsableForDefinition() bool {
 	if len(ns.elements) < 2 {
 		return false
 	}
@@ -46,7 +46,7 @@ func (ns *namespace) isUsableForDefinition() bool {
 
 // Check is namespace selector can be used for metric addition ie. in ctx.AddMetric
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
-func (ns *namespace) isUsableForAddition() bool {
+func (ns *Namespace) isUsableForAddition() bool {
 	if len(ns.elements) < 2 {
 		return false
 	}
@@ -71,7 +71,7 @@ func (ns *namespace) isUsableForAddition() bool {
 	return true
 }
 
-func (ns *namespace) isUsableForSelection() bool {
+func (ns *Namespace) isUsableForSelection() bool {
 	return true // todo: https://swicloud.atlassian.net/browse/AO-12232
 }
 

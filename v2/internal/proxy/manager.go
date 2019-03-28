@@ -9,8 +9,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithFields(logrus.Fields{"module": "plugin-proxy"})
 
 type Collector interface {
 	RequestCollect(id int) ([]plugin.Metric, error)
@@ -19,16 +23,29 @@ type Collector interface {
 	RequestInfo()
 }
 
+type metricValidator interface {
+	AddRule(string) error
+	IsValid(string) bool
+}
+
 type ContextManager struct {
-	collector  plugin.Collector
-	contextMap map[int]*pluginContext
+	collector  plugin.Collector       // reference to custom plugin code
+	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
+
+	metricsDefinition metricValidator // metrics defined by plugin (code)
+	metricsFilters    metricValidator // metric filters defined by task (yaml)
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
-	return &ContextManager{
+	cm := &ContextManager{
 		collector:  collector,
 		contextMap: map[int]*pluginContext{},
+
+		metricsDefinition: metrictree.NewMetricDefinition(),
+		metricsFilters:    metrictree.NewMetricFilter(),
 	}
+
+	return cm
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,4 +94,32 @@ func (cm *ContextManager) UnloadTask(id int) error {
 
 func (cm *ContextManager) RequestInfo() {
 	return
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// plugin.CollectorDefinition related methods
+
+func (cm *ContextManager) DefineMetric(ns string, isDefault bool, description string) {
+	err := cm.metricsDefinition.AddRule(ns)
+	if err != nil {
+		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
+	}
+}
+
+// Define description for dynamic element
+func (cm *ContextManager) DefineGroup(string, string) {
+	panic("implement")
+}
+
+// Define global tags that will be applied to all metrics
+func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
+	panic("implement")
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+func (cm *ContextManager) RequestPluginDefinition() {
+	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
+		definable.DefineMetrics(cm)
+	}
 }
