@@ -153,21 +153,33 @@ type dynamicRegexpElement struct {
 	regexp *regexp.Regexp
 }
 
-func newDynamicRegexpElement(group, regText string) *dynamicRegexpElement {
-	r, err := regexp.Compile(regText)
-	if err != nil {
-		// todo: log error
-		return nil
-	}
-
+func newDynamicRegexpElement(group string, r *regexp.Regexp) *dynamicRegexpElement {
 	return &dynamicRegexpElement{
 		group:  group,
 		regexp: r,
 	}
 }
 
-func (dre *dynamicRegexpElement) Match(string) bool {
-	return true // implement
+func (dre *dynamicRegexpElement) Match(s string) bool {
+	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+		dynElem := s[1 : len(s)-1]
+		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+
+		if eqIndex != -1 {
+			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+				groupName := dynElem[0:eqIndex]
+				groupValue := dynElem[eqIndex+1:]
+
+				return dre.group == groupName && dre.regexp.MatchString(groupValue)
+			}
+		}
+	} else {
+		if dre.regexp.MatchString(s) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (dre *dynamicRegexpElement) String() string {

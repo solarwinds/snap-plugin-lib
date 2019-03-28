@@ -28,7 +28,19 @@ func ParseNamespaceElement(s string) namespaceElement {
 				groupName := dynElem[0:eqIndex]
 				groupValue := dynElem[eqIndex+1:]
 
-				return newDynamicSpecificElement(groupName, groupValue)
+				if isSurroundedWith(groupValue, regexBeginIndicator, regexEndIndicator) {
+					regexStr := groupValue[1 : len(groupValue)-1]
+					r, err := regexp.Compile(regexStr)
+					if err != nil {
+						// todo: log error
+						return nil
+					}
+					return newDynamicRegexpElement(groupName, r)
+				}
+
+				if isValidIdentifier(groupValue) {
+					return newDynamicSpecificElement(groupName, groupValue)
+				}
 			}
 		}
 

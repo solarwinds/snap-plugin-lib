@@ -36,6 +36,21 @@ func TestParseNamespaceElement(t *testing.T) {
 			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
 		}
 		{
+			el := "[group={id.*}]"
+			parsedEl := ParseNamespaceElement(el)
+			So(parsedEl, ShouldHaveSameTypeAs, &dynamicRegexpElement{})
+			So(parsedEl.String(), ShouldEqual, el)
+
+			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
+			So(parsedEl.Match("[group=id3]"), ShouldBeTrue)
+			So(parsedEl.Match("id1"), ShouldBeTrue)
+			So(parsedEl.Match("id3"), ShouldBeTrue)
+
+			So(parsedEl.Match("[group=i1]"), ShouldBeFalse)
+			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
+			So(parsedEl.Match("i1"), ShouldBeFalse)
+		}
+		{
 			// empty regexp - valid
 			el := "{}"
 			parsedEl := ParseNamespaceElement(el)
