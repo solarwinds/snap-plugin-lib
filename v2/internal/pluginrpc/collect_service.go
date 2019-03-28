@@ -33,7 +33,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 
 	taskID := int(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
-	metrics := request.GetMetricSelector()
+	metrics := request.GetMetricSelectors()
 
 	cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 

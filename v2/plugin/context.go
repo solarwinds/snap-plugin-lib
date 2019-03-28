@@ -9,7 +9,7 @@ type Context interface {
 	ConfigKeys() []string
 
 	// Return raw configuration (JSON string)
-	RawConfig() string
+	RawConfig() []byte
 
 	// Store any object between Collect requests using key
 	Store(string, interface{})
