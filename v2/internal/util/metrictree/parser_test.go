@@ -11,8 +11,9 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// dynamic element - any
 			el := "[group]"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicAnyElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
@@ -24,8 +25,9 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// dynamic element - concrete
 			el := "[group=id1]"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicSpecificElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("id1"), ShouldBeTrue)
@@ -37,8 +39,9 @@ func TestParseNamespaceElement(t *testing.T) {
 		}
 		{
 			el := "[group={id.*}]"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicRegexpElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
@@ -53,15 +56,17 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// empty regexp - valid
 			el := "{}"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 		}
 		{
 			// some regexp
 			el := "{mem.*[1-3]{1,}}"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("memory3"), ShouldBeTrue)
@@ -74,8 +79,10 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// static any match
 			el := "*"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticAnyElement{})
+			So(err, ShouldBeNil)
+			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("metric"), ShouldBeTrue)
 			So(parsedEl.Match("group"), ShouldBeTrue)
@@ -84,8 +91,9 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// static concrete match
 			el := "group1"
-			parsedEl := ParseNamespaceElement(el)
+			parsedEl, err := ParseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticSpecificElement{})
+			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
 
 			So(parsedEl.Match("group1"), ShouldBeTrue)
@@ -96,8 +104,8 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// wrong regexp
 			el := "{asdsad[}"
-			parsedEl := ParseNamespaceElement(el)
-			So(parsedEl, ShouldBeNil)
+			_, err := ParseNamespaceElement(el)
+			So(err, ShouldBeError)
 		}
 	})
 }

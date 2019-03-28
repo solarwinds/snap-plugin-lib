@@ -1,11 +1,12 @@
 package metrictree
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
 
-const nsSeparator = '/'
+const nsSeparator = "/"
 const regexBeginIndicator = '{'
 const regexEndIndicator = '}'
 const staticAnyMatcher = '*'
@@ -13,12 +14,27 @@ const dynamicElementBeginIndicator = '['
 const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
 
-type Namespace struct {
+type namespace struct {
 	elements []namespaceElement
 }
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
-func ParseNamespaceElement(s string) namespaceElement {
+func ParseNamespace(s string) (*namespace, error) {
+	ns := &namespace{}
+
+	for _, nsElem := range strings.Split(s, nsSeparator) {
+		parsedEl, err := ParseNamespaceElement(nsElem)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse namespace (%s): %s", parsedEl, err)
+		}
+		ns.elements = append(ns.elements, parsedEl)
+	}
+
+	return ns, nil
+}
+
+// Parsing single selector (ie. [group={reg}])
+func ParseNamespaceElement(s string) (namespaceElement, error) {
 	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
@@ -32,20 +48,19 @@ func ParseNamespaceElement(s string) namespaceElement {
 					regexStr := groupValue[1 : len(groupValue)-1]
 					r, err := regexp.Compile(regexStr)
 					if err != nil {
-						// todo: log error
-						return nil
+						return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
 					}
-					return newDynamicRegexpElement(groupName, r)
+					return newDynamicRegexpElement(groupName, r), nil
 				}
 
 				if isValidIdentifier(groupValue) {
-					return newDynamicSpecificElement(groupName, groupValue)
+					return newDynamicSpecificElement(groupName, groupValue), nil
 				}
 			}
 		}
 
 		if isValidIdentifier(dynElem) {
-			return newDynamicAnyElement(dynElem)
+			return newDynamicAnyElement(dynElem), nil
 		}
 	}
 
@@ -53,21 +68,20 @@ func ParseNamespaceElement(s string) namespaceElement {
 		regexStr := s[1 : len(s)-1]
 		r, err := regexp.Compile(regexStr)
 		if err != nil {
-			// todo: log error
-			return nil
+			return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
 		}
-		return newStaticRegexpElement(r)
+		return newStaticRegexpElement(r), nil
 	}
 
 	if s == string(staticAnyMatcher) {
-		return newStaticAnyElement()
+		return newStaticAnyElement(), nil
 	}
 
 	if isValidIdentifier(s) {
-		return newStaticSpecificElement(s)
+		return newStaticSpecificElement(s), nil
 	}
 
-	return nil
+	return nil, fmt.Errorf("couldn't recognize selector (%s)", s)
 }
 
 func isSurroundedWith(s string, prefix, postfix rune) bool {
