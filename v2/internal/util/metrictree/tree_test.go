@@ -13,8 +13,8 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		// Assert
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
-		//So(v.AddRule("/plugin/group2/metric2"), ShouldBeNil)
-		//So(v.AddRule("/plugin/group2/metric3"), ShouldBeNil)
+		So(v.AddRule("/plugin/group2/metric2"), ShouldBeNil)
+		So(v.AddRule("/plugin/group2/metric3"), ShouldBeNil)
 		//So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeNil)
 		//So(v.AddRule("/plugin/group4/[dyn2]/metric5"), ShouldBeNil)
 		//

@@ -73,7 +73,7 @@ func (tv *TreeValidator) add(parsedNs *Namespace) error {
 	return tv.updateTree(parsedNs)
 }
 
-// this function looks where to put new namespace elements and if tree conditions are met, update the tree
+// this function looks where to put new namespace elements and if tree conditions are met, updates the tree
 func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 	// special case - tree doesn't contain anything
 	if tv.head == nil {
@@ -81,10 +81,56 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 		return nil
 	}
 
+	nodeToUpdate, namespacesToAttach, err := tv.findNodeToUpdate(tv.head, parsedNs)
+	if err != nil {
+		return err
+	}
+
+	nodesToAttach := tv.createNodes(namespacesToAttach)
+	tv.attachBranchToNode(nodeToUpdate, nodesToAttach)
+	return nil
+}
+
+func (tv *TreeValidator) attachBranchToNode(node *Node, attachedNodes *Node) error {
+	isNextNodeStatic := !attachedNodes.currentElement.IsDynamic()
+
+	if isNextNodeStatic && node.nodeType == onlyStaticElementsLevel {
+		node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+		return nil
+	}
+
 	return errors.New("not implemented")
 }
 
-// will create the entire branch (each level is a namespace element). Return the first namespace element that are not yet part of the tree.
+/*
+Find the node, from which tree update should be started
+
+Example:
+* tree has:              /plugin/group1/sub1/met1
+* want to add:           /plugin/group1/sub2/met2
+* function will returns: (node representing "group", "sub2/met2", nil)
+*/
+func (tv *TreeValidator) findNodeToUpdate(head *Node, parsedNs *Namespace) (*Node, *Namespace, error) {
+	if len(parsedNs.elements) <= 1 {
+		return nil, nil, errors.New("can't find a place to update tree (tree already contains rule)")
+	}
+
+	currElem := parsedNs.elements[0]
+	nextElem := parsedNs.elements[1]
+
+	if currElem.String() == head.currentElement.String() {
+		if node, ok := head.concreteSubNodes[nextElem.String()]; ok {
+			return tv.findNodeToUpdate(node, &Namespace{elements: parsedNs.elements[1:]})
+		} else {
+			return head, &Namespace{parsedNs.elements[1:]}, nil
+		}
+	}
+
+	return nil, nil, errors.New("not implemented")
+}
+
+// will create the entire branch of nodes from namespace (not update the tree, only returns branch)
+// ie. /plugin/group1/metric will create branch consisting of 3 elements (node plugin -> node group1 -> leaf metric)
 func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 	if len(ns.elements) == 0 {
 		return nil
