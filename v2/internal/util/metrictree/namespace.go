@@ -13,6 +13,9 @@ type Namespace struct {
 type namespaceElement interface {
 	Match(string) bool
 	String() string
+
+	IsDynamic() bool
+	HasRegexp() bool
 }
 
 /*****************************************************************************/
@@ -93,6 +96,9 @@ func (*staticAnyElement) String() string {
 	return "*"
 }
 
+func (*staticAnyElement) IsDynamic() bool { return false }
+func (*staticAnyElement) HasRegexp() bool { return false }
+
 /*****************************************************************************/
 
 // Representing 2nd element of: /plugin/group1/metric1
@@ -114,6 +120,9 @@ func (sse *staticSpecificElement) String() string {
 	return sse.name
 }
 
+func (*staticSpecificElement) IsDynamic() bool { return false }
+func (*staticSpecificElement) HasRegexp() bool { return false }
+
 /*****************************************************************************/
 
 // Representing 2nd element of: /plugin/{"group.*"}/metric1
@@ -134,6 +143,9 @@ func (sre *staticRegexpElement) Match(s string) bool {
 func (sre *staticRegexpElement) String() string {
 	return "{" + sre.regExp.String() + "}" // todo: constants
 }
+
+func (*staticRegexpElement) IsDynamic() bool { return false }
+func (*staticRegexpElement) HasRegexp() bool { return true }
 
 /*****************************************************************************/
 
@@ -167,6 +179,9 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 func (dae *dynamicAnyElement) String() string {
 	return fmt.Sprintf("[%s]", dae.group)
 }
+
+func (*dynamicAnyElement) IsDynamic() bool { return true }
+func (*dynamicAnyElement) HasRegexp() bool { return false }
 
 /*****************************************************************************/
 
@@ -209,6 +224,9 @@ func newDynamicSpecificElement(group, value string) *dynamicSpecificElement {
 	}
 }
 
+func (*dynamicSpecificElement) IsDynamic() bool { return false }
+func (*dynamicSpecificElement) HasRegexp() bool { return true }
+
 /*****************************************************************************/
 
 // Representing 2nd element of: /plugin/[group={id.*}/metric1
@@ -249,3 +267,6 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 func (dre *dynamicRegexpElement) String() string {
 	return fmt.Sprintf("[%s={%s}]", dre.group, dre.regexp.String())
 }
+
+func (*dynamicRegexpElement) IsDynamic() bool { return true }
+func (*dynamicRegexpElement) HasRegexp() bool { return true }
