@@ -2,6 +2,8 @@ package metrictree
 
 import (
 	"errors"
+	"sort"
+	"strings"
 )
 
 const (
@@ -54,6 +56,47 @@ func (tv *TreeValidator) AddRule(ns string) error {
 
 func (tv *TreeValidator) IsValid(ns string) bool {
 	return true
+}
+
+func (tv *TreeValidator) ListRules() []string {
+	if tv.head == nil {
+		return []string{}
+	}
+
+	nsList := []string{}
+	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) {
+		stack = append(stack, n)
+
+		nsElems := []string{}
+		for _, stackEl := range stack {
+			nsElems = append(nsElems, stackEl.currentElement.String())
+		}
+
+		nsString := "/" + strings.Join(nsElems, "/")
+		nsList = append(nsList, nsString)
+	})
+
+	sort.Strings(nsList)
+	return nsList
+}
+
+type traverseFn func(*Node, []*Node)
+
+func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) {
+
+	if (n.nodeType == leafLevel) {
+		fn(n, stack)
+	}
+
+	stack = append(stack, n)
+
+	for _, subNode := range n.concreteSubNodes {
+		tv.traverse(subNode, stack, fn)
+	}
+
+	for _, subNode := range n.regexSubNodes {
+		tv.traverse(subNode, stack, fn)
+	}
 }
 
 func (tv *TreeValidator) add(parsedNs *Namespace) error {

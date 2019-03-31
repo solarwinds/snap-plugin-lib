@@ -26,6 +26,7 @@ type Collector interface {
 type metricValidator interface {
 	AddRule(string) error
 	IsValid(string) bool
+	ListRules() []string
 }
 
 type ContextManager struct {
