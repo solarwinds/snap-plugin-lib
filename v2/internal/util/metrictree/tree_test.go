@@ -1,7 +1,6 @@
 package metrictree
 
 import (
-	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -19,7 +18,12 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeNil)
 		So(v.AddRule("/plugin/group4/[dyn2]/metric5"), ShouldBeNil)
 
-		fmt.Printf("%s\n", v.ListRules())
+		So(len(v.ListRules()), ShouldEqual, 5)
+
+		So(v.IsValid("/plugin/group1/metric1"), ShouldBeTrue)
+		So(v.IsValid("/plugin/group2/metric2"), ShouldBeTrue)
+		So(v.IsValid("/plugin/group3/[dyn1=id1]/metric4"), ShouldBeTrue)
+		So(v.IsValid("/plugin/group3/id2/metric4"), ShouldBeTrue)
 
 		//So(v.AddRule("/plugin/group5/[dyn3]/metric4"), ShouldBeNil) // ok - last element may be repeated if there is no ambiguity
 		//So(v.AddRule("/plugin/group6/metric1"), ShouldBeNil)        // ok - last element may be repeated if there is no ambiguity

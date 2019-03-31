@@ -55,7 +55,27 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsValid(ns string) bool {
-	return true
+	if tv.head == nil {
+		return true // special case - there is no rule defined so everything is valid
+	}
+
+	isValid := false
+	nsSep := strings.Split(ns, "/")[1:]
+	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
+		idx := len(stack) // len of stack indicated to which string element should we match
+		if !n.currentElement.Match(nsSep[idx]) {
+			return false, true
+		}
+
+		if n.nodeType == leafLevel {
+			isValid = true
+			return false, false
+		}
+
+		return true, true
+	})
+
+	return isValid
 }
 
 func (tv *TreeValidator) ListRules() []string {
@@ -64,7 +84,11 @@ func (tv *TreeValidator) ListRules() []string {
 	}
 
 	nsList := []string{}
-	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) {
+	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
+		if n.nodeType != leafLevel {
+			return true, true
+		}
+
 		stack = append(stack, n)
 
 		nsElems := []string{}
@@ -74,29 +98,46 @@ func (tv *TreeValidator) ListRules() []string {
 
 		nsString := "/" + strings.Join(nsElems, "/")
 		nsList = append(nsList, nsString)
+
+		return false, true
 	})
 
 	sort.Strings(nsList)
 	return nsList
 }
 
-type traverseFn func(*Node, []*Node)
+// Define function executed when each node is reached during traversion.
+// First return value indicates if traversing should be continued (go to next level) after processing this node (false ends traversing of current branch)
+// Second return value indicates if traversing should be continued on other branches (false ends traversing of tree)
+type traverseFn func(*Node, []*Node) (bool, bool)
 
-func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) {
+func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
 
-	if (n.nodeType == leafLevel) {
-		fn(n, stack)
+	procBranch, procTree := fn(n, stack)
+	if !procTree {
+		return false
+	}
+	if !procBranch {
+		return true
 	}
 
 	stack = append(stack, n)
 
 	for _, subNode := range n.concreteSubNodes {
-		tv.traverse(subNode, stack, fn)
+		cont := tv.traverse(subNode, stack, fn)
+		if !cont {
+			return false
+		}
 	}
 
 	for _, subNode := range n.regexSubNodes {
-		tv.traverse(subNode, stack, fn)
+		cont := tv.traverse(subNode, stack, fn)
+		if !cont {
+			return false
+		}
 	}
+
+	return true
 }
 
 func (tv *TreeValidator) add(parsedNs *Namespace) error {
