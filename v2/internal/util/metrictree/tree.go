@@ -63,13 +63,20 @@ func (tv *TreeValidator) IsValid(ns string) bool {
 	nsSep := strings.Split(ns, "/")[1:]
 	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
 		idx := len(stack) // len of stack indicated to which string element should we match
+		if idx >= len(nsSep) {
+			return false, false // todo: think is should end travesing here
+		}
 		if !n.currentElement.Match(nsSep[idx]) {
 			return false, true
 		}
 
 		if n.nodeType == leafLevel {
-			isValid = true
-			return false, false
+			if len(nsSep)-1 == idx {
+				isValid = true
+				return false, false
+			} else {
+				return false, true
+			}
 		}
 
 		return true, true
@@ -111,6 +118,7 @@ func (tv *TreeValidator) ListRules() []string {
 // Second return value indicates if traversing should be continued on other branches (false ends traversing of tree)
 type traverseFn func(*Node, []*Node) (bool, bool)
 
+// Traversing tree and executing function on each node.
 func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
 
 	procBranch, procTree := fn(n, stack)
@@ -123,7 +131,7 @@ func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
 
 	stack = append(stack, n)
 
-	for _, subNode := range n.concreteSubNodes {
+	for _, subNode := range n.concreteSubNodes { // todo: should merge those two when processing
 		cont := tv.traverse(subNode, stack, fn)
 		if !cont {
 			return false
@@ -171,19 +179,22 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 	}
 
 	nodesToAttach := tv.createNodes(namespacesToAttach)
-	tv.attachBranchToNode(nodeToUpdate, nodesToAttach)
-	return nil
+	return tv.attachBranchToNode(nodeToUpdate, nodesToAttach)
 }
 
 func (tv *TreeValidator) attachBranchToNode(node *Node, attachedNodes *Node) error {
 	isNextNodeStatic := !attachedNodes.currentElement.IsDynamic()
 
-	if isNextNodeStatic && node.nodeType == onlyStaticElementsLevel {
-		node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
-		return nil
+	if node.nodeType == onlyStaticElementsLevel && !isNextNodeStatic {
+		return errors.New("only static elements may added at current level")
 	}
 
-	return errors.New("not implemented")
+	if !isNextNodeStatic {
+		return errors.New("there can be only one dynamic element at current level")
+	}
+
+	node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+	return nil
 }
 
 /*
