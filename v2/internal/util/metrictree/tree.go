@@ -256,7 +256,11 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 		}
 	}
 
-	currNode := &Node{currentElement: ns.elements[0]}
+	currNode := &Node{
+		currentElement:   ns.elements[0],
+		concreteSubNodes: map[string]*Node{},
+		regexSubNodes:    []*Node{},
+	}
 	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]})
 
 	if tv.strategy == metricFilteringStrategy {

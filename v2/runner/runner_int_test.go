@@ -100,17 +100,23 @@ func (s *SuiteT) sendCollect(taskID int) (*pluginrpc.CollectResponse, error) {
 		return nil, err
 	}
 
+	aggregatedMts := &pluginrpc.CollectResponse{
+		MetricSet: []*pluginrpc.Metric{},
+	}
+
 	for {
-		_, err := stream.Recv()
+		partialResponse, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return &pluginrpc.CollectResponse{}, err
+			return nil, err
 		}
+
+		aggregatedMts.MetricSet = append(aggregatedMts.MetricSet, partialResponse.MetricSet...)
 	}
 
-	return &pluginrpc.CollectResponse{}, err
+	return aggregatedMts, nil
 }
 
 /*****************************************************************************/
@@ -324,6 +330,8 @@ func (cc *configurableCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestConfigurableCollector() {
+	s.T().Skip()
+
 	// Arrange
 	jsonConfig := []byte(`{
 		"address": {
@@ -349,5 +357,104 @@ func (s *SuiteT) TestConfigurableCollector() {
 		_, _ = s.sendKill()
 
 		// Assert is handled within configurableCollector.Collect() method
+	})
+}
+
+/*****************************************************************************/
+
+type metricSendingCollector struct {
+	t *testing.T
+}
+
+func (msc *metricSendingCollector) DefineMetrics(ctx plugin.CollectorDefinition) error {
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Pending", true, "this includes time before being bound to a node, as well as time spent pulling images onto the host")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Running", true, "the pod has been bound to a node and all of the containers have been started")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Succeeded", true, "all containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Failed", true, "all containers in the pod have terminated, and at least one container has terminated in a failure")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Unknown", true, "for some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/condition/ready", false, "specifies if the pod is ready to serve requests")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/condition/scheduled", false, "status of the scheduling process for the pod")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/restarts", true, "number of times the container has been restarted")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/ready", true, "specifies whether the container has passed its readiness probe")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/waiting", true, "value 1 if container is waiting else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/running", true, "value 1 if container is running else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/terminated", true, "value 1 if container is terminated else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/requested/cpu/cores", true, "The number of requested cpu cores by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/requested/memory/bytes", true, "The number of requested memory bytes by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/limits/cpu/cores", true, "The number of requested cpu cores by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/limits/memory/bytes", true, "The limit on memory to be used by a container in bytes")
+	ctx.DefineMetric("/kubernetes/node/[node]/spec/unschedulable", true, "Whether a node can schedule new pods.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/outofdisk", false, "---")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/cpu/cores", false, "The CPU resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/memory/bytes", false, "The memory resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/pods", false, "The pod resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/cpu/cores", false, "The total CPU resources of the node.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/memory/bytes", false, "The total memory resources of the node.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/pods", false, "The total pod resources of the node.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/metadata/generation", true, "The desired generation sequence number for deployment. If a deployment succeeds should be the same as the observed generation.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/observedgeneration", true, "The generation sequence number after deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/targetedreplicas", true, "Total number of non-terminated pods targeted by this deployment (their labels match the selector).")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/availablereplicas", true, "Total number of available pods (ready for at least minReadySeconds) targeted by this deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/unavailablereplicas", true, "Total number of unavailable pods targeted by this deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/updatedreplicas", true, "---")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/deploynotfinished", true, "If desired and observed generation are not the same, then either an ongoing deploy or a failed deploy.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/desiredreplicas", false, "Number of desired pods.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/paused", false, "---")
+
+	return nil
+}
+
+func (msc *metricSendingCollector) Collect(ctx plugin.Context) error {
+	Convey("Validate that metrics are filtered acording to metric definitions and filtering", msc.t, func() {
+		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
+
+		So(ctx.AddMetric("/kubernetes/container/appoptics1/node-251/pod-34/mycont155/status/ready", 15), ShouldBeNil)   // added
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/ready", 21), ShouldBeNil)     // added
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status", 1), ShouldBeError)          // discarded - no metric status defined
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/checking", 1), ShouldBeError) // discarded - no metric status/checking defined
+
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/outofdisk", 1), ShouldBeNil)               // added
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/allocatable/cpu/cores", 1), ShouldBeError) // discarded - (in /kubernetes/node/*/status/* last star matches to single element)
+
+		So(ctx.AddMetric("/kubernetes/deployment/[namespace=appoptics3]/depl-2322/status/targetedreplicas", 10), ShouldBeNil) // added
+		So(ctx.AddMetric("/kubernetes/deployment/[namespace=loggly12]/depl-5402/status/availablereplicas", 20), ShouldBeNil)  // added
+		//So(ctx.AddMetric("/kubernetes/deployment/[namespace=papertrail15]/depl-52/status/updatedreplicas", 30), ShouldBeNil)  // todo: Should pass
+		So(ctx.AddMetric("/kubernetes/deployment/[name=appoptics3]/depl-2322/status/targetedreplicas", 1), ShouldBeError) // dicarded (name != namespace)
+	})
+	return nil
+}
+
+func (s *SuiteT) TestMetricSendingCollector() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/kubernetes/pod/node-125/*/*/status/*/*",
+		"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+		"/kubernetes/node/*/status/*",
+		"/kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*",
+		"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+		"/kubernetes/deployment/papertrail15/*/*/*",
+	}
+
+	sendingCollector := &metricSendingCollector{t: s.T()}
+	s.startCollector(sendingCollector)
+	s.startClient()
+
+	Convey("", s.T(), func() {
+		// Act
+		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		So(err, ShouldBeNil)
+
+		collMts, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
+		So(len(collMts.MetricSet), ShouldEqual, 6)
+
+		time.Sleep(2 * time.Second)
+		_, err = s.sendKill()
+		So(err, ShouldBeNil)
+
+		// Assert is handled within metricSendingCollector.Collect() method
 	})
 }

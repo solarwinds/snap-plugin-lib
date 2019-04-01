@@ -17,7 +17,7 @@ import (
 var log = logrus.WithFields(logrus.Fields{"module": "plugin-proxy"})
 
 type Collector interface {
-	RequestCollect(id int) ([]plugin.Metric, error)
+	RequestCollect(id int) ([]*plugin.Metric, error)
 	LoadTask(id int, config []byte, selectors []string) error
 	UnloadTask(id int) error
 	RequestInfo()
@@ -35,7 +35,6 @@ type ContextManager struct {
 	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
 
 	metricsDefinition metricValidator // metrics defined by plugin (code)
-	metricsFilters    metricValidator // metric filters defined by task (yaml)
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
@@ -44,8 +43,9 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 		contextMap: map[int]*pluginContext{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
-		metricsFilters:    metrictree.NewMetricFilter(),
 	}
+
+	cm.requestPluginDefinition()
 
 	return cm
 }
@@ -53,30 +53,43 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]plugin.Metric, error) {
+func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
 	context, ok := cm.contextMap[id]
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
 
+	context.sessionMts = []*plugin.Metric{}
 	cm.collector.Collect(context)
-	return nil, nil
+
+	return context.sessionMts, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsSelectors []string) error {
+func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(rawConfig, mtsSelectors)
+	newCtx, err := NewPluginContext(cm.metricsDefinition, rawConfig, mtsFilter)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}
-	cm.contextMap[id] = newCtx
+
+	for _, mtFilter := range mtsFilter {
+		err := newCtx.metricsFilters.AddRule(mtFilter)
+		if err != nil {
+			log.WithError(err).WithField("rule", mtFilter).Warn("can't add filtering rule, it will be ignored")
+		}
+	}
 
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
-		loadable.Load(cm.contextMap[id])
+		err := loadable.Load(newCtx)
+		if err != nil {
+			return fmt.Errorf("can't load task due to errors returned from user-defined function: %s", err)
+		}
 	}
+
+	cm.contextMap[id] = newCtx
 
 	return nil
 }
@@ -120,7 +133,7 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func (cm *ContextManager) RequestPluginDefinition() {
+func (cm *ContextManager) requestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
 		definable.DefineMetrics(cm)
 	}

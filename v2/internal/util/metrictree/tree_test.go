@@ -63,7 +63,8 @@ func TestMetricFilterValidator(t *testing.T) {
 		// Add valid rules
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
 		So(v.AddRule("/plugin/{id[234]{1,}}/{.*}"), ShouldBeNil)
-		So(v.AddRule("/plugin/[group2={id[234]{1,}}]"), ShouldBeNil)
+		So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeNil)
+
 		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
 
 		// Double-check that rules were applied
@@ -76,6 +77,7 @@ func TestMetricFilterValidator(t *testing.T) {
 
 		// Try to validate (filter) incoming metrics - negative scenarios
 		So(v.IsValid("/plugin/group2/metric4"), ShouldBeFalse)
+		So(v.IsValid("/plugin/[group2=group2]/metric4"), ShouldBeFalse)
 		So(v.IsValid("/plugin/id15/group4/metric4"), ShouldBeFalse)
 	})
 }
