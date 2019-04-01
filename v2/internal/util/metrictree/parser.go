@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 const nsSeparator = "/"
@@ -27,7 +28,7 @@ func ParseNamespace(s string) (*Namespace, error) {
 	}
 
 	for i, nsElem := range splitedNs[1:] {
-		parsedEl, err := ParseNamespaceElement(nsElem)
+		parsedEl, err := parseNamespaceElement(nsElem)
 		if err != nil {
 			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
 		}
@@ -38,7 +39,7 @@ func ParseNamespace(s string) (*Namespace, error) {
 }
 
 // Parsing single selector (ie. [group={reg}])
-func ParseNamespaceElement(s string) (namespaceElement, error) {
+func parseNamespaceElement(s string) (namespaceElement, error) {
 	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
@@ -100,5 +101,15 @@ func isSurroundedWith(s string, prefix, postfix rune) bool {
 }
 
 func isValidIdentifier(s string) bool {
-	return len(s) > 0 // todo: check is contains valid characters
+	if len(s) == 0 {
+		return false
+	}
+
+	for _, el := range s {
+		if !unicode.IsLetter(el) && !unicode.IsDigit(el) && el != '-' && el != '_' {
+			return false
+		}
+	}
+
+	return true
 }

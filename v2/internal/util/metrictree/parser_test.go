@@ -3,93 +3,90 @@
 package metrictree
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+/*****************************************************************************/
+
+type parseNamespaceValidScenario struct {
+	namespace           string
+	usableForDefinition bool
+	usableForAddition   bool
+}
+
+var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
+	{ // 0
+		namespace:           "/plugin/group1/metric",
+		usableForDefinition: true,
+		usableForAddition:   true,
+	},
+	{ // 1
+		namespace:           "/plugin/[group2]/metric",
+		usableForDefinition: true,
+		usableForAddition:   false,
+	},
+	{ // 2
+		namespace:           "/plugin/[group2=id]/metric",
+		usableForDefinition: false,
+		usableForAddition:   true,
+	},
+	{ // 3
+		namespace:           "/plugin/[group2={id.*}]/metric",
+		usableForDefinition: false,
+		usableForAddition:   false,
+	},
+	{ // 4
+		namespace:           "/plugin/{id.*}/metric",
+		usableForDefinition: false,
+		usableForAddition:   false,
+	},
+	{ // 5
+		namespace:           "/plugin/*/metric",
+		usableForDefinition: false,
+		usableForAddition:   false,
+	},
+}
+
+func TestParseNamespace_ValidScenarios(t *testing.T) {
+	Convey("Validate ParseNamespace - valid scenarios", t, func() {
+		for i, tc := range parseNamespaceValidScenarios {
+			Convey(fmt.Sprintf("Scenario %d", i), func() {
+				// Act
+				ns, err := ParseNamespace(tc.namespace)
+
+				// Assert
+				So(ns, ShouldNotBeNil)
+				So(err, ShouldBeNil)
+				So(ns.isUsableForDefinition(), ShouldEqual, tc.usableForDefinition)
+				So(ns.isUsableForAddition(), ShouldEqual, tc.usableForAddition)
+			})
+		}
+	})
+}
+
+/*****************************************************************************/
+
 func TestParseNamespace(t *testing.T) {
-	Convey("", t, func() {
-		{
-			nsStr := "/plugin/group1/metric"
-			ns, err := ParseNamespace(nsStr)
+	testCases := []string{
+		"/",
+		"el1/",
+		"/el1/el2//m3",
+		"/el1/el_#/m4",
+		"",
+	}
 
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
+	Convey("Validate ParseNamespace - negative scenarios", t, func() {
+		for i, tc := range testCases {
+			Convey(fmt.Sprintf("Scenario %d (%s)", i, tc), func() {
+				// Act
+				_, err := ParseNamespace(tc)
 
-			So(ns.isUsableForDefinition(), ShouldBeTrue)
-			So(ns.isUsableForAddition(), ShouldBeTrue)
-
-		}
-		{
-			nsStr := "/plugin/[group2]/metric"
-			ns, err := ParseNamespace(nsStr)
-
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
-
-			So(ns.isUsableForDefinition(), ShouldBeTrue)
-			So(ns.isUsableForAddition(), ShouldBeFalse)
-		}
-		{
-			nsStr := "/plugin/[group2=id]/metric"
-			ns, err := ParseNamespace(nsStr)
-
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
-
-			So(ns.isUsableForDefinition(), ShouldBeFalse)
-			So(ns.isUsableForAddition(), ShouldBeTrue)
-		}
-		{
-			nsStr := "/plugin/[group2={id.*}]/metric"
-			ns, err := ParseNamespace(nsStr)
-
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
-
-			So(ns.isUsableForDefinition(), ShouldBeFalse)
-			So(ns.isUsableForAddition(), ShouldBeFalse)
-		}
-		{
-			nsStr := "/plugin/{id.*}/metric"
-			ns, err := ParseNamespace(nsStr)
-
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
-
-			So(ns.isUsableForDefinition(), ShouldBeFalse)
-			So(ns.isUsableForAddition(), ShouldBeFalse)
-		}
-		{
-			nsStr := "/plugin/*/metric"
-			ns, err := ParseNamespace(nsStr)
-
-			So(ns, ShouldNotBeNil)
-			So(err, ShouldBeNil)
-
-			So(ns.isUsableForDefinition(), ShouldBeFalse)
-			So(ns.isUsableForAddition(), ShouldBeFalse)
-		}
-		{
-			nsStr := "/"
-			_, err := ParseNamespace(nsStr)
-			So(err, ShouldBeError)
-		}
-		{
-			nsStr := "sdd/"
-			_, err := ParseNamespace(nsStr)
-			So(err, ShouldBeError)
-		}
-		{
-			nsStr := "/sdd/sd//df"
-			_, err := ParseNamespace(nsStr)
-			So(err, ShouldBeError)
-		}
-		{
-			nsStr := ""
-			_, err := ParseNamespace(nsStr)
-			So(err, ShouldBeError)
+				// Assert
+				So(err, ShouldBeError)
+			})
 		}
 	})
 }
@@ -99,7 +96,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// dynamic element - any
 			el := "[group]"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicAnyElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -113,7 +110,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// dynamic element - concrete
 			el := "[group=id1]"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicSpecificElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -127,7 +124,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		}
 		{
 			el := "[group={id.*}]"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &dynamicRegexpElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -144,7 +141,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// empty regexp - valid
 			el := "{}"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -152,7 +149,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// some regexp
 			el := "{mem.*[1-3]{1,}}"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -167,7 +164,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// static any match
 			el := "*"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticAnyElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -179,7 +176,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// static concrete match
 			el := "group1"
-			parsedEl, err := ParseNamespaceElement(el)
+			parsedEl, err := parseNamespaceElement(el)
 			So(parsedEl, ShouldHaveSameTypeAs, &staticSpecificElement{})
 			So(err, ShouldBeNil)
 			So(parsedEl.String(), ShouldEqual, el)
@@ -192,7 +189,7 @@ func TestParseNamespaceElement(t *testing.T) {
 		{
 			// wrong regexp
 			el := "{asdsad[}"
-			_, err := ParseNamespaceElement(el)
+			_, err := parseNamespaceElement(el)
 			So(err, ShouldBeError)
 		}
 	})
