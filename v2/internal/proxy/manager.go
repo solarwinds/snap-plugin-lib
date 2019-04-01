@@ -26,6 +26,7 @@ type Collector interface {
 type metricValidator interface {
 	AddRule(string) error
 	IsValid(string) bool
+	IsPartiallyValid(string) bool
 	ListRules() []string
 }
 

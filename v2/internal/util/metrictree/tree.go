@@ -54,7 +54,15 @@ func (tv *TreeValidator) AddRule(ns string) error {
 	return tv.add(parsedNs)
 }
 
+func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
+	return tv.isValid(ns, false)
+}
+
 func (tv *TreeValidator) IsValid(ns string) bool {
+	return tv.isValid(ns, true)
+}
+
+func (tv *TreeValidator) isValid(ns string, fullMatch bool) bool {
 	if tv.head == nil {
 		return true // special case - there is no rule defined so everything is valid
 	}
@@ -70,11 +78,15 @@ func (tv *TreeValidator) IsValid(ns string) bool {
 			return false, true
 		}
 
-		if n.nodeType == leafLevel {
-			if len(nsSep)-1 == idx {
+		if len(nsSep)-1 == idx {
+			switch {
+			case fullMatch && n.nodeType == leafLevel:
 				isValid = true
 				return false, false
-			} else {
+			case !fullMatch:
+				isValid = true
+				return false, false
+			default:
 				return false, true
 			}
 		}

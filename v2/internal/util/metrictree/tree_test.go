@@ -30,6 +30,12 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.IsValid("/plugin/group3/id2/metric4"), ShouldBeTrue)
 		So(v.IsValid("/plugin/group6/metric1"), ShouldBeTrue)
 
+		So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
+		So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
+		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue)
+		So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
+		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
+
 		// Try to validate (filter) incoming metrics - negative scenarios
 		//So(v.IsValid("/plugin/group5/[dyn3]/metric4"), ShouldBeFalse) // todo: no value for dynamic element
 		So(v.IsValid("/plugin/group1/metric1/"), ShouldBeFalse)
