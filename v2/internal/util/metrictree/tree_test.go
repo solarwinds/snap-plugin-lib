@@ -55,3 +55,27 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeError) // the rules already exists
 	})
 }
+
+func TestMetricFilterValidator(t *testing.T) {
+	Convey("", t, func() {
+		v := NewMetricFilter()
+
+		// Add valid rules
+		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
+		So(v.AddRule("/plugin/{id[234]{1,}}/{.*}"), ShouldBeNil)
+		So(v.AddRule("/plugin/[group2={id[234]{1,}}]"), ShouldBeNil)
+		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
+
+		// Double-check that rules were applied
+		So(len(v.ListRules()), ShouldEqual, 4)
+
+		// Try to validate (filter) incoming metrics - positive scenarios
+		So(v.IsValid("/plugin/group1/metric1"), ShouldBeTrue)
+		So(v.IsValid("/plugin/id2/metric4"), ShouldBeTrue)
+		So(v.IsValid("/plugin/id15/group3/metric3"), ShouldBeTrue)
+
+		// Try to validate (filter) incoming metrics - negative scenarios
+		So(v.IsValid("/plugin/group2/metric4"), ShouldBeFalse)
+		So(v.IsValid("/plugin/id15/group4/metric4"), ShouldBeFalse)
+	})
+}

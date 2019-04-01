@@ -16,6 +16,7 @@ const (
 	invalidElementLevel = iota
 	onlyStaticElementsLevel
 	onlyDynamicElementsLevel
+	mixedElementsLevel
 	leafLevel
 )
 
@@ -201,11 +202,15 @@ func (tv *TreeValidator) attachBranchToNode(node *Node, attachedNodes *Node) err
 		return errors.New("only static elements may added at current level")
 	}
 
-	if !isNextNodeStatic {
+	if node.nodeType == onlyDynamicElementsLevel && !isNextNodeStatic {
 		return errors.New("there can be only one dynamic element at current level")
 	}
 
-	node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+	if !attachedNodes.currentElement.HasRegexp() {
+		node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+	} else {
+		node.regexSubNodes = append(node.regexSubNodes, attachedNodes)
+	}
 	return nil
 }
 
@@ -254,10 +259,15 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 	currNode := &Node{currentElement: ns.elements[0]}
 	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]})
 
-	if !nextNode.currentElement.IsDynamic() {
-		currNode.nodeType = onlyStaticElementsLevel
-	} else {
-		currNode.nodeType = onlyDynamicElementsLevel
+	if tv.strategy == metricFilteringStrategy {
+		currNode.nodeType = mixedElementsLevel
+	}
+	if tv.strategy == metricDefinitionStrategy {
+		if !nextNode.currentElement.IsDynamic() {
+			currNode.nodeType = onlyStaticElementsLevel
+		} else {
+			currNode.nodeType = onlyDynamicElementsLevel
+		}
 	}
 
 	if nextNode.currentElement.HasRegexp() {
