@@ -48,6 +48,11 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 		usableForDefinition: false,
 		usableForAddition:   false,
 	},
+	{ // 5
+		namespace:           "/plugin/metric",
+		usableForDefinition: true,
+		usableForAddition:   true,
+	},
 }
 
 func TestParseNamespace_ValidScenarios(t *testing.T) {
@@ -72,9 +77,12 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 func TestParseNamespace_InvalidScenarios(t *testing.T) {
 	testCases := []string{
 		"/",
+		"el",
 		"el1/",
 		"/el1/el2//m3",
 		"/el1/el_#/m4",
+		"el/el2/el3/el4",
+		"/el/el2/el3/el4/",
 		"",
 	}
 
@@ -188,7 +196,7 @@ func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 		"[gr+]",
 		"[group={]",
 		"[group={reg[}]",
-		//"[gr+={id.*}]", // todo: should fail - wrong group name
+		"[gr+={id.*}]",
 		"[group=id+]",
 	}
 

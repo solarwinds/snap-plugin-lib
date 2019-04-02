@@ -1,7 +1,6 @@
 package metrictree
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -16,12 +15,14 @@ const dynamicElementBeginIndicator = '['
 const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
 
+const minNamespaceElements = 2
+
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string) (*Namespace, error) {
 	ns := &Namespace{}
 	splitedNs := strings.Split(s, nsSeparator)
-	if len(splitedNs) < 2 {
-		return nil, errors.New("namespace doesn't contain valid numbers of elements")
+	if len(splitedNs)-1 < minNamespaceElements {
+		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
 	}
 	if splitedNs[0] != "" {
 		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
@@ -40,16 +41,20 @@ func ParseNamespace(s string) (*Namespace, error) {
 
 // Parsing single selector (ie. [group={reg}])
 func parseNamespaceElement(s string) (namespaceElement, error) {
-	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) { // is it group []?
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
-		if eqIndex != -1 {
-			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 {
+		if eqIndex != -1 { // is it group with value [group=id]
+			if isIndexInTheMiddle(eqIndex, s) {
 				groupName := dynElem[0:eqIndex]
 				groupValue := dynElem[eqIndex+1:]
 
-				if isSurroundedWith(groupValue, regexBeginIndicator, regexEndIndicator) {
+				if !isValidIdentifier(groupName) {
+					return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
+				}
+
+				if isSurroundedWith(groupValue, regexBeginIndicator, regexEndIndicator) { // is it group value as regex [group={regex}]
 					regexStr := groupValue[1 : len(groupValue)-1]
 					r, err := regexp.Compile(regexStr)
 					if err != nil {
@@ -61,15 +66,21 @@ func parseNamespaceElement(s string) (namespaceElement, error) {
 				if isValidIdentifier(groupValue) {
 					return newDynamicSpecificElement(groupName, groupValue), nil
 				}
+
+				return nil, fmt.Errorf("invalid character(s) used for group value [%s]", groupValue)
 			}
+
+			return nil, fmt.Errorf("invalid group with value (%s)", dynElem)
 		}
 
 		if isValidIdentifier(dynElem) {
 			return newDynamicAnyElement(dynElem), nil
 		}
+
+		return nil, fmt.Errorf("invalid character(s) used for group value [%s]", dynElem)
 	}
 
-	if isSurroundedWith(s, regexBeginIndicator, regexEndIndicator) {
+	if isSurroundedWith(s, regexBeginIndicator, regexEndIndicator) { // is it {regex}
 		regexStr := s[1 : len(s)-1]
 		r, err := regexp.Compile(regexStr)
 		if err != nil {
@@ -78,15 +89,21 @@ func parseNamespaceElement(s string) (namespaceElement, error) {
 		return newStaticRegexpElement(r), nil
 	}
 
-	if s == string(staticAnyMatcher) {
+	if s == string(staticAnyMatcher) { // is it *
 		return newStaticAnyElement(), nil
 	}
 
-	if isValidIdentifier(s) {
+	if isValidIdentifier(s) { // is it static element ie. metric
 		return newStaticSpecificElement(s), nil
 	}
 
-	return nil, fmt.Errorf("couldn't recognize selector (%s)", s)
+	return nil, fmt.Errorf("invalid character(s) used for element [%s]", s)
+}
+
+/*****************************************************************************/
+
+func isIndexInTheMiddle(idx int, s string) bool {
+	return len(s) >= 3 && idx > 0 && idx < len(s)-1
 }
 
 func isSurroundedWith(s string, prefix, postfix rune) bool {

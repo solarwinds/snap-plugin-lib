@@ -141,7 +141,7 @@ func (sre *staticRegexpElement) Match(s string) bool {
 }
 
 func (sre *staticRegexpElement) String() string {
-	return "{" + sre.regExp.String() + "}" // todo: constants
+	return string(regexBeginIndicator) + sre.regExp.String() + string(regexEndIndicator)
 }
 
 func (*staticRegexpElement) IsDynamic() bool { return false }
@@ -166,7 +166,7 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+			if isIndexInTheMiddle(eqIndex, s) {
 				groupName := dynElem[0:eqIndex]
 				return groupName == dae.group
 			}
@@ -197,7 +197,7 @@ func (dse *dynamicSpecificElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+			if isIndexInTheMiddle(eqIndex, s) {
 				groupName := dynElem[0:eqIndex]
 				groupValue := dynElem[eqIndex+1:]
 
@@ -248,7 +248,7 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if len(dynElem) >= 3 && eqIndex > 0 && eqIndex < len(dynElem)-1 { // todo: remove duplication
+			if isIndexInTheMiddle(eqIndex, s) {
 				groupName := dynElem[0:eqIndex]
 				groupValue := dynElem[eqIndex+1:]
 
