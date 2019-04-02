@@ -69,7 +69,7 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 
 /*****************************************************************************/
 
-func TestParseNamespace(t *testing.T) {
+func TestParseNamespace_InvalidScenarios(t *testing.T) {
 	testCases := []string{
 		"/",
 		"el1/",
@@ -91,106 +91,116 @@ func TestParseNamespace(t *testing.T) {
 	})
 }
 
-func TestParseNamespaceElement(t *testing.T) {
-	Convey("", t, func() {
-		{
-			// dynamic element - any
-			el := "[group]"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &dynamicAnyElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
+/*****************************************************************************/
 
-			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
-			So(parsedEl.Match("[group=id3]"), ShouldBeTrue)
-			So(parsedEl.Match("id3"), ShouldBeTrue)
+type parseNamespaceElementValidScenario struct {
+	namespaceElement string
+	comparableType   namespaceElement
+	shouldMatch      []string
+	shouldNotMatch   []string
+}
 
-			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
+var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
+	{ // 0
+		namespaceElement: "[group]",
+		comparableType:   &dynamicAnyElement{},
+		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3"},
+		shouldNotMatch:   []string{"[grp=id1]"},
+	},
+	{ // 1
+		namespaceElement: "[group=id1]",
+		comparableType:   &dynamicSpecificElement{},
+		shouldMatch:      []string{"id1", "[group=id1]"},
+		shouldNotMatch:   []string{"id2", "[group=id2]", "[grp=id1]"},
+	},
+	{ // 2
+		namespaceElement: "[group={id.*}]",
+		comparableType:   &dynamicRegexpElement{},
+		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id1", "id3"},
+		shouldNotMatch:   []string{"[group=i1]", "[grp=id1]", "i1"},
+	},
+	{ // 3
+		namespaceElement: "{}", // valid
+		comparableType:   &staticRegexpElement{},
+		shouldMatch:      []string{},
+		shouldNotMatch:   []string{},
+	},
+	{ // 4
+		namespaceElement: "{mem.*[1-3]{1,}}",
+		comparableType:   &staticRegexpElement{},
+		shouldMatch:      []string{"memory3", "mem1", "memo2"},
+		shouldNotMatch:   []string{"memo4", "memory0"},
+	},
+	{ // 5
+		namespaceElement: "*", // valid
+		comparableType:   &staticAnyElement{},
+		shouldMatch:      []string{"metric", "group", ""},
+		shouldNotMatch:   []string{},
+	},
+	{
+		namespaceElement: "group1",
+		comparableType:   &staticSpecificElement{},
+		shouldMatch:      []string{"group1"},
+		shouldNotMatch:   []string{"group2", "group", ""},
+	},
+}
+
+func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
+	Convey("Validate ParseNamespace - valid scenarios", t, func() {
+		for i, tc := range parseNamespaceElementValidScenarios {
+			Convey(fmt.Sprintf("Scenario %d", i), func() {
+				// Act
+				parsedEl, err := parseNamespaceElement(tc.namespaceElement)
+
+				// Assert
+				So(err, ShouldBeNil)
+				So(parsedEl.String(), ShouldEqual, tc.namespaceElement)
+				So(parsedEl, ShouldHaveSameTypeAs, tc.comparableType)
+
+				// Assert matching (positive)
+				for i, m := range tc.shouldMatch {
+					Convey(fmt.Sprintf("Scenario %d - Positive matching (%s to %s)", i, m, parsedEl.String()), func() {
+						So(parsedEl.Match(m), ShouldBeTrue)
+					})
+				}
+
+				// Assert matching (negative)
+				for i, m := range tc.shouldNotMatch {
+					Convey(fmt.Sprintf("Scenario %d - Negative matching (%s to %s)", i, m, parsedEl.String()), func() {
+						So(parsedEl.Match(m), ShouldBeFalse)
+					})
+				}
+			})
 		}
-		{
-			// dynamic element - concrete
-			el := "[group=id1]"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &dynamicSpecificElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
+	})
+}
 
-			So(parsedEl.Match("id1"), ShouldBeTrue)
-			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
+/*****************************************************************************/
 
-			So(parsedEl.Match("id2"), ShouldBeFalse)
-			So(parsedEl.Match("[group=id2]"), ShouldBeFalse)
-			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
-		}
-		{
-			el := "[group={id.*}]"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &dynamicRegexpElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
+func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
+	testCases := []string{
+		"",
+		"asd+",
+		"{asd[}",
+		"[group=]",
+		"[=id]",
+		"[=]",
+		"[gr+]",
+		"[group={]",
+		"[group={reg[}]",
+		//"[gr+={id.*}]", // todo: should fail - wrong group name
+		"[group=id+]",
+	}
 
-			So(parsedEl.Match("[group=id1]"), ShouldBeTrue)
-			So(parsedEl.Match("[group=id3]"), ShouldBeTrue)
-			So(parsedEl.Match("id1"), ShouldBeTrue)
-			So(parsedEl.Match("id3"), ShouldBeTrue)
+	Convey("Validate parseNamespaceElement - negative scenarios", t, func() {
+		for i, tc := range testCases {
+			Convey(fmt.Sprintf("Scenario %d (%s)", i, tc), func() {
+				// Act
+				_, err := parseNamespaceElement(tc)
 
-			So(parsedEl.Match("[group=i1]"), ShouldBeFalse)
-			So(parsedEl.Match("[grp=id1]"), ShouldBeFalse)
-			So(parsedEl.Match("i1"), ShouldBeFalse)
-		}
-		{
-			// empty regexp - valid
-			el := "{}"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
-		}
-		{
-			// some regexp
-			el := "{mem.*[1-3]{1,}}"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &staticRegexpElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
-
-			So(parsedEl.Match("memory3"), ShouldBeTrue)
-			So(parsedEl.Match("mem1"), ShouldBeTrue)
-			So(parsedEl.Match("memo2"), ShouldBeTrue)
-
-			So(parsedEl.Match("memo4"), ShouldBeFalse)
-			So(parsedEl.Match("memory0"), ShouldBeFalse)
-		}
-		{
-			// static any match
-			el := "*"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &staticAnyElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
-
-			So(parsedEl.Match("metric"), ShouldBeTrue)
-			So(parsedEl.Match("group"), ShouldBeTrue)
-			So(parsedEl.Match(""), ShouldBeTrue)
-		}
-		{
-			// static concrete match
-			el := "group1"
-			parsedEl, err := parseNamespaceElement(el)
-			So(parsedEl, ShouldHaveSameTypeAs, &staticSpecificElement{})
-			So(err, ShouldBeNil)
-			So(parsedEl.String(), ShouldEqual, el)
-
-			So(parsedEl.Match("group1"), ShouldBeTrue)
-			So(parsedEl.Match("group2"), ShouldBeFalse)
-			So(parsedEl.Match("group"), ShouldBeFalse)
-			So(parsedEl.Match(""), ShouldBeFalse)
-		}
-		{
-			// wrong regexp
-			el := "{asdsad[}"
-			_, err := parseNamespaceElement(el)
-			So(err, ShouldBeError)
+				// Assert
+				So(err, ShouldBeError)
+			})
 		}
 	})
 }

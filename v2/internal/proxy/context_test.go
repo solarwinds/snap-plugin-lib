@@ -4,8 +4,9 @@ package proxy
 
 import (
 	"encoding/json"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"testing"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 )
 import . "github.com/smartystreets/goconvey/convey"
 
