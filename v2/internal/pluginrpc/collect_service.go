@@ -62,9 +62,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
-	cs.proxy.LoadTask(taskID, jsonConfig, metrics)
-
-	return &LoadResponse{}, nil
+	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }
 
 func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
@@ -72,9 +70,7 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 
 	taskID := int(request.GetTaskId())
 
-	cs.proxy.UnloadTask(taskID)
-
-	return &UnloadResponse{}, nil
+	return &UnloadResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {

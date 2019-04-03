@@ -276,21 +276,33 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 /*****************************************************************************/
 
 type configurableCollector struct {
-	t *testing.T
+	t           *testing.T
+	loadCalls   int
+	unloadCalls int
 }
 
 type storedObj struct {
 	count int
 }
 
+func (cc *configurableCollector) resetCallCounters() {
+	cc.loadCalls = 0
+	cc.unloadCalls = 0
+}
+
 func (cc *configurableCollector) Load(ctx plugin.Context) error {
+	cc.loadCalls++
+
 	// Arrange - create configuration objects
 	ctx.Store("obj1", &storedObj{count: 10})
 	ctx.Store("obj2", &storedObj{count: -14})
+
 	return nil
 }
 
 func (cc *configurableCollector) Unload(ctx plugin.Context) error {
+	cc.unloadCalls++
+
 	return nil
 }
 
@@ -330,7 +342,7 @@ func (cc *configurableCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestConfigurableCollector() {
-	s.T().Skip()
+	//s.T().Skip()
 
 	// Arrange
 	jsonConfig := []byte(`{
@@ -347,17 +359,71 @@ func (s *SuiteT) TestConfigurableCollector() {
 	s.startCollector(configurableCollector)
 	s.startClient()
 
-	Convey("", s.T(), func() {
-		// Act
-		_, _ = s.sendLoad(1, jsonConfig, mtsSelector)
-		_, _ = s.sendCollect(1)
-		_, _ = s.sendCollect(1)
-
-		time.Sleep(2 * time.Second)
-		_, _ = s.sendKill()
-
-		// Assert is handled within configurableCollector.Collect() method
+	Convey("Validate that load and unload works in valid scenarios", s.T(), func() {
+		{
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendCollect(1)
+			So(err, ShouldBeNil)
+		}
+		{
+			_, err := s.sendCollect(1)
+			So(err, ShouldBeNil)
+		}
+		{
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
 	})
+
+	Convey("Validate that load and unload works properly in invalid scenarios", s.T(), func() {
+		configurableCollector.resetCallCounters()
+
+		{
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendLoad(2, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 2)
+		}
+		{ // Shouldn't accept load of the same task
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeError)
+			So(configurableCollector.loadCalls, ShouldEqual, 2)
+		}
+		{ // Shouldn't accept unload of the same task which was loaded
+			_, err := s.sendUnload(3)
+			So(err, ShouldBeError)
+			So(configurableCollector.unloadCalls, ShouldEqual, 0)
+		}
+		{
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
+		{ // Shouldn't accept unload of the task that is already unloaded
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeError)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendUnload(2)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 2)
+		}
+	})
+
+	time.Sleep(2 * time.Second)
+	_, _ = s.sendKill()
+
+	// Assert is handled within configurableCollector.Collect() method
 }
 
 /*****************************************************************************/
