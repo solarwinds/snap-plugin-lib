@@ -4,6 +4,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -220,22 +221,22 @@ func (s *SuiteT) TestSimpleCollector() {
 /*****************************************************************************/
 
 type longRunningCollector struct {
-	collectCalls int
+	collectCalls    int
+	collectDuration time.Duration
 }
 
 func (c *longRunningCollector) Collect(ctx plugin.Context) error {
 	c.collectCalls++
-	time.Sleep(1 * time.Minute)
+	time.Sleep(c.collectDuration)
 	return nil
 }
 
 func (s *SuiteT) TestKillLongRunningCollector() {
-	s.T().Skip()
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	var mtsSelector []string
 
-	longRunningCollector := &longRunningCollector{}
+	longRunningCollector := &longRunningCollector{collectDuration: 1 * time.Second}
 	s.startCollector(longRunningCollector)
 	s.startClient()
 
@@ -270,6 +271,50 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 			// Assert that Collect was called
 			So(longRunningCollector.collectCalls, ShouldEqual, 1)
 		})
+	})
+}
+
+func (s *SuiteT) TestRunningCollectorInTheSameTime() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	longRunningCollector := &longRunningCollector{collectDuration: 5 * time.Second}
+	s.startCollector(longRunningCollector)
+	s.startClient()
+
+	errCh := make(chan error, 1)
+
+	Convey("Validate that collector associated with the same id can't be run in more that 1 instance", s.T(), func() {
+		const numberOfCollectors = 10
+		const numberOfCollectorsWithSameID = 5
+
+		for id := 1; id <= numberOfCollectors; id++ {
+			fmt.Printf("** Sending load %d\n", id)
+			_, _ = s.sendLoad(id, jsonConfig, mtsSelector)
+
+			for i := 1; i <= numberOfCollectorsWithSameID; i++ {
+				go func(id int) {
+					fmt.Printf("** Sending collect %d\n", id)
+					_, err := s.sendCollect(id)
+					errCh <- err
+				}(id)
+			}
+		}
+
+		errorCounter := 0
+		for i := 0; i < numberOfCollectorsWithSameID*numberOfCollectors; i++ {
+			errRecv := <-errCh
+			if errRecv != nil {
+				errorCounter++
+			}
+		}
+
+		So(errorCounter, ShouldEqual, (numberOfCollectors*numberOfCollectorsWithSameID)-numberOfCollectors) // only 1 task from each id should complete without error
+
+		// validate that when collect is completed you can requested it
+		_, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
 	})
 }
 

@@ -8,6 +8,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -34,13 +35,17 @@ type ContextManager struct {
 	collector  plugin.Collector       // reference to custom plugin code
 	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
 
+	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
+	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
+
 	metricsDefinition metricValidator // metrics defined by plugin (code)
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
 	cm := &ContextManager{
-		collector:  collector,
-		contextMap: map[int]*pluginContext{},
+		collector:   collector,
+		contextMap:  map[int]*pluginContext{},
+		activeTasks: map[int]struct{}{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
 	}
@@ -58,9 +63,17 @@ func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
+	if cm.isOtherCollectInProgress(id) {
+		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
+	}
+
+	defer cm.markCollectAsCompleted(id)
 
 	context.sessionMts = []*plugin.Metric{}
-	cm.collector.Collect(context)
+	err := cm.collector.Collect(context)
+	if err != nil {
+		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
+	}
 
 	return context.sessionMts, nil
 }
@@ -137,4 +150,23 @@ func (cm *ContextManager) requestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
 		definable.DefineMetrics(cm)
 	}
+}
+
+func (cm *ContextManager) isOtherCollectInProgress(id int) bool {
+	cm.activeTasksMutex.Lock()
+	defer cm.activeTasksMutex.Unlock()
+
+	if _, ok := cm.activeTasks[id]; ok {
+		return true
+	}
+
+	cm.activeTasks[id] = struct{}{}
+	return false
+}
+
+func (cm *ContextManager) markCollectAsCompleted(id int) {
+	cm.activeTasksMutex.Lock()
+	defer cm.activeTasksMutex.Unlock()
+
+	delete(cm.activeTasks, id)
 }
