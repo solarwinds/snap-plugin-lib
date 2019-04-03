@@ -78,6 +78,10 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) bool {
 		if !n.currentElement.Match(nsSep[idx]) {
 			return false, true
 		}
+		if _, ok := n.currentElement.(*staticRecursiveAnyElement); ok {
+			isValid = true
+			return false, false
+		}
 
 		if len(nsSep)-1 == idx {
 			switch {

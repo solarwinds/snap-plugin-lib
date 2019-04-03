@@ -415,8 +415,8 @@ func (msc *metricSendingCollector) Collect(ctx plugin.Context) error {
 		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status", 1), ShouldBeError)          // discarded - no metric status defined
 		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/checking", 1), ShouldBeError) // discarded - no metric status/checking defined
 
-		So(ctx.AddMetric("/kubernetes/node/node-124/status/outofdisk", 1), ShouldBeNil)               // added
-		So(ctx.AddMetric("/kubernetes/node/node-124/status/allocatable/cpu/cores", 1), ShouldBeError) // discarded - (in /kubernetes/node/*/status/* last star matches to single element)
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/outofdisk", 1), ShouldBeNil)             // added
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/allocatable/cpu/cores", 1), ShouldBeNil) // added
 
 		So(ctx.AddMetric("/kubernetes/deployment/[namespace=appoptics3]/depl-2322/status/targetedreplicas", 10), ShouldBeNil) // added
 		So(ctx.AddMetric("/kubernetes/deployment/[namespace=loggly12]/depl-5402/status/availablereplicas", 20), ShouldBeNil)  // added
@@ -427,12 +427,14 @@ func (msc *metricSendingCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestMetricSendingCollector() {
+	logrus.SetLevel(logrus.TraceLevel)
+
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	mtsSelector := []string{
 		"/kubernetes/pod/node-125/*/*/status/*/*",
 		"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
-		"/kubernetes/node/*/status/*",
+		"/kubernetes/node/*/status/**",
 		"/kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*",
 		"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
 		"/kubernetes/deployment/papertrail15/*/*/*",
@@ -449,7 +451,7 @@ func (s *SuiteT) TestMetricSendingCollector() {
 
 		collMts, err := s.sendCollect(1)
 		So(err, ShouldBeNil)
-		So(len(collMts.MetricSet), ShouldEqual, 6)
+		So(len(collMts.MetricSet), ShouldEqual, 7)
 
 		time.Sleep(2 * time.Second)
 		_, err = s.sendKill()

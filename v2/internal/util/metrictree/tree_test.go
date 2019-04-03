@@ -64,20 +64,23 @@ func TestMetricFilterValidator(t *testing.T) {
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
 		So(v.AddRule("/plugin/{id[234]{1,}}/{.*}"), ShouldBeNil)
 		So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeNil)
-
 		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
+		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
 
 		// Double-check that rules were applied
-		So(len(v.ListRules()), ShouldEqual, 4)
+		So(len(v.ListRules()), ShouldEqual, 5)
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		So(v.IsValid("/plugin/group1/metric1"), ShouldBeTrue)
 		So(v.IsValid("/plugin/id2/metric4"), ShouldBeTrue)
 		So(v.IsValid("/plugin/id15/group3/metric3"), ShouldBeTrue)
+		So(v.IsValid("/plugin/group4/m1"), ShouldBeTrue)
+		So(v.IsValid("/plugin/group4/m1/m2"), ShouldBeTrue)
 
 		// Try to validate (filter) incoming metrics - negative scenarios
 		So(v.IsValid("/plugin/group2/metric4"), ShouldBeFalse)
 		So(v.IsValid("/plugin/[group2=group2]/metric4"), ShouldBeFalse)
 		So(v.IsValid("/plugin/id15/group4/metric4"), ShouldBeFalse)
+		So(v.IsValid("/plugin/group4"), ShouldBeFalse)
 	})
 }

@@ -93,11 +93,32 @@ func (*staticAnyElement) Match(string) bool {
 }
 
 func (*staticAnyElement) String() string {
-	return "*"
+	return string(staticAnyMatcher)
 }
 
 func (*staticAnyElement) IsDynamic() bool { return false }
 func (*staticAnyElement) HasRegexp() bool { return false }
+
+/*****************************************************************************/
+
+// Representing 2nd element of: /plugin/group1/**
+type staticRecursiveAnyElement struct {
+}
+
+func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
+	return &staticRecursiveAnyElement{}
+}
+
+func (*staticRecursiveAnyElement) Match(string) bool {
+	return true
+}
+
+func (*staticRecursiveAnyElement) String() string {
+	return staticRecursiveAnyMatcher
+}
+
+func (*staticRecursiveAnyElement) IsDynamic() bool { return false }
+func (*staticRecursiveAnyElement) HasRegexp() bool { return false }
 
 /*****************************************************************************/
 

@@ -48,10 +48,20 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 		usableForDefinition: false,
 		usableForAddition:   false,
 	},
-	{ // 5
+	{ // 6
+		namespace:           "/plugin/metric/**",
+		usableForDefinition: false,
+		usableForAddition:   false,
+	},
+	{ // 7
 		namespace:           "/plugin/metric",
 		usableForDefinition: true,
 		usableForAddition:   true,
+	},
+	{ // 7
+		namespace:           "/plugin/**",
+		usableForDefinition: false,
+		usableForAddition:   false,
 	},
 }
 
@@ -83,7 +93,8 @@ func TestParseNamespace_InvalidScenarios(t *testing.T) {
 		"/el1/el_#/m4",
 		"el/el2/el3/el4",
 		"/el/el2/el3/el4/",
-		"",
+		"/el/el2/**/m4",
+		"/el/el2/**/",
 	}
 
 	Convey("Validate ParseNamespace - negative scenarios", t, func() {
@@ -145,11 +156,17 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		shouldMatch:      []string{"metric", "group", ""},
 		shouldNotMatch:   []string{},
 	},
-	{
+	{ // 6
 		namespaceElement: "group1",
 		comparableType:   &staticSpecificElement{},
 		shouldMatch:      []string{"group1"},
 		shouldNotMatch:   []string{"group2", "group", ""},
+	},
+	{ // 7
+		namespaceElement: "**",
+		comparableType:   &staticRecursiveAnyElement{},
+		shouldMatch:      []string{"group", "m1", "m2"},
+		shouldNotMatch:   []string{},
 	},
 }
 
@@ -162,7 +179,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 
 				// Assert
 				So(err, ShouldBeNil)
-				So(parsedEl.String(), ShouldEqual, tc.namespaceElement)
+				//So(parsedEl.String(), ShouldEqual, tc.namespaceElement)
 				So(parsedEl, ShouldHaveSameTypeAs, tc.comparableType)
 
 				// Assert matching (positive)

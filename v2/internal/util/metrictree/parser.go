@@ -11,6 +11,7 @@ const nsSeparator = "/"
 const regexBeginIndicator = '{'
 const regexEndIndicator = '}'
 const staticAnyMatcher = '*'
+const staticRecursiveAnyMatcher = "**"
 const dynamicElementBeginIndicator = '['
 const dynamicElementEndIndicator = ']'
 const dynamicElementEqualIndicator = '='
@@ -32,6 +33,9 @@ func ParseNamespace(s string) (*Namespace, error) {
 		parsedEl, err := parseNamespaceElement(nsElem)
 		if err != nil {
 			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
+		}
+		if _, ok := parsedEl.(*staticRecursiveAnyElement); ok && i != len(splitedNs[1:])-1 {
+			return nil, fmt.Errorf("recurive any-matcher (**) can be placed only as the last element")
 		}
 		ns.elements = append(ns.elements, parsedEl)
 	}
@@ -87,6 +91,10 @@ func parseNamespaceElement(s string) (namespaceElement, error) {
 			return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
 		}
 		return newStaticRegexpElement(r), nil
+	}
+
+	if s == string(staticRecursiveAnyMatcher) { // is it **
+		return newStaticRecursiveAnyElement(), nil
 	}
 
 	if s == string(staticAnyMatcher) { // is it *
