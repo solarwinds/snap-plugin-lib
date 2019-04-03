@@ -8,7 +8,8 @@ import (
 
 func TestMetricDefinitionValidator(t *testing.T) {
 
-	Convey("", t, func() {
+	Convey("Validate that operations can be done on definition tree", t, func() {
+
 		v := NewMetricDefinition()
 
 		// Add valid rules
@@ -37,7 +38,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
 
 		// Try to validate (filter) incoming metrics - negative scenarios
-		//So(v.IsValid("/plugin/group5/[dyn3]/metric4"), ShouldBeFalse) // todo: no value for dynamic element
+		So(v.IsValid("/plugin/group5/[dyn3]/metric4"), ShouldBeFalse)
 		So(v.IsValid("/plugin/group1/metric1/"), ShouldBeFalse)
 		So(v.IsValid("/plugin/group1/metric2"), ShouldBeFalse)
 		So(v.IsValid("/plugin/group1"), ShouldBeFalse)
@@ -57,7 +58,8 @@ func TestMetricDefinitionValidator(t *testing.T) {
 }
 
 func TestMetricFilterValidator(t *testing.T) {
-	Convey("", t, func() {
+
+	Convey("Validate that operations can be done on filtering tree", t, func() {
 		v := NewMetricFilter()
 
 		// Add valid rules
@@ -83,4 +85,5 @@ func TestMetricFilterValidator(t *testing.T) {
 		So(v.IsValid("/plugin/id15/group4/metric4"), ShouldBeFalse)
 		So(v.IsValid("/plugin/group4"), ShouldBeFalse)
 	})
+
 }

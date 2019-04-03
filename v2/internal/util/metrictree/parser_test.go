@@ -124,7 +124,7 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		namespaceElement: "[group]",
 		comparableType:   &dynamicAnyElement{},
 		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3"},
-		shouldNotMatch:   []string{"[grp=id1]"},
+		shouldNotMatch:   []string{"[grp=id1]", "[group]"},
 	},
 	{ // 1
 		namespaceElement: "[group=id1]",

@@ -25,7 +25,6 @@ type TreeValidator struct {
 	head     *Node
 }
 
-// todo: Node may be a namespaceElement probably
 type Node struct {
 	currentElement namespaceElement
 	nodeType       int
@@ -73,7 +72,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) bool {
 	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
 		idx := len(stack) // len of stack indicated to which string element should we match
 		if idx >= len(nsSep) {
-			return false, false // todo: think is should end travesing here
+			return false, true
 		}
 		if !n.currentElement.Match(nsSep[idx]) {
 			return false, true
@@ -148,7 +147,7 @@ func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
 
 	stack = append(stack, n)
 
-	for _, subNode := range n.concreteSubNodes { // todo: should merge those two when processing
+	for _, subNode := range n.concreteSubNodes { // todo: optimalize O(n) into O(1)
 		cont := tv.traverse(subNode, stack, fn)
 		if !cont {
 			return false

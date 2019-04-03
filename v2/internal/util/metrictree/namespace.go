@@ -189,12 +189,14 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 		if eqIndex != -1 {
 			if isIndexInTheMiddle(eqIndex, s) {
 				groupName := dynElem[0:eqIndex]
-				return groupName == dae.group
+				groupValue := dynElem[eqIndex+1:]
+
+				return groupName == dae.group && isValidIdentifier(groupValue)
 			}
 		}
 	}
 
-	return true
+	return isValidIdentifier(s)
 }
 
 func (dae *dynamicAnyElement) String() string {
