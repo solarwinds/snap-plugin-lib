@@ -5,8 +5,6 @@ package proxy
 import (
 	"encoding/json"
 	"testing"
-
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 )
 import . "github.com/smartystreets/goconvey/convey"
 
@@ -30,7 +28,7 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctx, cErr := NewPluginContext(nil, metrictree.NewMetricDefinition(), jsonConfig, []string{})
+	ctx, cErr := NewPluginContext(nil, jsonConfig, []string{})
 
 	Convey("Validate Context API for handling configuration", t, func() {
 
@@ -139,7 +137,7 @@ func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctx, cErr := NewPluginContext(nil, metrictree.NewMetricDefinition(), emptyConfig, []string{})
+		ctx, cErr := NewPluginContext(nil, emptyConfig, []string{})
 
 		So(cErr, ShouldBeNil)
 

@@ -40,7 +40,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue) // todo: this is not a valid definition
+		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
 

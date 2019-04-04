@@ -64,6 +64,10 @@ func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
 	return isValid, trace
 }
 
+func (tv *TreeValidator) HaveRules() bool {
+	return tv.head != nil
+}
+
 // second value indicated name of dynamic group for the element
 // ["", "group", ""] indicated that 2nd parameter should be treated as dynamic
 func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {

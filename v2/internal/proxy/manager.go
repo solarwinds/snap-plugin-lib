@@ -29,6 +29,7 @@ type metricValidator interface {
 	IsValid(string) (bool, []string)
 	IsPartiallyValid(string) bool
 	ListRules() []string
+	HaveRules() bool
 }
 
 type ContextManager struct {
@@ -92,7 +93,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(cm, cm.metricsDefinition, rawConfig, mtsFilter)
+	newCtx, err := NewPluginContext(cm, rawConfig, mtsFilter)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}

@@ -17,28 +17,26 @@ type pluginContext struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
-	metricsDefinition  metricValidator // metrics defined by plugin (code) // todo: remove
 	metricsFilters     metricValidator // metric filters defined by task (yaml)
 
 	sessionMts []*plugin.Metric
 
-	cxtManager *ContextManager // back-reference to context manager
+	ctxManager *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *ContextManager, mtsDefinition metricValidator, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
 	flattenConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
 	return &pluginContext{
-		rawConfig:         []byte(rawConfig),
-		flattenedConfig:   flattenConfig,
-		storedObjects:     map[string]interface{}{},
-		metricsDefinition: mtsDefinition,
-		metricsFilters:    metrictree.NewMetricFilter(),
+		rawConfig:       []byte(rawConfig),
+		flattenedConfig: flattenConfig,
+		storedObjects:   map[string]interface{}{},
+		metricsFilters:  metrictree.NewMetricFilter(),
 
-		cxtManager: ctxManager,
+		ctxManager: ctxManager,
 	}, nil
 }
 
@@ -79,7 +77,7 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
-	matchDefinition, groupPositions := pc.metricsDefinition.IsValid(ns)
+	matchDefinition, groupPositions := pc.ctxManager.metricsDefinition.IsValid(ns)
 	matchFilters, _ := pc.metricsFilters.IsValid(ns)
 
 	if !matchDefinition {
@@ -96,7 +94,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
 			Name:        groupName,
 			Value:       nsElem, // todo: extract only value when someone add /plugin/[group=df]/metr1
-			Description: pc.cxtManager.groupsDescription[groupName],
+			Description: pc.ctxManager.groupsDescription[groupName],
 		})
 	}
 
@@ -113,7 +111,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		Value:       v,
 		Tags:        tags,
 		Timestamp:   time.Now(),
-		Description: pc.cxtManager.metricsDescription[nsDescKey],
+		Description: pc.ctxManager.metricsDescription[nsDescKey],
 	})
 
 	return nil
