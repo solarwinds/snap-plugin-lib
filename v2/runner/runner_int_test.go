@@ -4,7 +4,6 @@ package runner
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -288,12 +287,10 @@ func (s *SuiteT) TestRunningCollectorInTheSameTime() {
 		const numberOfCollectorsWithSameID = 5
 
 		for id := 1; id <= numberOfCollectors; id++ {
-			fmt.Printf("** Sending load %d\n", id)
 			_, _ = s.sendLoad(id, jsonConfig, mtsSelector)
 
 			for i := 1; i <= numberOfCollectorsWithSameID; i++ {
 				go func(id int) {
-					fmt.Printf("** Sending collect %d\n", id)
 					_, err := s.sendCollect(id)
 					errCh <- err
 				}(id)

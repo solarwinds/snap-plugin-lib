@@ -108,7 +108,6 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	}
 
 	nsDescKey := "/" + strings.Join(nsDefFormat, "/")
-	fmt.Printf("^^^^^^^^^^^ %s\n", nsDescKey)
 	pc.sessionMts = append(pc.sessionMts, &plugin.Metric{
 		Namespace:   mtNamespace,
 		Value:       v,
