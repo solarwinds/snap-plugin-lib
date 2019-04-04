@@ -30,7 +30,7 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctx, cErr := NewPluginContext(metrictree.NewMetricDefinition(), jsonConfig, []string{})
+	ctx, cErr := NewPluginContext(nil, metrictree.NewMetricDefinition(), jsonConfig, []string{})
 
 	Convey("Validate Context API for handling configuration", t, func() {
 
@@ -139,7 +139,7 @@ func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctx, cErr := NewPluginContext(metrictree.NewMetricDefinition(), emptyConfig, []string{})
+		ctx, cErr := NewPluginContext(nil, metrictree.NewMetricDefinition(), emptyConfig, []string{})
 
 		So(cErr, ShouldBeNil)
 

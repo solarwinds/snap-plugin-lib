@@ -542,7 +542,7 @@ func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
 	return nil
 }
 
-func (s *SuiteT) TestMetricSendingCollector() {
+func (s *SuiteT) TestKubernetesCollector() {
 	logrus.SetLevel(logrus.TraceLevel)
 
 	// Arrange

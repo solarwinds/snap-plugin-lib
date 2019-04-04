@@ -84,8 +84,6 @@ func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
 
-	// todo: apply metric description and group description
-
 	return context.sessionMts, nil
 }
 
@@ -94,7 +92,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(cm.metricsDefinition, rawConfig, mtsFilter)
+	newCtx, err := NewPluginContext(cm, cm.metricsDefinition, rawConfig, mtsFilter)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}

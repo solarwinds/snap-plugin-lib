@@ -17,13 +17,15 @@ type pluginContext struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
-	metricsDefinition  metricValidator // metrics defined by plugin (code)
+	metricsDefinition  metricValidator // metrics defined by plugin (code) // todo: remove
 	metricsFilters     metricValidator // metric filters defined by task (yaml)
 
 	sessionMts []*plugin.Metric
+
+	cxtManager *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(mtsDefinition metricValidator, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, mtsDefinition metricValidator, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
 	flattenConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
@@ -35,6 +37,8 @@ func NewPluginContext(mtsDefinition metricValidator, rawConfig []byte, mtsSelect
 		storedObjects:     map[string]interface{}{},
 		metricsDefinition: mtsDefinition,
 		metricsFilters:    metrictree.NewMetricFilter(),
+
+		cxtManager: ctxManager,
 	}, nil
 }
 
@@ -88,17 +92,29 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 
 	mtNamespace := []plugin.NamespaceElement{}
 	for i, nsElem := range strings.Split(ns, "/")[1:] {
+		groupName := groupPositions[i]
 		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
-			Name:  groupPositions[i],
-			Value: nsElem, // todo: extract only value when someone add /plugin/[group=df]/metr1
+			Name:        groupName,
+			Value:       nsElem, // todo: extract only value when someone add /plugin/[group=df]/metr1
+			Description: pc.cxtManager.groupsDescription[groupName],
 		})
 	}
 
+	nsDefFormat := strings.Split(ns, "/")[1:]
+	for i := 0; i < len(nsDefFormat); i++ {
+		if groupPositions[i] != "" {
+			nsDefFormat[i] = fmt.Sprintf("[%s]", groupPositions[i])
+		}
+	}
+
+	nsDescKey := "/" + strings.Join(nsDefFormat, "/")
+	fmt.Printf("^^^^^^^^^^^ %s\n", nsDescKey)
 	pc.sessionMts = append(pc.sessionMts, &plugin.Metric{
-		Namespace: mtNamespace,
-		Value:     v,
-		Tags:      tags,
-		Timestamp: time.Now(),
+		Namespace:   mtNamespace,
+		Value:       v,
+		Tags:        tags,
+		Timestamp:   time.Now(),
+		Description: pc.cxtManager.metricsDescription[nsDescKey],
 	})
 
 	return nil

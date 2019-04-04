@@ -87,6 +87,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 		}
 		if _, ok := n.currentElement.(*staticRecursiveAnyElement); ok {
 			isValid = true
+			stackFromValidBranch = stack
 			return false, false
 		}
 
@@ -94,6 +95,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 			switch {
 			case fullMatch && n.nodeType == leafLevel:
 				isValid = true
+				stackFromValidBranch = stack
 				return false, false
 			case !fullMatch:
 				isValid = true
