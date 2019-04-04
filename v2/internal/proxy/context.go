@@ -93,7 +93,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		groupName := groupPositions[i]
 		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
 			Name:        groupName,
-			Value:       nsElem, // todo: extract only value when someone add /plugin/[group=df]/metr1
+			Value:       pc.extractStaticValue(nsElem),
 			Description: pc.ctxManager.groupsDescription[groupName],
 		})
 	}
@@ -123,4 +123,15 @@ func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
 
 func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
 	panic("implement me")
+}
+
+// extract static value when adding metrics like. /plugin/[grp=id]/m1
+// function assumes valid format
+func (pc *pluginContext) extractStaticValue(s string) string {
+	eqIndex := strings.Index(s, "=")
+	if eqIndex != -1 {
+		return s[eqIndex+1 : len(s)-1]
+	}
+
+	return s
 }
