@@ -71,20 +71,24 @@ func TestMetricDefinitionValidator(t *testing.T) {
 	})
 }
 
-func TestMetricFilterValidator(t *testing.T) {
+func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 
 	Convey("Validate that operations can be done on filtering tree", t, func() {
-		v := NewMetricFilter()
+		v := NewMetricFilter(nil)
 
 		// Add valid rules
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
 		So(v.AddRule("/plugin/{id[234]{1,}}/{.*}"), ShouldBeNil)
-		So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeNil)
 		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
 		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
 
+		// Add invalid rules
+		So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeError) // dynamic element with no definition
+		So(v.AddRule("/plugin"), ShouldBeError)                        // len < 2
+		So(v.AddRule("/plugin/{af[}/metric4"), ShouldBeError)          // invalid regexp
+
 		// Double-check that rules were applied
-		So(len(v.ListRules()), ShouldEqual, 5)
+		So(len(v.ListRules()), ShouldEqual, 4)
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		validMetricsToAdd := []string{
@@ -106,6 +110,58 @@ func TestMetricFilterValidator(t *testing.T) {
 			"/plugin/[group2=group2]/metric4",
 			"/plugin/id15/group4/metric4",
 			"/plugin/group4",
+		}
+
+		for _, mt := range invalidMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeFalse)
+		}
+	})
+
+}
+
+func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
+
+	Convey("Validate that operations can be done on filtering tree", t, func() {
+		d := NewMetricDefinition()
+		v := NewMetricFilter(d)
+
+		// Add valid definition rules
+		So(d.AddRule("/plugin/group1/[dyn1]/metric1"), ShouldBeNil)
+		So(d.AddRule("/plugin/group2/sub1/metric1"), ShouldBeNil)
+		So(d.AddRule("/plugin/group2/sub2/metric2"), ShouldBeNil)
+		So(d.AddRule("/plugin/group2/sub3/metric3"), ShouldBeNil)
+		So(d.AddRule("/plugin/group3/[dyn2]/[dyn3]/metric2"), ShouldBeNil)
+		So(d.AddRule("/plugin/group4/[dyn1]/[dyn3]/metric2"), ShouldBeNil)
+
+		// Add valid filtering rules
+		So(v.AddRule("/plugin/group1/id1/metric1"), ShouldBeNil)
+		So(v.AddRule("/plugin/group2/*/{metric[123]+}"), ShouldBeNil)
+		So(v.AddRule("/plugin/group3/id1/[dyn3=id2]/metric2"), ShouldBeNil)
+		So(v.AddRule("/plugin/group3/{id3+}/[dyn3={id4+}]/metric2"), ShouldBeNil)
+
+		// Double-check that rules were applied
+		So(len(d.ListRules()), ShouldEqual, 6)
+		So(len(v.ListRules()), ShouldEqual, 4)
+
+		// Try to validate (filter) incoming metrics - positive scenarios
+		validMetricsToAdd := []string{
+			"/plugin/group1/id1/metric1",
+			"/plugin/group2/sub2/metric2",
+			"/plugin/group3/id1/[dyn3=id2]/metric2",
+			"/plugin/group3/[dyn2=id1]/[dyn3=id2]/metric2",
+		}
+
+		for _, mt := range validMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeTrue)
+		}
+
+		// Try to validate (filter) incoming metrics - negative scenarios
+		invalidMetricsToAdd := []string{
+			"/plugin/group1/id1/metric4",
+			"/plugin/group2/sub2/metric4",
+			"/plugin/group3/[dyn2=id2]/[dyn3=id2]/metric2",
 		}
 
 		for _, mt := range invalidMetricsToAdd {

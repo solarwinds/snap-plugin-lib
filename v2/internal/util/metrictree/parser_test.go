@@ -70,7 +70,7 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 		for i, tc := range parseNamespaceValidScenarios {
 			Convey(fmt.Sprintf("Scenario %d", i), func() {
 				// Act
-				ns, err := ParseNamespace(tc.namespace)
+				ns, err := ParseNamespace(tc.namespace, false)
 
 				// Assert
 				So(ns, ShouldNotBeNil)
@@ -101,7 +101,7 @@ func TestParseNamespace_InvalidScenarios(t *testing.T) {
 		for i, tc := range testCases {
 			Convey(fmt.Sprintf("Scenario %d (%s)", i, tc), func() {
 				// Act
-				_, err := ParseNamespace(tc)
+				_, err := ParseNamespace(tc, false)
 
 				// Assert
 				So(err, ShouldBeError)
@@ -117,65 +117,97 @@ type parseNamespaceElementValidScenario struct {
 	comparableType   namespaceElement
 	shouldMatch      []string
 	shouldNotMatch   []string
+	isFilter         bool
 }
 
 var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
-	{ // 0
+	{
 		namespaceElement: "[group]",
 		comparableType:   &dynamicAnyElement{},
 		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3"},
 		shouldNotMatch:   []string{"[grp=id1]", "[group]"},
+		isFilter:         false,
 	},
-	{ // 1
+	{
 		namespaceElement: "[group=id1]",
 		comparableType:   &dynamicSpecificElement{},
 		shouldMatch:      []string{"id1", "[group=id1]"},
 		shouldNotMatch:   []string{"id2", "[group=id2]", "[grp=id1]"},
+		isFilter:         false,
 	},
-	{ // 2
+	{
 		namespaceElement: "[group={id.*}]",
 		comparableType:   &dynamicRegexpElement{},
 		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id1", "id3"},
 		shouldNotMatch:   []string{"[group=i1]", "[grp=id1]", "i1"},
+		isFilter:         false,
 	},
-	{ // 3
+	{
 		namespaceElement: "{}", // valid
 		comparableType:   &staticRegexpElement{},
 		shouldMatch:      []string{},
 		shouldNotMatch:   []string{},
+		isFilter:         false,
 	},
-	{ // 4
+	{
 		namespaceElement: "{mem.*[1-3]{1,}}",
 		comparableType:   &staticRegexpElement{},
 		shouldMatch:      []string{"memory3", "mem1", "memo2"},
-		shouldNotMatch:   []string{"memo4", "memory0"},
+		shouldNotMatch:   []string{"memo4", "memory0", "group"},
+		isFilter:         false,
 	},
-	{ // 5
+	{
 		namespaceElement: "*", // valid
 		comparableType:   &staticAnyElement{},
 		shouldMatch:      []string{"metric", "group", ""},
 		shouldNotMatch:   []string{},
+		isFilter:         false,
 	},
-	{ // 6
+	{
 		namespaceElement: "group1",
 		comparableType:   &staticSpecificElement{},
 		shouldMatch:      []string{"group1"},
-		shouldNotMatch:   []string{"group2", "group", ""},
+		shouldNotMatch:   []string{"group2", "group", "", "[dyn1=group1]"},
+		isFilter:         false,
 	},
-	{ // 7
+	{
 		namespaceElement: "**",
 		comparableType:   &staticRecursiveAnyElement{},
 		shouldMatch:      []string{"group", "m1", "m2"},
 		shouldNotMatch:   []string{},
+		isFilter:         false,
 	},
+	{
+		/* special case:
+		when we have metric defined: /plugin/[dyn1]/metric1
+		we can add filter using two methods:
+			/plugin/id1/metric1
+			/plugin/[dyn1=id]/metric1
+		we need to be able to add metric using form:
+			/plugin/id1/metric1
+		*/
+		namespaceElement: "metric1",
+		comparableType:   &staticSpecificAcceptingGroupElement{},
+		shouldMatch:      []string{"metric1", "[dyn1=metric1]", "[dyn4=metric1]"},
+		shouldNotMatch:   []string{"[metric1]", "=metric1]", "[=metric1]"},
+		isFilter:         true,
+	},
+	//{
+	//	namespaceElement: "{mem.*[1-3]{1,}}",
+	//	comparableType:   &staticRegexpElement{},
+	//	shouldMatch:      []string{"memory3", "mem1", "memo2"},
+	//	shouldNotMatch:   []string{"memo4", "memory0"},
+	//	isFilter:         true,
+	//},
+
 }
 
 func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 	Convey("Validate ParseNamespace - valid scenarios", t, func() {
-		for i, tc := range parseNamespaceElementValidScenarios {
+		for i, tc := range parseNamespaceElementValidScenarios[8:] {
 			Convey(fmt.Sprintf("Scenario %d", i), func() {
 				// Act
-				parsedEl, err := parseNamespaceElement(tc.namespaceElement)
+				parsedEl, err := parseNamespaceElement(tc.namespaceElement, tc.isFilter)
 
 				// Assert
 				So(err, ShouldBeNil)
@@ -185,6 +217,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (positive)
 				for i, m := range tc.shouldMatch {
 					Convey(fmt.Sprintf("Scenario %d - Positive matching (%s to %s)", i, m, parsedEl.String()), func() {
+						fmt.Printf("***%s->%s \n", tc.namespaceElement, m)
 						So(parsedEl.Match(m), ShouldBeTrue)
 					})
 				}
@@ -221,7 +254,7 @@ func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 		for i, tc := range testCases {
 			Convey(fmt.Sprintf("Scenario %d (%s)", i, tc), func() {
 				// Act
-				_, err := parseNamespaceElement(tc)
+				_, err := parseNamespaceElement(tc, false)
 
 				// Assert
 				So(err, ShouldBeError)

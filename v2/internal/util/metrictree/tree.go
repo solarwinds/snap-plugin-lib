@@ -21,8 +21,10 @@ const (
 )
 
 type TreeValidator struct {
-	strategy int
-	head     *Node
+	strategy       int            // used to distinguish between definition and filtering tree
+	definitionTree *TreeValidator // used in filtering tree (reference to definition tree)
+
+	head *Node
 }
 
 type Node struct {
@@ -39,14 +41,15 @@ func NewMetricDefinition() *TreeValidator {
 	}
 }
 
-func NewMetricFilter() *TreeValidator {
+func NewMetricFilter(definitionTree *TreeValidator) *TreeValidator {
 	return &TreeValidator{
-		strategy: metricFilteringStrategy,
+		strategy:       metricFilteringStrategy,
+		definitionTree: definitionTree,
 	}
 }
 
 func (tv *TreeValidator) AddRule(ns string) error {
-	parsedNs, err := ParseNamespace(ns)
+	parsedNs, err := ParseNamespace(ns, tv.strategy == metricFilteringStrategy)
 	if err != nil {
 		return err
 	}
@@ -191,7 +194,8 @@ func (tv *TreeValidator) add(parsedNs *Namespace) error {
 			return errors.New("can't add rule")
 		}
 	case metricFilteringStrategy:
-		if !parsedNs.isUsableForSelection() {
+		defPresent := (tv.definitionTree != nil)
+		if !parsedNs.isUsableForFiltering(defPresent) {
 			return errors.New("can't add rule")
 		}
 	default:

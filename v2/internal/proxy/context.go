@@ -30,14 +30,18 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte, mtsSelectors
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
-	return &pluginContext{
+	pc := &pluginContext{
 		rawConfig:       []byte(rawConfig),
 		flattenedConfig: flattenConfig,
 		storedObjects:   map[string]interface{}{},
-		metricsFilters:  metrictree.NewMetricFilter(),
+	}
 
-		ctxManager: ctxManager,
-	}, nil
+	if ctxManager != nil {
+		pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition.(*metrictree.TreeValidator))
+		pc.ctxManager = ctxManager
+	}
+
+	return pc, nil
 }
 
 func (pc *pluginContext) Config(key string) (string, bool) {

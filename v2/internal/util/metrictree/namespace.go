@@ -74,8 +74,29 @@ func (ns *Namespace) isUsableForAddition() bool {
 	return true
 }
 
-func (ns *Namespace) isUsableForSelection() bool {
-	return true // todo: https://swicloud.atlassian.net/browse/AO-12232
+// Check if namespace selector can be used for metric filters
+// !! Note: If metric definition is not provided in plugin, matcher with dynamic element can't be used in filter (to avoid ambiguity)
+func (ns *Namespace) isUsableForFiltering(metricDefinitionPresent bool) bool {
+	if len(ns.elements) < 2 {
+		return false
+	}
+
+	switch ns.elements[0].(type) {
+	case *staticSpecificElement:
+	case *staticSpecificAcceptingGroupElement:
+	default:
+		return false
+	}
+
+	if !metricDefinitionPresent {
+		for _, nsElem := range ns.elements[1:len(ns.elements)] {
+			if nsElem.IsDynamic() == true {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 /*****************************************************************************/
@@ -293,3 +314,38 @@ func (dre *dynamicRegexpElement) String() string {
 
 func (*dynamicRegexpElement) IsDynamic() bool { return true }
 func (*dynamicRegexpElement) HasRegexp() bool { return true }
+
+/*****************************************************************************/
+
+type staticSpecificAcceptingGroupElement struct {
+	name string
+}
+
+func newStaticSpecificAcceptingGroupElement(selector string) *staticSpecificAcceptingGroupElement {
+	return &staticSpecificAcceptingGroupElement{
+		name: selector,
+	}
+}
+
+func (sse *staticSpecificAcceptingGroupElement) Match(s string) bool {
+	if sse.name == s {
+		return true
+	}
+
+	ps, err := parseNamespaceElement(s, false)
+	if err != nil {
+		return false
+	}
+	if gps, ok := ps.(*dynamicSpecificElement); ok {
+		return gps.value == sse.name
+	}
+
+	return false
+}
+
+func (sse *staticSpecificAcceptingGroupElement) String() string {
+	return sse.name
+}
+
+func (*staticSpecificAcceptingGroupElement) IsDynamic() bool { return false }
+func (*staticSpecificAcceptingGroupElement) HasRegexp() bool { return false }

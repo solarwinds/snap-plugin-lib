@@ -19,7 +19,7 @@ const dynamicElementEqualIndicator = '='
 const minNamespaceElements = 2
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
-func ParseNamespace(s string) (*Namespace, error) {
+func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
 	splitedNs := strings.Split(s, nsSeparator)
 	if len(splitedNs)-1 < minNamespaceElements {
@@ -30,7 +30,7 @@ func ParseNamespace(s string) (*Namespace, error) {
 	}
 
 	for i, nsElem := range splitedNs[1:] {
-		parsedEl, err := parseNamespaceElement(nsElem)
+		parsedEl, err := parseNamespaceElement(nsElem, isFilter)
 		if err != nil {
 			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
 		}
@@ -44,7 +44,7 @@ func ParseNamespace(s string) (*Namespace, error) {
 }
 
 // Parsing single selector (ie. [group={reg}])
-func parseNamespaceElement(s string) (namespaceElement, error) {
+func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) { // is it group []?
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
@@ -99,6 +99,10 @@ func parseNamespaceElement(s string) (namespaceElement, error) {
 
 	if s == string(staticAnyMatcher) { // is it *
 		return newStaticAnyElement(), nil
+	}
+
+	if isFilter {
+		return newStaticSpecificAcceptingGroupElement(s), nil
 	}
 
 	if isValidIdentifier(s) { // is it static element ie. metric
