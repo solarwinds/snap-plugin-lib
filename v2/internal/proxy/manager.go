@@ -26,7 +26,7 @@ type Collector interface {
 
 type metricValidator interface {
 	AddRule(string) error
-	IsValid(string) bool
+	IsValid(string) (bool, []string)
 	IsPartiallyValid(string) bool
 	ListRules() []string
 }
@@ -39,6 +39,10 @@ type ContextManager struct {
 	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
 
 	metricsDefinition metricValidator // metrics defined by plugin (code)
+
+	metricsDescription map[string]string // description associated with metrics
+	metricsDefault     map[string]bool   // map of default metrics
+	groupsDescription  map[string]string // description associated with each group (dynamic element)
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
@@ -48,6 +52,10 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 		activeTasks: map[int]struct{}{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
+
+		metricsDescription: map[string]string{},
+		metricsDefault:     map[string]bool{},
+		groupsDescription:  map[string]string{},
 	}
 
 	cm.requestPluginDefinition()
@@ -69,11 +77,14 @@ func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
 
 	defer cm.markCollectAsCompleted(id)
 
+	// collect metrics - user defined code
 	context.sessionMts = []*plugin.Metric{}
 	err := cm.collector.Collect(context)
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
+
+	// todo: apply metric description and group description
 
 	return context.sessionMts, nil
 }
@@ -132,11 +143,14 @@ func (cm *ContextManager) DefineMetric(ns string, isDefault bool, description st
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
 	}
+
+	cm.metricsDescription[ns] = description
+	cm.metricsDefault[ns] = true
 }
 
 // Define description for dynamic element
-func (cm *ContextManager) DefineGroup(string, string) {
-	panic("implement")
+func (cm *ContextManager) DefineGroup(name string, description string) {
+	cm.groupsDescription[name] = description
 }
 
 // Define global tags that will be applied to all metrics

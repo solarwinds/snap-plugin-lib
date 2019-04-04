@@ -55,20 +55,28 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	return tv.isValid(ns, false)
+	isValid, _ := tv.isValid(ns, false)
+	return isValid
 }
 
-func (tv *TreeValidator) IsValid(ns string) bool {
-	return tv.isValid(ns, true)
+func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
+	isValid, trace := tv.isValid(ns, true)
+	return isValid, trace
 }
 
-func (tv *TreeValidator) isValid(ns string, fullMatch bool) bool {
+// second value indicated name of dynamic group for the element
+// ["", "group", ""] indicated that 2nd parameter should be treated as dynamic
+func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
+	nsSep := strings.Split(ns, "/")[1:]
+	groupIndicator := make([]string, len(nsSep))
+
 	if tv.head == nil {
-		return true // special case - there is no rule defined so everything is valid
+		return true, groupIndicator // special case - there is no rule defined so everything is valid
 	}
 
 	isValid := false
-	nsSep := strings.Split(ns, "/")[1:]
+	var stackFromValidBranch []*Node
+
 	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
 		idx := len(stack) // len of stack indicated to which string element should we match
 		if idx >= len(nsSep) {
@@ -98,7 +106,13 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) bool {
 		return true, true
 	})
 
-	return isValid
+	for idx, node := range stackFromValidBranch {
+		if groupNode, ok := node.currentElement.(*dynamicAnyElement); ok {
+			groupIndicator[idx] = groupNode.group
+		}
+	}
+
+	return isValid, groupIndicator
 }
 
 func (tv *TreeValidator) ListRules() []string {
@@ -129,7 +143,7 @@ func (tv *TreeValidator) ListRules() []string {
 	return nsList
 }
 
-// Define function executed when each node is reached during traversion.
+// Define function executed when each node is reached during traverse.
 // First return value indicates if traversing should be continued (go to next level) after processing this node (false ends traversing of current branch)
 // Second return value indicates if traversing should be continued on other branches (false ends traversing of tree)
 type traverseFn func(*Node, []*Node) (bool, bool)

@@ -6,7 +6,7 @@ import (
 
 func toGRPCMetric(mt *plugin.Metric) (*Metric, error) {
 	protoMt := &Metric{
-		Namespace: mt.Namespace,
+		Namespace: "", // todo: fix sending namespace
 		Tags:      mt.Tags,
 		Value:     nil, // todo: fix sending values
 		Timestamp: &Time{

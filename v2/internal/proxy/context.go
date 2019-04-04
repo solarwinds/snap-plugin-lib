@@ -3,6 +3,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -74,8 +75,8 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
-	matchDefinition := pc.metricsDefinition.IsValid(ns)
-	matchFilters := pc.metricsFilters.IsValid(ns)
+	matchDefinition, groupPositions := pc.metricsDefinition.IsValid(ns)
+	matchFilters, _ := pc.metricsFilters.IsValid(ns)
 
 	if !matchDefinition {
 		return errors.New("couldn't match metric with plugin definition")
@@ -85,8 +86,16 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		return errors.New("couldn't match metrics with plugin filters")
 	}
 
+	mtNamespace := []plugin.NamespaceElement{}
+	for i, nsElem := range strings.Split(ns, "/")[1:] {
+		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
+			Name:  groupPositions[i],
+			Value: nsElem, // todo: extract only value when someone add /plugin/[group=df]/metr1
+		})
+	}
+
 	pc.sessionMts = append(pc.sessionMts, &plugin.Metric{
-		Namespace: ns,
+		Namespace: mtNamespace,
 		Value:     v,
 		Tags:      tags,
 		Timestamp: time.Now(),

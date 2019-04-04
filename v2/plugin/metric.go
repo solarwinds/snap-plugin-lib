@@ -4,9 +4,16 @@ import (
 	"time"
 )
 
+type NamespaceElement struct {
+	Name        string
+	Value       string
+	Description string
+}
+
 type Metric struct {
-	Namespace string
-	Value     interface{}
-	Tags      map[string]string
-	Timestamp time.Time
+	Namespace   []NamespaceElement
+	Value       interface{}
+	Tags        map[string]string
+	Timestamp   time.Time
+	Description string
 }

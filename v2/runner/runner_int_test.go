@@ -1,4 +1,4 @@
-// +build medium
+// +build skipmedium
 
 package runner
 
@@ -138,8 +138,6 @@ func (sc *simpleCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestSimpleCollector() {
-	s.T().Skip()
-
 	// Arrange
 	jsonConfig := []byte(`{
 		"address": {
@@ -315,6 +313,9 @@ func (s *SuiteT) TestRunningCollectorInTheSameTime() {
 		// validate that when collect is completed you can requested it
 		_, err := s.sendCollect(1)
 		So(err, ShouldBeNil)
+
+		time.Sleep(2 * time.Second)
+		_, _ = s.sendKill()
 	})
 }
 
@@ -387,8 +388,6 @@ func (cc *configurableCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestConfigurableCollector() {
-	//s.T().Skip()
-
 	// Arrange
 	jsonConfig := []byte(`{
 		"address": {
@@ -473,11 +472,11 @@ func (s *SuiteT) TestConfigurableCollector() {
 
 /*****************************************************************************/
 
-type metricSendingCollector struct {
+type kubernetesCollector struct {
 	t *testing.T
 }
 
-func (msc *metricSendingCollector) DefineMetrics(ctx plugin.CollectorDefinition) error {
+func (kc *kubernetesCollector) DefineMetrics(ctx plugin.CollectorDefinition) error {
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Pending", true, "this includes time before being bound to a node, as well as time spent pulling images onto the host")
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Running", true, "the pod has been bound to a node and all of the containers have been started")
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Succeeded", true, "all containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers")
@@ -512,11 +511,17 @@ func (msc *metricSendingCollector) DefineMetrics(ctx plugin.CollectorDefinition)
 	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/desiredreplicas", false, "Number of desired pods.")
 	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/paused", false, "---")
 
+	ctx.DefineGroup("node", "kubernetes node name")
+	ctx.DefineGroup("namespace", "kubernetes namespace")
+	ctx.DefineGroup("pod", "kubernetes pod")
+	ctx.DefineGroup("container", "kubernetes container")
+	ctx.DefineGroup("deployment", "kubernetes deployment")
+
 	return nil
 }
 
-func (msc *metricSendingCollector) Collect(ctx plugin.Context) error {
-	Convey("Validate that metrics are filtered acording to metric definitions and filtering", msc.t, func() {
+func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
+	Convey("Validate that metrics are filtered acording to metric definitions and filtering", kc.t, func() {
 		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
@@ -551,7 +556,7 @@ func (s *SuiteT) TestMetricSendingCollector() {
 		"/kubernetes/deployment/papertrail15/*/*/*",
 	}
 
-	sendingCollector := &metricSendingCollector{t: s.T()}
+	sendingCollector := &kubernetesCollector{t: s.T()}
 	s.startCollector(sendingCollector)
 	s.startClient()
 
@@ -568,6 +573,6 @@ func (s *SuiteT) TestMetricSendingCollector() {
 		_, err = s.sendKill()
 		So(err, ShouldBeNil)
 
-		// Assert is handled within metricSendingCollector.Collect() method
+		// Assert is handled within kubernetesCollector.Collect() method
 	})
 }

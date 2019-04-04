@@ -25,29 +25,43 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(len(v.ListRules()), ShouldEqual, 7)
 
 		// Try to validate (filter) incoming metrics - positive scenarios
-		So(v.IsValid("/plugin/group1/metric1"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group2/metric2"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group3/[dyn1=id1]/metric4"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group3/id2/metric4"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group6/metric1"), ShouldBeTrue)
+		validMetricsToAdd := []string{
+			"/plugin/group1/metric1",
+			"/plugin/group2/metric2",
+			"/plugin/group3/[dyn1=id1]/metric4",
+			"/plugin/group3/id2/metric4",
+			"/plugin/group6/metric1",
+		}
+
+		for _, mt := range validMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeTrue)
+		}
 
 		So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue)
+		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue) // todo: this is not a valid definition
 		So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
 
 		// Try to validate (filter) incoming metrics - negative scenarios
-		So(v.IsValid("/plugin/group5/[dyn3]/metric4"), ShouldBeFalse)
-		So(v.IsValid("/plugin/group1/metric1/"), ShouldBeFalse)
-		So(v.IsValid("/plugin/group1/metric2"), ShouldBeFalse)
-		So(v.IsValid("/plugin/group1"), ShouldBeFalse)
-		So(v.IsValid("/plugin"), ShouldBeFalse)
-		So(v.IsValid("/plugin/[group1=group1]/metric1"), ShouldBeFalse)
-		So(v.IsValid("/plugin/group1/metric2/metric2"), ShouldBeFalse)
-		So(v.IsValid(""), ShouldBeFalse)
-		So(v.IsValid("/"), ShouldBeFalse)
-		So(v.IsValid("a/"), ShouldBeFalse)
+		invalidMetricsToAdd := []string{
+			"/plugin/group5/[dyn3]/metric4",
+			"/plugin/group1/metric1/",
+			"/plugin/group1/metric2",
+			"/plugin/group1",
+			"/plugin",
+			"/plugin/[group1=group1]/metric1",
+			"/plugin/group1/metric2/metric2",
+			"",
+			"/",
+			"a/",
+		}
+
+		for _, mt := range invalidMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeFalse)
+		}
 
 		// Try to add invalid rules (in current validator state)
 		So(v.AddRule("/plugin/[dyn3]/metric6"), ShouldBeError)        // dynamic element on the level where static element is already defined
@@ -73,17 +87,31 @@ func TestMetricFilterValidator(t *testing.T) {
 		So(len(v.ListRules()), ShouldEqual, 5)
 
 		// Try to validate (filter) incoming metrics - positive scenarios
-		So(v.IsValid("/plugin/group1/metric1"), ShouldBeTrue)
-		So(v.IsValid("/plugin/id2/metric4"), ShouldBeTrue)
-		So(v.IsValid("/plugin/id15/group3/metric3"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group4/m1"), ShouldBeTrue)
-		So(v.IsValid("/plugin/group4/m1/m2"), ShouldBeTrue)
+		validMetricsToAdd := []string{
+			"/plugin/group1/metric1",
+			"/plugin/id2/metric4",
+			"/plugin/id15/group3/metric3",
+			"/plugin/group4/m1",
+			"/plugin/group4/m1/m2",
+		}
+
+		for _, mt := range validMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeTrue)
+		}
 
 		// Try to validate (filter) incoming metrics - negative scenarios
-		So(v.IsValid("/plugin/group2/metric4"), ShouldBeFalse)
-		So(v.IsValid("/plugin/[group2=group2]/metric4"), ShouldBeFalse)
-		So(v.IsValid("/plugin/id15/group4/metric4"), ShouldBeFalse)
-		So(v.IsValid("/plugin/group4"), ShouldBeFalse)
+		invalidMetricsToAdd := []string{
+			"/plugin/group2/metric4",
+			"/plugin/[group2=group2]/metric4",
+			"/plugin/id15/group4/metric4",
+			"/plugin/group4",
+		}
+
+		for _, mt := range invalidMetricsToAdd {
+			ok, _ := v.IsValid(mt)
+			So(ok, ShouldBeFalse)
+		}
 	})
 
 }
