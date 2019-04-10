@@ -23,20 +23,20 @@ const minNamespaceElements = 2
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
-	splitedNs := strings.Split(s, nsSeparator)
-	if len(splitedNs)-1 < minNamespaceElements {
+	splitNs := strings.Split(s, nsSeparator)
+	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
 	}
-	if splitedNs[0] != "" {
+	if splitNs[0] != "" {
 		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
 	}
 
-	for i, nsElem := range splitedNs[1:] {
+	for i, nsElem := range splitNs[1:] {
 		parsedEl, err := parseNamespaceElement(nsElem, isFilter)
 		if err != nil {
 			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
 		}
-		if _, ok := parsedEl.(*staticRecursiveAnyElement); ok && i != len(splitedNs[1:])-1 {
+		if _, ok := parsedEl.(*staticRecursiveAnyElement); ok && i != len(splitNs[1:])-1 {
 			return nil, fmt.Errorf("recurive any-matcher (**) can be placed only as the last element")
 		}
 		ns.elements = append(ns.elements, parsedEl)
