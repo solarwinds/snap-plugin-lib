@@ -93,7 +93,9 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	}
 
 	mtNamespace := []plugin.NamespaceElement{}
-	for i, nsElem := range strings.Split(ns, "/")[1:] {
+	nsDefFormat := strings.Split(ns, "/")[1:]
+
+	for i, nsElem := range nsDefFormat {
 		groupName := groupPositions[i]
 		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
 			Name:        groupName,
@@ -102,7 +104,6 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		})
 	}
 
-	nsDefFormat := strings.Split(ns, "/")[1:]
 	for i := 0; i < len(nsDefFormat); i++ {
 		if groupPositions[i] != "" {
 			nsDefFormat[i] = fmt.Sprintf("[%s]", groupPositions[i])

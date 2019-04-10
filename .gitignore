@@ -53,3 +53,6 @@ build/
 bin/
 pkg/
 temp/
+
+# Ignore tests artifacts
+v1/plugin/libtest*
