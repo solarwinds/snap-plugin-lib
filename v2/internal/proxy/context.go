@@ -21,10 +21,10 @@ type pluginContext struct {
 
 	sessionMts []*types.Metric
 
-	ctxManager *ContextManager // back-reference to context manager
+	ctxManager *contextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *ContextManager, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
+func NewPluginContext(ctxManager *contextManager, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
 	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)

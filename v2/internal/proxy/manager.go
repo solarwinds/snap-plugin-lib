@@ -37,7 +37,7 @@ type metricValidator interface {
 	HasRules() bool
 }
 
-type ContextManager struct {
+type contextManager struct {
 	collector  plugin.Collector       // reference to custom plugin code
 	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
 
@@ -52,7 +52,7 @@ type ContextManager struct {
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
-	cm := &ContextManager{
+	cm := &contextManager{
 		collector:   collector,
 		contextMap:  map[int]*pluginContext{},
 		activeTasks: map[int]struct{}{},
@@ -72,7 +72,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
+func (cm *contextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	context, ok := cm.contextMap[id]
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
@@ -93,7 +93,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	return context.sessionMts, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
+func (cm *contextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
@@ -122,7 +122,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	return nil
 }
 
-func (cm *ContextManager) UnloadTask(id int) error {
+func (cm *contextManager) UnloadTask(id int) error {
 	if _, ok := cm.contextMap[id]; !ok {
 		return errors.New("context with given id is not defined")
 	}
@@ -135,14 +135,14 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	return nil
 }
 
-func (cm *ContextManager) RequestInfo() {
+func (cm *contextManager) RequestInfo() {
 	return
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // plugin.CollectorDefinition related methods
 
-func (cm *ContextManager) DefineMetric(ns string, isDefault bool, description string) {
+func (cm *contextManager) DefineMetric(ns string, isDefault bool, description string) {
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
@@ -153,24 +153,24 @@ func (cm *ContextManager) DefineMetric(ns string, isDefault bool, description st
 }
 
 // Define description for dynamic element
-func (cm *ContextManager) DefineGroup(name string, description string) {
+func (cm *contextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
 }
 
 // Define global tags that will be applied to all metrics
-func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
+func (cm *contextManager) DefineGlobalTags(string, map[string]string) {
 	panic("implement")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func (cm *ContextManager) requestPluginDefinition() {
+func (cm *contextManager) requestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
 		definable.DefineMetrics(cm)
 	}
 }
 
-func (cm *ContextManager) isOtherCollectInProgress(id int) bool {
+func (cm *contextManager) isOtherCollectInProgress(id int) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
@@ -182,7 +182,7 @@ func (cm *ContextManager) isOtherCollectInProgress(id int) bool {
 	return false
 }
 
-func (cm *ContextManager) markCollectAsCompleted(id int) {
+func (cm *contextManager) markCollectAsCompleted(id int) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
