@@ -67,7 +67,7 @@ func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
 	return isValid, trace
 }
 
-func (tv *TreeValidator) HaveRules() bool {
+func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
 }
 

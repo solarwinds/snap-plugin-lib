@@ -1,8 +1,6 @@
-package plugin
+package types
 
-import (
-	"time"
-)
+import "time"
 
 type NamespaceElement struct {
 	Name        string

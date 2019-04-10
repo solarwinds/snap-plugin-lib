@@ -2,12 +2,11 @@ package pluginrpc
 
 import (
 	"fmt"
-
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 // convert metric to GRPC structure
-func toGRPCMetric(mt *plugin.Metric) (*Metric, error) {
+func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 	value, err := toGRPCValue(mt.Value)
 	if err != nil {
 		return nil, fmt.Errorf("can't convert metric to GRPC structure: %v", err)
@@ -27,7 +26,7 @@ func toGRPCMetric(mt *plugin.Metric) (*Metric, error) {
 }
 
 // convert namespace to GRPC structure
-func toGRPCNamespace(ns []plugin.NamespaceElement) []*Namespace {
+func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 	grpcNs := make([]*Namespace, 0, len(ns))
 
 	for _, nsElem := range ns {

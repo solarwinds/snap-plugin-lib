@@ -8,6 +8,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
@@ -22,7 +23,7 @@ func init() {
 }
 
 type Collector interface {
-	RequestCollect(id int) ([]*plugin.Metric, error)
+	RequestCollect(id int) ([]*types.Metric, error)
 	LoadTask(id int, config []byte, selectors []string) error
 	UnloadTask(id int) error
 	RequestInfo()
@@ -33,7 +34,7 @@ type metricValidator interface {
 	IsValid(string) (bool, []string)
 	IsPartiallyValid(string) bool
 	ListRules() []string
-	HaveRules() bool
+	HasRules() bool
 }
 
 type ContextManager struct {
@@ -71,7 +72,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
+func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	context, ok := cm.contextMap[id]
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
@@ -83,7 +84,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*plugin.Metric, error) {
 	defer cm.markCollectAsCompleted(id)
 
 	// collect metrics - user defined code
-	context.sessionMts = []*plugin.Metric{}
+	context.sessionMts = []*types.Metric{}
 	err := cm.collector.Collect(context)
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)

@@ -3,13 +3,13 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 type pluginContext struct {
@@ -19,7 +19,7 @@ type pluginContext struct {
 	storedObjectsMutex sync.RWMutex
 	metricsFilters     metricValidator // metric filters defined by task (yaml)
 
-	sessionMts []*plugin.Metric
+	sessionMts []*types.Metric
 
 	ctxManager *ContextManager // back-reference to context manager
 }
@@ -92,12 +92,12 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		return errors.New("couldn't match metrics with plugin filters")
 	}
 
-	mtNamespace := []plugin.NamespaceElement{}
+	mtNamespace := []types.NamespaceElement{}
 	nsDefFormat := strings.Split(ns, "/")[1:]
 
 	for i, nsElem := range nsDefFormat {
 		groupName := groupPositions[i]
-		mtNamespace = append(mtNamespace, plugin.NamespaceElement{
+		mtNamespace = append(mtNamespace, types.NamespaceElement{
 			Name:        groupName,
 			Value:       pc.extractStaticValue(nsElem),
 			Description: pc.ctxManager.groupsDescription[groupName],
@@ -111,7 +111,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	}
 
 	nsDescKey := "/" + strings.Join(nsDefFormat, "/")
-	pc.sessionMts = append(pc.sessionMts, &plugin.Metric{
+	pc.sessionMts = append(pc.sessionMts, &types.Metric{
 		Namespace:   mtNamespace,
 		Value:       v,
 		Tags:        tags,
