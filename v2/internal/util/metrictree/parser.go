@@ -7,14 +7,16 @@ import (
 	"unicode"
 )
 
-const nsSeparator = "/"
-const regexBeginIndicator = '{'
-const regexEndIndicator = '}'
-const staticAnyMatcher = '*'
-const staticRecursiveAnyMatcher = "**"
-const dynamicElementBeginIndicator = '['
-const dynamicElementEndIndicator = ']'
-const dynamicElementEqualIndicator = '='
+const (
+	nsSeparator                  = "/"
+	regexBeginIndicator          = '{'
+	regexEndIndicator            = '}'
+	staticAnyMatcher             = '*'
+	staticRecursiveAnyMatcher    = "**"
+	dynamicElementBeginIndicator = '['
+	dynamicElementEndIndicator   = ']'
+	dynamicElementEqualIndicator = '='
+)
 
 const minNamespaceElements = 2
 
