@@ -47,7 +47,7 @@ func (ns *Namespace) isUsableForDefinition() bool {
 	return true
 }
 
-// Check is namespace selector can be used for metric addition ie. in ctx.AddMetric
+// Check if namespace selector can be used for metric addition ie. in ctx.AddMetric
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
 func (ns *Namespace) isUsableForAddition() bool {
 	if len(ns.elements) < 2 {
