@@ -15,7 +15,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var log = logrus.WithFields(logrus.Fields{"module": "plugin-proxy"})
+var log *logrus.Entry
+
+func init() {
+	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-proxy"})
+}
 
 type Collector interface {
 	RequestCollect(id int) ([]*plugin.Metric, error)

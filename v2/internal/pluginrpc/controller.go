@@ -16,7 +16,11 @@ import (
 
 const GRPCGracefulStopTimeout = 10 * time.Second
 
-var log = logrus.WithFields(logrus.Fields{"module": "plugin-rpc"})
+var log *logrus.Entry
+
+func init() {
+	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
+}
 
 func StartGRPCController(proxy CollectorProxy) {
 	closeChan := make(chan error, 1)
