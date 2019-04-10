@@ -18,12 +18,14 @@ type namespaceElement interface {
 	HasRegexp() bool
 }
 
+const minNamespaceLength = 2
+
 /*****************************************************************************/
 
 // Check is namespace selector can be used for metric definition
 // First and last element should be static names, middle elements can be group (ie. [group])
 func (ns *Namespace) isUsableForDefinition() bool {
-	if len(ns.elements) < 2 {
+	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
@@ -50,7 +52,7 @@ func (ns *Namespace) isUsableForDefinition() bool {
 // Check if namespace selector can be used for metric addition ie. in ctx.AddMetric
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
 func (ns *Namespace) isUsableForAddition() bool {
-	if len(ns.elements) < 2 {
+	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
@@ -77,7 +79,7 @@ func (ns *Namespace) isUsableForAddition() bool {
 // Check if namespace selector can be used for metric filters
 // !! Note: If metric definition is not provided in plugin, matcher with dynamic element can't be used in filter (to avoid ambiguity)
 func (ns *Namespace) isUsableForFiltering(metricDefinitionPresent bool) bool {
-	if len(ns.elements) < 2 {
+	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
