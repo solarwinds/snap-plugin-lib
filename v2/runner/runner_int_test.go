@@ -271,7 +271,7 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 	})
 }
 
-func (s *SuiteT) TestRunningCollectorInTheSameTime() {
+func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	var mtsSelector []string
