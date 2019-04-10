@@ -25,14 +25,14 @@ type pluginContext struct {
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
-	flattenConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
+	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
 	pc := &pluginContext{
 		rawConfig:       []byte(rawConfig),
-		flattenedConfig: flattenConfig,
+		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
 	}
 
