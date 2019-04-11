@@ -153,7 +153,7 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		namespaceElement: "{mem.*[1-3]{1,}}",
 		comparableType:   &staticRegexpElement{},
 		shouldMatch:      []string{"memory3", "mem1", "memo2"},
-		shouldNotMatch:   []string{"memo4", "memory0", "group"}, // todo: , "[grp=memory3]"
+		shouldNotMatch:   []string{"memo4", "memory0", "group", "[grp=memory3]"},
 		isFilter:         false,
 	},
 	{
@@ -217,7 +217,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (positive)
 				for i, m := range tc.shouldMatch {
 					Convey(fmt.Sprintf("Scenario %d - Positive matching (%s to %s)", i, m, parsedEl.String()), func() {
-						fmt.Printf("***%s->%s \n", tc.namespaceElement, m)
+						fmt.Printf("\n^p^^%s->%s \n", tc.namespaceElement, m)
 						So(parsedEl.Match(m), ShouldBeTrue)
 					})
 				}
@@ -225,6 +225,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (negative)
 				for i, m := range tc.shouldNotMatch {
 					Convey(fmt.Sprintf("Scenario %d - Negative matching (%s to %s)", i, m, parsedEl.String()), func() {
+						fmt.Printf("\n^f^^%s->%s \n", tc.namespaceElement, m)
 						So(parsedEl.Match(m), ShouldBeFalse)
 					})
 				}

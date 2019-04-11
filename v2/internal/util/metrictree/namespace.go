@@ -185,7 +185,7 @@ func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 }
 
 func (sre *staticRegexpElement) Match(s string) bool {
-	return sre.regExp.MatchString(s) // todo: fix matching to group
+	return !containsGroup(s) && sre.regExp.MatchString(s)
 }
 
 func (sre *staticRegexpElement) String() string {
