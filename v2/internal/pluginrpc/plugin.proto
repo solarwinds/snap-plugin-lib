@@ -79,6 +79,7 @@ message Metric {
     map<string, string> tags = 3;
     Time timestamp = 4;
     string description = 5;
+    string unit = 6;
 }
 
 message Namespace {

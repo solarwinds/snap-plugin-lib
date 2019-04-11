@@ -16,6 +16,7 @@ func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 		Namespace: toGRPCNamespace(mt.Namespace),
 		Tags:      mt.Tags,
 		Value:     value,
+		Unit:      mt.Unit,
 		Timestamp: &Time{
 			Sec:  mt.Timestamp.Unix(),
 			Nsec: int64(mt.Timestamp.Nanosecond()),

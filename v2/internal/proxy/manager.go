@@ -37,6 +37,12 @@ type metricValidator interface {
 	HasRules() bool
 }
 
+type metricMetadata struct {
+	isDefault   bool
+	description string
+	unit        string
+}
+
 type contextManager struct {
 	collector  plugin.Collector       // reference to custom plugin code
 	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
@@ -46,9 +52,8 @@ type contextManager struct {
 
 	metricsDefinition metricValidator // metrics defined by plugin (code)
 
-	metricsDescription map[string]string // description associated with metrics
-	metricsDefault     map[string]bool   // map of default metrics
-	groupsDescription  map[string]string // description associated with each group (dynamic element)
+	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
+	groupsDescription map[string]string         // description associated with each group (dynamic element)
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
@@ -59,9 +64,8 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
 
-		metricsDescription: map[string]string{},
-		metricsDefault:     map[string]bool{},
-		groupsDescription:  map[string]string{},
+		metricsMetadata:   map[string]metricMetadata{},
+		groupsDescription: map[string]string{},
 	}
 
 	cm.requestPluginDefinition()
@@ -142,14 +146,17 @@ func (cm *contextManager) RequestInfo() {
 ///////////////////////////////////////////////////////////////////////////////
 // plugin.CollectorDefinition related methods
 
-func (cm *contextManager) DefineMetric(ns string, isDefault bool, description string) {
+func (cm *contextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
 	}
 
-	cm.metricsDescription[ns] = description
-	cm.metricsDefault[ns] = true
+	cm.metricsMetadata[ns] = metricMetadata{
+		isDefault:   isDefault,
+		description: description,
+		unit:        unit,
+	}
 }
 
 // Define description for dynamic element

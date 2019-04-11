@@ -12,6 +12,7 @@ type Metric struct {
 	Namespace   []NamespaceElement
 	Value       interface{}
 	Tags        map[string]string
+	Unit        string
 	Timestamp   time.Time
 	Description string
 }

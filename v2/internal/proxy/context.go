@@ -111,15 +111,27 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	}
 
 	nsDescKey := "/" + strings.Join(nsDefFormat, "/")
+	mtMeta := pc.metricMeta(nsDescKey)
+
 	pc.sessionMts = append(pc.sessionMts, &types.Metric{
 		Namespace:   mtNamespace,
 		Value:       v,
 		Tags:        tags,
+		Unit:        mtMeta.unit,
 		Timestamp:   time.Now(),
-		Description: pc.ctxManager.metricsDescription[nsDescKey],
+		Description: mtMeta.description,
 	})
 
 	return nil
+}
+
+func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
+	if mtMeta, ok := pc.ctxManager.metricsMetadata[nsKey]; ok {
+		return mtMeta
+	}
+
+	// if metric wasn't defined just return structure with empty fields
+	return metricMetadata{}
 }
 
 func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
