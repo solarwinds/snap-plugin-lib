@@ -29,12 +29,8 @@ func (ns *Namespace) isUsableForDefinition() bool {
 		return false
 	}
 
-	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
-		switch nsElem.(type) {
-		case *staticSpecificElement: // ok
-		default:
-			return false
-		}
+	if !ns.isFirstAndLastElementStatic() {
+		return false
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
@@ -56,12 +52,8 @@ func (ns *Namespace) isUsableForAddition() bool {
 		return false
 	}
 
-	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
-		switch nsElem.(type) {
-		case *staticSpecificElement: // ok
-		default:
-			return false
-		}
+	if !ns.isFirstAndLastElementStatic() {
+		return false
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
@@ -95,6 +87,18 @@ func (ns *Namespace) isUsableForFiltering(metricDefinitionPresent bool) bool {
 			if nsElem.IsDynamic() == true {
 				return false
 			}
+		}
+	}
+
+	return true
+}
+
+func (ns *Namespace) isFirstAndLastElementStatic() bool {
+	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
+		switch nsElem.(type) {
+		case *staticSpecificElement: // ok
+		default:
+			return false
 		}
 	}
 
