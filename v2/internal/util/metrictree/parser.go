@@ -9,13 +9,13 @@ import (
 
 const (
 	nsSeparator                  = "/"
-	regexBeginIndicator          = '{'
-	regexEndIndicator            = '}'
-	staticAnyMatcher             = '*'
+	regexBeginIndicator          = "{"
+	regexEndIndicator            = "}"
+	staticAnyMatcher             = "*"
 	staticRecursiveAnyMatcher    = "**"
-	dynamicElementBeginIndicator = '['
-	dynamicElementEndIndicator   = ']'
-	dynamicElementEqualIndicator = '='
+	dynamicElementBeginIndicator = "["
+	dynamicElementEndIndicator   = "]"
+	dynamicElementEqualIndicator = "="
 )
 
 const minNamespaceElements = 2
@@ -120,14 +120,11 @@ func isIndexInTheMiddle(idx int, s string) bool {
 	return len(s) >= 3 && idx > 0 && idx < len(s)-1
 }
 
-func isSurroundedWith(s string, prefix, postfix rune) bool {
-	r := []rune(s)
-	if len(r) < 2 {
+func isSurroundedWith(s string, prefix, suffix string) bool {
+	if !strings.HasPrefix(s, prefix) || !strings.HasSuffix(s, suffix) {
 		return false
 	}
-	if r[0] != prefix || r[len(r)-1] != postfix {
-		return false
-	}
+
 	return true
 }
 

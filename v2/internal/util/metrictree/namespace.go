@@ -185,7 +185,7 @@ func (sre *staticRegexpElement) Match(s string) bool {
 }
 
 func (sre *staticRegexpElement) String() string {
-	return string(regexBeginIndicator) + sre.regExp.String() + string(regexEndIndicator)
+	return regexBeginIndicator + sre.regExp.String() + regexEndIndicator
 }
 
 func (*staticRegexpElement) IsDynamic() bool { return false }
@@ -205,7 +205,7 @@ func newDynamicAnyElement(group string) *dynamicAnyElement {
 }
 
 func (dae *dynamicAnyElement) Match(s string) bool {
-	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
@@ -238,7 +238,7 @@ type dynamicSpecificElement struct {
 }
 
 func (dse *dynamicSpecificElement) Match(s string) bool {
-	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
@@ -289,7 +289,7 @@ func newDynamicRegexpElement(group string, r *regexp.Regexp) *dynamicRegexpEleme
 }
 
 func (dre *dynamicRegexpElement) Match(s string) bool {
-	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) {
+	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
