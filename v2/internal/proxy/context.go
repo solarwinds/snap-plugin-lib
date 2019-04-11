@@ -3,13 +3,13 @@ package proxy
 import (
 	"errors"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 type pluginContext struct {

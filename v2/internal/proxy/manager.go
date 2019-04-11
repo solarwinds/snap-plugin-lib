@@ -8,10 +8,10 @@ package proxy
 import (
 	"errors"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 )
