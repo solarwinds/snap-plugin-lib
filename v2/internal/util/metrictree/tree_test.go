@@ -74,7 +74,8 @@ func TestMetricDefinitionValidator(t *testing.T) {
 func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 
 	Convey("Validate that operations can be done on filtering tree", t, func() {
-		v := NewMetricFilter(nil)
+		d := NewMetricDefinition()
+		v := NewMetricFilter(d)
 
 		// Add valid rules
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)

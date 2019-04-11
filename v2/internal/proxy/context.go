@@ -81,6 +81,14 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+	parsedNs, err := metrictree.ParseNamespace(ns, false)
+	if err != nil {
+		return errors.New("invalid format of namespace")
+	}
+	if !parsedNs.IsUsableForAddition() {
+		return errors.New("invalid namespace (some elements can't be used when adding metric)")
+	}
+
 	matchDefinition, groupPositions := pc.ctxManager.metricsDefinition.IsValid(ns)
 	matchFilters, _ := pc.metricsFilters.IsValid(ns)
 

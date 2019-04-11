@@ -190,13 +190,13 @@ func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
 func (tv *TreeValidator) add(parsedNs *Namespace) error {
 	switch tv.strategy {
 	case metricDefinitionStrategy:
-		if !parsedNs.isUsableForDefinition() {
-			return errors.New("can't add rule")
+		if !parsedNs.IsUsableForDefinition() {
+			return errors.New("can't add rule - some namespace elements are not allowed in definition")
 		}
 	case metricFilteringStrategy:
-		defPresent := (tv.definitionTree != nil)
-		if !parsedNs.isUsableForFiltering(defPresent) {
-			return errors.New("can't add rule")
+		defPresent := tv.definitionTree.HasRules()
+		if !parsedNs.IsUsableForFiltering(defPresent) {
+			return errors.New("can't add rule - some namespace elements are not allowed in filtering when metric definition wasn't provided")
 		}
 	default:
 		panic("invalid strategy")

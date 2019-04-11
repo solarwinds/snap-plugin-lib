@@ -518,7 +518,7 @@ func (kc *kubernetesCollector) DefineMetrics(ctx plugin.CollectorDefinition) err
 }
 
 func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
-	Convey("Validate that metrics are filtered acording to metric definitions and filtering", kc.t, func() {
+	Convey("Validate that metrics are filtered according to metric definitions and filtering", kc.t, func() {
 		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
@@ -540,8 +540,6 @@ func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestKubernetesCollector() {
-	logrus.SetLevel(logrus.TraceLevel)
-
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	mtsSelector := []string{
@@ -557,7 +555,7 @@ func (s *SuiteT) TestKubernetesCollector() {
 	s.startCollector(sendingCollector)
 	s.startClient()
 
-	Convey("", s.T(), func() {
+	Convey("Validate that collector can gather metric based on definition and filter", s.T(), func() {
 		// Act
 		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
 		So(err, ShouldBeNil)
@@ -571,5 +569,63 @@ func (s *SuiteT) TestKubernetesCollector() {
 		So(err, ShouldBeNil)
 
 		// Assert is handled within kubernetesCollector.Collect() method
+	})
+}
+
+/*****************************************************************************/
+
+type noDefinitionCollector struct {
+	collectCalls int
+	t            *testing.T
+}
+
+func (ndc *noDefinitionCollector) Collect(ctx plugin.Context) error {
+	ndc.collectCalls++
+
+	Convey("Validate that metrics are filtered according to filtering", ndc.t, func() {
+		So(ctx.AddMetric("/plugin/group1/subgroup1/metric1", 10), ShouldBeNil) // added
+		So(ctx.AddMetric("/plugin/group2/id12/metric1", 20), ShouldBeNil)      // added
+
+		So(ctx.AddMetric("/plugin/group3/subgroup3/metric4", 15), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group3/subgroup3/metric$4", 12), ShouldBeError)       // invalid char used in element
+		So(ctx.AddMetric("/plugin/group3/subgroup4/metric4", 15), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group3/subgroup4/sub5/metric6", 13), ShouldBeNil)     // added
+		So(ctx.AddMetric("/plugin/group3/subgroup4/sub()5/metric6", 13), ShouldBeError) // invalid char used in element
+
+		//So(ctx.AddMetric("/plugin/group2/[subgroup2=id12]/metric1", 20), ShouldBeError) // todo: can't add elements with dynamic metrics (no definition)
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestWithoutDefinitionCollector() {
+	logrus.SetLevel(logrus.TraceLevel)
+
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/plugin/group1/subgroup1/metric1",
+		"/plugin/group2/{id.*}/metric1",
+		"/plugin/group2/[subgroup2={id.*}]/metric2",
+		"/plugin/group3/subgroup3/{.*}",
+		"/plugin/group3/subgroup4/**",
+	}
+
+	noDefCollector := &noDefinitionCollector{t: s.T()}
+	s.startCollector(noDefCollector)
+	s.startClient()
+
+	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
+		// Act
+		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		So(err, ShouldBeNil)
+
+		collMts, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
+		So(len(collMts.MetricSet), ShouldEqual, 5)
+
+		time.Sleep(2 * time.Second)
+		_, err = s.sendKill()
+		So(err, ShouldBeNil)
 	})
 }
