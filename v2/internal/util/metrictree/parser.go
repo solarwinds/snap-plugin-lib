@@ -47,7 +47,7 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 
 // Parsing single selector (ie. [group={reg}])
 func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
-	if isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator) { // is it group []?
+	if containsGroup(s) { // is it group []?
 		dynElem := s[1 : len(s)-1]
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
@@ -60,7 +60,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 					return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
 				}
 
-				if isSurroundedWith(groupValue, regexBeginIndicator, regexEndIndicator) { // is it group value as regex [group={regex}]
+				if containsRegexp(groupValue) {
 					regexStr := groupValue[1 : len(groupValue)-1]
 					r, err := regexp.Compile(regexStr)
 					if err != nil {
@@ -86,7 +86,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		return nil, fmt.Errorf("invalid character(s) used for group value [%s]", dynElem)
 	}
 
-	if isSurroundedWith(s, regexBeginIndicator, regexEndIndicator) { // is it {regex}
+	if containsRegexp(s) { // is it {regex}
 		regexStr := s[1 : len(s)-1]
 		r, err := regexp.Compile(regexStr)
 		if err != nil {
@@ -143,4 +143,12 @@ func isValidIdentifier(s string) bool {
 	}
 
 	return true
+}
+
+func containsRegexp(s string) bool {
+	return isSurroundedWith(s, regexBeginIndicator, regexEndIndicator)
+}
+
+func containsGroup(s string) bool {
+	return isSurroundedWith(s, dynamicElementBeginIndicator, dynamicElementEndIndicator)
 }
