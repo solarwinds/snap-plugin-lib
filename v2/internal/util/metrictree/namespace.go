@@ -214,12 +214,10 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if isIndexInTheMiddle(eqIndex, s) {
-				groupName := dynElem[0:eqIndex]
-				groupValue := dynElem[eqIndex+1:]
+			groupName := dynElem[0:eqIndex]
+			groupValue := dynElem[eqIndex+1:]
 
-				return groupName == dae.group && isValidIdentifier(groupValue)
-			}
+			return groupName == dae.group && isValidIdentifier(groupValue)
 		}
 	}
 
@@ -247,12 +245,10 @@ func (dse *dynamicSpecificElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if isIndexInTheMiddle(eqIndex, s) {
-				groupName := dynElem[0:eqIndex]
-				groupValue := dynElem[eqIndex+1:]
+			groupName := dynElem[0:eqIndex]
+			groupValue := dynElem[eqIndex+1:]
 
-				return dse.group == groupName && dse.value == groupValue
-			}
+			return dse.group == groupName && dse.value == groupValue
 		}
 	} else {
 		if dse.value == s {
@@ -298,12 +294,10 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 {
-			if isIndexInTheMiddle(eqIndex, s) {
-				groupName := dynElem[0:eqIndex]
-				groupValue := dynElem[eqIndex+1:]
+			groupName := dynElem[0:eqIndex]
+			groupValue := dynElem[eqIndex+1:]
 
-				return dre.group == groupName && dre.regexp.MatchString(groupValue)
-			}
+			return dre.group == groupName && dre.regexp.MatchString(groupValue)
 		}
 	} else {
 		if dre.regexp.MatchString(s) {

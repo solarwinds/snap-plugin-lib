@@ -52,31 +52,27 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
 
 		if eqIndex != -1 { // is it group with value [group=id]
-			if isIndexInTheMiddle(eqIndex, s) {
-				groupName := dynElem[0:eqIndex]
-				groupValue := dynElem[eqIndex+1:]
+			groupName := dynElem[0:eqIndex]
+			groupValue := dynElem[eqIndex+1:]
 
-				if !isValidIdentifier(groupName) {
-					return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
-				}
-
-				if containsRegexp(groupValue) {
-					regexStr := groupValue[1 : len(groupValue)-1]
-					r, err := regexp.Compile(regexStr)
-					if err != nil {
-						return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
-					}
-					return newDynamicRegexpElement(groupName, r), nil
-				}
-
-				if isValidIdentifier(groupValue) {
-					return newDynamicSpecificElement(groupName, groupValue), nil
-				}
-
-				return nil, fmt.Errorf("invalid character(s) used for group value [%s]", groupValue)
+			if !isValidIdentifier(groupName) {
+				return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
 			}
 
-			return nil, fmt.Errorf("invalid group with value (%s)", dynElem)
+			if containsRegexp(groupValue) {
+				regexStr := groupValue[1 : len(groupValue)-1]
+				r, err := regexp.Compile(regexStr)
+				if err != nil {
+					return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
+				}
+				return newDynamicRegexpElement(groupName, r), nil
+			}
+
+			if isValidIdentifier(groupValue) {
+				return newDynamicSpecificElement(groupName, groupValue), nil
+			}
+
+			return nil, fmt.Errorf("invalid character(s) used for group value [%s]", groupValue)
 		}
 
 		if isValidIdentifier(dynElem) {
@@ -117,7 +113,8 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 /*****************************************************************************/
 
 func isIndexInTheMiddle(idx int, s string) bool {
-	return len(s) >= 3 && idx > 0 && idx < len(s)-1
+	//return len(s) >= 3 && idx > 0 && idx < len(s)-1
+	return true
 }
 
 func isSurroundedWith(s string, prefix, suffix string) bool {
