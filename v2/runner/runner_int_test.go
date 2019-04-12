@@ -593,7 +593,7 @@ func (ndc *noDefinitionCollector) Collect(ctx plugin.Context) error {
 		So(ctx.AddMetric("/plugin/group3/subgroup4/sub5/metric6", 13), ShouldBeNil)     // added
 		So(ctx.AddMetric("/plugin/group3/subgroup4/sub()5/metric6", 13), ShouldBeError) // invalid char used in element
 		So(ctx.AddMetric("some/plugin/group1/subgroup1/metric1", 11), ShouldBeError)    // invalid: doesn't start from "/"
-		//So(ctx.AddMetric("/plugin/group2/[subgroup2=id12]/metric1", 20), ShouldBeError) // invalid: using dyn. element // todo: fix when adding
+		So(ctx.AddMetric("/plugin/group2/[subgroup2=id12]/metric1", 20), ShouldBeError) // invalid: using dyn. element
 	})
 
 	return nil

@@ -28,7 +28,7 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctx, cErr := NewPluginContext(nil, jsonConfig, []string{})
+	ctx, cErr := NewPluginContext(nil, jsonConfig)
 
 	Convey("Validate Context API for handling configuration", t, func() {
 
@@ -137,7 +137,7 @@ func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctx, cErr := NewPluginContext(nil, emptyConfig, []string{})
+		ctx, cErr := NewPluginContext(nil, emptyConfig)
 
 		So(cErr, ShouldBeNil)
 

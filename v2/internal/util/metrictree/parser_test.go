@@ -12,56 +12,67 @@ import (
 /*****************************************************************************/
 
 type parseNamespaceValidScenario struct {
-	namespace           string
-	usableForDefinition bool
-	usableForAddition   bool
+	namespace                         string
+	usableForDefinition               bool
+	usableForAdditionWhenDefinition   bool
+	usableForAdditionWhenNoDefinition bool
+	usableForSelection                bool
 }
 
 var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
-	{ // 0
-		namespace:           "/plugin/group1/metric",
-		usableForDefinition: true,
-		usableForAddition:   true,
+	{
+		namespace:                         "/plugin/group1/metric",
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
-	{ // 1
-		namespace:           "/plugin/[group2]/metric",
-		usableForDefinition: true,
-		usableForAddition:   false,
+	{
+		namespace:                         "/plugin/[group2]/metric",
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 2
-		namespace:           "/plugin/[group2=id]/metric",
-		usableForDefinition: false,
-		usableForAddition:   true,
+		namespace:                         "/plugin/[group2=id]/metric",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 3
-		namespace:           "/plugin/[group2={id.*}]/metric",
-		usableForDefinition: false,
-		usableForAddition:   false,
+		namespace:                         "/plugin/[group2={id.*}]/metric",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 4
-		namespace:           "/plugin/{id.*}/metric",
-		usableForDefinition: false,
-		usableForAddition:   false,
+		namespace:                         "/plugin/{id.*}/metric",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 5
-		namespace:           "/plugin/*/metric",
-		usableForDefinition: false,
-		usableForAddition:   false,
+		namespace:                         "/plugin/*/metric",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 6
-		namespace:           "/plugin/metric/**",
-		usableForDefinition: false,
-		usableForAddition:   false,
+		namespace:                         "/plugin/metric/**",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 	{ // 7
-		namespace:           "/plugin/metric",
-		usableForDefinition: true,
-		usableForAddition:   true,
+		namespace:                         "/plugin/metric",
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
-	{ // 7
-		namespace:           "/plugin/**",
-		usableForDefinition: false,
-		usableForAddition:   false,
+	{ // 8
+		namespace:                         "/plugin/**",
+		usableForDefinition:               false,
+		usableForAdditionWhenDefinition:   false,
+		usableForAdditionWhenNoDefinition: false,
 	},
 }
 
@@ -76,7 +87,9 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 				So(ns, ShouldNotBeNil)
 				So(err, ShouldBeNil)
 				So(ns.IsUsableForDefinition(), ShouldEqual, tc.usableForDefinition)
-				So(ns.IsUsableForAddition(), ShouldEqual, tc.usableForAddition)
+				So(ns.IsUsableForAddition(false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
+				So(ns.IsUsableForAddition(true), ShouldEqual, tc.usableForAdditionWhenDefinition)
+				So(ns.IsUsableForFiltering(true), ShouldBeTrue)
 			})
 		}
 	})

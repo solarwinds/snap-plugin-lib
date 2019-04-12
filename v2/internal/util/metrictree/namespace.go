@@ -47,7 +47,8 @@ func (ns *Namespace) IsUsableForDefinition() bool {
 
 // Check if namespace selector can be used for metric addition ie. in ctx.AddMetric
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
-func (ns *Namespace) IsUsableForAddition() bool {
+// In case plugin doesn't provide metric definition added element should be only static names.
+func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
@@ -59,7 +60,10 @@ func (ns *Namespace) IsUsableForAddition() bool {
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
 		switch nsElem.(type) {
 		case *staticSpecificElement: // ok
-		case *dynamicSpecificElement: // ok
+		case *dynamicSpecificElement:
+			if !metricDefinitionPresent {
+				return false
+			}
 		default:
 			return false
 		}

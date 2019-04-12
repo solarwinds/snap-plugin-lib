@@ -24,7 +24,7 @@ type pluginContext struct {
 	ctxManager *contextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *contextManager, rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
+func NewPluginContext(ctxManager *contextManager, rawConfig []byte) (*pluginContext, error) {
 	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
@@ -85,7 +85,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	if err != nil {
 		return errors.New("invalid format of namespace")
 	}
-	if !parsedNs.IsUsableForAddition() {
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
 		return errors.New("invalid namespace (some elements can't be used when adding metric)")
 	}
 
