@@ -192,14 +192,13 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		shouldNotMatch:   []string{"[metric1]", "=metric1]", "[=metric1]"},
 		isFilter:         true,
 	},
-	//{
-	//	namespaceElement: "{mem.*[1-3]{1,}}",
-	//	comparableType:   &staticRegexpElement{},
-	//	shouldMatch:      []string{"memory3", "mem1", "memo2"},
-	//	shouldNotMatch:   []string{"memo4", "memory0"},
-	//	isFilter:         true,
-	//},
-
+	{
+		namespaceElement: "{mem.*[1-3]{1,}}",
+		comparableType:   &staticRegexpAcceptingGroupElement{},
+		shouldMatch:      []string{"memory3", "mem1", "memo2", "[grp=memo2]"},
+		shouldNotMatch:   []string{"memo4", "memory0", "[grp=memory0]"},
+		isFilter:         true,
+	},
 }
 
 func TestParseNamespaceElement_ValidScenarios(t *testing.T) {

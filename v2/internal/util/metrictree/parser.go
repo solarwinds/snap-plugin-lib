@@ -88,7 +88,12 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid regular expression (%s): %s", regexStr, err)
 		}
-		return newStaticRegexpElement(r), nil
+
+		if isFilter {
+			return newStaticRegexpAcceptingGroupElement(r), nil
+		} else {
+			return newStaticRegexpElement(r), nil
+		}
 	}
 
 	if s == string(staticRecursiveAnyMatcher) { // is it **
@@ -99,23 +104,18 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		return newStaticAnyElement(), nil
 	}
 
-	if isFilter {
-		return newStaticSpecificAcceptingGroupElement(s), nil
-	}
-
 	if isValidIdentifier(s) { // is it static element ie. metric
-		return newStaticSpecificElement(s), nil
+		if isFilter {
+			return newStaticSpecificAcceptingGroupElement(s), nil
+		} else {
+			return newStaticSpecificElement(s), nil
+		}
 	}
 
 	return nil, fmt.Errorf("invalid character(s) used for element [%s]", s)
 }
 
 /*****************************************************************************/
-
-func isIndexInTheMiddle(idx int, s string) bool {
-	//return len(s) >= 3 && idx > 0 && idx < len(s)-1
-	return true
-}
 
 func isSurroundedWith(s string, prefix, suffix string) bool {
 	if !strings.HasPrefix(s, prefix) || !strings.HasSuffix(s, suffix) {

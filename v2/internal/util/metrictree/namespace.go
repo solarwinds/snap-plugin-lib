@@ -332,11 +332,11 @@ func (sse *staticSpecificAcceptingGroupElement) Match(s string) bool {
 		return true
 	}
 
-	ps, err := parseNamespaceElement(s, false)
+	parsedEl, err := parseNamespaceElement(s, false)
 	if err != nil {
 		return false
 	}
-	if gps, ok := ps.(*dynamicSpecificElement); ok {
+	if gps, ok := parsedEl.(*dynamicSpecificElement); ok {
 		return gps.value == sse.name
 	}
 
@@ -349,3 +349,38 @@ func (sse *staticSpecificAcceptingGroupElement) String() string {
 
 func (*staticSpecificAcceptingGroupElement) IsDynamic() bool { return false }
 func (*staticSpecificAcceptingGroupElement) HasRegexp() bool { return false }
+
+/*****************************************************************************/
+
+type staticRegexpAcceptingGroupElement struct {
+	regExp *regexp.Regexp
+}
+
+func newStaticRegexpAcceptingGroupElement(r *regexp.Regexp) *staticRegexpAcceptingGroupElement {
+	return &staticRegexpAcceptingGroupElement{
+		regExp: r,
+	}
+}
+
+func (sre *staticRegexpAcceptingGroupElement) Match(s string) bool {
+	parsedEl, err := parseNamespaceElement(s, false)
+	if err != nil {
+		return false
+	}
+
+	switch parsedEl.(type) {
+	case *staticSpecificElement:
+		return sre.regExp.MatchString(s)
+	case *dynamicSpecificElement:
+		return sre.regExp.MatchString(parsedEl.(*dynamicSpecificElement).value)
+	}
+
+	return false
+}
+
+func (sre *staticRegexpAcceptingGroupElement) String() string {
+	return regexBeginIndicator + sre.regExp.String() + regexEndIndicator
+}
+
+func (*staticRegexpAcceptingGroupElement) IsDynamic() bool { return false }
+func (*staticRegexpAcceptingGroupElement) HasRegexp() bool { return false }
