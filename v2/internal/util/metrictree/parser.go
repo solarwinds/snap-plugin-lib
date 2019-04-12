@@ -37,7 +37,7 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
 		}
 		if _, ok := parsedEl.(*staticRecursiveAnyElement); ok && i != len(splitNs[1:])-1 {
-			return nil, fmt.Errorf("recurive any-matcher (**) can be placed only as the last element")
+			return nil, fmt.Errorf("recursive any-matcher (**) can be placed only as the last element")
 		}
 		ns.elements = append(ns.elements, parsedEl)
 	}
