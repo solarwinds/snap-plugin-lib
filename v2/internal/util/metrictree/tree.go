@@ -1,3 +1,42 @@
+/*
+File contains implementation of a validation tree, which is used to efficiently validate and filter metrics
+added during collection process.
+
+Validation tree is created based on parsed namespace elements defined in namespace.go.
+
+Let's consider that user have defined following metrics:
+	/pl/gr1/sub1/m1
+	/pl/gr1/sub2/m1
+	/pl/gr1/sub3/m1
+	/pl/gr1/sub3/m2
+	/pl/gr2/[dyn1]/m1
+
+Generated tree looks like:
+
+                  n1(pl)
+             /               \
+         n2(gr1)            n3(gr2)
+    /       |       \           \
+n4(sub1) n5(sub2) n6(sub3)     n7([dyn1])
+    |       |        |    \          |
+  n8(m1)  n9(m1)  n10(m1) n11(m2)  n12(m2)
+
+If user wanted to check if some metric is valid,
+	ie. /pl/g1/sub3/m1
+following steps are taken:
+	1) Extract selector "/pl/gr1/sub3/m1" into array of elements: [pl, gr1, sub2, m1]
+	2) Start traversing the tree from head (node n1), compare n1 matches to first element of selector (pl)
+	3) Check if node n1 (representing "pl" element) contains sub-element representing "gr1" -> yes, it's n2
+	4) Check if node n2 (representing "gr1" element) contains sub-element representing "sub3" -> yes, it's n6
+	5) Check if node n6 (representing "sub3" element) contains sub-element representing "m1" -> yes, it's n10
+	6) Check if node n10 is a leaf.
+
+Steps 3-5 should be executed in O(1) since node contains map reference to its sub-nodes, so we don't need to
+compare with "sub1" and "sub2" at that level.
+
+Filtering tree looks very similar, although can contain more sophisticated nodes (like regular expression).
+ */
+
 package metrictree
 
 import (
