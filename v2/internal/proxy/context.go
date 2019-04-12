@@ -110,9 +110,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 			Value:       pc.extractStaticValue(nsElem),
 			Description: pc.ctxManager.groupsDescription[groupName],
 		})
-	}
 
-	for i := 0; i < len(nsDefFormat); i++ {
 		if groupPositions[i] != "" {
 			nsDefFormat[i] = fmt.Sprintf("[%s]", groupPositions[i])
 		}

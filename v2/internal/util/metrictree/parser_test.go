@@ -217,7 +217,6 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (positive)
 				for i, m := range tc.shouldMatch {
 					Convey(fmt.Sprintf("Scenario %d - Positive matching (%s to %s)", i, m, parsedEl.String()), func() {
-						fmt.Printf("\n^p^^%s->%s \n", tc.namespaceElement, m)
 						So(parsedEl.Match(m), ShouldBeTrue)
 					})
 				}
@@ -225,7 +224,6 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (negative)
 				for i, m := range tc.shouldNotMatch {
 					Convey(fmt.Sprintf("Scenario %d - Negative matching (%s to %s)", i, m, parsedEl.String()), func() {
-						fmt.Printf("\n^f^^%s->%s \n", tc.namespaceElement, m)
 						So(parsedEl.Match(m), ShouldBeFalse)
 					})
 				}
