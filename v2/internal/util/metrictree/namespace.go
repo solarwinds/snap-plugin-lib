@@ -1,3 +1,37 @@
+/*
+This file contains definition of namespace and namespace elements. Namespace element can consist of:
+- static names
+- groups - elements which can hold additional values (and are converted to tags by AO)
+- regular expressions - used to restrict metrics sent to AO
+- special selectors - * and **
+ */
+
+// Example of valid namespaces:
+//    /plugin/group1/metric1             - general metric (or general filter)
+//    /plugin/[group1]/metric1           - metric containing group
+//    /plugin/[group1=id1]/metric1       - metric containing group with value
+//    /plugin/{id.*}/metric1             - filter with regular expression matcher
+//    /plugin/[group1={id.*}]/metric1    - filter with regular expression matcher for groups
+//    /plugin/group1/*/metric1           - filter matching anything to single namespace element
+//    /plugin/group1/**                  - filter matching anything to namespace prefix (** match to 1 or more namespace elements)
+
+/*
+Namespaces (very often referred as "selectors") are used in three different contexts:
+    - when defining metrics (DefineMetrics) by plugin
+    - when defining filters (task*.yaml) -
+    - when adding metrics during collection (CollectMetrics)
+
+Not all forms are valid for different context. Ie.
+    /plugin/[group]/metric
+is a valid form of metric definition and filter, but can't be used to add metric since it's not concrete
+
+On the other hand:
+    /plugin/[group=id1]/metric
+is a valid form of filter and can be used for addition, but it's not acceptable as a definition (group can't be concrete)
+
+Look at IsUsableFor*() and tests to understand all possible cases.
+*/
+
 package metrictree
 
 import (
@@ -132,7 +166,7 @@ func (*staticAnyElement) HasRegexp() bool { return false }
 
 /*****************************************************************************/
 
-// Representing 2nd element of: /plugin/group1/**
+// Representing 3rd element of: /plugin/group1/**
 type staticRecursiveAnyElement struct {
 }
 
@@ -158,9 +192,9 @@ type staticSpecificElement struct {
 	name string
 }
 
-func newStaticSpecificElement(selector string) *staticSpecificElement {
+func newStaticSpecificElement(name string) *staticSpecificElement {
 	return &staticSpecificElement{
-		name: selector,
+		name: name,
 	}
 }
 
@@ -177,7 +211,7 @@ func (*staticSpecificElement) HasRegexp() bool { return false }
 
 /*****************************************************************************/
 
-// Representing 2nd element of: /plugin/{"group.*"}/metric1
+// Representing 2nd element of: /plugin/{group.*}/metric1
 type staticRegexpElement struct {
 	regExp *regexp.Regexp
 }
@@ -243,6 +277,13 @@ type dynamicSpecificElement struct {
 	value string
 }
 
+func newDynamicSpecificElement(group, value string) *dynamicSpecificElement {
+	return &dynamicSpecificElement{
+		group: group,
+		value: value,
+	}
+}
+
 func (dse *dynamicSpecificElement) Match(s string) bool {
 	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
@@ -267,19 +308,12 @@ func (dse *dynamicSpecificElement) String() string {
 	return fmt.Sprintf("[%s=%s]", dse.group, dse.value)
 }
 
-func newDynamicSpecificElement(group, value string) *dynamicSpecificElement {
-	return &dynamicSpecificElement{
-		group: group,
-		value: value,
-	}
-}
-
 func (*dynamicSpecificElement) IsDynamic() bool { return false }
 func (*dynamicSpecificElement) HasRegexp() bool { return true }
 
 /*****************************************************************************/
 
-// Representing 2nd element of: /plugin/[group={id.*}/metric1
+// Representing 2nd element of: /plugin/[group={id.*}]/metric1
 type dynamicRegexpElement struct {
 	group  string
 	regexp *regexp.Regexp
@@ -321,13 +355,21 @@ func (*dynamicRegexpElement) HasRegexp() bool { return true }
 
 /*****************************************************************************/
 
+/*
+Special case: representing 2nd element of: /plugin/group1/metric1 in filters when plugin provides definition. Ie.
+We have metric defined:
+	/plugin/[dyn1]/metric1
+We can add filter using two methods:
+	/plugin/id1/metric1
+	/plugin/[dyn1=id]/metric1
+*/
 type staticSpecificAcceptingGroupElement struct {
 	name string
 }
 
-func newStaticSpecificAcceptingGroupElement(selector string) *staticSpecificAcceptingGroupElement {
+func newStaticSpecificAcceptingGroupElement(name string) *staticSpecificAcceptingGroupElement {
 	return &staticSpecificAcceptingGroupElement{
-		name: selector,
+		name: name,
 	}
 }
 
@@ -356,6 +398,14 @@ func (*staticSpecificAcceptingGroupElement) HasRegexp() bool { return false }
 
 /*****************************************************************************/
 
+/*
+Special case: representing 2nd element of: /plugin/{group1}/metric1 in filters when plugin provides definition. Ie.
+We have metric defined:
+	/plugin/[dyn1]/metric1
+We can add filter using two methods:
+	/plugin/{id1.*}/metric1
+	/plugin/[dyn1={id.*}]/metric1
+*/
 type staticRegexpAcceptingGroupElement struct {
 	regExp *regexp.Regexp
 }

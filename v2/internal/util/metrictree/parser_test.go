@@ -191,14 +191,6 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		isFilter:         false,
 	},
 	{
-		/* special case:
-		when we have metric defined: /plugin/[dyn1]/metric1
-		we can add filter using two methods:
-			/plugin/id1/metric1
-			/plugin/[dyn1=id]/metric1
-		we need to be able to add metric using form:
-			/plugin/id1/metric1
-		*/
 		namespaceElement: "metric1",
 		comparableType:   &staticSpecificAcceptingGroupElement{},
 		shouldMatch:      []string{"metric1", "[dyn1=metric1]", "[dyn4=metric1]"},
