@@ -29,14 +29,6 @@ type Collector interface {
 	RequestInfo()
 }
 
-type metricValidator interface {
-	AddRule(string) error
-	IsValid(string) (bool, []string)
-	IsPartiallyValid(string) bool
-	ListRules() []string
-	HasRules() bool
-}
-
 type metricMetadata struct {
 	isDefault   bool
 	description string
@@ -50,7 +42,7 @@ type contextManager struct {
 	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
 
-	metricsDefinition metricValidator // metrics defined by plugin (code)
+	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)

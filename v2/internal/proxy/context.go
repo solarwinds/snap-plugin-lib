@@ -17,7 +17,7 @@ type pluginContext struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
-	metricsFilters     metricValidator // metric filters defined by task (yaml)
+	metricsFilters     *metrictree.TreeValidator // metric filters defined by task (yaml)
 
 	sessionMts []*types.Metric
 
@@ -37,7 +37,7 @@ func NewPluginContext(ctxManager *contextManager, rawConfig []byte) (*pluginCont
 	}
 
 	if ctxManager != nil {
-		pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition.(*metrictree.TreeValidator))
+		pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition)
 		pc.ctxManager = ctxManager
 	}
 
