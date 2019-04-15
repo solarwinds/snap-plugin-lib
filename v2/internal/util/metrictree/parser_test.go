@@ -137,71 +137,71 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 	{
 		namespaceElement: "[group]",
 		comparableType:   &dynamicAnyElement{},
-		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3"},
-		shouldNotMatch:   []string{"[grp=id1]", "[group]"},
+		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3", "group"},
+		shouldNotMatch:   []string{"[grp=id1]", "[group]", "[id1=group]", "*", "**", "{group}", ""},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "[group=id1]",
 		comparableType:   &dynamicSpecificElement{},
 		shouldMatch:      []string{"id1", "[group=id1]"},
-		shouldNotMatch:   []string{"id2", "[group=id2]", "[grp=id1]"},
+		shouldNotMatch:   []string{"id2", "[group=id2]", "[grp=id1]", "[group]", "*", "**", "{group}", ""},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "[group={id.*}]",
 		comparableType:   &dynamicRegexpElement{},
 		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id1", "id3"},
-		shouldNotMatch:   []string{"[group=i1]", "[grp=id1]", "i1"},
+		shouldNotMatch:   []string{"[group=i1]", "[grp=id1]", "i1", "*", "**", "{group}", "[group={id1}]"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "{}", // valid
 		comparableType:   &staticRegexpElement{},
-		shouldMatch:      []string{},
-		shouldNotMatch:   []string{},
+		shouldMatch:      []string{"id"},
+		shouldNotMatch:   []string{"", "*", "**", "{group}", "[group=id]"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "{mem.*[1-3]{1,}}",
 		comparableType:   &staticRegexpElement{},
 		shouldMatch:      []string{"memory3", "mem1", "memo2"},
-		shouldNotMatch:   []string{"memo4", "memory0", "group", "[grp=memory3]"},
+		shouldNotMatch:   []string{"memo4", "memory0", "group", "[grp=memory3]", "", "*", "**", "{memo2}", "[group={mem1}]"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "*", // valid
 		comparableType:   &staticAnyElement{},
-		shouldMatch:      []string{"metric", "group", ""},
-		shouldNotMatch:   []string{},
+		shouldMatch:      []string{"metric", "group"},
+		shouldNotMatch:   []string{"*", "**", "", "{memo2}", "[group={id1}]", "[group1=id]"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "group1",
 		comparableType:   &staticSpecificElement{},
 		shouldMatch:      []string{"group1"},
-		shouldNotMatch:   []string{"group2", "group", "", "[dyn1=group1]"},
+		shouldNotMatch:   []string{"group2", "group", "", "[dyn1=group1]", "[group1]", "*", "**", "{group}"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "**",
 		comparableType:   &staticRecursiveAnyElement{},
 		shouldMatch:      []string{"group", "m1", "m2"},
-		shouldNotMatch:   []string{},
+		shouldNotMatch:   []string{"", "*", "**", "{group}"},
 		isFilter:         false,
 	},
 	{
 		namespaceElement: "metric1",
 		comparableType:   &staticSpecificAcceptingGroupElement{},
 		shouldMatch:      []string{"metric1", "[dyn1=metric1]", "[dyn4=metric1]"},
-		shouldNotMatch:   []string{"[metric1]", "=metric1]", "[=metric1]"},
+		shouldNotMatch:   []string{"[metric1]", "=metric1]", "[=metric1]", "[dyn1={metric1}]", "*", "**", ""},
 		isFilter:         true,
 	},
 	{
 		namespaceElement: "{mem.*[1-3]{1,}}",
 		comparableType:   &staticRegexpAcceptingGroupElement{},
 		shouldMatch:      []string{"memory3", "mem1", "memo2", "[grp=memo2]"},
-		shouldNotMatch:   []string{"memo4", "memory0", "[grp=memory0]"},
+		shouldNotMatch:   []string{"memo4", "memory0", "[grp=memory0]", "*", "**", "", "[grp={memo2}]"},
 		isFilter:         true,
 	},
 }
@@ -221,6 +221,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (positive)
 				for i, m := range tc.shouldMatch {
 					Convey(fmt.Sprintf("Scenario %d - Positive matching (%s to %s)", i, m, parsedEl.String()), func() {
+						fmt.Printf("m=%#v\n", m)
 						So(parsedEl.Match(m), ShouldBeTrue)
 					})
 				}
@@ -228,6 +229,7 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				// Assert matching (negative)
 				for i, m := range tc.shouldNotMatch {
 					Convey(fmt.Sprintf("Scenario %d - Negative matching (%s to %s)", i, m, parsedEl.String()), func() {
+						fmt.Printf("m=%#v\n", m)
 						So(parsedEl.Match(m), ShouldBeFalse)
 					})
 				}

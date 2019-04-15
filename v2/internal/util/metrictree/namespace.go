@@ -4,7 +4,7 @@ This file contains definition of namespace and namespace elements. Namespace ele
 - groups - elements which can hold additional values (and are converted to tags by AO)
 - regular expressions - used to restrict metrics sent to AO
 - special selectors - * and **
- */
+*/
 
 // Example of valid namespaces:
 //    /plugin/group1/metric1             - general metric (or general filter)
@@ -153,8 +153,8 @@ func newStaticAnyElement() *staticAnyElement {
 	return &staticAnyElement{}
 }
 
-func (*staticAnyElement) Match(string) bool {
-	return true
+func (*staticAnyElement) Match(s string) bool {
+	return isValidIdentifier(s)
 }
 
 func (*staticAnyElement) String() string {
@@ -174,8 +174,8 @@ func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
 	return &staticRecursiveAnyElement{}
 }
 
-func (*staticRecursiveAnyElement) Match(string) bool {
-	return true
+func (*staticRecursiveAnyElement) Match(s string) bool {
+	return isValidIdentifier(s)
 }
 
 func (*staticRecursiveAnyElement) String() string {
@@ -223,7 +223,7 @@ func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 }
 
 func (sre *staticRegexpElement) Match(s string) bool {
-	return !containsGroup(s) && sre.regExp.MatchString(s)
+	return !containsGroup(s) && isValidIdentifier(s) && sre.regExp.MatchString(s)
 }
 
 func (sre *staticRegexpElement) String() string {
@@ -335,7 +335,7 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			return dre.group == groupName && dre.regexp.MatchString(groupValue)
+			return dre.group == groupName && isValidIdentifier(groupValue) && dre.regexp.MatchString(groupValue)
 		}
 	} else {
 		if dre.regexp.MatchString(s) {
