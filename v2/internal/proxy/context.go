@@ -85,21 +85,21 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
-		return errors.New("invalid format of namespace")
+		return fmt.Errorf("invalid format of namespace: %v", err)
 	}
 	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
-		return errors.New("invalid namespace (some elements can't be used when adding metric)")
+		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %v", err)
 	}
 
 	matchDefinition, groupPositions := pc.ctxManager.metricsDefinition.IsValid(ns)
 	matchFilters, _ := pc.metricsFilters.IsValid(ns)
 
 	if !matchDefinition {
-		return errors.New("couldn't match metric with plugin definition")
+		return fmt.Errorf("couldn't match metric with plugin definition: %v", err)
 	}
 
 	if !matchFilters {
-		return errors.New("couldn't match metrics with plugin filters")
+		return fmt.Errorf("couldn't match metrics with plugin filters: %v", err)
 	}
 
 	mtNamespace := []types.NamespaceElement{}

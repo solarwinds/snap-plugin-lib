@@ -60,7 +60,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 		groupsDescription: map[string]string{},
 	}
 
-	cm.requestPluginDefinition()
+	cm.RequestPluginDefinition()
 
 	return cm
 }
@@ -163,7 +163,7 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func (cm *ContextManager) requestPluginDefinition() {
+func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
 		definable.DefineMetrics(cm)
 	}
