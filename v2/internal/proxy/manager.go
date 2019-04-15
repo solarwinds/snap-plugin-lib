@@ -35,7 +35,7 @@ type metricMetadata struct {
 	unit        string
 }
 
-type contextManager struct {
+type ContextManager struct {
 	collector  plugin.Collector       // reference to custom plugin code
 	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
 
@@ -48,8 +48,8 @@ type contextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 }
 
-func NewContextManager(collector plugin.Collector, pluginName string, version string) Collector {
-	cm := &contextManager{
+func NewContextManager(collector plugin.Collector, pluginName string, version string) *ContextManager {
+	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  map[int]*pluginContext{},
 		activeTasks: map[int]struct{}{},
@@ -68,7 +68,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *contextManager) RequestCollect(id int) ([]*types.Metric, error) {
+func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	context, ok := cm.contextMap[id]
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
@@ -89,7 +89,7 @@ func (cm *contextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	return context.sessionMts, nil
 }
 
-func (cm *contextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
+func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
@@ -118,7 +118,7 @@ func (cm *contextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	return nil
 }
 
-func (cm *contextManager) UnloadTask(id int) error {
+func (cm *ContextManager) UnloadTask(id int) error {
 	if _, ok := cm.contextMap[id]; !ok {
 		return errors.New("context with given id is not defined")
 	}
@@ -131,14 +131,14 @@ func (cm *contextManager) UnloadTask(id int) error {
 	return nil
 }
 
-func (cm *contextManager) RequestInfo() {
+func (cm *ContextManager) RequestInfo() {
 	return
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // plugin.CollectorDefinition related methods
 
-func (cm *contextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
+func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
 		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
@@ -152,24 +152,24 @@ func (cm *contextManager) DefineMetric(ns string, unit string, isDefault bool, d
 }
 
 // Define description for dynamic element
-func (cm *contextManager) DefineGroup(name string, description string) {
+func (cm *ContextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
 }
 
 // Define global tags that will be applied to all metrics
-func (cm *contextManager) DefineGlobalTags(string, map[string]string) {
+func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 	panic("implement")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func (cm *contextManager) requestPluginDefinition() {
+func (cm *ContextManager) requestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
 		definable.DefineMetrics(cm)
 	}
 }
 
-func (cm *contextManager) isOtherCollectInProgress(id int) bool {
+func (cm *ContextManager) isOtherCollectInProgress(id int) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
@@ -181,7 +181,7 @@ func (cm *contextManager) isOtherCollectInProgress(id int) bool {
 	return false
 }
 
-func (cm *contextManager) markCollectAsCompleted(id int) {
+func (cm *ContextManager) markCollectAsCompleted(id int) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 

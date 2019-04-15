@@ -35,7 +35,7 @@ Steps 3-5 should be executed in O(1) since node contains map reference to its su
 compare with "sub1" and "sub2" at that level.
 
 Filtering tree looks very similar, although can contain more sophisticated nodes (like regular expression).
- */
+*/
 
 package metrictree
 

@@ -5,6 +5,8 @@ package proxy
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 import . "github.com/smartystreets/goconvey/convey"
 
@@ -28,7 +30,8 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctx, cErr := NewPluginContext(nil, jsonConfig)
+	ctxMan := NewContextManager(&mockCollector{}, "plugin", "1.0.0")
+	ctx, cErr := NewPluginContext(ctxMan, jsonConfig)
 
 	Convey("Validate Context API for handling configuration", t, func() {
 
@@ -133,11 +136,18 @@ func (sc *storedClient) Count() int {
 	return sc.count
 }
 
+type mockCollector struct{}
+
+func (*mockCollector) Collect(plugin.Context) error {
+	return nil
+}
+
 func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctx, cErr := NewPluginContext(nil, emptyConfig)
+		ctxMan := NewContextManager(&mockCollector{}, "plugin", "1.0.0")
+		ctx, cErr := NewPluginContext(ctxMan, emptyConfig)
 
 		So(cErr, ShouldBeNil)
 

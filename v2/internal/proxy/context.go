@@ -21,10 +21,14 @@ type pluginContext struct {
 
 	sessionMts []*types.Metric
 
-	ctxManager *contextManager // back-reference to context manager
+	ctxManager *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *contextManager, rawConfig []byte) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
+	if ctxManager == nil {
+		return nil, errors.New("can't create context without valid context manager")
+	}
+
 	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
@@ -36,10 +40,8 @@ func NewPluginContext(ctxManager *contextManager, rawConfig []byte) (*pluginCont
 		storedObjects:   map[string]interface{}{},
 	}
 
-	if ctxManager != nil {
-		pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition)
-		pc.ctxManager = ctxManager
-	}
+	pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition)
+	pc.ctxManager = ctxManager
 
 	return pc, nil
 }
