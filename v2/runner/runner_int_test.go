@@ -540,8 +540,6 @@ func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestKubernetesCollector() {
-	s.T().Skip() // todo: fix kubernetes test
-
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	mtsSelector := []string{
