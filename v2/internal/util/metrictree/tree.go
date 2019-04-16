@@ -51,7 +51,7 @@ const (
 	metricFilteringStrategy
 )
 
-const (
+const ( // nodeType const
 	invalidElementLevel = iota
 	onlyStaticElementsLevel
 	onlyDynamicElementsLevel
@@ -70,6 +70,7 @@ type Node struct {
 	parent         *Node
 	currentElement namespaceElement
 	nodeType       int
+	level          int // horizontal position in tree (starts from 0)
 
 	concreteSubNodes map[string]*Node
 	regexSubNodes    []*Node
@@ -98,12 +99,22 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValid(ns, false)
+	isValid, _ := tv.isValidIter(ns, false)
 	return isValid
 }
 
+func (tv *TreeValidator) IsValidRecu(ns string) (bool, []string) {
+	isValid, trace := tv.isValidRecu(ns, true)
+	return isValid, trace
+}
+
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.isValid(ns, true)
+	isValid, trace := tv.IsValidIter(ns)
+	return isValid, trace
+}
+
+func (tv *TreeValidator) IsValidIter(ns string) (bool, []string) {
+	isValid, trace := tv.isValidIter(ns, true)
 	return isValid, trace
 }
 
@@ -111,9 +122,64 @@ func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
 }
 
+func (tv *TreeValidator) isValidIter(ns string, fullMatch bool) (bool, []string) {
+	nsElems := strings.Split(ns, "/")[1:]
+	groupIndicator := make([]string, len(nsElems))
+
+	// special case - no rules defined - everything is valid and there are no groups (2nd param contains empty strings)
+	if tv.head == nil {
+		return true, groupIndicator
+	}
+
+	toVisit := nodeStack{}
+	toVisit.Push(tv.head)
+
+	for !toVisit.Empty() {
+		visitedNode, _ := toVisit.Pop()
+
+		if visitedNode.level >= len(nsElems) {
+			continue
+		}
+		if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) { // todo: optimalization for def tree (return)
+			continue
+		}
+
+		if visitedNode.level == len(nsElems)-1 {
+			if fullMatch && visitedNode.nodeType == leafLevel {
+				return true, visitedNode.groupIndicator()
+			}
+			if !fullMatch {
+				return true, groupIndicator
+			}
+		}
+		if _, ok := visitedNode.currentElement.(*staticRecursiveAnyElement); ok { // if ** we don't need to match anymore
+			return true, groupIndicator
+		}
+
+		for _, subNode := range visitedNode.regexSubNodes {
+			toVisit.Push(subNode)
+		}
+
+		if visitedNode.level != len(nsElems)-1 {
+			// todo: O(n) -> O(1)
+
+			//nextNodeKey := nsElems[visitedNode.level+1]
+			//if nextNode, ok := visitedNode.concreteSubNodes[nextNodeKey]; ok {
+			//	toVisit.Push(nextNode)
+			//}
+
+			for _, subNode := range visitedNode.concreteSubNodes {
+				toVisit.Push(subNode)
+			}
+		}
+	}
+
+	return false, groupIndicator
+}
+
 // second value indicated name of dynamic group for the element
 // ["", "group", ""] indicated that 2nd parameter should be treated as dynamic
-func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
+func (tv *TreeValidator) isValidRecu(ns string, fullMatch bool) (bool, []string) {
 	nsSep := strings.Split(ns, "/")[1:]
 	groupIndicator := make([]string, len(nsSep))
 
@@ -207,6 +273,7 @@ func (tv *TreeValidator) ListRules() []string {
 
 		if visitedNode.nodeType == leafLevel {
 			nsList = append(nsList, visitedNode.path())
+			continue
 		}
 
 		for _, subNode := range visitedNode.regexSubNodes {
@@ -279,7 +346,7 @@ func (tv *TreeValidator) add(parsedNs *Namespace) error {
 func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 	// special case - tree doesn't contain anything
 	if tv.head == nil {
-		tv.head = tv.createNodes(parsedNs)
+		tv.head = tv.createNodes(parsedNs, 0)
 		return nil
 	}
 
@@ -288,7 +355,7 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 		return err
 	}
 
-	nodesToAttach := tv.createNodes(namespacesToAttach)
+	nodesToAttach := tv.createNodes(namespacesToAttach, nodeToUpdate.level+1)
 	return nodeToUpdate.attachNode(nodesToAttach)
 }
 
@@ -321,7 +388,7 @@ func (tv *TreeValidator) findNodeToUpdate(head *Node, parsedNs *Namespace) (*Nod
 
 // will create the entire branch of nodes from namespace (not update the tree, only returns branch)
 // ie. /plugin/group1/metric will create branch consisting of 3 elements (node plugin -> node group1 -> leaf metric)
-func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
+func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 	if len(ns.elements) == 0 {
 		return nil
 	}
@@ -331,6 +398,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 			concreteSubNodes: nil,
 			regexSubNodes:    nil,
 			nodeType:         leafLevel,
+			level:            level,
 		}
 	}
 
@@ -338,8 +406,9 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 		currentElement:   ns.elements[0],
 		concreteSubNodes: map[string]*Node{},
 		regexSubNodes:    []*Node{},
+		level:            level,
 	}
-	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]})
+	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1)
 	nextNode.parent = currNode
 
 	if tv.strategy == metricFilteringStrategy {
@@ -378,24 +447,50 @@ func (n *Node) attachNode(attachedNode *Node) error {
 	} else {
 		n.regexSubNodes = append(n.regexSubNodes, attachedNode)
 	}
+
 	attachedNode.parent = n
 
 	return nil
 }
 
-func (n *Node) path() string {
-	nodeTrace := []*Node{n}
+func (n *Node) trace() []*Node {
+	revNodeTrace := []*Node{n}
+	nodeTrace := []*Node{}
 
 	currNode := n
 	for currNode.parent != nil {
 		currNode = currNode.parent
-		nodeTrace = append(nodeTrace, currNode)
+		revNodeTrace = append(revNodeTrace, currNode)
 	}
 
-	nsElems := make([]string, 0, len(nodeTrace))
-	for i := len(nodeTrace) - 1; i >= 0; i-- {
-		nsElems = append(nsElems, nodeTrace[i].currentElement.String())
+	for i := len(revNodeTrace) - 1; i >= 0; i-- { // todo: optimize
+		nodeTrace = append(nodeTrace, revNodeTrace[i])
+	}
+
+	return nodeTrace
+}
+
+func (n *Node) path() string {
+	trace := n.trace()
+
+	nsElems := make([]string, 0, len(trace))
+	for _, node := range trace {
+		nsElems = append(nsElems, node.currentElement.String())
 	}
 
 	return "/" + strings.Join(nsElems, "/")
+}
+
+func (n *Node) groupIndicator() []string {
+	trace := n.trace()
+
+	groupIndicator := make([]string, len(trace))
+
+	for i, node := range trace {
+		if groupNode, ok := node.currentElement.(*dynamicAnyElement); ok {
+			groupIndicator[i] = groupNode.group
+		}
+	}
+
+	return groupIndicator
 }
