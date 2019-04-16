@@ -258,26 +258,7 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 	}
 
 	nodesToAttach := tv.createNodes(namespacesToAttach)
-	return tv.attachBranchToNode(nodeToUpdate, nodesToAttach)
-}
-
-func (tv *TreeValidator) attachBranchToNode(node *Node, attachedNodes *Node) error {
-	isNextNodeStatic := !attachedNodes.currentElement.IsDynamic()
-
-	if node.nodeType == onlyStaticElementsLevel && !isNextNodeStatic {
-		return errors.New("only static elements may added at current level")
-	}
-
-	if node.nodeType == onlyDynamicElementsLevel && !isNextNodeStatic {
-		return errors.New("there can be only one dynamic element at current level")
-	}
-
-	if !attachedNodes.currentElement.HasRegexp() {
-		node.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
-	} else {
-		node.regexSubNodes = append(node.regexSubNodes, attachedNodes)
-	}
-	return nil
+	return nodeToUpdate.attachNodes(nodesToAttach)
 }
 
 /*
@@ -347,4 +328,23 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 	}
 
 	return currNode
+}
+
+func (n *Node) attachNodes(attachedNodes *Node) error {
+	isNextNodeStatic := !attachedNodes.currentElement.IsDynamic()
+
+	if n.nodeType == onlyStaticElementsLevel && !isNextNodeStatic {
+		return errors.New("only static elements may added at current level")
+	}
+
+	if n.nodeType == onlyDynamicElementsLevel && !isNextNodeStatic {
+		return errors.New("there can be only one dynamic element at current level")
+	}
+
+	if !attachedNodes.currentElement.HasRegexp() {
+		n.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+	} else {
+		n.regexSubNodes = append(n.regexSubNodes, attachedNodes)
+	}
+	return nil
 }
