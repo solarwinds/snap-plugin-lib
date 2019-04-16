@@ -164,7 +164,8 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	return isValid, groupIndicator
 }
 
-func (tv *TreeValidator) ListRules() []string {
+// todo: remove recursive version after tests
+func (tv *TreeValidator) ListRulesRecu() []string {
 	if tv.head == nil {
 		return []string{}
 	}
@@ -187,6 +188,35 @@ func (tv *TreeValidator) ListRules() []string {
 
 		return false, true
 	})
+
+	sort.Strings(nsList)
+	return nsList
+}
+
+func (tv *TreeValidator) ListRules() []string {
+	if tv.head == nil {
+		return []string{}
+	}
+
+	nsList := []string{}
+	toVisit := nodeStack{}
+	toVisit.Push(tv.head)
+
+	for !toVisit.Empty() {
+		visitedNode, _ := toVisit.Pop()
+
+		if visitedNode.nodeType == leafLevel {
+			nsList = append(nsList, visitedNode.path())
+		}
+
+		for _, subNode := range visitedNode.regexSubNodes {
+			toVisit.Push(subNode)
+		}
+
+		for _, subNode := range visitedNode.concreteSubNodes {
+			toVisit.Push(subNode)
+		}
+	}
 
 	sort.Strings(nsList)
 	return nsList
@@ -351,4 +381,21 @@ func (n *Node) attachNode(attachedNode *Node) error {
 	attachedNode.parent = n
 
 	return nil
+}
+
+func (n *Node) path() string {
+	nodeTrace := []*Node{n}
+
+	currNode := n
+	for currNode.parent != nil {
+		currNode = currNode.parent
+		nodeTrace = append(nodeTrace, currNode)
+	}
+
+	nsElems := make([]string, 0, len(nodeTrace))
+	for i := len(nodeTrace) - 1; i >= 0; i-- {
+		nsElems = append(nsElems, nodeTrace[i].currentElement.String())
+	}
+
+	return "/" + strings.Join(nsElems, "/")
 }
