@@ -67,6 +67,7 @@ type TreeValidator struct {
 }
 
 type Node struct {
+	parent         *Node
 	currentElement namespaceElement
 	nodeType       int
 
@@ -258,7 +259,7 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 	}
 
 	nodesToAttach := tv.createNodes(namespacesToAttach)
-	return nodeToUpdate.attachNodes(nodesToAttach)
+	return nodeToUpdate.attachNode(nodesToAttach)
 }
 
 /*
@@ -309,6 +310,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 		regexSubNodes:    []*Node{},
 	}
 	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]})
+	nextNode.parent = currNode
 
 	if tv.strategy == metricFilteringStrategy {
 		currNode.nodeType = mixedElementsLevel
@@ -330,8 +332,8 @@ func (tv *TreeValidator) createNodes(ns *Namespace) *Node {
 	return currNode
 }
 
-func (n *Node) attachNodes(attachedNodes *Node) error {
-	isNextNodeStatic := !attachedNodes.currentElement.IsDynamic()
+func (n *Node) attachNode(attachedNode *Node) error {
+	isNextNodeStatic := !attachedNode.currentElement.IsDynamic()
 
 	if n.nodeType == onlyStaticElementsLevel && !isNextNodeStatic {
 		return errors.New("only static elements may added at current level")
@@ -341,10 +343,12 @@ func (n *Node) attachNodes(attachedNodes *Node) error {
 		return errors.New("there can be only one dynamic element at current level")
 	}
 
-	if !attachedNodes.currentElement.HasRegexp() {
-		n.concreteSubNodes[attachedNodes.currentElement.String()] = attachedNodes
+	if !attachedNode.currentElement.HasRegexp() {
+		n.concreteSubNodes[attachedNode.currentElement.String()] = attachedNode
 	} else {
-		n.regexSubNodes = append(n.regexSubNodes, attachedNodes)
+		n.regexSubNodes = append(n.regexSubNodes, attachedNode)
 	}
+	attachedNode.parent = n
+
 	return nil
 }
