@@ -23,7 +23,6 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		// Double-check that rules were applied
 		So(len(v.ListRules()), ShouldEqual, 7)
-		So(v.ListRules(), ShouldResemble, v.ListRulesRecu())
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		validMetricsToAdd := []string{
@@ -91,7 +90,6 @@ func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 
 		// Double-check that rules were applied
 		So(len(v.ListRules()), ShouldEqual, 4)
-		So(v.ListRules(), ShouldResemble, v.ListRulesRecu())
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		validMetricsToAdd := []string{
@@ -145,10 +143,8 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 
 		// Double-check that rules were applied
 		So(len(d.ListRules()), ShouldEqual, 6)
-		So(v.ListRules(), ShouldResemble, v.ListRulesRecu())
 
 		So(len(v.ListRules()), ShouldEqual, 4)
-		So(v.ListRules(), ShouldResemble, v.ListRulesRecu())
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		validMetricsToAdd := []string{

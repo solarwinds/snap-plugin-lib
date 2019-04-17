@@ -99,22 +99,12 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValidIter(ns, false)
+	isValid, _ := tv.isValid(ns, false)
 	return isValid
 }
 
-func (tv *TreeValidator) IsValidRecu(ns string) (bool, []string) {
-	isValid, trace := tv.isValidRecu(ns, true)
-	return isValid, trace
-}
-
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.IsValidIter(ns)
-	return isValid, trace
-}
-
-func (tv *TreeValidator) IsValidIter(ns string) (bool, []string) {
-	isValid, trace := tv.isValidIter(ns, true)
+	isValid, trace := tv.isValid(ns, true)
 	return isValid, trace
 }
 
@@ -122,7 +112,7 @@ func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
 }
 
-func (tv *TreeValidator) isValidIter(ns string, fullMatch bool) (bool, []string) {
+func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	nsElems := strings.Split(ns, "/")[1:]
 	groupIndicator := make([]string, len(nsElems))
 
@@ -175,88 +165,6 @@ func (tv *TreeValidator) isValidIter(ns string, fullMatch bool) (bool, []string)
 	}
 
 	return false, groupIndicator
-}
-
-// second value indicated name of dynamic group for the element
-// ["", "group", ""] indicated that 2nd parameter should be treated as dynamic
-func (tv *TreeValidator) isValidRecu(ns string, fullMatch bool) (bool, []string) {
-	nsSep := strings.Split(ns, "/")[1:]
-	groupIndicator := make([]string, len(nsSep))
-
-	if tv.head == nil {
-		return true, groupIndicator // special case - there is no rule defined so everything is valid
-	}
-
-	isValid := false
-	var stackFromValidBranch []*Node
-
-	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
-		idx := len(stack) // len of stack indicated to which string element should we match
-		if idx >= len(nsSep) {
-			return false, true
-		}
-		if !n.currentElement.Match(nsSep[idx]) {
-			return false, true
-		}
-		if _, ok := n.currentElement.(*staticRecursiveAnyElement); ok {
-			isValid = true
-			stackFromValidBranch = stack
-			return false, false
-		}
-
-		if len(nsSep)-1 == idx {
-			switch {
-			case fullMatch && n.nodeType == leafLevel:
-				isValid = true
-				stackFromValidBranch = stack
-				return false, false
-			case !fullMatch:
-				isValid = true
-				return false, false
-			default:
-				return false, true
-			}
-		}
-
-		return true, true
-	})
-
-	for idx, node := range stackFromValidBranch {
-		if groupNode, ok := node.currentElement.(*dynamicAnyElement); ok {
-			groupIndicator[idx] = groupNode.group
-		}
-	}
-
-	return isValid, groupIndicator
-}
-
-// todo: remove recursive version after tests
-func (tv *TreeValidator) ListRulesRecu() []string {
-	if tv.head == nil {
-		return []string{}
-	}
-
-	nsList := []string{}
-	tv.traverse(tv.head, nil, func(n *Node, stack []*Node) (bool, bool) {
-		if n.nodeType != leafLevel {
-			return true, true
-		}
-
-		stack = append(stack, n)
-
-		nsElems := []string{}
-		for _, stackEl := range stack {
-			nsElems = append(nsElems, stackEl.currentElement.String())
-		}
-
-		nsString := "/" + strings.Join(nsElems, "/")
-		nsList = append(nsList, nsString)
-
-		return false, true
-	})
-
-	sort.Strings(nsList)
-	return nsList
 }
 
 func (tv *TreeValidator) ListRules() []string {
