@@ -199,41 +199,6 @@ func (tv *TreeValidator) ListRules() []string {
 	return nsList
 }
 
-// Define function executed when each node is reached during traverse.
-// First return value indicates if traversing should be continued (go to next level) after processing this node (false ends traversing of current branch)
-// Second return value indicates if traversing should be continued on other branches (false ends traversing of tree)
-type traverseFn func(*Node, []*Node) (bool, bool)
-
-// Traversing tree and executing function on each node.
-func (tv *TreeValidator) traverse(n *Node, stack []*Node, fn traverseFn) bool {
-
-	procBranch, procTree := fn(n, stack)
-	if !procTree {
-		return false
-	}
-	if !procBranch {
-		return true
-	}
-
-	stack = append(stack, n)
-
-	for _, subNode := range n.concreteSubNodes { // todo: optimalize O(n) into O(1)
-		cont := tv.traverse(subNode, stack, fn)
-		if !cont {
-			return false
-		}
-	}
-
-	for _, subNode := range n.regexSubNodes {
-		cont := tv.traverse(subNode, stack, fn)
-		if !cont {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (tv *TreeValidator) add(parsedNs *Namespace) error {
 	switch tv.strategy {
 	case metricDefinitionStrategy:
