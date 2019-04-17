@@ -108,6 +108,10 @@ func TestParseNamespace_InvalidScenarios(t *testing.T) {
 		"/el/el2/el3/el4/",
 		"/el/el2/**/m4",
 		"/el/el2/**/",
+		"/el/el2/ gr/m1",
+		"/el/el2/gr /m1",
+		"/el/el2/gr/ m1",
+		"/el/el2/gr/ m1 ",
 	}
 
 	Convey("Validate ParseNamespace - negative scenarios", t, func() {
@@ -241,6 +245,9 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 	testCases := []string{
 		"",
+		"  metr  ",
+		" metr",
+		"metr ",
 		"asd+",
 		"{asd[}",
 		"[group=]",
