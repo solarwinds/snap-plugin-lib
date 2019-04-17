@@ -73,7 +73,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
-	if cm.isOtherCollectInProgress(id) {
+	if cm.tryToActivateTask(id) {
 		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
 	}
 
@@ -169,7 +169,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 	}
 }
 
-func (cm *ContextManager) isOtherCollectInProgress(id int) bool {
+func (cm *ContextManager) tryToActivateTask(id int) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
