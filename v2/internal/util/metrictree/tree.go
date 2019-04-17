@@ -113,7 +113,7 @@ func (tv *TreeValidator) HasRules() bool {
 }
 
 func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
-	nsElems := strings.Split(ns, "/")[1:]
+	nsElems := strings.Split(ns, NsSeparator)[1:]
 	groupIndicator := make([]string, len(nsElems))
 
 	// special case - no rules defined - everything is valid and there are no groups (2nd param contains empty strings)
@@ -386,7 +386,7 @@ func (n *Node) path() string {
 		nsElems = append(nsElems, node.currentElement.String())
 	}
 
-	return "/" + strings.Join(nsElems, "/")
+	return NsSeparator + strings.Join(nsElems, NsSeparator)
 }
 
 func (n *Node) groupIndicator() []string {

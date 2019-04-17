@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	nsSeparator                  = "/"
+	NsSeparator                  = "/"
 	regexBeginIndicator          = "{"
 	regexEndIndicator            = "}"
 	staticAnyMatcher             = "*"
@@ -23,12 +23,12 @@ const minNamespaceElements = 2
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
-	splitNs := strings.Split(s, nsSeparator)
+	splitNs := strings.Split(s, NsSeparator)
 	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
 	}
 	if splitNs[0] != "" {
-		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
+		return nil, fmt.Errorf("namespace should start with '%s'", NsSeparator)
 	}
 
 	for i, nsElem := range splitNs[1:] {
