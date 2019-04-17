@@ -46,7 +46,7 @@ import (
 )
 
 const (
-	_ = iota
+	_ TreeStrategy = iota
 	metricDefinitionStrategy
 	metricFilteringStrategy
 )
@@ -59,8 +59,10 @@ const ( // nodeType const
 	leafLevel
 )
 
+type TreeStrategy int
+
 type TreeValidator struct {
-	strategy       int            // used to distinguish between definition and filtering tree
+	strategy       TreeStrategy   // used to distinguish between definition and filtering tree
 	definitionTree *TreeValidator // used in filtering tree (reference to definition tree)
 
 	head *Node
