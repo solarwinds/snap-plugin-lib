@@ -74,8 +74,7 @@ type Node struct {
 	nodeType       int
 	level          int // horizontal position in tree (starts from 0)
 
-	concreteSubNodes map[string]*Node
-	regexSubNodes    []*Node
+	subNodes map[string]*Node
 }
 
 func NewMetricDefinition() *TreeValidator {
@@ -149,13 +148,10 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 			return true, groupIndicator
 		}
 
-		for _, subNode := range visitedNode.regexSubNodes {
+		for _, subNode := range visitedNode.subNodes {
 			toVisit.Push(subNode)
 		}
 
-		for _, subNode := range visitedNode.concreteSubNodes {
-			toVisit.Push(subNode)
-		}
 	}
 
 	return false, groupIndicator
@@ -178,11 +174,7 @@ func (tv *TreeValidator) ListRules() []string {
 			continue
 		}
 
-		for _, subNode := range visitedNode.regexSubNodes {
-			toVisit.Push(subNode)
-		}
-
-		for _, subNode := range visitedNode.concreteSubNodes {
+		for _, subNode := range visitedNode.subNodes {
 			toVisit.Push(subNode)
 		}
 	}
@@ -243,7 +235,7 @@ func (tv *TreeValidator) findNodeToUpdate(head *Node, parsedNs *Namespace) (*Nod
 	nextElem := parsedNs.elements[1]
 
 	if currElem.String() == head.currentElement.String() {
-		if node, ok := head.concreteSubNodes[nextElem.String()]; ok {
+		if node, ok := head.subNodes[nextElem.String()]; ok {
 			return tv.findNodeToUpdate(node, &Namespace{elements: parsedNs.elements[1:]})
 		} else {
 			return head, &Namespace{parsedNs.elements[1:]}, nil
@@ -261,19 +253,17 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 	}
 	if len(ns.elements) == 1 {
 		return &Node{
-			currentElement:   ns.elements[0],
-			concreteSubNodes: nil,
-			regexSubNodes:    nil,
-			nodeType:         leafLevel,
-			level:            level,
+			currentElement: ns.elements[0],
+			subNodes:       nil,
+			nodeType:       leafLevel,
+			level:          level,
 		}
 	}
 
 	currNode := &Node{
-		currentElement:   ns.elements[0],
-		concreteSubNodes: map[string]*Node{},
-		regexSubNodes:    []*Node{},
-		level:            level,
+		currentElement: ns.elements[0],
+		subNodes:       map[string]*Node{},
+		level:          level,
 	}
 	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1)
 	nextNode.parent = currNode
@@ -289,11 +279,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 		}
 	}
 
-	if nextNode.currentElement.HasRegexp() {
-		currNode.regexSubNodes = []*Node{nextNode}
-	} else {
-		currNode.concreteSubNodes = map[string]*Node{nextNode.currentElement.String(): nextNode}
-	}
+	currNode.subNodes = map[string]*Node{nextNode.currentElement.String(): nextNode}
 
 	return currNode
 }
@@ -309,12 +295,7 @@ func (n *Node) attachNode(attachedNode *Node) error {
 		return errors.New("there can be only one dynamic element at current level")
 	}
 
-	if !attachedNode.currentElement.HasRegexp() {
-		n.concreteSubNodes[attachedNode.currentElement.String()] = attachedNode
-	} else {
-		n.regexSubNodes = append(n.regexSubNodes, attachedNode)
-	}
-
+	n.subNodes[attachedNode.currentElement.String()] = attachedNode
 	attachedNode.parent = n
 
 	return nil
