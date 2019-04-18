@@ -321,20 +321,16 @@ func (n *Node) attachNode(attachedNode *Node) error {
 }
 
 func (n *Node) trace() []*Node {
-	revNodeTrace := []*Node{n}
+	nodeTrace := make([]*Node, n.level+1)
+	nodeTrace[n.level] = n
 
 	currNode := n
 	for currNode.parent != nil {
 		currNode = currNode.parent
-		revNodeTrace = append(revNodeTrace, currNode)
+		nodeTrace[currNode.level] = currNode
 	}
 
-	for i := len(revNodeTrace)/2-1; i >= 0; i-- {
-		opp := len(revNodeTrace)-1-i
-		revNodeTrace[i], revNodeTrace[opp] = revNodeTrace[opp], revNodeTrace[i]
-	}
-
-	return revNodeTrace
+	return nodeTrace
 }
 
 func (n *Node) path() string {
