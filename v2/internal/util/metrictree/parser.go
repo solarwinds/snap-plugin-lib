@@ -19,6 +19,11 @@ const (
 
 const minNamespaceElements = 2
 
+const initCacheSize = 100
+
+var filteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
+var noFilteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
+
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
@@ -31,13 +36,33 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	}
 
 	for i, nsElem := range splitNs[1:] {
-		parsedEl, err := parseNamespaceElement(nsElem, isFilter)
-		if err != nil {
-			return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
+		var parsedEl namespaceElement
+		var ok bool
+		var err error
+
+		if isFilter {
+			parsedEl, ok = filteredNsBuffer[nsElem]
+		} else {
+			parsedEl, ok = noFilteredNsBuffer[nsElem]
 		}
+
+		if !ok {
+			parsedEl, err = parseNamespaceElement(nsElem, isFilter)
+			if err != nil {
+				return nil, fmt.Errorf("can't parse namespace (%s), error at index %d: %s", s, i, err)
+			}
+		}
+
 		if _, ok := parsedEl.(*staticRecursiveAnyElement); ok && i != len(splitNs[1:])-1 {
 			return nil, fmt.Errorf("recursive any-matcher (**) can be placed only as the last element")
 		}
+
+		if isFilter {
+			filteredNsBuffer[nsElem] = parsedEl
+		} else {
+			noFilteredNsBuffer[nsElem] = parsedEl
+		}
+
 		ns.elements = append(ns.elements, parsedEl)
 	}
 
