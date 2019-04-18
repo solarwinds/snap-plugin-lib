@@ -132,7 +132,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 		if visitedNode.level >= len(nsElems) {
 			continue
 		}
-		if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) { // todo: optimalization for def tree (return)
+		if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
 			continue
 		}
 
@@ -144,6 +144,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 				return true, groupIndicator
 			}
 		}
+
 		if _, ok := visitedNode.currentElement.(*staticRecursiveAnyElement); ok { // if ** we don't need to match anymore
 			return true, groupIndicator
 		}
@@ -152,17 +153,8 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 			toVisit.Push(subNode)
 		}
 
-		if visitedNode.level != len(nsElems)-1 {
-			// todo: O(n) -> O(1)
-
-			//nextNodeKey := nsElems[visitedNode.level+1]
-			//if nextNode, ok := visitedNode.concreteSubNodes[nextNodeKey]; ok {
-			//	toVisit.Push(nextNode)
-			//}
-
-			for _, subNode := range visitedNode.concreteSubNodes {
-				toVisit.Push(subNode)
-			}
+		for _, subNode := range visitedNode.concreteSubNodes {
+			toVisit.Push(subNode)
 		}
 	}
 
@@ -338,7 +330,7 @@ func (n *Node) trace() []*Node {
 		revNodeTrace = append(revNodeTrace, currNode)
 	}
 
-	for i := len(revNodeTrace) - 1; i >= 0; i-- { // todo: optimize
+	for i := len(revNodeTrace) - 1; i >= 0; i-- {
 		nodeTrace = append(nodeTrace, revNodeTrace[i])
 	}
 
