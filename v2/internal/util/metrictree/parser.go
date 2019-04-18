@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"unicode"
 )
 
 const (
@@ -131,7 +130,12 @@ func isValidIdentifier(s string) bool {
 	}
 
 	for _, el := range s {
-		if !unicode.IsLetter(el) && !unicode.IsDigit(el) && el != '-' && el != '_' {
+		switch {
+		case el >= 'A' && el <= 'Z':
+		case el >= 'a' && el <= 'z':
+		case el >= '0' && el <= '9':
+		case el == '-' || el == '_':
+		default:
 			return false
 		}
 	}
