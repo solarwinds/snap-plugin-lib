@@ -326,7 +326,12 @@ func (n *Node) trace() []*Node {
 	currNode := n
 	for currNode.parent != nil {
 		currNode = currNode.parent
-		revNodeTrace = append([]*Node{currNode}, revNodeTrace...)
+		revNodeTrace = append(revNodeTrace, currNode)
+	}
+
+	for i := len(revNodeTrace)/2-1; i >= 0; i-- {
+		opp := len(revNodeTrace)-1-i
+		revNodeTrace[i], revNodeTrace[opp] = revNodeTrace[opp], revNodeTrace[i]
 	}
 
 	return revNodeTrace
