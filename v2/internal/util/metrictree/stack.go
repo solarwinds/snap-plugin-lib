@@ -13,6 +13,7 @@ func (s *nodeStack) Pop() (*Node, bool) {
 
 	idx := s.Len() - 1
 	node := (*s)[idx]
+	(*s)[idx] = nil
 	*s = (*s)[:idx]
 
 	return node, true
