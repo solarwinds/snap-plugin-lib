@@ -22,7 +22,6 @@ package plugin
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
@@ -54,7 +53,8 @@ func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc
 func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamServer) error {
 	var logF = log.WithFields(log.Fields{"function": "PublishAsStream"})
 
-	var errList []string
+	var mts []Metric
+	var cfg Config
 
 	for {
 		protoMts, err := stream.Recv()
@@ -66,17 +66,16 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 			return fmt.Errorf("failure when reading from stream: %s", err.Error())
 		}
 
-		logF.WithFields(log.Fields{"length": len(protoMts.Metrics)}).Debug("Metrics chunk will be sent to appoptics")
+		logF.WithFields(log.Fields{"length": len(protoMts.Metrics)}).Debug("Metrics chunk received from AppOptics")
 
-		mts := convertProtoToMetrics(protoMts.Metrics)
-		cfg := fromProtoConfig(protoMts.Config)
-
-		err = p.plugin.Publish(mts, cfg)
-		if err != nil {
-			errList = append(errList, err.Error())
-		}
+		streamMts := convertProtoToMetrics(protoMts.Metrics)
+		mts = append(mts, streamMts...)
+		cfg = fromProtoConfig(protoMts.Config)
 	}
 
-	reply := &rpc.ErrReply{Error: strings.Join(errList, "")}
+	logF.WithFields(log.Fields{"length": len(mts)}).Debug("Metrics will be published")
+
+	err := p.plugin.Publish(mts, cfg)
+	reply := &rpc.ErrReply{Error: err.Error()}
 	return stream.SendAndClose(reply)
 }
