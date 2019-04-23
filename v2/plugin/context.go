@@ -33,7 +33,7 @@ type Context interface {
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
 type CollectorDefinition interface {
 	// Define supported metric, its description and indication if metric is default
-	DefineMetric(string, bool, string)
+	DefineMetric(string, string, bool, string)
 
 	// Define description for dynamic element
 	DefineGroup(string, string)

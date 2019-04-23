@@ -74,10 +74,18 @@ message InfoResponse {
 // Common messages definition
 
 message Metric {
-    string namespace = 1;
+    repeated Namespace namespace = 1;
     MetricValue value = 2;
     map<string, string> tags = 3;
     Time timestamp = 4;
+    string description = 5;
+    string unit = 6;
+}
+
+message Namespace {
+    string name = 1;
+    string value = 2;
+    string description = 3;
 }
 
 message MetricValue {

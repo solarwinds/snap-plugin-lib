@@ -1,32 +1,51 @@
 package proxy
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 	"sync"
+	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
+
+const nsSeparator = metrictree.NsSeparator
 
 type pluginContext struct {
 	rawConfig          []byte
 	flattenedConfig    map[string]string
-	mtsSelectors       []string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
+	metricsFilters     *metrictree.TreeValidator // metric filters defined by task (yaml)
+
+	sessionMts []*types.Metric
+
+	ctxManager *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(rawConfig []byte, mtsSelectors []string) (*pluginContext, error) {
-	flattenConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
+func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
+	if ctxManager == nil {
+		return nil, errors.New("can't create context without valid context manager")
+	}
+
+	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
 	if err != nil {
 		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
 	}
 
-	return &pluginContext{
+	pc := &pluginContext{
 		rawConfig:       []byte(rawConfig),
-		flattenedConfig: flattenConfig,
-		mtsSelectors:    mtsSelectors,
+		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
-	}, nil
+	}
+
+	pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition)
+	pc.ctxManager = ctxManager
+
+	return pc, nil
 }
 
 func (pc *pluginContext) Config(key string) (string, bool) {
@@ -61,12 +80,68 @@ func (pc *pluginContext) Load(key string) (interface{}, bool) {
 	return obj, ok
 }
 
-func (pc *pluginContext) AddMetric(string, interface{}) error {
-	panic("implement me")
+func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
+	return pc.AddMetricWithTags(ns, v, nil)
 }
 
-func (pc *pluginContext) AddMetricWithTags(string, interface{}, map[string]string) error {
-	panic("implement me")
+func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+	parsedNs, err := metrictree.ParseNamespace(ns, false)
+	if err != nil {
+		return fmt.Errorf("invalid format of namespace: %v", err)
+	}
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
+		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %v", err)
+	}
+
+	matchDefinition, groupPositions := pc.ctxManager.metricsDefinition.IsValid(ns)
+	matchFilters, _ := pc.metricsFilters.IsValid(ns)
+
+	if !matchDefinition {
+		return fmt.Errorf("couldn't match metric with plugin definition: %v", err)
+	}
+
+	if !matchFilters {
+		return fmt.Errorf("couldn't match metrics with plugin filters: %v", err)
+	}
+
+	mtNamespace := []types.NamespaceElement{}
+	nsDefFormat := strings.Split(ns, metrictree.NsSeparator)[1:]
+
+	for i, nsElem := range nsDefFormat {
+		groupName := groupPositions[i]
+		mtNamespace = append(mtNamespace, types.NamespaceElement{
+			Name:        groupName,
+			Value:       pc.extractStaticValue(nsElem),
+			Description: pc.ctxManager.groupsDescription[groupName],
+		})
+
+		if groupPositions[i] != "" {
+			nsDefFormat[i] = fmt.Sprintf("[%s]", groupPositions[i])
+		}
+	}
+
+	nsDescKey := nsSeparator + strings.Join(nsDefFormat, nsSeparator)
+	mtMeta := pc.metricMeta(nsDescKey)
+
+	pc.sessionMts = append(pc.sessionMts, &types.Metric{
+		Namespace:   mtNamespace,
+		Value:       v,
+		Tags:        tags,
+		Unit:        mtMeta.unit,
+		Timestamp:   time.Now(),
+		Description: mtMeta.description,
+	})
+
+	return nil
+}
+
+func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
+	if mtMeta, ok := pc.ctxManager.metricsMetadata[nsKey]; ok {
+		return mtMeta
+	}
+
+	// if metric wasn't defined just return structure with empty fields
+	return metricMetadata{}
 }
 
 func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
@@ -75,4 +150,15 @@ func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
 
 func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
 	panic("implement me")
+}
+
+// extract static value when adding metrics like. /plugin/[grp=id]/m1
+// function assumes valid format
+func (pc *pluginContext) extractStaticValue(s string) string {
+	eqIndex := strings.Index(s, "=")
+	if eqIndex != -1 {
+		return s[eqIndex+1 : len(s)-1]
+	}
+
+	return s
 }

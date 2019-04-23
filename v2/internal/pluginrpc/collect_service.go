@@ -1,7 +1,13 @@
 package pluginrpc
 
 import (
+	"fmt"
+
 	"golang.org/x/net/context"
+)
+
+const (
+	maxCollectChunkSize = 100
 )
 
 type collectService struct {
@@ -19,11 +25,32 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 
 	taskID := int(request.GetTaskId())
 
-	cs.proxy.RequestCollect(taskID)
+	pluginMts, err := cs.proxy.RequestCollect(taskID)
+	if err != nil {
+		return fmt.Errorf("plugin is not able to collect metrics: %s", err)
+	}
 
-	_ = stream.Send(&CollectResponse{
-		MetricSet: nil,
-	})
+	protoMts := make([]*Metric, 0, len(pluginMts))
+	for i, pluginMt := range pluginMts {
+		protoMt, err := toGRPCMetric(pluginMt)
+		if err != nil {
+			log.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
+		}
+
+		protoMts = append(protoMts, protoMt)
+
+		if len(protoMts) == maxCollectChunkSize || i == len(pluginMts)-1 {
+			err = stream.Send(&CollectResponse{
+				MetricSet: protoMts,
+			})
+			if err != nil {
+				log.WithError(err).Error("can't send metric chunk over GRPC")
+				return err
+			}
+
+			log.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
+		}
+	}
 
 	return nil
 }
@@ -35,9 +62,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
-	cs.proxy.LoadTask(taskID, jsonConfig, metrics)
-
-	return &LoadResponse{}, nil
+	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }
 
 func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
@@ -45,9 +70,7 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 
 	taskID := int(request.GetTaskId())
 
-	cs.proxy.UnloadTask(taskID)
-
-	return &UnloadResponse{}, nil
+	return &UnloadResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {

@@ -1,4 +1,4 @@
-// +build medium
+// +build skipmedium
 
 package runner
 
@@ -100,17 +100,23 @@ func (s *SuiteT) sendCollect(taskID int) (*pluginrpc.CollectResponse, error) {
 		return nil, err
 	}
 
+	aggregatedMts := &pluginrpc.CollectResponse{
+		MetricSet: []*pluginrpc.Metric{},
+	}
+
 	for {
-		_, err := stream.Recv()
+		partialResponse, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return &pluginrpc.CollectResponse{}, err
+			return nil, err
 		}
+
+		aggregatedMts.MetricSet = append(aggregatedMts.MetricSet, partialResponse.MetricSet...)
 	}
 
-	return &pluginrpc.CollectResponse{}, err
+	return aggregatedMts, nil
 }
 
 /*****************************************************************************/
@@ -131,8 +137,6 @@ func (sc *simpleCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestSimpleCollector() {
-	s.T().Skip()
-
 	// Arrange
 	jsonConfig := []byte(`{
 		"address": {
@@ -214,22 +218,22 @@ func (s *SuiteT) TestSimpleCollector() {
 /*****************************************************************************/
 
 type longRunningCollector struct {
-	collectCalls int
+	collectCalls    int
+	collectDuration time.Duration
 }
 
 func (c *longRunningCollector) Collect(ctx plugin.Context) error {
 	c.collectCalls++
-	time.Sleep(1 * time.Minute)
+	time.Sleep(c.collectDuration)
 	return nil
 }
 
 func (s *SuiteT) TestKillLongRunningCollector() {
-	s.T().Skip()
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	var mtsSelector []string
 
-	longRunningCollector := &longRunningCollector{}
+	longRunningCollector := &longRunningCollector{collectDuration: 1 * time.Second}
 	s.startCollector(longRunningCollector)
 	s.startClient()
 
@@ -267,24 +271,81 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 	})
 }
 
+func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	longRunningCollector := &longRunningCollector{collectDuration: 5 * time.Second}
+	s.startCollector(longRunningCollector)
+	s.startClient()
+
+	errCh := make(chan error, 1)
+
+	Convey("Validate that collector associated with the same id can't be run in more that 1 instance", s.T(), func() {
+		const numberOfCollectors = 10
+		const numberOfCollectorsWithSameID = 5
+
+		for id := 1; id <= numberOfCollectors; id++ {
+			_, _ = s.sendLoad(id, jsonConfig, mtsSelector)
+
+			for i := 1; i <= numberOfCollectorsWithSameID; i++ {
+				go func(id int) {
+					_, err := s.sendCollect(id)
+					errCh <- err
+				}(id)
+			}
+		}
+
+		errorCounter := 0
+		for i := 0; i < numberOfCollectorsWithSameID*numberOfCollectors; i++ {
+			errRecv := <-errCh
+			if errRecv != nil {
+				errorCounter++
+			}
+		}
+
+		So(errorCounter, ShouldEqual, (numberOfCollectors*numberOfCollectorsWithSameID)-numberOfCollectors) // only 1 task from each id should complete without error
+
+		// validate that when collect is completed you can requested it
+		_, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
+
+		time.Sleep(2 * time.Second)
+		_, _ = s.sendKill()
+	})
+}
+
 /*****************************************************************************/
 
 type configurableCollector struct {
-	t *testing.T
+	t           *testing.T
+	loadCalls   int
+	unloadCalls int
 }
 
 type storedObj struct {
 	count int
 }
 
+func (cc *configurableCollector) resetCallCounters() {
+	cc.loadCalls = 0
+	cc.unloadCalls = 0
+}
+
 func (cc *configurableCollector) Load(ctx plugin.Context) error {
+	cc.loadCalls++
+
 	// Arrange - create configuration objects
 	ctx.Store("obj1", &storedObj{count: 10})
 	ctx.Store("obj2", &storedObj{count: -14})
+
 	return nil
 }
 
 func (cc *configurableCollector) Unload(ctx plugin.Context) error {
+	cc.unloadCalls++
+
 	return nil
 }
 
@@ -339,15 +400,231 @@ func (s *SuiteT) TestConfigurableCollector() {
 	s.startCollector(configurableCollector)
 	s.startClient()
 
-	Convey("", s.T(), func() {
+	Convey("Validate that load and unload works in valid scenarios", s.T(), func() {
+		{
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendCollect(1)
+			So(err, ShouldBeNil)
+		}
+		{
+			_, err := s.sendCollect(1)
+			So(err, ShouldBeNil)
+		}
+		{
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
+	})
+
+	Convey("Validate that load and unload works properly in invalid scenarios", s.T(), func() {
+		configurableCollector.resetCallCounters()
+
+		{
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendLoad(2, jsonConfig, mtsSelector)
+			So(err, ShouldBeNil)
+			So(configurableCollector.loadCalls, ShouldEqual, 2)
+		}
+		{ // Shouldn't accept load of the same task
+			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			So(err, ShouldBeError)
+			So(configurableCollector.loadCalls, ShouldEqual, 2)
+		}
+		{ // Shouldn't accept unload of the same task which was loaded
+			_, err := s.sendUnload(3)
+			So(err, ShouldBeError)
+			So(configurableCollector.unloadCalls, ShouldEqual, 0)
+		}
+		{
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
+		{ // Shouldn't accept unload of the task that is already unloaded
+			_, err := s.sendUnload(1)
+			So(err, ShouldBeError)
+			So(configurableCollector.unloadCalls, ShouldEqual, 1)
+		}
+		{
+			_, err := s.sendUnload(2)
+			So(err, ShouldBeNil)
+			So(configurableCollector.unloadCalls, ShouldEqual, 2)
+		}
+	})
+
+	time.Sleep(2 * time.Second)
+	_, _ = s.sendKill()
+
+	// Assert is handled within configurableCollector.Collect() method
+}
+
+/*****************************************************************************/
+
+type kubernetesCollector struct {
+	t *testing.T
+}
+
+func (kc *kubernetesCollector) DefineMetrics(ctx plugin.CollectorDefinition) error {
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Pending", "", true, "this includes time before being bound to a node, as well as time spent pulling images onto the host")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Running", "count", true, "the pod has been bound to a node and all of the containers have been started")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Succeeded", "", true, "all containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Failed", "", true, "all containers in the pod have terminated, and at least one container has terminated in a failure")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Unknown", "", true, "for some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/condition/ready", "", false, "specifies if the pod is ready to serve requests")
+	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/condition/scheduled", "", false, "status of the scheduling process for the pod")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/restarts", "", true, "number of times the container has been restarted")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/ready", "boolean", true, "specifies whether the container has passed its readiness probe")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/waiting", "", true, "value 1 if container is waiting else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/running", "", true, "value 1 if container is running else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/status/terminated", "", true, "value 1 if container is terminated else value 0")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/requested/cpu/cores", "", true, "The number of requested cpu cores by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/requested/memory/bytes", "", true, "The number of requested memory bytes by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/limits/cpu/cores", "", true, "The number of requested cpu cores by a container")
+	ctx.DefineMetric("/kubernetes/container/[namespace]/[node]/[pod]/[container]/limits/memory/bytes", "", true, "The limit on memory to be used by a container in bytes")
+	ctx.DefineMetric("/kubernetes/node/[node]/spec/unschedulable", "", true, "Whether a node can schedule new pods.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/outofdisk", "", false, "---")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/cpu/cores", "bytes", false, "The CPU resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/memory/bytes", "bytes", false, "The memory resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/allocatable/pods", "bytes", false, "The pod resources of a node that are available for scheduling.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/cpu/cores", "", false, "The total CPU resources of the node.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/memory/bytes", "", false, "The total memory resources of the node.")
+	ctx.DefineMetric("/kubernetes/node/[node]/status/capacity/pods", "", false, "The total pod resources of the node.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/metadata/generation", "", true, "The desired generation sequence number for deployment. If a deployment succeeds should be the same as the observed generation.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/observedgeneration", "", true, "The generation sequence number after deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/targetedreplicas", "", true, "Total number of non-terminated pods targeted by this deployment (their labels match the selector).")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/availablereplicas", "", true, "Total number of available pods (ready for at least minReadySeconds) targeted by this deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/unavailablereplicas", "", true, "Total number of unavailable pods targeted by this deployment.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/updatedreplicas", "", true, "---")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/status/deploynotfinished", "", true, "If desired and observed generation are not the same, then either an ongoing deploy or a failed deploy.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/desiredreplicas", "", false, "Number of desired pods.")
+	ctx.DefineMetric("/kubernetes/deployment/[namespace]/[deployment]/spec/paused", "", false, "---")
+
+	ctx.DefineGroup("node", "kubernetes node name")
+	ctx.DefineGroup("namespace", "kubernetes namespace")
+	ctx.DefineGroup("pod", "kubernetes pod")
+	ctx.DefineGroup("container", "kubernetes container")
+	ctx.DefineGroup("deployment", "kubernetes deployment")
+
+	return nil
+}
+
+func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
+	Convey("Validate that metrics are filtered according to metric definitions and filtering", kc.t, func() {
+		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
+
+		So(ctx.AddMetric("/kubernetes/container/appoptics1/node-251/pod-34/mycont155/status/ready", 15), ShouldBeNil)   // added
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/ready", 21), ShouldBeNil)     // added
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status", 1), ShouldBeError)          // discarded - no metric status defined
+		So(ctx.AddMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/checking", 1), ShouldBeError) // discarded - no metric status/checking defined
+
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/outofdisk", 1), ShouldBeNil)             // added
+		So(ctx.AddMetric("/kubernetes/node/node-124/status/allocatable/cpu/cores", 1), ShouldBeNil) // added
+
+		So(ctx.AddMetric("/kubernetes/deployment/[namespace=appoptics3]/depl-2322/status/targetedreplicas", 10), ShouldBeNil) // added
+		So(ctx.AddMetric("/kubernetes/deployment/[namespace=loggly12]/depl-5402/status/availablereplicas", 20), ShouldBeNil)  // added
+		So(ctx.AddMetric("/kubernetes/deployment/[namespace=papertrail15]/depl-52/status/updatedreplicas", 30), ShouldBeNil)  // added
+		So(ctx.AddMetric("/kubernetes/deployment/[name=appoptics3]/depl-2322/status/targetedreplicas", 1), ShouldBeError)     // discarded (name != namespace)
+	})
+	return nil
+}
+
+func (s *SuiteT) TestKubernetesCollector() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/kubernetes/pod/node-125/*/*/status/*/*",
+		"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+		"/kubernetes/node/*/status/**",
+		"/kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*",
+		"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+		"/kubernetes/deployment/papertrail15/*/*/*",
+	}
+
+	sendingCollector := &kubernetesCollector{t: s.T()}
+	s.startCollector(sendingCollector)
+	s.startClient()
+
+	Convey("Validate that collector can gather metric based on definition and filter", s.T(), func() {
 		// Act
-		_, _ = s.sendLoad(1, jsonConfig, mtsSelector)
-		_, _ = s.sendCollect(1)
-		_, _ = s.sendCollect(1)
+		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		So(err, ShouldBeNil)
+
+		collMts, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
+		So(len(collMts.MetricSet), ShouldEqual, 8)
 
 		time.Sleep(2 * time.Second)
-		_, _ = s.sendKill()
+		_, err = s.sendKill()
+		So(err, ShouldBeNil)
 
-		// Assert is handled within configurableCollector.Collect() method
+		// Assert is handled within kubernetesCollector.Collect() method
+	})
+}
+
+/*****************************************************************************/
+
+type noDefinitionCollector struct {
+	collectCalls int
+	t            *testing.T
+}
+
+func (ndc *noDefinitionCollector) Collect(ctx plugin.Context) error {
+	ndc.collectCalls++
+
+	Convey("Validate that metrics are filtered according to filtering", ndc.t, func() {
+		So(ctx.AddMetric("/plugin/group1/subgroup1/metric1", 10), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group2/id12/metric1", 20), ShouldBeNil)               // added
+		So(ctx.AddMetric("/plugin/group3/subgroup3/metric4", 15), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group3/subgroup3/metric$4", 12), ShouldBeError)       // invalid char used in element
+		So(ctx.AddMetric("/plugin/group3/subgroup4/metric4", 15), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group3/subgroup4/sub5/metric6", 13), ShouldBeNil)     // added
+		So(ctx.AddMetric("/plugin/group3/subgroup4/sub()5/metric6", 13), ShouldBeError) // invalid char used in element
+		So(ctx.AddMetric("some/plugin/group1/subgroup1/metric1", 11), ShouldBeError)    // invalid: doesn't start from "/"
+		So(ctx.AddMetric("/plugin/group2/[subgroup2=id12]/metric1", 20), ShouldBeError) // invalid: using dyn. element
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestWithoutDefinitionCollector() {
+	logrus.SetLevel(logrus.TraceLevel)
+
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/plugin/group1/subgroup1/metric1",
+		"/plugin/group2/{id.*}/metric1",
+		"/plugin/group2/[subgroup2={id.*}]/metric2",
+		"/plugin/group3/subgroup3/{.*}",
+		"/plugin/group3/subgroup4/**",
+	}
+
+	noDefCollector := &noDefinitionCollector{t: s.T()}
+	s.startCollector(noDefCollector)
+	s.startClient()
+
+	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
+		// Act
+		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		So(err, ShouldBeNil)
+
+		collMts, err := s.sendCollect(1)
+		So(err, ShouldBeNil)
+		So(len(collMts.MetricSet), ShouldEqual, 5)
+
+		time.Sleep(2 * time.Second)
+		_, err = s.sendKill()
+		So(err, ShouldBeNil)
 	})
 }
