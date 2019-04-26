@@ -36,8 +36,8 @@ type metricMetadata struct {
 }
 
 type ContextManager struct {
-	collector  plugin.Collector       // reference to custom plugin code
-	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
+	collector  plugin.Collector // reference to custom plugin code
+	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
 	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
@@ -51,7 +51,7 @@ type ContextManager struct {
 func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
-		contextMap:  map[int]*pluginContext{},
+		contextMap:  sync.Map{},
 		activeTasks: map[int]struct{}{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
@@ -74,10 +74,11 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	}
 	defer cm.markTaskAsCompleted(id)
 
-	context, ok := cm.contextMap[id]
+	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
+	context := contextIf.(*pluginContext)
 
 	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
@@ -95,7 +96,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	}
 	defer cm.markTaskAsCompleted(id)
 
-	if _, ok := cm.contextMap[id]; ok {
+	if _, ok := cm.contextMap.Load(id); ok {
 		return errors.New("context with given id was already defined")
 	}
 
@@ -118,7 +119,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 		}
 	}
 
-	cm.contextMap[id] = newCtx
+	cm.contextMap.Store(id, newCtx)
 
 	return nil
 }
@@ -129,18 +130,20 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 	defer cm.markTaskAsCompleted(id)
 
-	if _, ok := cm.contextMap[id]; !ok {
+	contextIf, ok := cm.contextMap.Load(id)
+	if !ok {
 		return errors.New("context with given id is not defined")
 	}
 
+	context := contextIf.(*pluginContext)
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
-		err := loadable.Unload(cm.contextMap[id])
+		err := loadable.Unload(context)
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
 		}
 	}
 
-	delete(cm.contextMap, id)
+	cm.contextMap.Delete(id)
 	return nil
 }
 
