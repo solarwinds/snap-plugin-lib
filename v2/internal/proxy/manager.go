@@ -90,10 +90,10 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 }
 
 func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
-	//if cm.tryToActivateTask(id) {
-	//	return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
-	//}
-	//defer cm.markTaskAsCompleted(id)
+	if cm.tryToActivateTask(id) {
+		return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
 
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
@@ -124,10 +124,10 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 }
 
 func (cm *ContextManager) UnloadTask(id int) error {
-	//if cm.tryToActivateTask(id) {
-	//	return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
-	//}
-	//defer cm.markTaskAsCompleted(id)
+	if cm.tryToActivateTask(id) {
+		return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
 
 	if _, ok := cm.contextMap[id]; !ok {
 		return errors.New("context with given id is not defined")
