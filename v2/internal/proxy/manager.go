@@ -48,7 +48,7 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 }
 
-func NewContextManager(collector plugin.Collector, pluginName string, version string) *ContextManager {
+func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  map[int]*pluginContext{},
@@ -69,15 +69,15 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
+	if cm.tryToActivateTask(id) {
+		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
+
 	context, ok := cm.contextMap[id]
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
-	if cm.tryToActivateTask(id) {
-		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
-	}
-
-	defer cm.markCollectAsCompleted(id)
 
 	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
@@ -90,6 +90,11 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 }
 
 func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
+	//if cm.tryToActivateTask(id) {
+	//	return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
+	//}
+	//defer cm.markTaskAsCompleted(id)
+
 	if _, ok := cm.contextMap[id]; ok {
 		return errors.New("context with given id was already defined")
 	}
@@ -119,12 +124,20 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 }
 
 func (cm *ContextManager) UnloadTask(id int) error {
+	//if cm.tryToActivateTask(id) {
+	//	return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
+	//}
+	//defer cm.markTaskAsCompleted(id)
+
 	if _, ok := cm.contextMap[id]; !ok {
 		return errors.New("context with given id is not defined")
 	}
 
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
-		loadable.Unload(cm.contextMap[id])
+		err := loadable.Unload(cm.contextMap[id])
+		if err != nil {
+			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
+		}
 	}
 
 	delete(cm.contextMap, id)
@@ -165,7 +178,10 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 
 func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
-		definable.DefineMetrics(cm)
+		err := definable.DefineMetrics(cm)
+		if err != nil {
+			log.WithError(err).Errorf("Error occurred during plugin definition")
+		}
 	}
 }
 
@@ -181,7 +197,7 @@ func (cm *ContextManager) tryToActivateTask(id int) bool {
 	return false
 }
 
-func (cm *ContextManager) markCollectAsCompleted(id int) {
+func (cm *ContextManager) markTaskAsCompleted(id int) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 

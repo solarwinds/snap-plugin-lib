@@ -74,7 +74,7 @@ func TestContextAPI_Config(t *testing.T) {
 
 		Convey("Validate Context::ConfigKeys", func() {
 
-			keyList := []string{}
+			var keyList []string
 
 			Convey("User can read allowed config fields", func() {
 

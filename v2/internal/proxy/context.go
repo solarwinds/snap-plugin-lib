@@ -54,7 +54,7 @@ func (pc *pluginContext) Config(key string) (string, bool) {
 }
 
 func (pc *pluginContext) ConfigKeys() []string {
-	keysList := []string{}
+	var keysList []string
 	for k := range pc.flattenedConfig {
 		keysList = append(keysList, k)
 	}
@@ -104,7 +104,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 		return fmt.Errorf("couldn't match metrics with plugin filters: %v", err)
 	}
 
-	mtNamespace := []types.NamespaceElement{}
+	var mtNamespace []types.NamespaceElement
 	nsDefFormat := strings.Split(ns, metrictree.NsSeparator)[1:]
 
 	for i, nsElem := range nsDefFormat {

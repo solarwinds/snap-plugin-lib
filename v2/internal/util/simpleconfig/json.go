@@ -47,7 +47,7 @@ func parseMap(aMap map[string]interface{}, retMap map[string]string, path ...str
 }
 
 func parseArray(anArray []interface{}) []string {
-	res := []string{}
+	var res []string
 
 	for _, val := range anArray {
 		switch val.(type) {
