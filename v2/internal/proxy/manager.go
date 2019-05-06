@@ -69,7 +69,7 @@ func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager 
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
-	if !cm.tryToActivateTask(id) {
+	if !cm.activateTask(id) {
 		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
@@ -91,7 +91,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 }
 
 func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
-	if !cm.tryToActivateTask(id) {
+	if !cm.activateTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
@@ -125,7 +125,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 }
 
 func (cm *ContextManager) UnloadTask(id int) error {
-	if !cm.tryToActivateTask(id) {
+	if !cm.activateTask(id) {
 		return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
@@ -188,7 +188,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 	}
 }
 
-func (cm *ContextManager) tryToActivateTask(id int) bool {
+func (cm *ContextManager) activateTask(id int) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
