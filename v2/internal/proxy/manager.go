@@ -36,11 +36,11 @@ type metricMetadata struct {
 }
 
 type ContextManager struct {
-	collector  plugin.Collector       // reference to custom plugin code
-	contextMap map[int]*pluginContext // map of contexts associated with taskIDs
+	collector  plugin.Collector // reference to custom plugin code
+	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
-	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
+	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -48,10 +48,10 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 }
 
-func NewContextManager(collector plugin.Collector, pluginName string, version string) *ContextManager {
+func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
-		contextMap:  map[int]*pluginContext{},
+		contextMap:  sync.Map{},
 		activeTasks: map[int]struct{}{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
@@ -69,15 +69,16 @@ func NewContextManager(collector plugin.Collector, pluginName string, version st
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
-	context, ok := cm.contextMap[id]
+	if !cm.activateTask(id) {
+		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
+
+	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
 	}
-	if cm.tryToActivateTask(id) {
-		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
-	}
-
-	defer cm.markCollectAsCompleted(id)
+	context := contextIf.(*pluginContext)
 
 	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
@@ -90,7 +91,12 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 }
 
 func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
-	if _, ok := cm.contextMap[id]; ok {
+	if !cm.activateTask(id) {
+		return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
+
+	if _, ok := cm.contextMap.Load(id); ok {
 		return errors.New("context with given id was already defined")
 	}
 
@@ -113,21 +119,31 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 		}
 	}
 
-	cm.contextMap[id] = newCtx
+	cm.contextMap.Store(id, newCtx)
 
 	return nil
 }
 
 func (cm *ContextManager) UnloadTask(id int) error {
-	if _, ok := cm.contextMap[id]; !ok {
+	if !cm.activateTask(id) {
+		return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
+	}
+	defer cm.markTaskAsCompleted(id)
+
+	contextI, ok := cm.contextMap.Load(id)
+	if !ok {
 		return errors.New("context with given id is not defined")
 	}
 
+	context := contextI.(*pluginContext)
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
-		loadable.Unload(cm.contextMap[id])
+		err := loadable.Unload(context)
+		if err != nil {
+			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
+		}
 	}
 
-	delete(cm.contextMap, id)
+	cm.contextMap.Delete(id)
 	return nil
 }
 
@@ -165,23 +181,26 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 
 func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
-		definable.DefineMetrics(cm)
+		err := definable.DefineMetrics(cm)
+		if err != nil {
+			log.WithError(err).Errorf("Error occurred during plugin definition")
+		}
 	}
 }
 
-func (cm *ContextManager) tryToActivateTask(id int) bool {
+func (cm *ContextManager) activateTask(id int) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
 	if _, ok := cm.activeTasks[id]; ok {
-		return true
+		return false
 	}
 
 	cm.activeTasks[id] = struct{}{}
-	return false
+	return true
 }
 
-func (cm *ContextManager) markCollectAsCompleted(id int) {
+func (cm *ContextManager) markTaskAsCompleted(id int) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 

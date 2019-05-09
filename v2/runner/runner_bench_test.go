@@ -1,3 +1,5 @@
+// +build bench
+
 /*
 Benchmark test mainly measures:
 - the time needed to create validation tree (1-33 metrics)
@@ -188,3 +190,5 @@ func genMetricAddition(addRatio int, b *testing.B) {
 func BenchmarkFilterMetrics_All_25p(b *testing.B)  { genMetricAddition(4, b) }
 func BenchmarkFilterMetrics_All_50p(b *testing.B)  { genMetricAddition(2, b) }
 func BenchmarkFilterMetrics_All_100p(b *testing.B) { genMetricAddition(1, b) }
+
+///////////////////////////////////////////////////////////////////////////////
