@@ -39,8 +39,8 @@ type ContextManager struct {
 	collector  plugin.Collector // reference to custom plugin code
 	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
-	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
+	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -130,12 +130,12 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 	defer cm.markTaskAsCompleted(id)
 
-	contextIf, ok := cm.contextMap.Load(id)
+	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
 		return errors.New("context with given id is not defined")
 	}
 
-	context := contextIf.(*pluginContext)
+	context := contextI.(*pluginContext)
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
 		err := loadable.Unload(context)
 		if err != nil {

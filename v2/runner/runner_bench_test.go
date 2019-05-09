@@ -1,4 +1,4 @@
-// +build manual
+// +build bench
 
 /*
 Benchmark test mainly measures:
