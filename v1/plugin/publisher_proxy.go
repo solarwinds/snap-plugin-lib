@@ -76,6 +76,12 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 	logF.WithFields(log.Fields{"length": len(mts)}).Debug("Metrics will be published")
 
 	err := p.plugin.Publish(mts, cfg)
-	reply := &rpc.ErrReply{Error: err.Error()}
+
+	errMsg := ""
+	if err != nil {
+		errMsg = err.Error()
+	}
+
+	reply := &rpc.ErrReply{Error: errMsg}
 	return stream.SendAndClose(reply)
 }
