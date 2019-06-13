@@ -73,13 +73,17 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 		cfg = fromProtoConfig(protoMts.Config)
 	}
 
-	logF.WithFields(log.Fields{"length": len(mts)}).Debug("Metrics will be published")
-
-	err := p.plugin.Publish(mts, cfg)
-
 	errMsg := ""
-	if err != nil {
-		errMsg = err.Error()
+	if len(mts) != 0 {
+		logF.WithFields(log.Fields{"length": len(mts)}).Debug("Metrics will be published")
+
+		err := p.plugin.Publish(mts, cfg)
+
+		if err != nil {
+			errMsg = err.Error()
+		}
+	} else {
+		logF.Info("Nothing to publish, request will be ignored.")
 	}
 
 	reply := &rpc.ErrReply{Error: errMsg}
