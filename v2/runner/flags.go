@@ -3,11 +3,12 @@ package runner
 import (
 	"flag"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/sirupsen/logrus"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
 )
 
 type logLevelHandler struct {

@@ -8,10 +8,10 @@ package pluginrpc
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"net"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -33,7 +33,7 @@ func StartGRPCController(proxy CollectorProxy, opt *plugin.Options) {
 	}
 
 	grpcServer := grpc.NewServer()
-	RegisterControllerServer(grpcServer, newControlService(closeChan))
+	RegisterControllerServer(grpcServer, newControlService(closeChan, DefaultPingTimeout, DefaultMaxMissingPingCounter))
 	RegisterCollectorServer(grpcServer, newCollectService(proxy))
 
 	go func() {
@@ -43,7 +43,9 @@ func StartGRPCController(proxy CollectorProxy, opt *plugin.Options) {
 		}
 	}()
 
-	<-closeChan
+	exitErr := <-closeChan
+	log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+
 	shutdownPlugin(grpcServer)
 }
 
