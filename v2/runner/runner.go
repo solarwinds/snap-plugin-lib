@@ -23,5 +23,5 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	logrus.SetLevel(opt.LogLevel)
 
 	contextManager := proxy.NewContextManager(collector, name, version)
-	pluginrpc.StartGRPCController(contextManager)  // todo - pass to grpc
+	pluginrpc.StartGRPCController(contextManager, opt)
 }

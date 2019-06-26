@@ -7,6 +7,8 @@ Package rpc:
 package pluginrpc
 
 import (
+	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"net"
 	"time"
 
@@ -22,10 +24,10 @@ func init() {
 	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 }
 
-func StartGRPCController(proxy CollectorProxy) {
+func StartGRPCController(proxy CollectorProxy, opt *plugin.Options) {
 	closeChan := make(chan error, 1)
 
-	ln, err := net.Listen("tcp", "0.0.0.0:56789")
+	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", opt.GrpcIp, opt.GrpcPort))
 	if err != nil {
 		log.Fatalf("can't create tcp connection (%s)", err)
 	}

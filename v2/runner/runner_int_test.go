@@ -54,7 +54,7 @@ func (s *SuiteT) startCollector(collector plugin.Collector) {
 	s.startedCollector = collector
 	go func() {
 		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
-		pluginrpc.StartGRPCController(contextManager)
+		pluginrpc.StartGRPCController(contextManager, &plugin.Options{GrpcPort: 56789})
 		s.endCh <- true
 	}()
 }
