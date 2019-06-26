@@ -49,7 +49,6 @@ var parseScenarios = []parseScenario{
 		shouldBeParsed: false,
 		shouldBeValid:  false,
 	},
-
 }
 
 func TestParseCmdLineOptions(t *testing.T) {
