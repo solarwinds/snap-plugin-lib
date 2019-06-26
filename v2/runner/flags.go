@@ -3,10 +3,42 @@ package runner
 import (
 	"flag"
 	"fmt"
-	"net"
-
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
+	"net"
+	"strconv"
+	"strings"
 )
+
+type logLevelHandler struct {
+	opt *plugin.Options
+}
+
+func (l *logLevelHandler) String() string {
+	if l.opt == nil {
+		return "error"
+	}
+
+	return l.opt.LogLevel.String()
+}
+
+func (l *logLevelHandler) Set(s string) error {
+	// accept level as a form of int (0 - 6)
+	intLvl, errConv := strconv.Atoi(s)
+	if errConv == nil && intLvl >= int(logrus.PanicLevel) && intLvl <= int(logrus.TraceLevel) {
+		l.opt.LogLevel = logrus.Level(intLvl)
+		return nil
+	}
+
+	// accept level as a form os string (warning, error etc.)
+	lvl, errParse := logrus.ParseLevel(s)
+	if errParse != nil {
+		return errParse
+	}
+	l.opt.LogLevel = lvl
+
+	return nil
+}
 
 func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
@@ -19,9 +51,10 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 		"grpc-port", 0,
 		"Port on which GRPC server will be served")
 
-	flagParser.StringVar(&opt.LogLevel,
-		"log-level", "warning",
-		"Minimal level of logged messages")
+	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
+	flagParser.Var(&logLevelHandler{opt: opt},
+		"log-level",
+		fmt.Sprintf("Minimal level of logged messages %s", allLogLevels))
 
 	flagParser.BoolVar(&opt.EnablePprof,
 		"enable-pprof", false,
@@ -43,7 +76,9 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 }
 
 func ParseCmdLineOptions(pluginName string, args []string) (*plugin.Options, error) {
-	opt := &plugin.Options{}
+	opt := &plugin.Options{
+		LogLevel: logrus.WarnLevel, // todo: should i leave it here?
+	}
 
 	flagParser := newFlagParser(pluginName, opt)
 

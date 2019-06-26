@@ -20,20 +20,36 @@ type parseScenario struct {
 
 var parseScenarios = []parseScenario{
 	{ // 0
-		inputCmdLine:   "-grpc-ip=1.2.3.4 --grpc-port=456",
+		inputCmdLine:   "-grpc-ip=1.2.3.4 --grpc-port=456 --log-level=warning",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
 	{ // 1
+		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4",
+		shouldBeParsed: true,
+		shouldBeValid:  true,
+	},
+	{ // 2
 		inputCmdLine:   "",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
-	//{ // 2
-	//	inputCmdLine:   "--enable-pprof",
-	//	shouldBeParsed: true,
-	//	shouldBeValid:  true,
-	//},
+	{ // 3
+		inputCmdLine:   "--grpc-port=abc",
+		shouldBeParsed: false,
+		shouldBeValid:  false,
+	},
+	{ // 4
+		inputCmdLine:   "--debug-level=invalid",
+		shouldBeParsed: false,
+		shouldBeValid:  false,
+	},
+	{ // 5
+		inputCmdLine:   "--debug-level=8",
+		shouldBeParsed: false,
+		shouldBeValid:  false,
+	},
+
 }
 
 func TestParseCmdLineOptions(t *testing.T) {
