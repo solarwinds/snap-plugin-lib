@@ -25,7 +25,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  true,
 	},
 	{ // 1
-		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4",
+		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 )
@@ -51,6 +52,14 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 	flagParser.IntVar(&opt.GrpcPort,
 		"grpc-port", 0,
 		"Port on which GRPC server will be served")
+
+	flagParser.DurationVar(&opt.GrpcPingTimeout,
+		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
+		"Deadline for receiving single ping messages")
+
+	flagParser.IntVar(&opt.GrpcPingMaxMissed,
+		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
+		"Number of missed ping messages after which, plugin should exit")
 
 	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
 	flagParser.Var(&logLevelHandler{opt: opt},

@@ -1,10 +1,16 @@
 package plugin
 
-import "github.com/sirupsen/logrus"
+import (
+	"time"
+
+	"github.com/sirupsen/logrus"
+)
 
 type Options struct {
-	GrpcIp   string
-	GrpcPort int
+	GrpcIp            string
+	GrpcPort          int
+	GrpcPingTimeout   time.Duration
+	GrpcPingMaxMissed int
 
 	LogLevel     logrus.Level
 	EnablePprof  bool
