@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DefaultPingTimeout           = 6 * time.Second
+	DefaultPingTimeout           = 3 * time.Second
 	DefaultMaxMissingPingCounter = 3
 )
 
