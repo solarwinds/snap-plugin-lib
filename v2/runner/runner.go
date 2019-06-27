@@ -4,6 +4,7 @@ The package "runner" provides simple API to start plugins in different modes.
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -24,15 +25,20 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 
 	standaloneRun := false
 
+	contextManager := proxy.NewContextManager(collector, name, version)
+	printMetaInformation(opt)
+
 	logrus.SetLevel(opt.LogLevel)
 
-	contextManager := proxy.NewContextManager(collector, name, version)
-
-	if standaloneRun == false {
+	switch standaloneRun {
+	case false:
 		if opt.EnablePprof == true {
 			startPprofServer(opt)
 		}
+
 		startCollectorInServerMode(contextManager, opt)
+	case true:
+		startCollectorInSingleMode(contextManager, opt)
 	}
 }
 
@@ -72,4 +78,39 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		fmt.Printf("Couldn't unload a task in a standalone mode (reason: %v)", errUnload)
 		os.Exit(1)
 	}
+}
+
+func printMetaInformation(opt *plugin.Options) {
+	// Gather meta information
+	m := plugin.Meta{
+		GRPCVersion: pluginrpc.GRPCDefinitionVersion,
+	}
+
+	m.Plugin.Name = ""    // todo: plugin name
+	m.Plugin.Version = "" // todo: plugin version
+
+	m.GRPC.IP = opt.GrpcIp
+	m.GRPC.Port = opt.GrpcPort
+
+	m.PProf.Enabled = opt.EnablePprof
+	if opt.EnablePprof {
+		m.PProf.IP = opt.GrpcIp
+		m.PProf.Port = opt.PprofPort
+	}
+
+	m.Stats.Enabled = opt.EnableStats
+	if opt.EnableStats {
+		m.Stats.Enabled = opt.EnableStats
+		m.Stats.IP = opt.GrpcIp
+		m.Stats.Port = 0 // todo: stats port
+	}
+
+	// Print
+	jsonMeta, err := json.Marshal(m)
+	if err != nil {
+		fmt.Printf("Can't provide plugin metadata information (reason: %v)\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("%s\n", string(jsonMeta))
 }
