@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
@@ -23,15 +24,14 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(1)
 	}
 
-	standaloneRun := false
-
 	contextManager := proxy.NewContextManager(collector, name, version)
-	printMetaInformation(opt)
 
 	logrus.SetLevel(opt.LogLevel)
 
-	switch standaloneRun {
+	switch opt.DebugMode {
 	case false:
+		printMetaInformation(opt)
+
 		if opt.EnablePprof == true {
 			startPprofServer(opt)
 		}
@@ -60,17 +60,27 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		os.Exit(1)
 	}
 
-	// Request metrics collection
-	mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
-	if errColl != nil {
-		fmt.Printf("Error occurred during metrics collection in a standalone mode (reason: %v)", errColl)
-		os.Exit(1)
-	}
+	for runCount := 0; ; {
+		// Request metrics collection
+		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
+		if errColl != nil {
+			fmt.Printf("Error occurred during metrics collection in a standalone mode (reason: %v)", errColl)
+			os.Exit(1)
+		}
 
-	// Print out metrics
-	fmt.Printf("Gathered metrics (length=%d): \n\n", len(mts))
-	for _, mt := range mts {
-		fmt.Printf("%#v\n", mt) // todo: format output string
+		// Print out metrics
+		fmt.Printf("Gathered metrics (length=%d): \n\n", len(mts))
+		for _, mt := range mts {
+			fmt.Printf("%#v\n", mt) // todo: format output string
+		}
+
+		// wait to request new collection or exit
+		runCount++
+		if runCount == opt.DebugCollectCounts {
+			break
+		}
+
+		time.Sleep(opt.DebugCollectInterval)
 	}
 
 	errUnload := ctxManager.UnloadTask(singleModeTaskID)

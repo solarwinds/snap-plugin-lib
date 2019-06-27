@@ -12,10 +12,14 @@ type Options struct {
 	GrpcPingTimeout   time.Duration
 	GrpcPingMaxMissed int
 
-	LogLevel     logrus.Level
-	EnablePprof  bool
-	PprofPort    int
-	EnableStats  bool
-	DebugMode    bool
-	PluginConfig string
+	LogLevel    logrus.Level
+	EnablePprof bool
+	EnableStats bool
+	PprofPort   int
+	StatsPort   int
+
+	DebugMode            bool
+	PluginConfig         string
+	DebugCollectCounts   int
+	DebugCollectInterval time.Duration
 }

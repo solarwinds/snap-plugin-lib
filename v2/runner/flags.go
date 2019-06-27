@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -81,6 +82,14 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 	flagParser.BoolVar(&opt.DebugMode,
 		"debug-mode", false,
 		"Run plugin in debug mode (standalone)")
+
+	flagParser.IntVar(&opt.DebugCollectCounts,
+		"debug-collect-counts", 1,
+		"Number of collect requests executed in debug mode (0 - infinitely)")
+
+	flagParser.DurationVar(&opt.DebugCollectInterval,
+		"debug-collect-interval", 5*time.Second,
+		"Interval between consecutive collect requests")
 
 	flagParser.StringVar(&opt.PluginConfig,
 		"plugin-config", "{}",
