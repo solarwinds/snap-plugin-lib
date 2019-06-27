@@ -14,6 +14,7 @@ type Options struct {
 
 	LogLevel     logrus.Level
 	EnablePprof  bool
+	PprofPort    int
 	EnableStats  bool
 	DebugMode    bool
 	PluginConfig string

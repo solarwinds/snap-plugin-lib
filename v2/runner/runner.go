@@ -13,6 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runner"})
+
 func StartCollector(collector plugin.Collector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], os.Args[1:])
 	if err != nil {
@@ -27,11 +29,18 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	contextManager := proxy.NewContextManager(collector, name, version)
 
 	if standaloneRun == false {
+		if opt.EnablePprof == true {
+			startPprofServer(opt)
+		}
 		startCollectorInServerMode(contextManager, opt)
 	}
 }
 
 func startCollectorInServerMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
+	if opt.EnablePprof {
+		startPprofServer(opt)
+	}
+
 	pluginrpc.StartGRPCController(ctxManager, opt)
 }
 

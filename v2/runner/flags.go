@@ -70,6 +70,10 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 		"enable-pprof", false,
 		"Enable profiling server")
 
+	flagParser.IntVar(&opt.PprofPort,
+		"pprof-port", 0,
+		"Port on which profiling server will be available")
+
 	flagParser.BoolVar(&opt.EnableStats,
 		"enable-stats", false,
 		"Enable stats server")
