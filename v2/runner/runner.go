@@ -69,10 +69,11 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		}
 
 		// Print out metrics
-		fmt.Printf("Gathered metrics (length=%d): \n\n", len(mts))
+		fmt.Printf("Gathered metrics (length=%d): \n", len(mts))
 		for _, mt := range mts {
 			fmt.Printf("%s\n", mt) // todo: format output string
 		}
+		fmt.Printf("\n")
 
 		// wait to request new collection or exit
 		runCount++

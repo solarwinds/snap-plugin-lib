@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
+	"strconv"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
@@ -23,14 +25,33 @@ func (*myCollector) DefineMetrics(plugin.CollectorDefinition) error {
 func (*myCollector) Collect(ctx plugin.Context) error {
 	log.Trace("Collect executed")
 
-	ctx.AddMetric("/example/demo/random1", rand.Intn(10))
-	ctx.AddMetric("/example/demo/random2", rand.Intn(20))
+	_ = ctx.AddMetric("/example/static/random1", rand.Intn(10))
+	_ = ctx.AddMetric("/example/static/random2", rand.Intn(20))
+
+	globalRandom, _ := ctx.Load("random")
+	_ = ctx.AddMetric("/emample/global/random3", globalRandom)
+
+	configRandom, ok := ctx.Load("random-config")
+	if ok {
+		_ = ctx.AddMetricWithTags("/example/config/random4", rand.Intn(configRandom.(int)),
+			map[string]string{"random": fmt.Sprintf("%v", configRandom)})
+	}
 
 	return nil
 }
 
 func (*myCollector) Load(ctx plugin.Context) error {
 	log.Tracef("Load executed, configs=%s", ctx.ConfigKeys())
+
+	ctx.Store("random", rand.Intn(50))
+
+	v, ok := ctx.Config("crand")
+	if ok {
+		intV, err := strconv.Atoi(v)
+		if err == nil {
+			ctx.Store("random-config", intV)
+		}
+	}
 
 	return nil
 }
