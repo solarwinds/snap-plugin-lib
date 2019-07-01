@@ -7,7 +7,7 @@ import (
 )
 
 type Options struct {
-	GrpcIp            string
+	PluginIp          string
 	GrpcPort          int
 	GrpcPingTimeout   time.Duration
 	GrpcPingMaxMissed int

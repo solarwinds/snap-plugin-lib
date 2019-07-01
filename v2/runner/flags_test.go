@@ -20,12 +20,12 @@ type parseScenario struct {
 
 var parseScenarios = []parseScenario{
 	{ // 0
-		inputCmdLine:   "-grpc-ip=1.2.3.4 --grpc-port=456 --log-level=warning",
+		inputCmdLine:   "-plugin-ip=1.2.3.4 --grpc-port=456 --log-level=warning",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
 	{ // 1
-		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3 --plugin-config={}",
+		inputCmdLine:   "-plugin-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3 --plugin-config={}",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
@@ -50,7 +50,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  false,
 	},
 	{
-		inputCmdLine:   "--grpc-ip=1.2.3.4.5",
+		inputCmdLine:   "--plugin-ip=1.2.3.4.5",
 		shouldBeParsed: true,
 		shouldBeValid:  false,
 	},
