@@ -1,15 +1,15 @@
 package runner
 
 import (
-	"fmt"
+	"net"
 	"net/http"
 	"net/http/pprof"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-func startPprofServer(opt *plugin.Options) {
-	log.Infof("Running profiling server on address %s:%d", opt.GrpcIp, opt.PprofPort)
+func startPprofServer(opt *plugin.Options, ln net.Listener) {
+	log.Infof("Running profiling server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
 
@@ -27,6 +27,12 @@ func startPprofServer(opt *plugin.Options) {
 	})
 
 	go func() {
-		http.ListenAndServe(fmt.Sprintf("%s:%d", opt.GrpcIp, opt.PprofPort), h)
+		http.Serve(ln, h)
 	}()
+}
+
+func startStatsServer(_ *plugin.Options) {
+	log.Infof("Running stats server on address")
+
+	// TODO: AO-13450
 }

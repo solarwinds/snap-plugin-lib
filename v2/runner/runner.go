@@ -43,11 +43,6 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		}
 
 		printMetaInformation(opt, r)
-
-		if opt.EnablePprof == true {
-			startPprofServer(opt)
-		}
-
 		startCollectorInServerMode(contextManager, r, opt)
 	case true:
 		startCollectorInSingleMode(contextManager, opt)
@@ -56,7 +51,11 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 
 func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *plugin.Options) {
 	if opt.EnablePprof {
-		startPprofServer(opt)
+		startPprofServer(opt, r.pprofListener)
+	}
+
+	if opt.EnableStats {
+		startStatsServer(opt)
 	}
 
 	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt)

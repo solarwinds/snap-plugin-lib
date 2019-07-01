@@ -25,7 +25,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  true,
 	},
 	{ // 1
-		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3",
+		inputCmdLine:   "-grpc-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3 --plugin-config={}",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
@@ -48,6 +48,41 @@ var parseScenarios = []parseScenario{
 		inputCmdLine:   "--debug-level=8",
 		shouldBeParsed: false,
 		shouldBeValid:  false,
+	},
+	{
+		inputCmdLine:   "--grpc-ip=1.2.3.4.5",
+		shouldBeParsed: true,
+		shouldBeValid:  false,
+	},
+	{
+		inputCmdLine:   "--pprof-port=5678",
+		shouldBeParsed: true,
+		shouldBeValid:  false,
+	},
+	{
+		inputCmdLine:   "--enable-pprof=1 --pprof-port=5678",
+		shouldBeParsed: true,
+		shouldBeValid:  true,
+	},
+	{
+		inputCmdLine:   "--stats-port=5678",
+		shouldBeParsed: true,
+		shouldBeValid:  false,
+	},
+	{
+		inputCmdLine:   "--enable-stats=1 --stats-port=5678",
+		shouldBeParsed: true,
+		shouldBeValid:  true,
+	},
+	{
+		inputCmdLine:   "--debug-collect-counts=11",
+		shouldBeParsed: true,
+		shouldBeValid:  false,
+	},
+	{
+		inputCmdLine:   "--debug-mode=1 --debug-collect-counts=11",
+		shouldBeParsed: true,
+		shouldBeValid:  true,
 	},
 }
 
@@ -87,5 +122,3 @@ func TestParseCmdLineOptions(t *testing.T) {
 		}
 	})
 }
-
-///////////////////////////////////////////////////////////////////////////////

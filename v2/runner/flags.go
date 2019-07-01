@@ -13,6 +13,78 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	defaultPluginIP  = "127.0.0.1"
+	defaultGRPCPort  = 0
+	defaultPProfPort = 0
+	defaultStatsPort = 0
+
+	defaultConfig          = "{}"
+	defaultCollectInterval = 5 * time.Second
+	defaultCollectCount    = 1
+)
+
+///////////////////////////////////////////////////////////////////////////////
+
+func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
+	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
+
+	flagParser.StringVar(&opt.GrpcIp,
+		"grpc-ip", defaultPluginIP,
+		"IP Address on which GRPC server will be served")
+
+	flagParser.IntVar(&opt.GrpcPort,
+		"grpc-port", defaultGRPCPort,
+		"Port on which GRPC server will be served")
+
+	flagParser.DurationVar(&opt.GrpcPingTimeout,
+		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
+		"Deadline for receiving single ping messages")
+
+	flagParser.IntVar(&opt.GrpcPingMaxMissed,
+		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
+		"Number of missed ping messages after which, plugin should exit")
+
+	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
+	flagParser.Var(&logLevelHandler{opt: opt},
+		"log-level",
+		fmt.Sprintf("Minimal level of logged messages %s", allLogLevels))
+
+	flagParser.BoolVar(&opt.EnablePprof,
+		"enable-pprof", false,
+		"Enable profiling server")
+
+	flagParser.IntVar(&opt.PprofPort,
+		"pprof-port", defaultPProfPort,
+		"Port on which profiling server will be available")
+
+	flagParser.BoolVar(&opt.EnableStats,
+		"enable-stats", false,
+		"Enable stats server")
+
+	flagParser.IntVar(&opt.StatsPort,
+		"stats-port", defaultStatsPort,
+		"Port on which stats server will be available")
+
+	flagParser.BoolVar(&opt.DebugMode,
+		"debug-mode", false,
+		"Run plugin in debug mode (standalone)")
+
+	flagParser.IntVar(&opt.DebugCollectCounts,
+		"debug-collect-counts", defaultCollectCount,
+		"Number of collect requests executed in debug mode (0 - infinitely)")
+
+	flagParser.DurationVar(&opt.DebugCollectInterval,
+		"debug-collect-interval", defaultCollectInterval,
+		"Interval between consecutive collect requests")
+
+	flagParser.StringVar(&opt.PluginConfig,
+		"plugin-config", defaultConfig,
+		"Collector configuration in debug mode")
+
+	return flagParser
+}
+
 type logLevelHandler struct {
 	opt *plugin.Options
 }
@@ -43,64 +115,11 @@ func (l *logLevelHandler) Set(s string) error {
 	return nil
 }
 
-func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
-	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
-
-	flagParser.StringVar(&opt.GrpcIp,
-		"grpc-ip", "127.0.0.1",
-		"IP Address on which GRPC server will be served")
-
-	flagParser.IntVar(&opt.GrpcPort,
-		"grpc-port", 0,
-		"Port on which GRPC server will be served")
-
-	flagParser.DurationVar(&opt.GrpcPingTimeout,
-		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
-		"Deadline for receiving single ping messages")
-
-	flagParser.IntVar(&opt.GrpcPingMaxMissed,
-		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
-		"Number of missed ping messages after which, plugin should exit")
-
-	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
-	flagParser.Var(&logLevelHandler{opt: opt},
-		"log-level",
-		fmt.Sprintf("Minimal level of logged messages %s", allLogLevels))
-
-	flagParser.BoolVar(&opt.EnablePprof,
-		"enable-pprof", false,
-		"Enable profiling server")
-
-	flagParser.IntVar(&opt.PprofPort,
-		"pprof-port", 0,
-		"Port on which profiling server will be available")
-
-	flagParser.BoolVar(&opt.EnableStats,
-		"enable-stats", false,
-		"Enable stats server")
-
-	flagParser.BoolVar(&opt.DebugMode,
-		"debug-mode", false,
-		"Run plugin in debug mode (standalone)")
-
-	flagParser.IntVar(&opt.DebugCollectCounts,
-		"debug-collect-counts", 1,
-		"Number of collect requests executed in debug mode (0 - infinitely)")
-
-	flagParser.DurationVar(&opt.DebugCollectInterval,
-		"debug-collect-interval", 5*time.Second,
-		"Interval between consecutive collect requests")
-
-	flagParser.StringVar(&opt.PluginConfig,
-		"plugin-config", "{}",
-		"Collector configuration in debug mode")
-
-	return flagParser
-}
+///////////////////////////////////////////////////////////////////////////////
 
 func ParseCmdLineOptions(pluginName string, args []string) (*plugin.Options, error) {
 	opt := &plugin.Options{
-		LogLevel: logrus.WarnLevel, // todo: should i leave it here?
+		LogLevel: logrus.WarnLevel,
 	}
 
 	flagParser := newFlagParser(pluginName, opt)
@@ -124,5 +143,23 @@ func ValidateOptions(opt *plugin.Options) error {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}
 
+	if opt.PprofPort > 0 && !opt.EnablePprof {
+		return fmt.Errorf("-enable-pprof flag should be set when configuring pprof port")
+	}
+
+	if opt.StatsPort > 0 && !opt.EnableStats {
+		return fmt.Errorf("-enable-stats flag should be set when configuring stats port")
+	}
+
+	if !opt.DebugMode && anyDebugFlagSet(opt) {
+		return fmt.Errorf("-debug-mode flag should be set when configuring debug options")
+	}
+
 	return nil
+}
+
+func anyDebugFlagSet(opt *plugin.Options) bool {
+	return opt.DebugCollectCounts != defaultCollectCount ||
+		opt.DebugCollectInterval != defaultCollectInterval ||
+		opt.PluginConfig != defaultConfig
 }
