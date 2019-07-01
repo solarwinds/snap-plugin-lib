@@ -29,7 +29,7 @@ func (*myCollector) Collect(ctx plugin.Context) error {
 	_ = ctx.AddMetric("/example/static/random2", rand.Intn(20))
 
 	globalRandom, _ := ctx.Load("random")
-	_ = ctx.AddMetric("/emample/global/random3", globalRandom)
+	_ = ctx.AddMetric("/example/global/random3", globalRandom)
 
 	configRandom, ok := ctx.Load("random-config")
 	if ok {

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -69,7 +70,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 	const singleModeTaskID = 1
 
 	// Load task based on command line options
-	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), []string{}) // todo: change this
+	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), strings.Split(opt.PluginFilter, filterSeparator))
 	if errLoad != nil {
 		fmt.Printf("Couldn't load a task in a standalone mode (reason: %v)", errLoad)
 		os.Exit(errorStatus)

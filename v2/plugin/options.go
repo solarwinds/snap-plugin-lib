@@ -20,6 +20,7 @@ type Options struct {
 
 	DebugMode            bool
 	PluginConfig         string
+	PluginFilter         string
 	DebugCollectCounts   int
 	DebugCollectInterval time.Duration
 }

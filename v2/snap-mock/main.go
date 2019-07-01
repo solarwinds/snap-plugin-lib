@@ -17,12 +17,15 @@ const (
 	defaultGRPCIP          = "127.0.0.1"
 	defaultGRPCPort        = 0
 	defaultConfig          = "{}"
+	defaultFilter          = ""
 	defaultTaskID          = 1
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
 
 	grpcLoadDelay      = 500 * time.Millisecond
 	grpcRequestTimeout = 10 * time.Second
+
+	filterSeparator = ";"
 )
 
 type Options struct {
@@ -33,6 +36,7 @@ type Options struct {
 	MaxCollectRequests int
 
 	PluginConfig string
+	PluginFilter string
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +55,10 @@ func parseCmdLine() *Options {
 	flag.StringVar(&opt.PluginConfig,
 		"plugin-config", defaultConfig,
 		"Plugin configuration (should be valid JSON)")
+
+	flag.StringVar(&opt.PluginFilter,
+		"plugin-filter", defaultFilter,
+		"Plugin filter (definition which subset of metrics should be gathered), ie. '/example/static/*;/example/global/*'")
 
 	flag.IntVar(&opt.MaxCollectRequests,
 		"max-collect-requests", 0,
@@ -150,7 +158,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	reqLoad := &pluginrpc.LoadRequest{
 		TaskId:          defaultTaskID,
 		JsonConfig:      []byte(opt.PluginConfig),
-		MetricSelectors: nil,
+		MetricSelectors: strings.Split(opt.PluginFilter, filterSeparator),
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)

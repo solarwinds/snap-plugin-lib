@@ -49,37 +49,37 @@ var parseScenarios = []parseScenario{
 		shouldBeParsed: false,
 		shouldBeValid:  false,
 	},
-	{
+	{ // 6
 		inputCmdLine:   "--plugin-ip=1.2.3.4.5",
 		shouldBeParsed: true,
 		shouldBeValid:  false,
 	},
-	{
+	{ // 7
 		inputCmdLine:   "--pprof-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  false,
 	},
-	{
+	{ // 8
 		inputCmdLine:   "--enable-pprof=1 --pprof-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
-	{
+	{ // 9
 		inputCmdLine:   "--stats-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  false,
 	},
-	{
+	{ // 10
 		inputCmdLine:   "--enable-stats=1 --stats-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
-	{
+	{ // 11
 		inputCmdLine:   "--debug-collect-counts=11",
 		shouldBeParsed: true,
 		shouldBeValid:  false,
 	},
-	{
+	{ // 12
 		inputCmdLine:   "--debug-mode=1 --debug-collect-counts=11",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
@@ -91,7 +91,7 @@ func TestParseCmdLineOptions(t *testing.T) {
 		for i, testCase := range parseScenarios {
 			Convey(fmt.Sprintf("Scenario %d [%s]", i, testCase.inputCmdLine), func() {
 				// Arrange
-				inputCmd := []string{}
+				var inputCmd []string
 				if len(testCase.inputCmdLine) > 0 {
 					inputCmd = strings.Split(testCase.inputCmdLine, " ")
 				}

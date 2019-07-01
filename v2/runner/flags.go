@@ -20,8 +20,11 @@ const (
 	defaultStatsPort = 0
 
 	defaultConfig          = "{}"
+	defaultFilter          = ""
 	defaultCollectInterval = 5 * time.Second
 	defaultCollectCount    = 1
+
+	filterSeparator = ";"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,6 +84,10 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 	flagParser.StringVar(&opt.PluginConfig,
 		"plugin-config", defaultConfig,
 		"Collector configuration in debug mode")
+
+	flagParser.StringVar(&opt.PluginFilter,
+		"plugin-filter", defaultFilter,
+		fmt.Sprintf("Default filtering definition (separated by %s)", filterSeparator))
 
 	return flagParser
 }
@@ -161,5 +168,6 @@ func ValidateOptions(opt *plugin.Options) error {
 func anyDebugFlagSet(opt *plugin.Options) bool {
 	return opt.DebugCollectCounts != defaultCollectCount ||
 		opt.DebugCollectInterval != defaultCollectInterval ||
-		opt.PluginConfig != defaultConfig
+		opt.PluginConfig != defaultConfig ||
+		opt.PluginFilter != defaultFilter
 }
