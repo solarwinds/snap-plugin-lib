@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -52,7 +53,7 @@ func main() {
 
 		reqLoad := &pluginrpc.LoadRequest{
 			TaskId:          defaultTaskID,
-			JsonConfig:      []byte("{}"),
+			JsonConfig:      []byte(opt.PluginConfig),
 			MetricSelectors: nil,
 		}
 
@@ -72,6 +73,11 @@ func main() {
 
 			ctx, _ := context.WithTimeout(context.Background(), defaultGRPCTimeout)
 			stream, err := cc.Collect(ctx, reqColl)
+			if err != nil {
+				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
+			}
+
+			var recvMts []string
 			for {
 				resp, err := stream.Recv()
 				if err == io.EOF {
@@ -81,12 +87,17 @@ func main() {
 					doneCh <- fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
 				}
 
-				fmt.Printf("resp=%#v\n", resp)
+				for _, mt := range resp.MetricSet {
+					recvMts = append(recvMts, grpcMetricToString(mt))
+				}
 			}
 
-			if err != nil {
-				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
+			fmt.Printf("Recived %d metric(s)\n", len(recvMts))
+			for _, mt := range recvMts {
+				fmt.Printf(" %s\n", mt)
 			}
+			fmt.Printf("\n")
+
 			if reqCounter == opt.MaxCollectRequests {
 				break
 			}
@@ -156,4 +167,13 @@ func parseCmdLine() *Options {
 	flag.Parse()
 
 	return opt
+}
+
+func grpcMetricToString(metric *pluginrpc.Metric) string {
+	var nsStr []string
+	for _, ns := range metric.Namespace {
+		nsStr = append(nsStr, ns.Value)
+	}
+
+	return fmt.Sprintf("%s %v [%v]", strings.Join(nsStr, "."), metric.Value, metric.Tags)
 }
