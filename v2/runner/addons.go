@@ -4,11 +4,9 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
-
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-func startPprofServer(opt *plugin.Options, ln net.Listener) {
+func startPprofServer(ln net.Listener) {
 	log.Infof("Running profiling server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
@@ -31,7 +29,7 @@ func startPprofServer(opt *plugin.Options, ln net.Listener) {
 	}()
 }
 
-func startStatsServer(_ *plugin.Options) {
+func startStatsServer() {
 	log.Infof("Running stats server on address")
 
 	// TODO: AO-13450

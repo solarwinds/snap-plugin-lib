@@ -57,7 +57,7 @@ func (s *SuiteT) startCollector(collector plugin.Collector) {
 		ln, _ := net.Listen("tcp", "127.0.0.1:56789")
 
 		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
-		pluginrpc.StartGRPCController(contextManager, ln, &plugin.Options{GrpcPort: 56789})
+		pluginrpc.StartGRPCController(contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
 }
