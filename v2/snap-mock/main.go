@@ -14,14 +14,15 @@ import (
 )
 
 const (
-	defaultLoadDelay = 500 * time.Millisecond
-
+	defaultGRPCIP          = "127.0.0.1"
+	defaultGRPCPort        = 0
+	defaultConfig          = "{}"
+	defaultTaskID          = 1
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
 
-	defaultGRPCTimeout = 10 * time.Second
-
-	defaultTaskID = 1
+	grpcLoadDelay      = 500 * time.Millisecond
+	grpcRequestTimeout = 10 * time.Second
 )
 
 type Options struct {
@@ -34,11 +35,48 @@ type Options struct {
 	PluginConfig string
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+func parseCmdLine() *Options {
+	opt := &Options{}
+
+	flag.StringVar(&opt.PluginIP,
+		"plugin-ip", defaultGRPCIP,
+		"IP Address of GRPC Server run by plugin")
+
+	flag.IntVar(&opt.PluginPort,
+		"plugin-port", defaultGRPCPort,
+		"Port of GRPC Server run by plugin")
+
+	flag.StringVar(&opt.PluginConfig,
+		"plugin-config", defaultConfig,
+		"Plugin configuration (should be valid JSON)")
+
+	flag.IntVar(&opt.MaxCollectRequests,
+		"max-collect-requests", 0,
+		"Maximum number of collect requests (default 0 for infinite)")
+
+	flag.DurationVar(&opt.CollectInterval,
+		"collect-interval", defaultCollectInterval,
+		"Duration between Collect requests")
+
+	flag.DurationVar(&opt.PingInterval,
+		"ping-interval", defaultPingInterval,
+		"Duration between Ping requests")
+
+	flag.Parse()
+
+	return opt
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 func main() {
 	doneCh := make(chan error)
 
 	opt := parseCmdLine()
 
+	// Create connection
 	grpcServerAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PluginPort)
 	cl, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
 	if err != nil {
@@ -47,49 +85,22 @@ func main() {
 	}
 	defer func() { _ = cl.Close() }()
 
-	// Load, collect, unload
+	// Load, collect, unload routine
 	go func() {
 		cc := pluginrpc.NewCollectorClient(cl)
 
-		reqLoad := &pluginrpc.LoadRequest{
-			TaskId:          defaultTaskID,
-			JsonConfig:      []byte(opt.PluginConfig),
-			MetricSelectors: nil,
-		}
-
-		ctx, _ := context.WithTimeout(context.Background(), defaultGRPCTimeout)
-		_, err := cc.Load(ctx, reqLoad)
+		err := doLoadRequest(cc, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
 		}
-		time.Sleep(defaultLoadDelay)
+		time.Sleep(grpcLoadDelay)
 
 		reqCounter := 0
 		for {
 			reqCounter++
-			reqColl := &pluginrpc.CollectRequest{
-				TaskId: defaultTaskID,
-			}
-
-			ctx, _ := context.WithTimeout(context.Background(), defaultGRPCTimeout)
-			stream, err := cc.Collect(ctx, reqColl)
+			recvMts, err := doCollectRequest(cc, opt)
 			if err != nil {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
-			}
-
-			var recvMts []string
-			for {
-				resp, err := stream.Recv()
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					doneCh <- fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
-				}
-
-				for _, mt := range resp.MetricSet {
-					recvMts = append(recvMts, grpcMetricToString(mt))
-				}
 			}
 
 			fmt.Printf("Recived %d metric(s)\n", len(recvMts))
@@ -104,13 +115,9 @@ func main() {
 			time.Sleep(opt.CollectInterval)
 		}
 
-		time.Sleep(defaultLoadDelay)
-		reqUnload := &pluginrpc.UnloadRequest{
-			TaskId: defaultTaskID,
-		}
+		time.Sleep(grpcLoadDelay)
 
-		ctx, _ = context.WithTimeout(context.Background(), defaultGRPCTimeout)
-		_, err = cc.Unload(ctx, reqUnload)
+		err = doUnloadRequest(cc, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send unload request to plugin: %v", err)
 		}
@@ -137,37 +144,69 @@ func main() {
 	}
 }
 
-func parseCmdLine() *Options {
-	opt := &Options{}
+///////////////////////////////////////////////////////////////////////////////
 
-	flag.StringVar(&opt.PluginIP,
-		"plugin-ip", "127.0.0.1",
-		"IP Address of GRPC Server run by plugin")
+func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
+	reqLoad := &pluginrpc.LoadRequest{
+		TaskId:          defaultTaskID,
+		JsonConfig:      []byte(opt.PluginConfig),
+		MetricSelectors: nil,
+	}
 
-	flag.IntVar(&opt.PluginPort,
-		"plugin-port", 0,
-		"Port of GRPC Server run by plugin")
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
 
-	flag.StringVar(&opt.PluginConfig,
-		"plugin-config", "{}",
-		"Plugin configuration (should be valid JSON)")
+	_, err := cc.Load(ctx, reqLoad)
 
-	flag.IntVar(&opt.MaxCollectRequests,
-		"max-collect-requests", 0,
-		"Maximum number of collect requests (default 0 for infinite)")
-
-	flag.DurationVar(&opt.CollectInterval,
-		"collect-interval", defaultCollectInterval,
-		"Duration between Collect requests")
-
-	flag.DurationVar(&opt.PingInterval,
-		"ping-interval", defaultPingInterval,
-		"Duration between Ping requests")
-
-	flag.Parse()
-
-	return opt
+	return err
 }
+
+func doUnloadRequest(cc pluginrpc.CollectorClient, _ *Options) error {
+	reqUnload := &pluginrpc.UnloadRequest{
+		TaskId: defaultTaskID,
+	}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	_, err := cc.Unload(ctx, reqUnload)
+
+	return err
+}
+
+func doCollectRequest(cc pluginrpc.CollectorClient, _ *Options) ([]string, error) {
+	var recvMts []string
+
+	reqColl := &pluginrpc.CollectRequest{
+		TaskId: defaultTaskID,
+	}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	stream, err := cc.Collect(ctx, reqColl)
+	if err != nil {
+		return recvMts, fmt.Errorf("can't send collect request to plugin: %v", err)
+	}
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return recvMts, fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
+		}
+
+		for _, mt := range resp.MetricSet {
+			recvMts = append(recvMts, grpcMetricToString(mt))
+		}
+	}
+
+	return recvMts, nil
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 func grpcMetricToString(metric *pluginrpc.Metric) string {
 	var nsStr []string
