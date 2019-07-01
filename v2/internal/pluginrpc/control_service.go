@@ -27,6 +27,12 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 
 	if pingTimeout != time.Duration(0) && maxMissingPingCounter != 0 {
 		go cs.monitor(pingTimeout, maxMissingPingCounter)
+	} else {
+		go func() {
+			for {
+				<-cs.pingCh
+			}
+		}()
 	}
 
 	return cs

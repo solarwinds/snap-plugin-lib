@@ -1,4 +1,4 @@
-// +build skipmedium
+// +build medium
 
 package runner
 
@@ -51,19 +51,23 @@ func (s *SuiteT) TearDownTest() {
 	s.startedCollector = nil
 }
 
-func (s *SuiteT) startCollector(collector plugin.Collector) {
-	s.startedCollector = collector
-	go func() {
-		ln, _ := net.Listen("tcp", "127.0.0.1:56789")
+func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
+	var ln net.Listener
 
+	s.startedCollector = collector
+	ln, _ = net.Listen("tcp", "127.0.0.1:")
+
+	go func() {
 		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
 		pluginrpc.StartGRPCController(contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
+
+	return ln
 }
 
-func (s *SuiteT) startClient() {
-	s.grpcConnection, _ = grpc.Dial("localhost:56789", grpc.WithInsecure())
+func (s *SuiteT) startClient(addr string) {
+	s.grpcConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
 
 	s.collectorClient = pluginrpc.NewCollectorClient(s.grpcConnection)
 	s.controlClient = pluginrpc.NewControllerClient(s.grpcConnection)
@@ -140,8 +144,6 @@ func (sc *simpleCollector) Collect(ctx plugin.Context) error {
 }
 
 func (s *SuiteT) TestSimpleCollector() {
-	s.T().Skip()
-
 	// Arrange
 	jsonConfig := []byte(`{
 		"address": {
@@ -158,8 +160,8 @@ func (s *SuiteT) TestSimpleCollector() {
 	}
 
 	simpleCollector := &simpleCollector{}
-	s.startCollector(simpleCollector)
-	s.startClient()
+	ln := s.startCollector(simpleCollector)
+	s.startClient(ln.Addr().String())
 
 	Convey("Validate ability to connect to simplest collector", s.T(), func() {
 
@@ -239,8 +241,8 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 	var mtsSelector []string
 
 	longRunningCollector := &longRunningCollector{collectDuration: 1 * time.Second}
-	s.startCollector(longRunningCollector)
-	s.startClient()
+	ln := s.startCollector(longRunningCollector)
+	s.startClient(ln.Addr().String())
 
 	errCh := make(chan error, 1)
 
@@ -282,8 +284,8 @@ func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
 	var mtsSelector []string
 
 	longRunningCollector := &longRunningCollector{collectDuration: 5 * time.Second}
-	s.startCollector(longRunningCollector)
-	s.startClient()
+	ln := s.startCollector(longRunningCollector)
+	s.startClient(ln.Addr().String())
 
 	errCh := make(chan error, 1)
 
@@ -402,8 +404,8 @@ func (s *SuiteT) TestConfigurableCollector() {
 	var mtsSelector []string
 
 	configurableCollector := &configurableCollector{t: s.T()}
-	s.startCollector(configurableCollector)
-	s.startClient()
+	ln := s.startCollector(configurableCollector)
+	s.startClient(ln.Addr().String())
 
 	Convey("Validate that load and unload works in valid scenarios", s.T(), func() {
 		{
@@ -557,8 +559,8 @@ func (s *SuiteT) TestKubernetesCollector() {
 	}
 
 	sendingCollector := &kubernetesCollector{t: s.T()}
-	s.startCollector(sendingCollector)
-	s.startClient()
+	ln := s.startCollector(sendingCollector)
+	s.startClient(ln.Addr().String())
 
 	Convey("Validate that collector can gather metric based on definition and filter", s.T(), func() {
 		// Act
@@ -616,8 +618,8 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 	}
 
 	noDefCollector := &noDefinitionCollector{t: s.T()}
-	s.startCollector(noDefCollector)
-	s.startClient()
+	ln := s.startCollector(noDefCollector)
+	s.startClient(ln.Addr().String())
 
 	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
 		// Act
