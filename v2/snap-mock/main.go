@@ -4,17 +4,19 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
-	"google.golang.org/grpc"
+	"io"
 	"os"
 	"time"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"google.golang.org/grpc"
 )
 
 const (
 	defaultLoadDelay = 500 * time.Millisecond
 
 	defaultCollectInterval = 5 * time.Second
-	defaultPingInterval    = 3 * time.Second
+	defaultPingInterval    = 2 * time.Second
 
 	defaultGRPCTimeout = 10 * time.Second
 
@@ -69,7 +71,19 @@ func main() {
 			}
 
 			ctx, _ := context.WithTimeout(context.Background(), defaultGRPCTimeout)
-			_, err := cc.Collect(ctx, reqColl)
+			stream, err := cc.Collect(ctx, reqColl)
+			for {
+				resp, err := stream.Recv()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					doneCh <- fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
+				}
+
+				fmt.Printf("resp=%#v\n", resp)
+			}
+
 			if err != nil {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 			}
@@ -129,7 +143,7 @@ func parseCmdLine() *Options {
 
 	flag.IntVar(&opt.MaxCollectRequests,
 		"max-collect-requests", 0,
-		"Maximum number of collect requests (0 for infinite)")
+		"Maximum number of collect requests (default 0 for infinite)")
 
 	flag.DurationVar(&opt.CollectInterval,
 		"collect-interval", defaultCollectInterval,

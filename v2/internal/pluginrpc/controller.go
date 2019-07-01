@@ -7,7 +7,6 @@ Package rpc:
 package pluginrpc
 
 import (
-	"fmt"
 	"net"
 	"time"
 
@@ -24,16 +23,11 @@ func init() {
 	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 }
 
-func StartGRPCController(proxy CollectorProxy, opt *plugin.Options) {
+func StartGRPCController(proxy CollectorProxy, ln net.Listener, opt *plugin.Options) {
 	closeChan := make(chan error, 1)
 
-	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", opt.GrpcIp, opt.GrpcPort))
-	if err != nil {
-		log.Fatalf("can't create tcp connection (%s)", err)
-	}
-
 	grpcServer := grpc.NewServer()
-	RegisterControllerServer(grpcServer, newControlService(closeChan, DefaultPingTimeout, DefaultMaxMissingPingCounter))
+	RegisterControllerServer(grpcServer, newControlService(closeChan, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed))
 	RegisterCollectorServer(grpcServer, newCollectService(proxy))
 
 	go func() {

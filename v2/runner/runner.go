@@ -48,18 +48,18 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 			startPprofServer(opt)
 		}
 
-		startCollectorInServerMode(contextManager, opt)
+		startCollectorInServerMode(contextManager, r, opt)
 	case true:
 		startCollectorInSingleMode(contextManager, opt)
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *plugin.Options) {
 	if opt.EnablePprof {
 		startPprofServer(opt)
 	}
 
-	pluginrpc.StartGRPCController(ctxManager, opt)
+	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt)
 }
 
 func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
