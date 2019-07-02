@@ -4,7 +4,6 @@ The package "runner" provides simple API to start plugins in different modes.
 package runner
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -105,41 +104,6 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		fmt.Printf("Couldn't unload a task in a standalone mode (reason: %v)", errUnload)
 		os.Exit(errorStatus)
 	}
-}
-
-func printMetaInformation(name string, version string, opt *plugin.Options, r *resources) {
-	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
-
-	m := plugin.Meta{
-		GRPCVersion: pluginrpc.GRPCDefinitionVersion,
-	}
-
-	m.Plugin.Name = name
-	m.Plugin.Version = version
-
-	m.GRPC.IP = ip
-	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
-
-	m.PProf.Enabled = opt.EnablePprof
-	if opt.EnablePprof {
-		m.PProf.IP = ip
-		m.PProf.Port = r.pprofListener.Addr().(*net.TCPAddr).Port
-	}
-
-	m.Stats.Enabled = opt.EnableStats
-	if opt.EnableStats {
-		m.Stats.IP = ip
-		m.Stats.Port = opt.StatsPort // TODO: AO-13450
-	}
-
-	// Print
-	jsonMeta, err := json.Marshal(m)
-	if err != nil {
-		fmt.Printf("Can't provide plugin metadata information (reason: %v)\n", err)
-		os.Exit(errorStatus)
-	}
-
-	fmt.Printf("%s\n", string(jsonMeta))
 }
 
 func acquireResources(opt *plugin.Options) (*resources, error) {
