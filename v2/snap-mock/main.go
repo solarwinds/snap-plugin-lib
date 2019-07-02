@@ -169,10 +169,15 @@ func main() {
 ///////////////////////////////////////////////////////////////////////////////
 
 func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
+	filter := []string{}
+	if opt.PluginFilter != defaultFilter {
+		filter = strings.Split(opt.PluginFilter, filterSeparator)
+	}
+
 	reqLoad := &pluginrpc.LoadRequest{
 		TaskId:          defaultTaskID,
 		JsonConfig:      []byte(opt.PluginConfig),
-		MetricSelectors: strings.Split(opt.PluginFilter, filterSeparator),
+		MetricSelectors: filter,
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)

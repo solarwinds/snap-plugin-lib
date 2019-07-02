@@ -69,7 +69,12 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *options) 
 	const singleModeTaskID = 1
 
 	// Load task based on command line options
-	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), strings.Split(opt.PluginFilter, filterSeparator))
+	filter := []string{}
+	if opt.PluginFilter != defaultFilter {
+		filter = strings.Split(opt.PluginFilter, filterSeparator)
+	}
+
+	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
 		fmt.Printf("Couldn't load a task in a standalone mode (reason: %v)", errLoad)
 		os.Exit(errorStatus)
