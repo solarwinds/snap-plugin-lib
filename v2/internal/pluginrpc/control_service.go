@@ -30,7 +30,10 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 	} else {
 		go func() {
 			for {
-				<-cs.pingCh
+				_, ok := <-cs.pingCh
+				if !ok {
+					return
+				}
 			}
 		}()
 	}
