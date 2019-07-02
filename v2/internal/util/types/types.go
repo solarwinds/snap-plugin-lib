@@ -44,5 +44,6 @@ func (m *Metric) String() string {
 		}
 	}
 
-	return fmt.Sprintf("%s %v {tags: %v}", sb.String(), m.Value, m.Tags)
+	sb.WriteString(fmt.Sprintf(" %v {%v}", m.Value, m.Tags))
+	return sb.String()
 }
