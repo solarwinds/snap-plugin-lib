@@ -23,6 +23,8 @@ const (
 	defaultCollectInterval = 5 * time.Second
 	defaultCollectCount    = 1
 
+	defaultLogLevel = logrus.WarnLevel
+
 	filterSeparator = ";"
 )
 
@@ -146,7 +148,7 @@ func (l *logLevelHandler) Set(s string) error {
 
 func ParseCmdLineOptions(pluginName string, args []string) (*options, error) {
 	opt := &options{
-		LogLevel: logrus.WarnLevel,
+		LogLevel: defaultLogLevel,
 	}
 
 	flagParser := newFlagParser(pluginName, opt)
