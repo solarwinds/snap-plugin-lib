@@ -14,6 +14,10 @@ const (
 	DefaultMaxMissingPingCounter = 3
 )
 
+var (
+	RequestedKillError error = errors.New("kill requested")
+)
+
 type controlService struct {
 	pingCh  chan struct{} // notification about received ping
 	closeCh chan error    // request exit to main routine
@@ -52,7 +56,8 @@ func (cs *controlService) Ping(context.Context, *PingRequest) (*PingResponse, er
 func (cs *controlService) Kill(context.Context, *KillRequest) (*KillResponse, error) {
 	log.Trace("GRPC Kill() received")
 
-	cs.closeCh <- errors.New("kill requested")
+	cs.closeCh <- RequestedKillError
+
 	return &KillResponse{}, nil
 }
 

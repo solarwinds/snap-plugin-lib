@@ -34,6 +34,7 @@ type Options struct {
 	CollectInterval    time.Duration
 	PingInterval       time.Duration
 	MaxCollectRequests int
+	SendKill           bool
 
 	PluginConfig string
 	PluginFilter string
@@ -72,6 +73,10 @@ func parseCmdLine() *Options {
 		"ping-interval", defaultPingInterval,
 		"Duration between Ping requests")
 
+	flag.BoolVar(&opt.SendKill,
+		"send-kill", false,
+		"When set, Kill request will be set after 'max-collect-requests' collects ")
+
 	flag.Parse()
 
 	return opt
@@ -95,9 +100,9 @@ func main() {
 
 	// Load, collect, unload routine
 	go func() {
-		cc := pluginrpc.NewCollectorClient(cl)
+		collClient := pluginrpc.NewCollectorClient(cl)
 
-		err := doLoadRequest(cc, opt)
+		err := doLoadRequest(collClient, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
 		}
@@ -106,7 +111,7 @@ func main() {
 		reqCounter := 0
 		for {
 			reqCounter++
-			recvMts, err := doCollectRequest(cc, opt)
+			recvMts, err := doCollectRequest(collClient, opt)
 			if err != nil {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 			}
@@ -125,7 +130,7 @@ func main() {
 
 		time.Sleep(grpcLoadDelay)
 
-		err = doUnloadRequest(cc, opt)
+		err = doUnloadRequest(collClient, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send unload request to plugin: %v", err)
 		}
@@ -134,11 +139,12 @@ func main() {
 	}()
 
 	// ping routine
+	contClient := pluginrpc.NewControllerClient(cl)
+
 	go func() {
 		for {
-			cc := pluginrpc.NewControllerClient(cl)
 			req := &pluginrpc.PingRequest{}
-			_, err := cc.Ping(context.Background(), req)
+			_, err := contClient.Ping(context.Background(), req)
 			if err != nil {
 				doneCh <- fmt.Errorf("can't start ")
 			}
@@ -147,6 +153,14 @@ func main() {
 	}()
 
 	doneErr := <-doneCh
+
+	if opt.SendKill {
+		err := doKillRequest(contClient)
+		if err != nil {
+			doneCh <- fmt.Errorf("can't send kill request to plugin: %v", err)
+		}
+	}
+
 	if doneErr != nil {
 		fmt.Printf("Snap-mock exists because of error: %v", doneErr)
 	}
@@ -179,6 +193,16 @@ func doUnloadRequest(cc pluginrpc.CollectorClient, _ *Options) error {
 
 	_, err := cc.Unload(ctx, reqUnload)
 
+	return err
+}
+
+func doKillRequest(cc pluginrpc.ControllerClient) error {
+	reqKill := &pluginrpc.KillRequest{}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	_, err := cc.Kill(ctx, reqKill)
 	return err
 }
 

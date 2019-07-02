@@ -37,7 +37,9 @@ func StartGRPCController(proxy CollectorProxy, ln net.Listener, pingTimeout time
 	}()
 
 	exitErr := <-closeChan
-	log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+	if exitErr != nil && exitErr != RequestedKillError {
+		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+	}
 
 	shutdownPlugin(grpcServer)
 }
