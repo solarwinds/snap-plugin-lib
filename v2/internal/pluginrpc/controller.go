@@ -22,16 +22,11 @@ func init() {
 	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 }
 
-func StartGRPCController(proxy CollectorProxy) {
+func StartGRPCController(proxy CollectorProxy, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
 
-	ln, err := net.Listen("tcp", "0.0.0.0:56789")
-	if err != nil {
-		log.Fatalf("can't create tcp connection (%s)", err)
-	}
-
 	grpcServer := grpc.NewServer()
-	RegisterControllerServer(grpcServer, newControlService(closeChan))
+	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 	RegisterCollectorServer(grpcServer, newCollectService(proxy))
 
 	go func() {
@@ -41,7 +36,11 @@ func StartGRPCController(proxy CollectorProxy) {
 		}
 	}()
 
-	<-closeChan
+	exitErr := <-closeChan
+	if exitErr != nil && exitErr != RequestedKillError {
+		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+	}
+
 	shutdownPlugin(grpcServer)
 }
 
