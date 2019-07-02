@@ -53,7 +53,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *plugin.Options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *options) {
 	if opt.EnablePprof {
 		startPprofServer(r.pprofListener)
 	}
@@ -65,7 +65,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, 
 	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }
 
-func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
+func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *options) {
 	const singleModeTaskID = 1
 
 	// Load task based on command line options
@@ -106,7 +106,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 	}
 }
 
-func acquireResources(opt *plugin.Options) (*resources, error) {
+func acquireResources(opt *options) (*resources, error) {
 	r := &resources{}
 	var err error
 
