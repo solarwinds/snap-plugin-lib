@@ -10,7 +10,7 @@ type Options struct {
 	PluginIp          string
 	GrpcPort          int
 	GrpcPingTimeout   time.Duration
-	GrpcPingMaxMissed int
+	GrpcPingMaxMissed uint
 
 	LogLevel    logrus.Level
 	EnablePprof bool
@@ -21,6 +21,6 @@ type Options struct {
 	DebugMode            bool
 	PluginConfig         string
 	PluginFilter         string
-	DebugCollectCounts   int
+	DebugCollectCounts   uint
 	DebugCollectInterval time.Duration
 }

@@ -22,7 +22,7 @@ func init() {
 	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 }
 
-func StartGRPCController(proxy CollectorProxy, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount int) {
+func StartGRPCController(proxy CollectorProxy, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
 
 	grpcServer := grpc.NewServer()

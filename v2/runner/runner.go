@@ -76,7 +76,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		os.Exit(errorStatus)
 	}
 
-	for runCount := 0; ; {
+	for runCount := uint(0); ; {
 		// Request metrics collection
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
 		if errColl != nil {

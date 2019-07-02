@@ -19,7 +19,7 @@ type controlService struct {
 	closeCh chan error    // request exit to main routine
 }
 
-func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter int) *controlService {
+func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
 	cs := &controlService{
 		pingCh:  make(chan struct{}),
 		closeCh: closeCh,
@@ -53,8 +53,8 @@ func (cs *controlService) Kill(context.Context, *KillRequest) (*KillResponse, er
 	return &KillResponse{}, nil
 }
 
-func (cs *controlService) monitor(timeout time.Duration, maxPingMissed int) {
-	pingMissed := 0
+func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
+	pingMissed := uint(0)
 
 	for {
 		select {

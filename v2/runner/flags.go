@@ -44,7 +44,7 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
 		"Deadline for receiving single ping messages")
 
-	flagParser.IntVar(&opt.GrpcPingMaxMissed,
+	flagParser.UintVar(&opt.GrpcPingMaxMissed,
 		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
 		"Number of missed ping messages after which, plugin should exit")
 
@@ -73,7 +73,7 @@ func newFlagParser(name string, opt *plugin.Options) *flag.FlagSet {
 		"debug-mode", false,
 		"Run plugin in debug mode (standalone)")
 
-	flagParser.IntVar(&opt.DebugCollectCounts,
+	flagParser.UintVar(&opt.DebugCollectCounts,
 		"debug-collect-counts", defaultCollectCount,
 		"Number of collect requests executed in debug mode (0 - infinitely)")
 
