@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	metricSeparator = "."
+)
+
 type NamespaceElement struct {
 	Name        string
 	Value       string
@@ -30,10 +34,15 @@ func (ns *NamespaceElement) String() string {
 }
 
 func (m *Metric) String() string {
-	nsStr := []string{}
-	for _, ns := range m.Namespace {
-		nsStr = append(nsStr, fmt.Sprintf("%s", ns.String()))
+	var sb strings.Builder
+
+	for i, ns := range m.Namespace {
+		sb.WriteString(ns.String())
+
+		if i != len(m.Namespace)-1 {
+			sb.WriteString(metricSeparator)
+		}
 	}
 
-	return fmt.Sprintf("%s %v {tags: %v}", strings.Join(nsStr, "."), m.Value, m.Tags)
+	return fmt.Sprintf("%s %v {tags: %v}", sb.String(), m.Value, m.Tags)
 }
