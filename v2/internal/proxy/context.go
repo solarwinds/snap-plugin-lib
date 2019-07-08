@@ -37,7 +37,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 	}
 
 	pc := &pluginContext{
-		rawConfig:       []byte(rawConfig),
+		rawConfig:       rawConfig,
 		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
 	}
@@ -133,6 +133,25 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	})
 
 	return nil
+}
+
+func (pc *pluginContext) ShouldProcessMetric(ns string) bool {
+	parsedNs, err := metrictree.ParseNamespace(ns, false)
+	if err != nil {
+		return false
+	}
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
+		return false
+	}
+
+	defValid, _ := pc.ctxManager.metricsDefinition.IsValid(ns)
+	passedFilter, _ := pc.metricsFilters.IsValid(ns)
+
+	return defValid && passedFilter
+}
+
+func (pc *pluginContext) ShouldProcessGroup(ns string) bool {
+	return false // todo: implement
 }
 
 func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {

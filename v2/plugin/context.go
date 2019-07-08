@@ -28,6 +28,12 @@ type Context interface {
 
 	// Add tags to all metrics matching regular expression
 	ApplyTagsByRegExp(string, map[string]string) error
+
+	// True, when metric won't be filtered.
+	ShouldProcessMetric(string) bool
+
+	// True, when at least one metric matching selector won't be filtered
+	ShouldProcessGroup(string) bool
 }
 
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
