@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -141,6 +142,10 @@ func (cm *ContextManager) UnloadTask(id int) error {
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
 		}
+
+		// todo: remove
+		sm := stats.NewStatsManager()
+		sm.UpdateUnloadTaskStat()
 	}
 
 	cm.contextMap.Delete(id)
