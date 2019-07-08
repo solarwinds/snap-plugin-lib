@@ -135,7 +135,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	return nil
 }
 
-func (pc *pluginContext) ShouldProcessMetric(ns string) bool {
+func (pc *pluginContext) ShouldProcess(ns string) bool {
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return false
@@ -148,10 +148,6 @@ func (pc *pluginContext) ShouldProcessMetric(ns string) bool {
 	passedFilter := pc.metricsFilters.IsPartiallyValid(ns)
 
 	return defValid && passedFilter
-}
-
-func (pc *pluginContext) ShouldProcessGroup(ns string) bool {
-	return false // todo: implement
 }
 
 func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
