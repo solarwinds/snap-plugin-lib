@@ -89,7 +89,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
 	}
-	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), false) {
 		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %v", err)
 	}
 
@@ -140,12 +140,12 @@ func (pc *pluginContext) ShouldProcessMetric(ns string) bool {
 	if err != nil {
 		return false
 	}
-	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), true) {
 		return false
 	}
 
-	defValid, _ := pc.ctxManager.metricsDefinition.IsValid(ns)
-	passedFilter, _ := pc.metricsFilters.IsValid(ns)
+	defValid := pc.ctxManager.metricsDefinition.IsPartiallyValid(ns)
+	passedFilter := pc.metricsFilters.IsPartiallyValid(ns)
 
 	return defValid && passedFilter
 }
