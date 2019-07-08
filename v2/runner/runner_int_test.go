@@ -525,6 +525,45 @@ func (kc *kubernetesCollector) DefineMetrics(ctx plugin.CollectorDefinition) err
 }
 
 func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
+	Convey("Validate that user can obtain proper information about reasonableness to process metrics or metrics groups", kc.t, func() {
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/spec/paused"), ShouldBeTrue)                  // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/spec/*"), ShouldBeTrue)                       // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/*/paused"), ShouldBeTrue)                     // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/*/*"), ShouldBeTrue)                          // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/*/*/*"), ShouldBeFalse)                       // false - too much elements
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/*"), ShouldBeTrue)                            // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/*/spec/paused/*"), ShouldBeFalse)               // false - too much elements
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*/depl-01/spec/paused"), ShouldBeTrue)            // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail15/*/spec/paused"), ShouldBeTrue)       // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail16/*/spec/paused"), ShouldBeFalse)      // false - only "papertrail15" is allowed by filters
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail15/depl-01/spec/paused"), ShouldBeTrue) // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail15/depl-01/spec"), ShouldBeTrue)        // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail15/depl-01"), ShouldBeTrue)             // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail15"), ShouldBeTrue)                     // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/papertrail16"), ShouldBeFalse)                    // false - only "papertrail15" is allowed by filters
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/*"), ShouldBeTrue)                                // ok
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment"), ShouldBeTrue)                                  // ok
+		So(ctx.ShouldProcessMetric("/kubernetes"), ShouldBeFalse)                                            // false - ns should have at least 2 elements
+
+		// Following check are adequate to results of AddMetrics from next convey section with some exceptions
+		So(ctx.ShouldProcessMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running"), ShouldBeFalse)
+		So(ctx.ShouldProcessMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running"), ShouldBeFalse)
+
+		So(ctx.ShouldProcessMetric("/kubernetes/container/appoptics1/node-251/pod-34/mycont155/status/ready"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/ready"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status"), ShouldBeTrue) // ok, because last element doesn't have to be metrics name
+		So(ctx.ShouldProcessMetric("/kubernetes/container/loggly/node-251/pod-5174/mycont155/status/checking"), ShouldBeFalse)
+
+		So(ctx.ShouldProcessMetric("/kubernetes/node/node-124/status/outofdisk"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/node/node-124/status/allocatable/cpu/cores"), ShouldBeTrue)
+
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/[namespace=appoptics3]/depl-2322/status/targetedreplicas"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/[namespace=loggly12]/depl-5402/status/availablereplicas"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/[namespace=papertrail15]/depl-52/status/updatedreplicas"), ShouldBeTrue)
+		So(ctx.ShouldProcessMetric("/kubernetes/deployment/[name=appoptics3]/depl-2322/status/targetedreplicas"), ShouldBeFalse)
+	})
+
 	Convey("Validate that metrics are filtered according to metric definitions and filtering", kc.t, func() {
 		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)

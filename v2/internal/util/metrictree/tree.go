@@ -132,7 +132,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 			continue
 		}
 
-		if _, ok := visitedNode.currentElement.(*staticAnyElement); !ok {
+		if nsElems[visitedNode.level] != staticAnyMatcher {
 			if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
 				continue
 			}
