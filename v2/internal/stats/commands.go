@@ -9,21 +9,25 @@ type StatCommand interface {
 ///////////////////////////////////////////////////////////////////////////////
 
 type loadTaskStat struct {
-	sm *StatsController
+	sm      *StatsController
+	taskId  int
+	config  string
+	filters []string
 }
 
-func (t *loadTaskStat) ApplyStat() {
-	t.sm.applyLoadTaskStat()
+func (ts *loadTaskStat) ApplyStat() {
+	ts.sm.applyLoadStat(ts.taskId, ts.config, ts.filters)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 type unloadTaskStat struct {
-	sm *StatsController
+	sm     *StatsController
+	taskId int
 }
 
-func (t *unloadTaskStat) ApplyStat() {
-	t.sm.applyUnloadTaskStat()
+func (ts *unloadTaskStat) ApplyStat() {
+	ts.sm.applyUnloadStat(ts.taskId)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +36,6 @@ type collectTaskStat struct {
 	sm *StatsController
 }
 
-func (t *collectTaskStat) ApplyStat() {
-	t.sm.applyCollectStat()
+func (ts *collectTaskStat) ApplyStat() {
+	ts.sm.applyCollectStat()
 }

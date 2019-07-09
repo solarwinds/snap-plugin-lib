@@ -92,6 +92,8 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
 
+	cm.statsController.UpdateCollectStat()
+
 	return context.sessionMts, nil
 }
 
@@ -125,6 +127,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	}
 
 	cm.contextMap.Store(id, newCtx)
+	cm.statsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
 
 	return nil
 }
@@ -149,6 +152,8 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 
 	cm.contextMap.Delete(id)
+	cm.statsController.UpdateUnloadStat(id)
+
 	return nil
 }
 

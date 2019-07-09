@@ -24,8 +24,8 @@ type tasksFields struct {
 	TotalActiveTasks     uint
 	TotalCollectsRequest uint
 
-	AvgProcessingTime time.Time
-	MaxProcessingTime time.Time
+	AvgProcessingTime time.Duration
+	MaxProcessingTime time.Duration
 
 	totalProcessingTime uint
 }
@@ -39,7 +39,7 @@ type taskDetailsFields struct {
 	TotalMetrics         uint
 	AvgMetricsPerCollect uint
 
-	TotalProcessingTime time.Time
-	AvgProcessingTime   time.Time
-	MaxProcessingTime   time.Time
+	TotalProcessingTime time.Duration
+	AvgProcessingTime   time.Duration
+	MaxProcessingTime   time.Duration
 }
