@@ -145,9 +145,9 @@ func (pc *pluginContext) ShouldProcess(ns string) bool {
 	}
 
 	defValid := pc.ctxManager.metricsDefinition.IsPartiallyValid(ns)
-	passedFilter := pc.metricsFilters.IsPartiallyValid(ns)
+	shouldProcess := defValid && pc.metricsFilters.IsPartiallyValid(ns)
 
-	return defValid && passedFilter
+	return shouldProcess
 }
 
 func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {

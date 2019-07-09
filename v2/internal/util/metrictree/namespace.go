@@ -87,15 +87,8 @@ func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool, allowAnyM
 		return false
 	}
 
-	switch allowAnyMatch {
-	case true:
-		if !ns.isFirstElementStatic() {
-			return false
-		}
-	case false:
-		if !ns.isFirstAndLastElementStatic() {
-			return false
-		}
+	if (allowAnyMatch && !ns.isFirstElementStatic()) || (!allowAnyMatch && !ns.isFirstAndLastElementStatic()) {
+		return false
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
