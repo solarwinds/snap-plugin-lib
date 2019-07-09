@@ -47,9 +47,11 @@ type ContextManager struct {
 
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
+
+	statsController *stats.StatsController // reference to statistics controller
 }
 
-func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager {
+func NewContextManager(collector plugin.Collector, pluginName string, pluginVersion string) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},
@@ -59,6 +61,8 @@ func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager 
 
 		metricsMetadata:   map[string]metricMetadata{},
 		groupsDescription: map[string]string{},
+
+		statsController: stats.NewStatsController(pluginName, pluginVersion),
 	}
 
 	cm.RequestPluginDefinition()
@@ -142,10 +146,6 @@ func (cm *ContextManager) UnloadTask(id int) error {
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
 		}
-
-		// todo: remove
-		sm := stats.NewStatsManager()
-		sm.UpdateUnloadTaskStat()
 	}
 
 	cm.contextMap.Delete(id)

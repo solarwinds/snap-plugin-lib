@@ -2,8 +2,14 @@ package stats
 
 ///////////////////////////////////////////////////////////////////////////////
 
+type StatCommand interface {
+	ApplyStat()
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 type loadTaskStat struct {
-	sm *StatsManager
+	sm *StatsController
 }
 
 func (t *loadTaskStat) ApplyStat() {
@@ -13,7 +19,7 @@ func (t *loadTaskStat) ApplyStat() {
 ///////////////////////////////////////////////////////////////////////////////
 
 type unloadTaskStat struct {
-	sm *StatsManager
+	sm *StatsController
 }
 
 func (t *unloadTaskStat) ApplyStat() {
@@ -23,7 +29,7 @@ func (t *unloadTaskStat) ApplyStat() {
 ///////////////////////////////////////////////////////////////////////////////
 
 type collectTaskStat struct {
-	sm *StatsManager
+	sm *StatsController
 }
 
 func (t *collectTaskStat) ApplyStat() {
