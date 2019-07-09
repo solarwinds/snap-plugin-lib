@@ -2,12 +2,20 @@ package runner
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 )
+
+const (
+	statsRequestTimeout = 10 * time.Second
+)
+
+///////////////////////////////////////////////////////////////////////////////
 
 func startPprofServer(ln net.Listener) {
 	log.Infof("Running profiling server on address %s", ln.Addr())
@@ -28,9 +36,14 @@ func startPprofServer(ln net.Listener) {
 	})
 
 	go func() {
-		http.Serve(ln, h)
+		err := http.Serve(ln, h)
+		if err != nil {
+			log.WithError(err).Warn("Pprof server stopped")
+		}
 	}()
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 func startStatsServer(ln net.Listener, stats *stats.StatsController) {
 	log.Infof("Running stats server on address")
@@ -38,19 +51,40 @@ func startStatsServer(ln net.Listener, stats *stats.StatsController) {
 	h := http.NewServeMux()
 
 	h.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
-		log.Trace("Handling stats request")
-
-		res := <-stats.RequestStat()
-		b, err := json.MarshalIndent(&res, "", "    ")
-		if err != nil {
-			// todo:
-		}
-
-		w.WriteHeader(http.StatusOK)
-		w.Write(b)
+		statsHandler(w, r, stats)
 	})
 
 	go func() {
-		http.Serve(ln, h)
+		err := http.Serve(ln, h)
+		if err != nil {
+			log.WithError(err).Warn("Stats server stopped")
+		}
 	}()
+}
+
+func statsHandler(w http.ResponseWriter, r *http.Request, stats *stats.StatsController) {
+	log.WithField("URI", r.RequestURI).Trace("Handling statistics request")
+
+	respCh := stats.RequestStat()
+
+	select {
+	case resp := <-respCh:
+		jsonStats, err := json.MarshalIndent(&resp, "", "    ")
+		if err != nil {
+			log.WithField("stats", fmt.Sprintf("%v", resp)).WithError(err).Error("error when marshaling statistics struct")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(jsonStats)
+		if err != nil {
+			log.WithError(err).Error("error occurred when serving statistics request")
+		}
+
+	case <-time.After(statsRequestTimeout):
+		log.WithField("timeout", statsRequestTimeout).Warning("timeout occurred when serving statistics request")
+		w.WriteHeader(http.StatusRequestTimeout)
+	}
+
 }
