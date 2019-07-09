@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
@@ -87,12 +88,15 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 
 	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
+
+	startTime := time.Now()
 	err := cm.collector.Collect(context)
+	endTime := time.Now()
+	cm.statsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
+
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
-
-	cm.statsController.UpdateCollectStat()
 
 	return context.sessionMts, nil
 }

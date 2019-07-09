@@ -20,14 +20,14 @@ type pluginInfoFields struct {
 }
 
 type tasksFields struct {
-	CurrentlyActiveTasks uint
-	TotalActiveTasks     uint
-	TotalCollectsRequest uint
+	CurrentlyActiveTasks int
+	TotalActiveTasks     int
+	TotalCollectsRequest int
 
 	AvgProcessingTime time.Duration
 	MaxProcessingTime time.Duration
 
-	totalProcessingTime uint
+	totalProcessingTime time.Duration
 }
 
 type taskDetailsFields struct {
@@ -35,9 +35,9 @@ type taskDetailsFields struct {
 	Filters       []string
 
 	LoadedTime           time.Time
-	CollectRequest       uint
-	TotalMetrics         uint
-	AvgMetricsPerCollect uint
+	CollectRequest       int
+	TotalMetrics         int
+	AvgMetricsPerCollect int
 
 	TotalProcessingTime time.Duration
 	AvgProcessingTime   time.Duration
