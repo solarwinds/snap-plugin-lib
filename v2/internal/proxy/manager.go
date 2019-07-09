@@ -100,6 +100,8 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
 
+	log.WithField("elapsed", endTime.Sub(startTime).String()).Debug("Collect completed")
+
 	return context.sessionMts, nil
 }
 

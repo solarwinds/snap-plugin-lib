@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -52,6 +53,7 @@ func (sc *StatsController) Run() {
 				case stat := <-sc.incomingStatsCh:
 					stat.ApplyStat()
 				case respCh := <-sc.incomingRequestCh:
+					sc.refresh()
 					respCh <- sc.stats
 					close(respCh)
 				case <-sc.closeCh:
@@ -110,7 +112,7 @@ func (sc *StatsController) applyLoadStat(taskId int, config string, filters []st
 
 	// Update task-specific stats
 	sc.stats.TasksDetails[taskId] = taskDetailsFields{
-		Configuration: config,
+		Configuration: json.RawMessage(config),
 		Filters:       filters,
 		LoadedTime:    time.Now(),
 	}
@@ -125,25 +127,44 @@ func (sc *StatsController) applyUnloadStat(taskId int) {
 }
 
 func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, success bool, startTime, completeTime time.Time) {
-	duration := completeTime.Sub(startTime)
+	processingTime := completeTime.Sub(startTime)
 
 	// Update global stats
-	sc.stats.Tasks.TotalCollectsRequest += 1
+	{
+		sc.stats.Tasks.TotalCollectsRequest += 1
 
-	sc.stats.Tasks.totalProcessingTime += duration
-	sc.stats.Tasks.AvgProcessingTime = 0 // todo
-	sc.stats.Tasks.MaxProcessingTime = 0 // todo
+		sc.stats.Tasks.totalProcessingTime += processingTime
+		sc.stats.Tasks.AvgProcessingTime = 0 // todo
+		sc.stats.Tasks.MaxProcessingTime = 0 // todo
+	}
 
 	// Update task-specific state
-	taskStats := sc.stats.TasksDetails[taskId]
+	{
+		taskStats := sc.stats.TasksDetails[taskId]
 
-	taskStats.CollectRequest += 1
-	taskStats.TotalMetrics += len(mts)
-	taskStats.TotalProcessingTime += duration
+		taskStats.CollectRequest += 1
+		taskStats.TotalMetrics += len(mts)
+		taskStats.totalProcessingTime += processingTime
 
-	taskStats.AvgMetricsPerCollect = 0 // todo
-	taskStats.AvgProcessingTime = 0    // todo
-	taskStats.MaxProcessingTime = 0    // todo
+		if taskStats.CollectRequest > 0 {
+			taskStats.avgProcessingTime = time.Duration(int(taskStats.totalProcessingTime) / taskStats.CollectRequest)
+			taskStats.AvgMetricsPerCollect = taskStats.TotalMetrics / taskStats.CollectRequest
+		}
+		if processingTime > taskStats.maxProcessingTime {
+			taskStats.maxProcessingTime = processingTime
+		}
 
-	sc.stats.TasksDetails[taskId] = taskStats
+		sc.stats.TasksDetails[taskId] = taskStats
+	}
+
+}
+
+func (sc *StatsController) refresh() {
+	for id, taskStat := range sc.stats.TasksDetails {
+		taskStat.TotalProcessingTime = taskStat.totalProcessingTime.String()
+		taskStat.AvgProcessingTime = taskStat.avgProcessingTime.String()
+		taskStat.MaxProcessingTime = taskStat.maxProcessingTime.String()
+
+		sc.stats.TasksDetails[id] = taskStat
+	}
 }

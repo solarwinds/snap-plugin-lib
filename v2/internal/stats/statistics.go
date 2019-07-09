@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -31,15 +32,20 @@ type tasksFields struct {
 }
 
 type taskDetailsFields struct {
-	Configuration string
+	Configuration json.RawMessage
 	Filters       []string
 
-	LoadedTime           time.Time
+	LoadedTime time.Time
+
 	CollectRequest       int
 	TotalMetrics         int
 	AvgMetricsPerCollect int
 
-	TotalProcessingTime time.Duration
-	AvgProcessingTime   time.Duration
-	MaxProcessingTime   time.Duration
+	TotalProcessingTime string
+	AvgProcessingTime   string
+	MaxProcessingTime   string
+
+	totalProcessingTime time.Duration
+	avgProcessingTime   time.Duration
+	maxProcessingTime   time.Duration
 }

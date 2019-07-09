@@ -61,6 +61,9 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 	taskID := int(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
+	if metrics == nil {
+		metrics = []string{}
+	}
 
 	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }

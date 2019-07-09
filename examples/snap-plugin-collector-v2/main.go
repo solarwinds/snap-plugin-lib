@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"strconv"
-
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
+	"math/rand"
+	"strconv"
+	"time"
 )
 
 var log = logrus.WithFields(logrus.Fields{
@@ -24,6 +24,9 @@ func (*myCollector) DefineMetrics(plugin.CollectorDefinition) error {
 
 func (*myCollector) Collect(ctx plugin.Context) error {
 	log.Trace("Collect executed")
+
+	// Simulate collector processing
+	time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
 
 	_ = ctx.AddMetric("/example/static/random1", rand.Intn(10))
 	_ = ctx.AddMetric("/example/static/random2", rand.Intn(20))
