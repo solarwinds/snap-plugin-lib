@@ -21,6 +21,7 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runn
 type resources struct {
 	grpcListener  net.Listener
 	pprofListener net.Listener
+	statsListener net.Listener
 }
 
 const (
@@ -59,7 +60,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, 
 	}
 
 	if opt.EnableStats {
-		startStatsServer()
+		startStatsServer(r.statsListener, ctxManager.StatsController)
 	}
 
 	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
@@ -124,6 +125,13 @@ func acquireResources(opt *options) (*resources, error) {
 		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.PprofPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for PProf server (%s)", err)
+		}
+	}
+
+	if opt.EnableStats {
+		r.statsListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.StatsPort))
+		if err != nil {
+			return nil, fmt.Errorf("can't create tcp connection for Stats server (%s)", err)
 		}
 	}
 

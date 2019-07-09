@@ -28,7 +28,6 @@ type Collector interface {
 	RequestCollect(id int) ([]*types.Metric, error)
 	LoadTask(id int, config []byte, selectors []string) error
 	UnloadTask(id int) error
-	RequestInfo()
 }
 
 type metricMetadata struct {
@@ -49,10 +48,13 @@ type ContextManager struct {
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
-	statsController *stats.StatsController // reference to statistics controller
+	StatsController *stats.StatsController // reference to statistics controller
 }
 
 func NewContextManager(collector plugin.Collector, pluginName string, pluginVersion string) *ContextManager {
+	statsController := stats.NewStatsController(pluginName, pluginVersion)
+	statsController.Run()
+
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},
@@ -63,7 +65,7 @@ func NewContextManager(collector plugin.Collector, pluginName string, pluginVers
 		metricsMetadata:   map[string]metricMetadata{},
 		groupsDescription: map[string]string{},
 
-		statsController: stats.NewStatsController(pluginName, pluginVersion),
+		StatsController: statsController,
 	}
 
 	cm.RequestPluginDefinition()
@@ -92,7 +94,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	startTime := time.Now()
 	err := cm.collector.Collect(context)
 	endTime := time.Now()
-	cm.statsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
+	cm.StatsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
 
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
@@ -131,7 +133,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	}
 
 	cm.contextMap.Store(id, newCtx)
-	cm.statsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
+	cm.StatsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
 
 	return nil
 }
@@ -156,13 +158,9 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 
 	cm.contextMap.Delete(id)
-	cm.statsController.UpdateUnloadStat(id)
+	cm.StatsController.UpdateUnloadStat(id)
 
 	return nil
-}
-
-func (cm *ContextManager) RequestInfo() {
-	return
 }
 
 ///////////////////////////////////////////////////////////////////////////////

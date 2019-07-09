@@ -10,6 +10,7 @@ import (
 
 const (
 	statsChannelSize = 100
+	reqChannelSize   = 10
 )
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"})
@@ -17,25 +18,28 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 ///////////////////////////////////////////////////////////////////////////////
 
 type StatsController struct {
-	startedSync     sync.Once
-	incomingStatsCh chan StatCommand
-	closeCh         chan struct{}
-	stats           Statistics
+	startedSync       sync.Once
+	incomingStatsCh   chan StatCommand
+	incomingRequestCh chan chan Statistics
+	closeCh           chan struct{}
+	stats             Statistics
 }
 
 func NewStatsController(pluginName string, pluginVersion string) *StatsController {
 	return &StatsController{
-		startedSync:     sync.Once{},
-		incomingStatsCh: make(chan StatCommand, statsChannelSize),
-		closeCh:         make(chan struct{}),
+		startedSync:       sync.Once{},
+		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
+		incomingRequestCh: make(chan chan Statistics, reqChannelSize),
+		closeCh:           make(chan struct{}),
 
 		stats: Statistics{
-			pluginInfo: pluginInfoFields{
+			PluginInfo: pluginInfoFields{
 				Name:      pluginName,
 				Version:   pluginVersion,
 				StartTime: time.Now(),
 			},
-			tasks: tasksFields{},
+			Tasks:        tasksFields{},
+			TasksDetails: map[int]taskDetailsFields{},
 		},
 	}
 }
@@ -47,6 +51,9 @@ func (sc *StatsController) Run() {
 				select {
 				case stat := <-sc.incomingStatsCh:
 					stat.ApplyStat()
+				case respCh := <-sc.incomingRequestCh:
+					respCh <- sc.stats
+					close(respCh)
 				case <-sc.closeCh:
 					return
 				}
@@ -57,6 +64,14 @@ func (sc *StatsController) Run() {
 
 func (sc *StatsController) Close() {
 	sc.closeCh <- struct{}{}
+}
+
+func (sc *StatsController) RequestStat() chan Statistics {
+	respCh := make(chan Statistics)
+
+	sc.incomingRequestCh <- respCh
+
+	return respCh
 }
 
 func (sc *StatsController) UpdateLoadStat(taskId int, config string, filters []string) {
@@ -90,11 +105,11 @@ func (sc *StatsController) UpdateCollectStat(taskId int, mts []*types.Metric, su
 
 func (sc *StatsController) applyLoadStat(taskId int, config string, filters []string) {
 	// Update global stats
-	sc.stats.tasks.CurrentlyActiveTasks += 1
-	sc.stats.tasks.TotalActiveTasks += 1
+	sc.stats.Tasks.CurrentlyActiveTasks += 1
+	sc.stats.Tasks.TotalActiveTasks += 1
 
 	// Update task-specific stats
-	sc.stats.tasksDetails[taskId] = taskDetailsFields{
+	sc.stats.TasksDetails[taskId] = taskDetailsFields{
 		Configuration: config,
 		Filters:       filters,
 		LoadedTime:    time.Now(),
@@ -103,24 +118,24 @@ func (sc *StatsController) applyLoadStat(taskId int, config string, filters []st
 
 func (sc *StatsController) applyUnloadStat(taskId int) {
 	// Update global stats
-	sc.stats.tasks.CurrentlyActiveTasks -= 1
+	sc.stats.Tasks.CurrentlyActiveTasks -= 1
 
 	// Update task-specific stats
-	delete(sc.stats.tasksDetails, taskId) // todo: safe?
+	delete(sc.stats.TasksDetails, taskId) // todo: safe?
 }
 
 func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, success bool, startTime, completeTime time.Time) {
 	duration := completeTime.Sub(startTime)
 
 	// Update global stats
-	sc.stats.tasks.TotalCollectsRequest += 1
+	sc.stats.Tasks.TotalCollectsRequest += 1
 
-	sc.stats.tasks.totalProcessingTime += duration
-	sc.stats.tasks.AvgProcessingTime = 0 // todo
-	sc.stats.tasks.MaxProcessingTime = 0 // todo
+	sc.stats.Tasks.totalProcessingTime += duration
+	sc.stats.Tasks.AvgProcessingTime = 0 // todo
+	sc.stats.Tasks.MaxProcessingTime = 0 // todo
 
 	// Update task-specific state
-	taskStats := sc.stats.tasksDetails[taskId]
+	taskStats := sc.stats.TasksDetails[taskId]
 
 	taskStats.CollectRequest += 1
 	taskStats.TotalMetrics += len(mts)
@@ -130,5 +145,5 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 	taskStats.AvgProcessingTime = 0    // todo
 	taskStats.MaxProcessingTime = 0    // todo
 
-	sc.stats.tasksDetails[taskId] = taskStats
+	sc.stats.TasksDetails[taskId] = taskStats
 }

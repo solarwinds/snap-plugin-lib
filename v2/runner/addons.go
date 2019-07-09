@@ -1,9 +1,12 @@
 package runner
 
 import (
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 )
 
 func startPprofServer(ln net.Listener) {
@@ -29,8 +32,25 @@ func startPprofServer(ln net.Listener) {
 	}()
 }
 
-func startStatsServer() {
+func startStatsServer(ln net.Listener, stats *stats.StatsController) {
 	log.Infof("Running stats server on address")
 
-	// TODO: AO-13450
+	h := http.NewServeMux()
+
+	h.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+		log.Trace("Handling stats request")
+
+		res := <-stats.RequestStat()
+		b, err := json.MarshalIndent(&res, "", "    ")
+		if err != nil {
+			// todo:
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
+	})
+
+	go func() {
+		http.Serve(ln, h)
+	}()
 }

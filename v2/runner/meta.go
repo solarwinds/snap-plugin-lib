@@ -58,7 +58,7 @@ func printMetaInformation(name string, version string, opt *options, r *resource
 	m.Stats.Enabled = opt.EnableStats
 	if opt.EnableStats {
 		m.Stats.IP = ip
-		m.Stats.Port = opt.StatsPort // TODO: AO-13450
+		m.Stats.Port = r.statsListener.Addr().(*net.TCPAddr).Port
 	}
 
 	// Print

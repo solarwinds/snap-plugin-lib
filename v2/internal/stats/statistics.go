@@ -5,9 +5,9 @@ import (
 )
 
 type Statistics struct {
-	pluginInfo   pluginInfoFields
-	tasks        tasksFields
-	tasksDetails map[int]taskDetailsFields
+	PluginInfo   pluginInfoFields
+	Tasks        tasksFields
+	TasksDetails map[int]taskDetailsFields
 }
 
 /*****************************************************************************/
