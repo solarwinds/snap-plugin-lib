@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -37,7 +39,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorStatus)
 	}
 
-	statsController := stats.NewStatsController(name, version)
+	statsController := stats.NewStatsController(name, version, opt)
 	contextManager := proxy.NewContextManager(collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
@@ -57,7 +59,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *types.Options) {
 	if opt.EnablePprof {
 		startPprofServer(r.pprofListener)
 	}
@@ -69,7 +71,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, 
 	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }
 
-func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *options) {
+func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Options) {
 	const singleModeTaskID = 1
 
 	// Load task based on command line options
@@ -115,7 +117,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *options) 
 	}
 }
 
-func acquireResources(opt *options) (*resources, error) {
+func acquireResources(opt *types.Options) (*resources, error) {
 	r := &resources{}
 	var err error
 

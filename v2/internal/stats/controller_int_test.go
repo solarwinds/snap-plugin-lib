@@ -16,7 +16,7 @@ func TestStatistics(t *testing.T) {
 
 	Convey("Validate that statistics calculation is correct", t, func() {
 		// Arrange
-		sc := NewStatsController("example", "1.2.3").(*StatsController)
+		sc := NewStatsController("example", "1.2.3", &types.Options{}).(*StatsController)
 
 		// Act
 		sc.UpdateLoadStat(1, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})

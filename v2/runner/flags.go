@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/sirupsen/logrus"
 )
@@ -30,28 +32,7 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Structure representing plugin configuration (received by parsing command-line arguments)
-// Visit newFlagParser() to find descriptions associated with each option.
-type options struct {
-	PluginIp          string
-	GrpcPort          int
-	GrpcPingTimeout   time.Duration
-	GrpcPingMaxMissed uint
-
-	LogLevel    logrus.Level
-	EnablePprof bool
-	EnableStats bool
-	PprofPort   int
-	StatsPort   int
-
-	DebugMode            bool
-	PluginConfig         string
-	PluginFilter         string
-	DebugCollectCounts   uint
-	DebugCollectInterval time.Duration
-}
-
-func newFlagParser(name string, opt *options) *flag.FlagSet {
+func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	flagParser.StringVar(&opt.PluginIp,
@@ -115,7 +96,7 @@ func newFlagParser(name string, opt *options) *flag.FlagSet {
 }
 
 type logLevelHandler struct {
-	opt *options
+	opt *types.Options
 }
 
 func (l *logLevelHandler) String() string {
@@ -146,8 +127,8 @@ func (l *logLevelHandler) Set(s string) error {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func ParseCmdLineOptions(pluginName string, args []string) (*options, error) {
-	opt := &options{
+func ParseCmdLineOptions(pluginName string, args []string) (*types.Options, error) {
+	opt := &types.Options{
 		LogLevel: defaultLogLevel,
 	}
 
@@ -166,7 +147,7 @@ func ParseCmdLineOptions(pluginName string, args []string) (*options, error) {
 	return opt, nil
 }
 
-func ValidateOptions(opt *options) error {
+func ValidateOptions(opt *types.Options) error {
 	grpcIp := net.ParseIP(opt.PluginIp)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
@@ -187,7 +168,7 @@ func ValidateOptions(opt *options) error {
 	return nil
 }
 
-func anyDebugFlagSet(opt *options) bool {
+func anyDebugFlagSet(opt *types.Options) bool {
 	return opt.DebugCollectCounts != defaultCollectCount ||
 		opt.DebugCollectInterval != defaultCollectInterval ||
 		opt.PluginConfig != defaultConfig ||

@@ -17,6 +17,7 @@ type pluginInfoFields struct {
 	Name           string
 	Version        string
 	StartTime      time.Time
+	OperatingTime  string
 	CmdLineOptions string
 	Options        json.RawMessage
 }
@@ -26,8 +27,11 @@ type tasksFields struct {
 	TotalActiveTasks     int
 	TotalCollectsRequest int
 
-	AvgProcessingTime time.Duration
-	MaxProcessingTime time.Duration
+	AvgProcessingTime string
+	MaxProcessingTime string
+
+	avgProcessingTime time.Duration
+	maxProcessingTime time.Duration
 
 	totalProcessingTime time.Duration
 }

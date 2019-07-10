@@ -6,6 +6,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 )
 
@@ -36,7 +38,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, opt *options, r *resources) {
+func printMetaInformation(name string, version string, opt *types.Options, r *resources) {
 	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
 
 	m := meta{

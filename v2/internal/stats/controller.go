@@ -2,6 +2,8 @@ package stats
 
 import (
 	"encoding/json"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,7 +20,8 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type StatsControllerI interface { // todo: change name
+type StatsControllerI interface {
+	// todo: change name
 	Close()
 	RequestStat() chan Statistics
 	UpdateLoadStat(taskId int, config string, filters []string)
@@ -34,7 +37,12 @@ type StatsController struct {
 	stats             Statistics
 }
 
-func NewStatsController(pluginName string, pluginVersion string) StatsControllerI {
+func NewStatsController(pluginName string, pluginVersion string, opt *types.Options) StatsControllerI {
+	optJson, err := json.Marshal(opt)
+	if err != nil {
+		// todo
+	}
+
 	sc := &StatsController{
 		startedSync:       sync.Once{},
 		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
@@ -46,6 +54,9 @@ func NewStatsController(pluginName string, pluginVersion string) StatsController
 				Name:      pluginName,
 				Version:   pluginVersion,
 				StartTime: time.Now(),
+
+				CmdLineOptions: strings.Join(os.Args[1:], " "),
+				Options:        optJson,
 			},
 			Tasks:        tasksFields{},
 			TasksDetails: map[int]taskDetailsFields{},
@@ -146,8 +157,14 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 		sc.stats.Tasks.TotalCollectsRequest += 1
 
 		sc.stats.Tasks.totalProcessingTime += processingTime
-		sc.stats.Tasks.AvgProcessingTime = 0 // todo
-		sc.stats.Tasks.MaxProcessingTime = 0 // todo
+
+		if sc.stats.Tasks.TotalCollectsRequest > 0 {
+			sc.stats.Tasks.avgProcessingTime = time.Duration(int(sc.stats.Tasks.totalProcessingTime) / sc.stats.Tasks.TotalCollectsRequest)
+		}
+
+		if processingTime > sc.stats.Tasks.maxProcessingTime {
+			sc.stats.Tasks.maxProcessingTime = processingTime
+		}
 	}
 
 	// Update task-specific state
@@ -172,6 +189,15 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 }
 
 func (sc *StatsController) refresh() {
+	now := time.Now()
+
+	// Global fields
+	sc.stats.PluginInfo.OperatingTime = now.Sub(sc.stats.PluginInfo.StartTime).String()
+
+	sc.stats.Tasks.MaxProcessingTime = sc.stats.Tasks.maxProcessingTime.String()
+	sc.stats.Tasks.AvgProcessingTime = sc.stats.Tasks.avgProcessingTime.String()
+
+	// Task-specific fields
 	for id, taskStat := range sc.stats.TasksDetails {
 		taskStat.TotalProcessingTime = taskStat.totalProcessingTime.String()
 		taskStat.AvgProcessingTime = taskStat.avgProcessingTime.String()
