@@ -78,7 +78,6 @@ func (sc *StatsController) run() {
 				case stat := <-sc.incomingStatsCh:
 					stat.ApplyStat()
 				case respCh := <-sc.incomingRequestCh:
-					sc.refresh()
 					respCh <- sc.stats
 					close(respCh)
 				case <-sc.closeCh:
@@ -158,46 +157,45 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 
 	// Update global stats
 	{
-		sc.stats.TasksSummary.Counters.TotalCollectsRequest += 1
+		ts := &sc.stats.TasksSummary
 
-		sc.stats.TasksSummary.ProcessingTimes.Total += processingTime
+		ts.Counters.TotalCollectRequests += 1
+		ts.ProcessingTimes.Total += processingTime
 
-		if sc.stats.TasksSummary.Counters.TotalCollectsRequest > 0 {
-			sc.stats.TasksSummary.ProcessingTimes.Average = time.Duration(int(sc.stats.TasksSummary.ProcessingTimes.Total) / sc.stats.TasksSummary.Counters.TotalCollectsRequest)
+		if ts.Counters.TotalCollectRequests > 0 {
+			ts.ProcessingTimes.Average = time.Duration(int(ts.ProcessingTimes.Total) / ts.Counters.TotalCollectRequests)
 		}
 
-		if processingTime > sc.stats.TasksSummary.ProcessingTimes.Maximum {
-			sc.stats.TasksSummary.ProcessingTimes.Maximum = processingTime
+		if processingTime > ts.ProcessingTimes.Maximum {
+			ts.ProcessingTimes.Maximum = processingTime
 		}
 	}
 
 	// Update task-specific state
 	{
-		taskStats := sc.stats.TasksDetails[taskId]
+		td := sc.stats.TasksDetails[taskId]
 
-		taskStats.Counters.CollectRequests += 1
-		taskStats.Counters.TotalMetrics += len(mts)
-		taskStats.ProcessingTimes.Total += processingTime
+		td.Counters.CollectRequests += 1
+		td.Counters.TotalMetrics += len(mts)
+		td.ProcessingTimes.Total += processingTime
 
-		if taskStats.Counters.CollectRequests > 0 {
-			taskStats.ProcessingTimes.Average = time.Duration(int(taskStats.ProcessingTimes.Total) / taskStats.Counters.CollectRequests)
-			taskStats.Counters.AvgMetricsPerCollect = taskStats.Counters.TotalMetrics / taskStats.Counters.CollectRequests
-		}
-		if processingTime > taskStats.ProcessingTimes.Maximum {
-			taskStats.ProcessingTimes.Maximum = processingTime
+		if td.Counters.CollectRequests > 0 {
+			td.ProcessingTimes.Average = time.Duration(int(td.ProcessingTimes.Total) / td.Counters.CollectRequests)
+			td.Counters.AvgMetricsPerCollect = td.Counters.TotalMetrics / td.Counters.CollectRequests
 		}
 
-		taskStats.LastMeasurement = measurementInfo{
+		if processingTime > td.ProcessingTimes.Maximum {
+			td.ProcessingTimes.Maximum = processingTime
+		}
+
+		td.LastMeasurement = measurementInfo{
 			Occurred: eventTimes{
 				Time: completeTime,
 			},
 			CollectedMetrics: len(mts),
 		}
 
-		sc.stats.TasksDetails[taskId] = taskStats
+		sc.stats.TasksDetails[taskId] = td
 	}
 
-}
-
-func (sc *StatsController) refresh() {
 }

@@ -41,7 +41,7 @@ type taskDetails struct {
 type summaryCounters struct {
 	CurrentlyActiveTasks int
 	TotalActiveTasks     int
-	TotalCollectsRequest int
+	TotalCollectRequests int
 }
 
 type tasksCounters struct {
