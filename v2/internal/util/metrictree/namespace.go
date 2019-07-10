@@ -79,9 +79,11 @@ func (ns *Namespace) IsUsableForDefinition() bool {
 	return true
 }
 
-// Check if namespace selector can be used for metric addition ie. in ctx.AddMetric
+// Check if namespace selector can be used for metric addition (ctx.AddMetric) or metric calculation reasonableness (ctx.ShouldProcess)
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
-// In case plugin doesn't provide metric definition added element should be only static names.
+//
+// metricDefinitionPresent - In case plugin doesn't provide metric definition, added elements should be only static names.
+// allowAnyMatch - When true, using '*' is allowed (ie. ctx.ShouldProcess("/plugin/group/*/*/metric1")
 func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool, allowAnyMatch bool) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
