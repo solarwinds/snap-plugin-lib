@@ -16,10 +16,9 @@ type Statistics struct {
 type pluginInfo struct {
 	Name           string
 	Version        string
-	StartTime      time.Time
-	OperatingTime  string
 	CmdLineOptions string
 	Options        json.RawMessage
+	Started        eventTimes
 }
 
 type tasksSummary struct {
@@ -34,6 +33,7 @@ type taskDetails struct {
 	Counters        tasksCounters
 	Loaded          eventTimes
 	ProcessingTimes processingTimes
+	LastMeasurement measurementInfo
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +48,11 @@ type tasksCounters struct {
 	CollectRequests      int
 	TotalMetrics         int
 	AvgMetricsPerCollect int
+}
+
+type measurementInfo struct {
+	Occurred         eventTimes
+	CollectedMetrics int
 }
 
 ///////////////////////////////////////////////////////////////////////////////

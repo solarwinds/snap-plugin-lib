@@ -51,9 +51,11 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 
 		stats: Statistics{
 			PluginInfo: pluginInfo{
-				Name:      pluginName,
-				Version:   pluginVersion,
-				StartTime: time.Now(),
+				Name:    pluginName,
+				Version: pluginVersion,
+				Started: eventTimes{
+					Time: time.Now(),
+				},
 
 				CmdLineOptions: strings.Join(os.Args[1:], " "),
 				Options:        optJson,
@@ -148,7 +150,7 @@ func (sc *StatsController) applyUnloadStat(taskId int) {
 	sc.stats.TasksSummary.Counters.CurrentlyActiveTasks -= 1
 
 	// Update task-specific stats
-	delete(sc.stats.TasksDetails, taskId) // todo: safe?
+	delete(sc.stats.TasksDetails, taskId)
 }
 
 func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, success bool, startTime, completeTime time.Time) {
@@ -185,14 +187,17 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 			taskStats.ProcessingTimes.Maximum = processingTime
 		}
 
+		taskStats.LastMeasurement = measurementInfo{
+			Occurred: eventTimes{
+				Time: completeTime,
+			},
+			CollectedMetrics: len(mts),
+		}
+
 		sc.stats.TasksDetails[taskId] = taskStats
 	}
 
 }
 
 func (sc *StatsController) refresh() {
-	now := time.Now()
-
-	// Global fields
-	sc.stats.PluginInfo.OperatingTime = now.Sub(sc.stats.PluginInfo.StartTime).String()
 }
