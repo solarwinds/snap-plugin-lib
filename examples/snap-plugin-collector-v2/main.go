@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/runner"
-	"github.com/sirupsen/logrus"
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/runner"
+	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.WithFields(logrus.Fields{

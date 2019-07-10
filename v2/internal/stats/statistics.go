@@ -14,10 +14,11 @@ type Statistics struct {
 /*****************************************************************************/
 
 type pluginInfoFields struct {
-	Name      string
-	Version   string
-	StartTime time.Time
-	Options   string // todo: format?
+	Name           string
+	Version        string
+	StartTime      time.Time
+	CmdLineOptions string
+	Options        json.RawMessage
 }
 
 type tasksFields struct {

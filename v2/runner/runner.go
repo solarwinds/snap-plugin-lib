@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -35,7 +37,8 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorStatus)
 	}
 
-	contextManager := proxy.NewContextManager(collector, name, version)
+	statsController := stats.NewStatsController(name, version)
+	contextManager := proxy.NewContextManager(collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
 

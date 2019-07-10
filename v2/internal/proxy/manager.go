@@ -48,13 +48,10 @@ type ContextManager struct {
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
-	StatsController *stats.StatsController // reference to statistics controller
+	StatsController stats.StatsControllerI // reference to statistics controller
 }
 
-func NewContextManager(collector plugin.Collector, pluginName string, pluginVersion string) *ContextManager {
-	statsController := stats.NewStatsController(pluginName, pluginVersion)
-	statsController.Run()
-
+func NewContextManager(collector plugin.Collector, statsController stats.StatsControllerI) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},

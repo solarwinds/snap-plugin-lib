@@ -18,6 +18,14 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 
 ///////////////////////////////////////////////////////////////////////////////
 
+type StatsControllerI interface { // todo: change name
+	Close()
+	RequestStat() chan Statistics
+	UpdateLoadStat(taskId int, config string, filters []string)
+	UpdateUnloadStat(taskId int)
+	UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time)
+}
+
 type StatsController struct {
 	startedSync       sync.Once
 	incomingStatsCh   chan StatCommand
@@ -26,8 +34,8 @@ type StatsController struct {
 	stats             Statistics
 }
 
-func NewStatsController(pluginName string, pluginVersion string) *StatsController {
-	return &StatsController{
+func NewStatsController(pluginName string, pluginVersion string) StatsControllerI {
+	sc := &StatsController{
 		startedSync:       sync.Once{},
 		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
 		incomingRequestCh: make(chan chan Statistics, reqChannelSize),
@@ -43,9 +51,13 @@ func NewStatsController(pluginName string, pluginVersion string) *StatsControlle
 			TasksDetails: map[int]taskDetailsFields{},
 		},
 	}
+
+	sc.run()
+
+	return sc
 }
 
-func (sc *StatsController) Run() {
+func (sc *StatsController) run() {
 	sc.startedSync.Do(func() {
 		go func() {
 			for {

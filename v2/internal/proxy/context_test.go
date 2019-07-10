@@ -30,7 +30,7 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctxMan := NewContextManager(&mockCollector{}, "plugin", "1.0.0")
+	ctxMan := NewContextManager(&mockCollector{}, nil)
 	ctx, cErr := NewPluginContext(ctxMan, jsonConfig)
 
 	Convey("Validate Context API for handling configuration", t, func() {
@@ -146,7 +146,7 @@ func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctxMan := NewContextManager(&mockCollector{}, "plugin", "1.0.0")
+		ctxMan := NewContextManager(&mockCollector{}, nil)
 		ctx, cErr := NewPluginContext(ctxMan, emptyConfig)
 
 		So(cErr, ShouldBeNil)
