@@ -46,6 +46,9 @@ type Options struct {
 }
 
 const (
+	unloadMaxRetry   = 5
+	unloadRetryDelay = 1 * time.Second
+
 	stoppedByUser = 1
 )
 
@@ -93,7 +96,6 @@ func parseCmdLine() *Options {
 	flag.Parse()
 
 	if opt.TaskId == defaultTaskID {
-		rand.Seed(time.Now().Unix())
 		opt.TaskId = rand.Intn(maxTaskId)
 	}
 
@@ -103,6 +105,8 @@ func parseCmdLine() *Options {
 ///////////////////////////////////////////////////////////////////////////////
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	doneCh := make(chan error)
 
 	opt := parseCmdLine()
@@ -131,7 +135,17 @@ func main() {
 		go func() {
 			<-notifyCh
 			fmt.Printf("!! Ctrl+c pressed !! trying to unload current task\n")
-			_ = doUnloadRequest(collClient, opt)
+
+			for i := 0; i < unloadMaxRetry; i++ {
+				err := doUnloadRequest(collClient, opt)
+				if err != nil {
+					fmt.Printf("!! Can't unload plugin (%v), will retry (%d/%d)...\n", err, i+1, unloadMaxRetry)
+					time.Sleep(unloadRetryDelay)
+					continue
+				}
+
+				break
+			}
 
 			os.Exit(stoppedByUser)
 		}()
