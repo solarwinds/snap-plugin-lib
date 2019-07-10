@@ -35,8 +35,8 @@ func TestStatistics(t *testing.T) {
 		//So(sc.stats.TasksDetails, ShouldContainKey, 1)
 		//So(sc.stats.TasksDetails[1].TotalMetrics, ShouldContain, 4)
 
-		So(sc.stats.Tasks.CurrentlyActiveTasks, ShouldEqual, 0)
-		So(sc.stats.Tasks.TotalActiveTasks, ShouldEqual, 1)
+		So(sc.stats.TasksSummary.CurrentlyActiveTasks, ShouldEqual, 0)
+		So(sc.stats.TasksSummary.TotalActiveTasks, ShouldEqual, 1)
 
 		// Finalize
 		stat := <-sc.RequestStat()

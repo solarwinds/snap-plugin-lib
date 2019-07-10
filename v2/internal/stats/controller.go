@@ -50,7 +50,7 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 		closeCh:           make(chan struct{}),
 
 		stats: Statistics{
-			PluginInfo: pluginInfoFields{
+			PluginInfo: pluginInfo{
 				Name:      pluginName,
 				Version:   pluginVersion,
 				StartTime: time.Now(),
@@ -58,8 +58,8 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 				CmdLineOptions: strings.Join(os.Args[1:], " "),
 				Options:        optJson,
 			},
-			Tasks:        tasksFields{},
-			TasksDetails: map[int]taskDetailsFields{},
+			TasksSummary: tasksSummary{},
+			TasksDetails: map[int]taskDetails{},
 		},
 	}
 
@@ -130,20 +130,22 @@ func (sc *StatsController) UpdateCollectStat(taskId int, mts []*types.Metric, su
 
 func (sc *StatsController) applyLoadStat(taskId int, config string, filters []string) {
 	// Update global stats
-	sc.stats.Tasks.CurrentlyActiveTasks += 1
-	sc.stats.Tasks.TotalActiveTasks += 1
+	sc.stats.TasksSummary.Counters.CurrentlyActiveTasks += 1
+	sc.stats.TasksSummary.Counters.TotalActiveTasks += 1
 
 	// Update task-specific stats
-	sc.stats.TasksDetails[taskId] = taskDetailsFields{
+	sc.stats.TasksDetails[taskId] = taskDetails{
 		Configuration: json.RawMessage(config),
 		Filters:       filters,
-		LoadedTime:    time.Now(),
+		Loaded: eventTimes{
+			Time: time.Now(),
+		},
 	}
 }
 
 func (sc *StatsController) applyUnloadStat(taskId int) {
 	// Update global stats
-	sc.stats.Tasks.CurrentlyActiveTasks -= 1
+	sc.stats.TasksSummary.Counters.CurrentlyActiveTasks -= 1
 
 	// Update task-specific stats
 	delete(sc.stats.TasksDetails, taskId) // todo: safe?
@@ -154,16 +156,16 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 
 	// Update global stats
 	{
-		sc.stats.Tasks.TotalCollectsRequest += 1
+		sc.stats.TasksSummary.Counters.TotalCollectsRequest += 1
 
-		sc.stats.Tasks.totalProcessingTime += processingTime
+		sc.stats.TasksSummary.ProcessingTimes.Total += processingTime
 
-		if sc.stats.Tasks.TotalCollectsRequest > 0 {
-			sc.stats.Tasks.avgProcessingTime = time.Duration(int(sc.stats.Tasks.totalProcessingTime) / sc.stats.Tasks.TotalCollectsRequest)
+		if sc.stats.TasksSummary.Counters.TotalCollectsRequest > 0 {
+			sc.stats.TasksSummary.ProcessingTimes.Average = time.Duration(int(sc.stats.TasksSummary.ProcessingTimes.Total) / sc.stats.TasksSummary.Counters.TotalCollectsRequest)
 		}
 
-		if processingTime > sc.stats.Tasks.maxProcessingTime {
-			sc.stats.Tasks.maxProcessingTime = processingTime
+		if processingTime > sc.stats.TasksSummary.ProcessingTimes.Maximum {
+			sc.stats.TasksSummary.ProcessingTimes.Maximum = processingTime
 		}
 	}
 
@@ -171,16 +173,16 @@ func (sc *StatsController) applyCollectStat(taskId int, mts []*types.Metric, suc
 	{
 		taskStats := sc.stats.TasksDetails[taskId]
 
-		taskStats.CollectRequest += 1
-		taskStats.TotalMetrics += len(mts)
-		taskStats.totalProcessingTime += processingTime
+		taskStats.Counters.CollectRequests += 1
+		taskStats.Counters.TotalMetrics += len(mts)
+		taskStats.ProcessingTimes.Total += processingTime
 
-		if taskStats.CollectRequest > 0 {
-			taskStats.avgProcessingTime = time.Duration(int(taskStats.totalProcessingTime) / taskStats.CollectRequest)
-			taskStats.AvgMetricsPerCollect = taskStats.TotalMetrics / taskStats.CollectRequest
+		if taskStats.Counters.CollectRequests > 0 {
+			taskStats.ProcessingTimes.Average = time.Duration(int(taskStats.ProcessingTimes.Total) / taskStats.Counters.CollectRequests)
+			taskStats.Counters.AvgMetricsPerCollect = taskStats.Counters.TotalMetrics / taskStats.Counters.CollectRequests
 		}
-		if processingTime > taskStats.maxProcessingTime {
-			taskStats.maxProcessingTime = processingTime
+		if processingTime > taskStats.ProcessingTimes.Maximum {
+			taskStats.ProcessingTimes.Maximum = processingTime
 		}
 
 		sc.stats.TasksDetails[taskId] = taskStats
@@ -193,16 +195,4 @@ func (sc *StatsController) refresh() {
 
 	// Global fields
 	sc.stats.PluginInfo.OperatingTime = now.Sub(sc.stats.PluginInfo.StartTime).String()
-
-	sc.stats.Tasks.MaxProcessingTime = sc.stats.Tasks.maxProcessingTime.String()
-	sc.stats.Tasks.AvgProcessingTime = sc.stats.Tasks.avgProcessingTime.String()
-
-	// Task-specific fields
-	for id, taskStat := range sc.stats.TasksDetails {
-		taskStat.TotalProcessingTime = taskStat.totalProcessingTime.String()
-		taskStat.AvgProcessingTime = taskStat.avgProcessingTime.String()
-		taskStat.MaxProcessingTime = taskStat.maxProcessingTime.String()
-
-		sc.stats.TasksDetails[id] = taskStat
-	}
 }

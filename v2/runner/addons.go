@@ -69,7 +69,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.StatsContr
 
 	select {
 	case resp := <-respCh:
-		jsonStats, err := json.MarshalIndent(&resp, "", "    ")
+		jsonStats, err := json.MarshalIndent(resp, "", "    ")
 		if err != nil {
 			log.WithField("stats", fmt.Sprintf("%v", resp)).WithError(err).Error("error when marshaling statistics struct")
 			w.WriteHeader(http.StatusInternalServerError)

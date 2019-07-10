@@ -6,14 +6,14 @@ import (
 )
 
 type Statistics struct {
-	PluginInfo   pluginInfoFields
-	Tasks        tasksFields
-	TasksDetails map[int]taskDetailsFields
+	PluginInfo   pluginInfo
+	TasksSummary tasksSummary
+	TasksDetails map[int]taskDetails
 }
 
 /*****************************************************************************/
 
-type pluginInfoFields struct {
+type pluginInfo struct {
 	Name           string
 	Version        string
 	StartTime      time.Time
@@ -22,35 +22,75 @@ type pluginInfoFields struct {
 	Options        json.RawMessage
 }
 
-type tasksFields struct {
-	CurrentlyActiveTasks int
-	TotalActiveTasks     int
-	TotalCollectsRequest int
-
-	AvgProcessingTime string
-	MaxProcessingTime string
-
-	avgProcessingTime time.Duration
-	maxProcessingTime time.Duration
-
-	totalProcessingTime time.Duration
+type tasksSummary struct {
+	Counters        summaryCounters
+	ProcessingTimes processingTimes
 }
 
-type taskDetailsFields struct {
+type taskDetails struct {
 	Configuration json.RawMessage
 	Filters       []string
 
-	LoadedTime time.Time
+	Counters        tasksCounters
+	Loaded          eventTimes
+	ProcessingTimes processingTimes
+}
 
-	CollectRequest       int
+///////////////////////////////////////////////////////////////////////////////
+
+type summaryCounters struct {
+	CurrentlyActiveTasks int
+	TotalActiveTasks     int
+	TotalCollectsRequest int
+}
+
+type tasksCounters struct {
+	CollectRequests      int
 	TotalMetrics         int
 	AvgMetricsPerCollect int
+}
 
-	TotalProcessingTime string
-	AvgProcessingTime   string
-	MaxProcessingTime   string
+///////////////////////////////////////////////////////////////////////////////
 
-	totalProcessingTime time.Duration
-	avgProcessingTime   time.Duration
-	maxProcessingTime   time.Duration
+type processingTimes struct {
+	Total   time.Duration
+	Average time.Duration
+	Maximum time.Duration
+}
+
+type processingTimesJSON struct {
+	Total   string
+	Average string
+	Maximum string
+}
+
+func (pt processingTimes) MarshalJSON() ([]byte, error) {
+	ptJSON := processingTimesJSON{
+		Total:   pt.Total.String(),
+		Average: pt.Average.String(),
+		Maximum: pt.Maximum.String(),
+	}
+
+	return json.Marshal(ptJSON)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type eventTimes struct {
+	Time time.Time
+	Ago  time.Duration
+}
+
+func (ot eventTimes) MarshalJSON() ([]byte, error) {
+	otJSON := operatingTimesJSON{
+		Time: ot.Time.Format(time.StampMicro),
+		Ago:  time.Since(ot.Time).String(),
+	}
+
+	return json.Marshal(otJSON)
+}
+
+type operatingTimesJSON struct {
+	Time string
+	Ago  string
 }
