@@ -37,7 +37,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 	}
 
 	pc := &pluginContext{
-		rawConfig:       []byte(rawConfig),
+		rawConfig:       rawConfig,
 		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
 	}
@@ -89,7 +89,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
 	}
-	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules()) {
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), false) {
 		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %v", err)
 	}
 
@@ -133,6 +133,21 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	})
 
 	return nil
+}
+
+func (pc *pluginContext) ShouldProcess(ns string) bool {
+	parsedNs, err := metrictree.ParseNamespace(ns, false)
+	if err != nil {
+		return false
+	}
+	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), true) {
+		return false
+	}
+
+	defValid := pc.ctxManager.metricsDefinition.IsPartiallyValid(ns)
+	shouldProcess := defValid && pc.metricsFilters.IsPartiallyValid(ns)
+
+	return shouldProcess
 }
 
 func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {

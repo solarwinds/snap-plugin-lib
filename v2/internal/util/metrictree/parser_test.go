@@ -87,8 +87,8 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 				So(ns, ShouldNotBeNil)
 				So(err, ShouldBeNil)
 				So(ns.IsUsableForDefinition(), ShouldEqual, tc.usableForDefinition)
-				So(ns.IsUsableForAddition(false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
-				So(ns.IsUsableForAddition(true), ShouldEqual, tc.usableForAdditionWhenDefinition)
+				So(ns.IsUsableForAddition(false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
+				So(ns.IsUsableForAddition(true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
 				So(ns.IsUsableForFiltering(true), ShouldBeTrue)
 			})
 		}

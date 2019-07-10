@@ -79,20 +79,26 @@ func (ns *Namespace) IsUsableForDefinition() bool {
 	return true
 }
 
-// Check if namespace selector can be used for metric addition ie. in ctx.AddMetric
+// Check if namespace selector can be used for metric addition (ctx.AddMetric) or metric calculation reasonableness (ctx.ShouldProcess)
 // First and last element should be static names, middle elements can be group with defined value (ie. [group=id])
-// In case plugin doesn't provide metric definition added element should be only static names.
-func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool) bool {
+//
+// metricDefinitionPresent - In case plugin doesn't provide metric definition, added elements should be only static names.
+// allowAnyMatch - When true, using '*' is allowed (ie. ctx.ShouldProcess("/plugin/group/*/*/metric1")
+func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool, allowAnyMatch bool) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
-	if !ns.isFirstAndLastElementStatic() {
+	if (allowAnyMatch && !ns.isFirstElementStatic()) || (!allowAnyMatch && !ns.isFirstAndLastElementStatic()) {
 		return false
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
 		switch nsElem.(type) {
+		case *staticAnyElement:
+			if !allowAnyMatch {
+				return false
+			}
 		case *staticSpecificElement: // ok
 		case *dynamicSpecificElement:
 			if !metricDefinitionPresent {
@@ -138,6 +144,16 @@ func (ns *Namespace) isFirstAndLastElementStatic() bool {
 		default:
 			return false
 		}
+	}
+
+	return true
+}
+
+func (ns *Namespace) isFirstElementStatic() bool {
+	switch ns.elements[0].(type) {
+	case *staticSpecificElement: // ok
+	default:
+		return false
 	}
 
 	return true
