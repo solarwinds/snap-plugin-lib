@@ -13,38 +13,144 @@ import (
 const (
 	pluginName    = "example"
 	pluginVersion = "1.2.3"
+
+	waitForCalculation = 200 * time.Millisecond
 )
 
 func TestStatistics(t *testing.T) {
-	startTime := time.Unix(100000, 0)
+	Convey("Validate that calculating statistics calculation is correct", t, func() {
+		startTime := time.Unix(100000, 0)
 
-	Convey("Validate that statistics calculation is correct", t, func() {
-		// Arrange
 		sci, _ := NewStatsController(pluginName, pluginVersion, &types.Options{})
 		sc := sci.(*StatisticsController)
 
-		// Act
-		sc.UpdateLoadStat(1, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
-		sc.UpdateCollectStat(1, make([]*types.Metric, 4), true, startTime.Add(1*time.Second), startTime.Add(3*time.Second))
-		sc.UpdateCollectStat(1, make([]*types.Metric, 6), true, startTime.Add(4*time.Second), startTime.Add(7*time.Second))
-		sc.UpdateCollectStat(1, make([]*types.Metric, 11), true, startTime.Add(8*time.Second), startTime.Add(12*time.Second))
+		// Load task1 and perform some collections
+		{
+			// Act
+			sc.UpdateLoadStat(1, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
+			sc.UpdateCollectStat(1, make([]*types.Metric, 4), true, startTime.Add(1*time.Second), startTime.Add(3*time.Second))
+			sc.UpdateCollectStat(1, make([]*types.Metric, 6), true, startTime.Add(4*time.Second), startTime.Add(7*time.Second))
+			sc.UpdateCollectStat(1, make([]*types.Metric, 11), true, startTime.Add(8*time.Second), startTime.Add(12*time.Second))
 
-		// Assert
-		time.Sleep(100 * time.Millisecond)
+			// Assert
+			time.Sleep(waitForCalculation)
 
-		pi := &sc.stats.PluginInfo
+			pi := sc.stats.PluginInfo
+			So(pi.Name, ShouldEqual, pluginName)
+			So(pi.Version, ShouldEqual, pluginVersion)
+			So(pi.Started.Time, ShouldNotBeNil)
 
-		So(pi.Name, ShouldEqual, pluginName)
-		So(pi.Version, ShouldEqual, pluginVersion)
-		So(pi.Started.Time, ShouldNotBeNil)
+			ts := sc.stats.TasksSummary
+			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 1)
+			So(ts.Counters.TotalActiveTasks, ShouldEqual, 1)
+			So(ts.Counters.TotalCollectRequests, ShouldEqual, 3)
 
-		So(sc.stats.TasksDetails, ShouldContainKey, 1)
-		So(sc.stats.TasksDetails[1].Counters.TotalMetrics, ShouldEqual, 21)
+			td := sc.stats.TasksDetails
+			So(td, ShouldContainKey, 1)
+			So(td[1].Counters.CollectRequests, ShouldEqual, 3)
+			So(td[1].Counters.TotalMetrics, ShouldEqual, 21)
+			So(td[1].LastMeasurement.CollectedMetrics, ShouldEqual, 11)
+			So(td[1].ProcessingTimes.Total, ShouldEqual, 9*time.Second)
+			So(td[1].ProcessingTimes.Average, ShouldEqual, 3*time.Second)
+		}
 
-		So(sc.stats.TasksSummary.Counters.CurrentlyActiveTasks, ShouldEqual, 1)
-		So(sc.stats.TasksSummary.Counters.TotalActiveTasks, ShouldEqual, 1)
+		// Load task2 and perform some collections
+		{
+			// Act
+			sc.UpdateLoadStat(2, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
+			sc.UpdateCollectStat(2, make([]*types.Metric, 5), true, startTime.Add(20*time.Second), startTime.Add(21*time.Second))
+			sc.UpdateCollectStat(2, make([]*types.Metric, 15), true, startTime.Add(25*time.Second), startTime.Add(26*time.Second))
+			sc.UpdateCollectStat(2, make([]*types.Metric, 10), true, startTime.Add(30*time.Second), startTime.Add(34*time.Second))
+
+			// Assert
+			time.Sleep(waitForCalculation)
+
+			ts := sc.stats.TasksSummary
+			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 2)
+			So(ts.Counters.TotalActiveTasks, ShouldEqual, 2)
+			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
+
+			td := sc.stats.TasksDetails
+			So(td, ShouldContainKey, 1)
+			So(td, ShouldContainKey, 2)
+			So(td[2].Counters.CollectRequests, ShouldEqual, 3)
+			So(td[2].Counters.TotalMetrics, ShouldEqual, 30)
+			So(td[2].LastMeasurement.CollectedMetrics, ShouldEqual, 10)
+			So(td[2].ProcessingTimes.Total, ShouldEqual, 6*time.Second)
+			So(td[2].ProcessingTimes.Average, ShouldEqual, 2*time.Second)
+		}
+
+		// Unload task1
+		{
+			// Act
+			sc.UpdateUnloadStat(1)
+
+			// Assert
+			time.Sleep(waitForCalculation)
+
+			ts := sc.stats.TasksSummary
+			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 1)
+			So(ts.Counters.TotalActiveTasks, ShouldEqual, 2)
+			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
+
+			td := sc.stats.TasksDetails
+			So(td, ShouldNotContainKey, 1)
+			So(td, ShouldContainKey, 2)
+		}
+
+		// Load task3 and perform some operations
+		{
+			// Act
+			sc.UpdateLoadStat(3, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
+
+			sc.UpdateCollectStat(3, make([]*types.Metric, 1), true, startTime.Add(40*time.Second), startTime.Add(41*time.Second))
+			sc.UpdateCollectStat(3, make([]*types.Metric, 0), true, startTime.Add(45*time.Second), startTime.Add(46*time.Second))
+
+			sc.UpdateCollectStat(2, make([]*types.Metric, 3), true, startTime.Add(50*time.Second), startTime.Add(51*time.Second))
+
+			// Assert
+			time.Sleep(waitForCalculation)
+
+			ts := sc.stats.TasksSummary
+			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 2)
+			So(ts.Counters.TotalActiveTasks, ShouldEqual, 3)
+			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
+
+			td := sc.stats.TasksDetails
+			So(td, ShouldContainKey, 2)
+			So(td, ShouldContainKey, 3)
+
+			So(td[2].Counters.CollectRequests, ShouldEqual, 4)
+			So(td[2].Counters.TotalMetrics, ShouldEqual, 33)
+			So(td[2].LastMeasurement.CollectedMetrics, ShouldEqual, 3)
+
+			So(td[3].Counters.CollectRequests, ShouldEqual, 2)
+			So(td[3].Counters.TotalMetrics, ShouldEqual, 1)
+			So(td[3].LastMeasurement.CollectedMetrics, ShouldEqual, 0)
+		}
+
+		// Unload task2 and task3
+		{
+			// Act
+			sc.UpdateUnloadStat(2)
+			sc.UpdateUnloadStat(3)
+
+			// Assert
+			time.Sleep(waitForCalculation)
+
+			ts := sc.stats.TasksSummary
+			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 0)
+			So(ts.Counters.TotalActiveTasks, ShouldEqual, 3)
+			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
+
+			td := sc.stats.TasksDetails
+			So(td, ShouldNotContainKey, 1)
+			So(td, ShouldNotContainKey, 2)
+			So(td, ShouldNotContainKey, 3)
+		}
 
 		// Finalize
 		sc.Close()
 	})
+
 }
