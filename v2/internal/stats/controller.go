@@ -28,6 +28,18 @@ type Controller interface {
 	UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time)
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+func NewController(pluginName string, pluginVersion string, opt *types.Options) (Controller, error) {
+	if opt.EnableStats {
+		return NewStatsController(pluginName, pluginVersion, opt)
+	}
+
+	return NewEmptyController()
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 type StatisticsController struct {
 	startedSync       sync.Once
 	incomingStatsCh   chan StatCommand
@@ -214,5 +226,35 @@ func (sc *StatisticsController) applyCollectStat(taskId int, mts []*types.Metric
 
 		sc.stats.TasksDetails[taskId] = td
 	}
+}
 
+///////////////////////////////////////////////////////////////////////////////
+
+func NewEmptyController() (Controller, error) {
+	return &EmptyController{}, nil
+}
+
+type EmptyController struct {
+}
+
+func (d *EmptyController) Close() {
+}
+
+func (d *EmptyController) RequestStat() chan Statistics {
+	statCh := make(chan Statistics)
+
+	go func() {
+		statCh <- Statistics{} // just return empty statistics
+	}()
+
+	return statCh
+}
+
+func (d *EmptyController) UpdateLoadStat(taskId int, config string, filters []string) {
+}
+
+func (d *EmptyController) UpdateUnloadStat(taskId int) {
+}
+
+func (d *EmptyController) UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time) {
 }

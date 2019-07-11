@@ -9,11 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -61,7 +59,8 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 	ln, _ = net.Listen("tcp", "127.0.0.1:")
 
 	go func() {
-		contextManager := proxy.NewContextManager(collector, &MockStatsController{})
+		statsController, _ := stats.NewEmptyController()
+		contextManager := proxy.NewContextManager(collector, statsController)
 		pluginrpc.StartGRPCController(contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
@@ -127,30 +126,6 @@ func (s *SuiteT) sendCollect(taskID int) (*pluginrpc.CollectResponse, error) {
 	}
 
 	return aggregatedMts, nil
-}
-
-/*****************************************************************************/
-
-type MockStatsController struct{}
-
-func (*MockStatsController) Close() {
-	return
-}
-
-func (*MockStatsController) RequestStat() chan stats.Statistics {
-	return nil
-}
-
-func (*MockStatsController) UpdateLoadStat(taskId int, config string, filters []string) {
-	return
-}
-
-func (*MockStatsController) UpdateUnloadStat(taskId int) {
-	return
-}
-
-func (*MockStatsController) UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time) {
-	return
 }
 
 /*****************************************************************************/

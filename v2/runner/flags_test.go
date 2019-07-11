@@ -60,7 +60,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  false,
 	},
 	{ // 8
-		inputCmdLine:   "--enable-pprof=1 --pprof-port=5678",
+		inputCmdLine:   "--enable-pprof-server=1 --pprof-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
@@ -70,7 +70,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  false,
 	},
 	{ // 10
-		inputCmdLine:   "--enable-stats=1 --stats-port=5678",
+		inputCmdLine:   "--enable-stats=1 --enable-stats-server=1 --stats-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},

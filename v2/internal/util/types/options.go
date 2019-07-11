@@ -14,11 +14,12 @@ type Options struct {
 	GrpcPingTimeout   time.Duration
 	GrpcPingMaxMissed uint
 
-	LogLevel    logrus.Level
-	EnablePprof bool
-	EnableStats bool
-	PprofPort   int `json:",omitempty"`
-	StatsPort   int `json:",omitempty"`
+	LogLevel          logrus.Level
+	EnablePprofServer bool
+	EnableStats       bool // enable calculation statistics
+	EnableStatsServer bool // if true, start statistics HTTP server
+	PprofPort         int `json:",omitempty"`
+	StatsPort         int `json:",omitempty"`
 
 	DebugMode            bool          `json:"-"`
 	PluginConfig         string        `json:"-"`

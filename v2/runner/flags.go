@@ -8,9 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -56,8 +55,8 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 		"log-level",
 		fmt.Sprintf("Minimal level of logged messages %s", allLogLevels))
 
-	flagParser.BoolVar(&opt.EnablePprof,
-		"enable-pprof", false,
+	flagParser.BoolVar(&opt.EnablePprofServer,
+		"enable-pprof-server", false,
 		"Enable profiling server")
 
 	flagParser.IntVar(&opt.PprofPort,
@@ -66,6 +65,10 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 
 	flagParser.BoolVar(&opt.EnableStats,
 		"enable-stats", false,
+		"Enable gathering plugin statistics")
+
+	flagParser.BoolVar(&opt.EnableStatsServer,
+		"enable-stats-server", false,
 		"Enable stats server")
 
 	flagParser.IntVar(&opt.StatsPort,
@@ -153,12 +156,16 @@ func ValidateOptions(opt *types.Options) error {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}
 
-	if opt.PprofPort > 0 && !opt.EnablePprof {
+	if opt.PprofPort > 0 && !opt.EnablePprofServer {
 		return fmt.Errorf("-enable-pprof flag should be set when configuring pprof port")
 	}
 
-	if opt.StatsPort > 0 && !opt.EnableStats {
+	if opt.StatsPort > 0 && !opt.EnableStatsServer {
 		return fmt.Errorf("-enable-stats flag should be set when configuring stats port")
+	}
+
+	if opt.EnableStatsServer && !opt.EnableStats {
+		return fmt.Errorf("-enable-stats should be set when -enable-stats-server=1")
 	}
 
 	if !opt.DebugMode && anyDebugFlagSet(opt) {

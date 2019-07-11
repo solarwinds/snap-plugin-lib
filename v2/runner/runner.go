@@ -37,7 +37,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorStatus)
 	}
 
-	statsController, err := stats.NewStatsController(name, version, opt)
+	statsController, err := stats.NewController(name, version, opt)
 	if err != nil {
 		fmt.Printf("Error occured when starting statistics controller (%v)", err)
 		os.Exit(errorStatus)
@@ -63,12 +63,12 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 }
 
 func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *types.Options) {
-	if opt.EnablePprof {
+	if opt.EnablePprofServer {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 	}
 
-	if opt.EnableStats {
+	if opt.EnableStatsServer {
 		startStatsServer(r.statsListener, ctxManager.StatsController)
 		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
@@ -132,14 +132,14 @@ func acquireResources(opt *types.Options) (*resources, error) {
 		return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
 	}
 
-	if opt.EnablePprof {
+	if opt.EnablePprofServer {
 		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.PprofPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for PProf server (%s)", err)
 		}
 	}
 
-	if opt.EnableStats {
+	if opt.EnableStatsServer {
 		r.statsListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.StatsPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for Stats server (%s)", err)
