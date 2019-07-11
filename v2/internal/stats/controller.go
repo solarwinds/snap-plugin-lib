@@ -90,7 +90,6 @@ func (sc *StatisticsController) run() {
 					stat.ApplyStat()
 				case respCh := <-sc.incomingRequestCh:
 					respCh <- sc.stats
-					close(respCh)
 				case <-sc.closeCh:
 					return
 				}
