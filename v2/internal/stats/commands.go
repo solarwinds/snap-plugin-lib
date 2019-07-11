@@ -2,8 +2,6 @@ package stats
 
 import (
 	"time"
-
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,14 +37,14 @@ func (ts *unloadTaskStat) ApplyStat() {
 ///////////////////////////////////////////////////////////////////////////////
 
 type collectTaskStat struct {
-	sm          *StatisticsController
-	taskId      int
-	mts         []*types.Metric
-	success     bool
-	startTime   time.Time
-	processTime time.Time
+	sm           *StatisticsController
+	taskId       int
+	metricsCount int
+	success      bool
+	startTime    time.Time
+	processTime  time.Time
 }
 
 func (ts *collectTaskStat) ApplyStat() {
-	ts.sm.applyCollectStat(ts.taskId, ts.mts, ts.success, ts.startTime, ts.processTime)
+	ts.sm.applyCollectStat(ts.taskId, ts.metricsCount, ts.success, ts.startTime, ts.processTime)
 }

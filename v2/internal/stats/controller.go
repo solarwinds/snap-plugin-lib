@@ -25,7 +25,7 @@ type Controller interface {
 	RequestStat() chan Statistics
 	UpdateLoadStat(taskId int, config string, filters []string)
 	UpdateUnloadStat(taskId int)
-	UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time)
+	UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,14 +126,14 @@ func (sc *StatisticsController) UpdateUnloadStat(taskId int) {
 	}
 }
 
-func (sc *StatisticsController) UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time) {
+func (sc *StatisticsController) UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time) {
 	sc.incomingStatsCh <- &collectTaskStat{
-		sm:          sc,
-		taskId:      taskId,
-		mts:         mts,
-		success:     success,
-		startTime:   startTime,
-		processTime: endTime,
+		sm:           sc,
+		taskId:       taskId,
+		metricsCount: metricsCount,
+		success:      success,
+		startTime:    startTime,
+		processTime:  endTime,
 	}
 }
 
@@ -176,7 +176,7 @@ func (sc *StatisticsController) applyUnloadStat(taskId int) {
 	delete(sc.stats.TasksDetails, taskId)
 }
 
-func (sc *StatisticsController) applyCollectStat(taskId int, mts []*types.Metric, success bool, startTime, completeTime time.Time) {
+func (sc *StatisticsController) applyCollectStat(taskId int, metricsCount int, success bool, startTime, completeTime time.Time) {
 	log.WithFields(logrus.Fields{
 		"task-id":        taskId,
 		"statistic-type": "Collect",
@@ -204,7 +204,7 @@ func (sc *StatisticsController) applyCollectStat(taskId int, mts []*types.Metric
 		td := sc.stats.TasksDetails[taskId]
 
 		td.Counters.CollectRequests += 1
-		td.Counters.TotalMetrics += len(mts)
+		td.Counters.TotalMetrics += metricsCount
 		td.ProcessingTimes.Total += processingTime
 
 		if td.Counters.CollectRequests > 0 {
@@ -220,7 +220,7 @@ func (sc *StatisticsController) applyCollectStat(taskId int, mts []*types.Metric
 			Occurred: eventTimes{
 				Time: completeTime,
 			},
-			CollectedMetrics: len(mts),
+			CollectedMetrics: metricsCount,
 		}
 
 		sc.stats.TasksDetails[taskId] = td
@@ -255,5 +255,5 @@ func (d *EmptyController) UpdateLoadStat(taskId int, config string, filters []st
 func (d *EmptyController) UpdateUnloadStat(taskId int) {
 }
 
-func (d *EmptyController) UpdateCollectStat(taskId int, mts []*types.Metric, success bool, startTime, endTime time.Time) {
+func (d *EmptyController) UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time) {
 }

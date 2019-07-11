@@ -91,7 +91,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.statsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
+	cm.statsController.UpdateCollectStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
