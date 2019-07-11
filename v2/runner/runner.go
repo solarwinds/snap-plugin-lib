@@ -56,20 +56,20 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		}
 
 		printMetaInformation(name, version, opt, r)
-		startCollectorInServerMode(contextManager, r, opt)
+		startCollectorInServerMode(contextManager, statsController, r, opt)
 	case true:
 		startCollectorInSingleMode(contextManager, opt)
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *types.Options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *types.Options) {
 	if opt.EnablePprofServer {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 	}
 
 	if opt.EnableStatsServer {
-		startStatsServer(r.statsListener, ctxManager.StatsController)
+		startStatsServer(r.statsListener, statsController)
 		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
 

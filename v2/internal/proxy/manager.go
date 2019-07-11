@@ -48,7 +48,7 @@ type ContextManager struct {
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
-	StatsController stats.Controller // reference to statistics controller
+	statsController stats.Controller // reference to statistics controller
 }
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
@@ -62,7 +62,7 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 		metricsMetadata:   map[string]metricMetadata{},
 		groupsDescription: map[string]string{},
 
-		StatsController: statsController,
+		statsController: statsController,
 	}
 
 	cm.RequestPluginDefinition()
@@ -91,7 +91,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.StatsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
+	cm.statsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
 
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
@@ -132,7 +132,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	}
 
 	cm.contextMap.Store(id, newCtx)
-	cm.StatsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
+	cm.statsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
 
 	return nil
 }
@@ -157,7 +157,7 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 
 	cm.contextMap.Delete(id)
-	cm.StatsController.UpdateUnloadStat(id)
+	cm.statsController.UpdateUnloadStat(id)
 
 	return nil
 }
