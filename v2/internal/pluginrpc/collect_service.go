@@ -61,9 +61,6 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 	taskID := int(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
-	if metrics == nil {
-		metrics = []string{}
-	}
 
 	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }
@@ -79,7 +76,7 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
 	log.Trace("GRPC Info() received")
 
-	// todo: stats
+	// TODO: https://swicloud.atlassian.net/browse/AO-12736
 
 	return &InfoResponse{}, nil
 }

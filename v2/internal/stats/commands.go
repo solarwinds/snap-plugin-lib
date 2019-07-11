@@ -15,7 +15,7 @@ type StatCommand interface {
 ///////////////////////////////////////////////////////////////////////////////
 
 type loadTaskStat struct {
-	sm      *StatsController
+	sm      *StatisticsController
 	taskId  int
 	config  string
 	filters []string
@@ -28,7 +28,7 @@ func (ts *loadTaskStat) ApplyStat() {
 ///////////////////////////////////////////////////////////////////////////////
 
 type unloadTaskStat struct {
-	sm     *StatsController
+	sm     *StatisticsController
 	taskId int
 }
 
@@ -39,7 +39,7 @@ func (ts *unloadTaskStat) ApplyStat() {
 ///////////////////////////////////////////////////////////////////////////////
 
 type collectTaskStat struct {
-	sm          *StatsController
+	sm          *StatisticsController
 	taskId      int
 	mts         []*types.Metric
 	success     bool

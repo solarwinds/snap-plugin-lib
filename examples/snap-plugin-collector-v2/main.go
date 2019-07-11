@@ -11,23 +11,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	pluginName    = "example-collector"
+	pluginVersion = "0.0.1"
+
+	maxCollectDuration = 5 * time.Second
+)
+
 var log = logrus.WithFields(logrus.Fields{
 	"layer": "plugin",
-	"name":  "example-collector",
+	"name":  pluginName,
 })
 
 type myCollector struct {
-}
-
-func (*myCollector) DefineMetrics(plugin.CollectorDefinition) error {
-	return nil
 }
 
 func (*myCollector) Collect(ctx plugin.Context) error {
 	log.Trace("Collect executed")
 
 	// Simulate collector processing
-	time.Sleep(time.Duration(rand.Intn(5000)) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Intn(int(maxCollectDuration))))
 
 	_ = ctx.AddMetric("/example/static/random1", rand.Intn(10))
 	_ = ctx.AddMetric("/example/static/random2", rand.Intn(20))
@@ -67,5 +70,5 @@ func (*myCollector) Unload(ctx plugin.Context) error {
 }
 
 func main() {
-	runner.StartCollector(&myCollector{}, "example-collector", "0.0.1")
+	runner.StartCollector(&myCollector{}, pluginName, pluginVersion)
 }

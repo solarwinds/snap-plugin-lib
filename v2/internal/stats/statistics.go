@@ -14,45 +14,45 @@ type Statistics struct {
 /*****************************************************************************/
 
 type pluginInfo struct {
-	Name           string
-	Version        string
-	CmdLineOptions string
-	Options        json.RawMessage
-	Started        eventTimes
+	Name           string          `json:"Name"`
+	Version        string          `json:"Version"`
+	CmdLineOptions string          `json:"Command-line options"`
+	Options        json.RawMessage `json:"Options"`
+	Started        eventTimes      `json:"Started"`
 }
 
 type tasksSummary struct {
-	Counters        summaryCounters
-	ProcessingTimes processingTimes
+	Counters        summaryCounters `json:"Counters"`
+	ProcessingTimes processingTimes `json:"Processing times"`
 }
 
 type taskDetails struct {
-	Configuration json.RawMessage
-	Filters       []string
+	Configuration json.RawMessage `json:"Configuration"`
+	Filters       []string        `json:"Requested metrics (filters)"`
 
-	Counters        tasksCounters
-	Loaded          eventTimes
-	ProcessingTimes processingTimes
-	LastMeasurement measurementInfo
+	Counters        tasksCounters   `json:"Counters"`
+	Loaded          eventTimes      `json:"Loaded"`
+	ProcessingTimes processingTimes `json:"Processing times"`
+	LastMeasurement measurementInfo `json:"Last measurement"`
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 type summaryCounters struct {
-	CurrentlyActiveTasks int
-	TotalActiveTasks     int
-	TotalCollectRequests int
+	CurrentlyActiveTasks int `json:"Currently active tasks"`
+	TotalActiveTasks     int `json:"Total active tasks"`
+	TotalCollectRequests int `json:"Total collect requests"`
 }
 
 type tasksCounters struct {
-	CollectRequests      int
-	TotalMetrics         int
-	AvgMetricsPerCollect int
+	CollectRequests      int `json:"Collect requests"`
+	TotalMetrics         int `json:"Total metrics"`
+	AvgMetricsPerCollect int `json:"Average metrics / Collect"`
 }
 
 type measurementInfo struct {
-	Occurred         eventTimes
-	CollectedMetrics int
+	Occurred         eventTimes `json:"Occured"`
+	CollectedMetrics int        `json:"Collected metrics"`
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,9 +64,9 @@ type processingTimes struct {
 }
 
 type processingTimesJSON struct {
-	Total   string
-	Average string
-	Maximum string
+	Total   string `json:"Total"`
+	Average string `json:"Average"`
+	Maximum string `json:"Maximum"`
 }
 
 func (pt processingTimes) MarshalJSON() ([]byte, error) {
@@ -86,6 +86,11 @@ type eventTimes struct {
 	Ago  time.Duration
 }
 
+type operatingTimesJSON struct {
+	Time string `json:"Time"`
+	Ago  string `json:"Ago"`
+}
+
 func (ot eventTimes) MarshalJSON() ([]byte, error) {
 	otJSON := operatingTimesJSON{
 		Time: ot.Time.Format(time.StampMicro),
@@ -93,9 +98,4 @@ func (ot eventTimes) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(otJSON)
-}
-
-type operatingTimesJSON struct {
-	Time string
-	Ago  string
 }

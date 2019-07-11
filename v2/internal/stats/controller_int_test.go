@@ -20,7 +20,7 @@ func TestStatistics(t *testing.T) {
 
 	Convey("Validate that statistics calculation is correct", t, func() {
 		// Arrange
-		sc := NewStatsController(pluginName, pluginVersion, &types.Options{}).(*StatsController)
+		sc := NewStatsController(pluginName, pluginVersion, &types.Options{}).(*StatisticsController)
 
 		// Act
 		sc.UpdateLoadStat(1, "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})

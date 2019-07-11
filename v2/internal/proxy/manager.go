@@ -48,10 +48,10 @@ type ContextManager struct {
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
-	StatsController stats.StatsControllerI // reference to statistics controller
+	StatsController stats.Controller // reference to statistics controller
 }
 
-func NewContextManager(collector plugin.Collector, statsController stats.StatsControllerI) *ContextManager {
+func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},
@@ -85,12 +85,12 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	}
 	context := contextIf.(*pluginContext)
 
-	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
 
 	startTime := time.Now()
-	err := cm.collector.Collect(context)
+	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
+
 	cm.StatsController.UpdateCollectStat(id, context.sessionMts, err != nil, startTime, endTime)
 
 	if err != nil {

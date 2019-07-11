@@ -45,7 +45,7 @@ func startPprofServer(ln net.Listener) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func startStatsServer(ln net.Listener, stats stats.StatsControllerI) {
+func startStatsServer(ln net.Listener, stats stats.Controller) {
 	log.Infof("Running stats server on address")
 
 	h := http.NewServeMux()
@@ -62,7 +62,7 @@ func startStatsServer(ln net.Listener, stats stats.StatsControllerI) {
 	}()
 }
 
-func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.StatsControllerI) {
+func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller) {
 	log.WithField("URI", r.RequestURI).Trace("Handling statistics request")
 
 	respCh := stats.RequestStat()

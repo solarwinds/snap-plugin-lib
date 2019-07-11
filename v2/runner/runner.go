@@ -37,7 +37,12 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorStatus)
 	}
 
-	statsController := stats.NewStatsController(name, version, opt)
+	statsController, err := stats.NewStatsController(name, version, opt)
+	if err != nil {
+		fmt.Printf("Error occured when starting statistics controller (%v)", err)
+		os.Exit(errorStatus)
+	}
+
 	contextManager := proxy.NewContextManager(collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
