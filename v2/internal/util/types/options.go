@@ -18,8 +18,8 @@ type Options struct {
 	EnablePprofServer bool
 	EnableStats       bool // enable calculation statistics
 	EnableStatsServer bool // if true, start statistics HTTP server
-	PprofPort         int `json:",omitempty"`
-	StatsPort         int `json:",omitempty"`
+	PprofPort         int  `json:",omitempty"`
+	StatsPort         int  `json:",omitempty"`
 
 	DebugMode            bool          `json:"-"`
 	PluginConfig         string        `json:"-"`
