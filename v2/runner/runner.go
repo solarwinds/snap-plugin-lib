@@ -10,12 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
-
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 )
@@ -62,12 +60,15 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 func startCollectorInServerMode(ctxManager *proxy.ContextManager, r *resources, opt *types.Options) {
 	if opt.EnablePprof {
 		startPprofServer(r.pprofListener)
+		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 	}
 
 	if opt.EnableStats {
 		startStatsServer(r.statsListener, ctxManager.StatsController)
+		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
 
+	// main blocking operation
 	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }
 
