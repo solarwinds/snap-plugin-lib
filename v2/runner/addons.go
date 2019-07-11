@@ -13,6 +13,8 @@ import (
 
 const (
 	statsRequestTimeout = 10 * time.Second
+
+	jsonIndentString = "    "
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +71,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller
 
 	select {
 	case resp := <-respCh:
-		jsonStats, err := json.MarshalIndent(resp, "", "    ")
+		jsonStats, err := json.MarshalIndent(resp, "", jsonIndentString)
 		if err != nil {
 			log.WithField("stats", fmt.Sprintf("%v", resp)).WithError(err).Error("error when marshaling statistics struct")
 			w.WriteHeader(http.StatusInternalServerError)
