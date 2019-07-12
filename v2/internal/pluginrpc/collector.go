@@ -8,5 +8,4 @@ type CollectorProxy interface {
 	RequestCollect(id int) ([]*types.Metric, error)
 	LoadTask(id int, rawConfig []byte, mtsSelectors []string) error
 	UnloadTask(id int) error
-	RequestInfo()
 }

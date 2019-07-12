@@ -11,6 +11,7 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -58,7 +59,8 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 	ln, _ = net.Listen("tcp", "127.0.0.1:")
 
 	go func() {
-		contextManager := proxy.NewContextManager(collector, "simple_collector", "1.0.0")
+		statsController, _ := stats.NewEmptyController()
+		contextManager := proxy.NewContextManager(collector, statsController)
 		pluginrpc.StartGRPCController(contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()

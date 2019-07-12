@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -18,7 +20,7 @@ const (
 	defaultGRPCPort        = 0
 	defaultConfig          = "{}"
 	defaultFilter          = ""
-	defaultTaskID          = 1
+	defaultTaskID          = 0
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
 
@@ -26,6 +28,8 @@ const (
 	grpcRequestTimeout = 10 * time.Second
 
 	filterSeparator = ";"
+
+	maxTaskId = 1024
 )
 
 type Options struct {
@@ -38,7 +42,15 @@ type Options struct {
 
 	PluginConfig string
 	PluginFilter string
+	TaskId       int
 }
+
+const (
+	unloadMaxRetry   = 5
+	unloadRetryDelay = 1 * time.Second
+
+	stoppedByUser = 1
+)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +64,10 @@ func parseCmdLine() *Options {
 	flag.IntVar(&opt.PluginPort,
 		"plugin-port", defaultGRPCPort,
 		"Port of GRPC Server run by plugin")
+
+	flag.IntVar(&opt.TaskId,
+		"task-id", defaultTaskID,
+		"Task identifier used to make GRPC requests (0 means random)")
 
 	flag.StringVar(&opt.PluginConfig,
 		"plugin-config", defaultConfig,
@@ -79,12 +95,18 @@ func parseCmdLine() *Options {
 
 	flag.Parse()
 
+	if opt.TaskId == defaultTaskID {
+		opt.TaskId = rand.Intn(maxTaskId)
+	}
+
 	return opt
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	doneCh := make(chan error)
 
 	opt := parseCmdLine()
@@ -106,6 +128,28 @@ func main() {
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
 		}
+
+		// Handle ctrl+C
+		notifyCh := make(chan os.Signal, 1)
+		signal.Notify(notifyCh, os.Interrupt)
+		go func() {
+			<-notifyCh
+			fmt.Printf("!! Ctrl+c pressed !! trying to unload current task\n")
+
+			for i := 0; i < unloadMaxRetry; i++ {
+				err := doUnloadRequest(collClient, opt)
+				if err != nil {
+					fmt.Printf("!! Can't unload plugin (%v), will retry (%d/%d)...\n", err, i+1, unloadMaxRetry)
+					time.Sleep(unloadRetryDelay)
+					continue
+				}
+
+				break
+			}
+
+			os.Exit(stoppedByUser)
+		}()
+
 		time.Sleep(grpcLoadDelay)
 
 		reqCounter := 0
@@ -175,7 +219,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	}
 
 	reqLoad := &pluginrpc.LoadRequest{
-		TaskId:          defaultTaskID,
+		TaskId:          int32(opt.TaskId),
 		JsonConfig:      []byte(opt.PluginConfig),
 		MetricSelectors: filter,
 	}
@@ -188,9 +232,9 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	return err
 }
 
-func doUnloadRequest(cc pluginrpc.CollectorClient, _ *Options) error {
+func doUnloadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	reqUnload := &pluginrpc.UnloadRequest{
-		TaskId: defaultTaskID,
+		TaskId: int32(opt.TaskId),
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
@@ -211,11 +255,11 @@ func doKillRequest(cc pluginrpc.ControllerClient) error {
 	return err
 }
 
-func doCollectRequest(cc pluginrpc.CollectorClient, _ *Options) ([]string, error) {
+func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, error) {
 	var recvMts []string
 
 	reqColl := &pluginrpc.CollectRequest{
-		TaskId: defaultTaskID,
+		TaskId: int32(opt.TaskId),
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)

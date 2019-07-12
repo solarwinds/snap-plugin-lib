@@ -9,7 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -26,7 +28,6 @@ type Collector interface {
 	RequestCollect(id int) ([]*types.Metric, error)
 	LoadTask(id int, config []byte, selectors []string) error
 	UnloadTask(id int) error
-	RequestInfo()
 }
 
 type metricMetadata struct {
@@ -46,9 +47,11 @@ type ContextManager struct {
 
 	metricsMetadata   map[string]metricMetadata // metadata associated with each metric (is default?, description, unit)
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
+
+	statsController stats.Controller // reference to statistics controller
 }
 
-func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager {
+func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},
@@ -58,6 +61,8 @@ func NewContextManager(collector plugin.Collector, _, _ string) *ContextManager 
 
 		metricsMetadata:   map[string]metricMetadata{},
 		groupsDescription: map[string]string{},
+
+		statsController: statsController,
 	}
 
 	cm.RequestPluginDefinition()
@@ -80,12 +85,19 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	}
 	context := contextIf.(*pluginContext)
 
-	// collect metrics - user defined code
 	context.sessionMts = []*types.Metric{}
-	err := cm.collector.Collect(context)
+
+	startTime := time.Now()
+	err := cm.collector.Collect(context) // calling to user defined code
+	endTime := time.Now()
+
+	cm.statsController.UpdateCollectStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
+
+	log.WithField("elapsed", endTime.Sub(startTime).String()).Debug("Collect completed")
 
 	return context.sessionMts, nil
 }
@@ -120,6 +132,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	}
 
 	cm.contextMap.Store(id, newCtx)
+	cm.statsController.UpdateLoadStat(id, string(rawConfig), mtsFilter)
 
 	return nil
 }
@@ -144,11 +157,9 @@ func (cm *ContextManager) UnloadTask(id int) error {
 	}
 
 	cm.contextMap.Delete(id)
-	return nil
-}
+	cm.statsController.UpdateUnloadStat(id)
 
-func (cm *ContextManager) RequestInfo() {
-	return
+	return nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////

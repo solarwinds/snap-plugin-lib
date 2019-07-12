@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 // Structure contains information about running services (used by snap)
@@ -36,7 +37,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, opt *options, r *resources) {
+func printMetaInformation(name string, version string, opt *types.Options, r *resources) {
 	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
 
 	m := meta{
@@ -49,16 +50,16 @@ func printMetaInformation(name string, version string, opt *options, r *resource
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
 
-	m.PProf.Enabled = opt.EnablePprof
-	if opt.EnablePprof {
+	m.PProf.Enabled = opt.EnablePprofServer
+	if opt.EnablePprofServer {
 		m.PProf.IP = ip
 		m.PProf.Port = r.pprofListener.Addr().(*net.TCPAddr).Port
 	}
 
-	m.Stats.Enabled = opt.EnableStats
-	if opt.EnableStats {
+	m.Stats.Enabled = opt.EnableStatsServer
+	if opt.EnableStatsServer {
 		m.Stats.IP = ip
-		m.Stats.Port = opt.StatsPort // TODO: AO-13450
+		m.Stats.Port = r.statsListener.Addr().(*net.TCPAddr).Port
 	}
 
 	// Print
