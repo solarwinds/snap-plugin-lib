@@ -17,7 +17,7 @@ func JSONToFlatMap(rawConfig []byte) (map[string]string, error) {
 	retMap := map[string]string{}
 	m := map[string]interface{}{}
 
-	err := json.Unmarshal([]byte(rawConfig), &m)
+	err := json.Unmarshal(rawConfig, &m)
 	if err != nil {
 		return nil, fmt.Errorf("can't create configuration map based on provided json: %v", err)
 	}

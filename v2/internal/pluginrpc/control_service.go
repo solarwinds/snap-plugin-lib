@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	RequestedKillError error = errors.New("kill requested")
+	RequestedKillError = errors.New("kill requested")
 )
 
 type controlService struct {

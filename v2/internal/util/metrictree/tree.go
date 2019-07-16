@@ -165,7 +165,8 @@ func (tv *TreeValidator) ListRules() []string {
 		return []string{}
 	}
 
-	nsList := []string{}
+	var nsList []string
+
 	toVisit := nodeStack{}
 	toVisit.Push(tv.head)
 
