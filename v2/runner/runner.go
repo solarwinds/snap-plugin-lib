@@ -49,7 +49,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	logrus.SetLevel(opt.LogLevel)
 
 	if opt.PrintExampleTask {
-		printExampleTask()
+		printExampleTask(contextManager, name)
 		os.Exit(normalExitStatus)
 	}
 

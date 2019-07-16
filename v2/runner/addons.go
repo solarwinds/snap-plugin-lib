@@ -89,7 +89,3 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller
 		w.WriteHeader(http.StatusRequestTimeout)
 	}
 }
-
-func printExampleTask() {
-	fmt.Printf("Example YAML\n")
-}

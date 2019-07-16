@@ -8,6 +8,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -216,4 +217,19 @@ func (cm *ContextManager) markTaskAsCompleted(id int) {
 	defer cm.activeTasksMutex.Unlock()
 
 	delete(cm.activeTasks, id)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+func (cm *ContextManager) ListDefaultMetrics() []string {
+	result := []string{}
+	for mt, meta := range cm.metricsMetadata {
+		if meta.isDefault {
+			result = append(result, mt)
+		}
+	}
+
+	sort.Strings(result)
+
+	return result
 }

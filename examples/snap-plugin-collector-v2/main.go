@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	pluginName    = "example-collector"
+	pluginName    = "example"
 	pluginVersion = "0.0.1"
 
 	maxCollectDuration = 5 * time.Second
@@ -24,6 +24,17 @@ var log = logrus.WithFields(logrus.Fields{
 })
 
 type myCollector struct {
+}
+
+func (*myCollector) DefineMetrics(def plugin.CollectorDefinition) error {
+	def.DefineMetric("/example/static/random1", "", true, "Random value (0-10)")
+	def.DefineMetric("/example/static/random2", "", true, "Random value (0-20)")
+	def.DefineMetric("/example/global/random3", "", true, "Random value (0-50)")
+	def.DefineMetric("/example/config/random4", "", true, "Random value (0-crand)")
+
+	def.DefineMetric("/example/nodefault/random5", "", false, "Random value")
+
+	return nil
 }
 
 func (*myCollector) Collect(ctx plugin.Context) error {
