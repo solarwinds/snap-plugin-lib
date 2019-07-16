@@ -21,6 +21,7 @@ type Options struct {
 	PprofPort         int  `json:",omitempty"`
 	StatsPort         int  `json:",omitempty"`
 
+	PrintExampleTask     bool          `json:"-"`
 	DebugMode            bool          `json:"-"`
 	PluginConfig         string        `json:"-"`
 	PluginFilter         string        `json:"-"`

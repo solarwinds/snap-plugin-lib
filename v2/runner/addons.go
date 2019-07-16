@@ -88,5 +88,8 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller
 		log.WithField("timeout", statsRequestTimeout).Warning("timeout occurred when serving statistics request")
 		w.WriteHeader(http.StatusRequestTimeout)
 	}
+}
 
+func printExampleTask() {
+	fmt.Printf("Example YAML\n")
 }

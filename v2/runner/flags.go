@@ -75,6 +75,10 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 		"stats-port", defaultStatsPort,
 		"Port on which stats server will be available")
 
+	flagParser.BoolVar(&opt.PrintExampleTask,
+		"print-example-task", false,
+		"Print-out example task for a plugin")
+
 	flagParser.BoolVar(&opt.DebugMode,
 		"debug-mode", false,
 		"Run plugin in debug mode (standalone)")
