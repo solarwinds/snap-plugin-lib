@@ -99,9 +99,6 @@ func TestParseCmdLineOptions(t *testing.T) {
 				// Act
 				opt, err := ParseCmdLineOptions("plugin", inputCmd)
 
-				fmt.Printf("opt=%#v\n", opt)
-				fmt.Printf("err=%#v\n", err)
-
 				// Assert
 				if testCase.shouldBeParsed {
 					So(err, ShouldBeNil)

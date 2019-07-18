@@ -48,7 +48,7 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 
 	flagParser.UintVar(&opt.GrpcPingMaxMissed,
 		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
-		"Number of missed ping messages after which, plugin should exit")
+		"Number of missed ping messages after which plugin should exit")
 
 	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
 	flagParser.Var(&logLevelHandler{opt: opt},

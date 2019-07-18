@@ -20,17 +20,15 @@ limitations under the License.
 package main
 
 import (
-	"github.com/librato/snap-plugin-lib-go/examples/snap-plugin-collector-rand/rand"
+	"github.com/librato/snap-plugin-lib-go/examples/v1/snap-plugin-publisher-file/file"
 	"github.com/librato/snap-plugin-lib-go/v1/plugin"
-	"google.golang.org/grpc"
 )
 
 const (
-	pluginName      = "test-rand-collector"
-	pluginVersion   = 1
-	maxGRPCMesgSize = 2 * 1024
+	pluginName    = "test-file-publisher"
+	pluginVersion = 1
 )
 
 func main() {
-	plugin.StartCollector(rand.RandCollector{}, pluginName, pluginVersion, plugin.GRPCServerOptions(grpc.MaxMsgSize(maxGRPCMesgSize)))
+	plugin.StartPublisher(file.FPublisher{}, pluginName, pluginVersion)
 }

@@ -160,10 +160,12 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 }
 
 func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
+	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
 
 func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
+	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
 
