@@ -38,7 +38,7 @@ type publishSubEntry struct {
 func printExampleTask(ctxMan *proxy.ContextManager, pluginName string) {
 	mtsList := ctxMan.ListDefaultMetrics()
 
-	aoName := fmt.Sprintf("ao-%scollector", pluginName)
+	aoName := fmt.Sprintf("%scollector", pluginName)
 	tagKey := fmt.Sprintf("/%s", pluginName)
 
 	taskExample := taskEntry{
