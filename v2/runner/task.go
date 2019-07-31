@@ -3,8 +3,8 @@ package runner
 import (
 	"fmt"
 
-	"github.com/go-yaml/yaml"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
+	"gopkg.in/yaml.v3"
 )
 
 type taskEntry struct {
@@ -21,7 +21,7 @@ type scheduleEntry struct {
 type pluginEntry struct {
 	Name    string
 	Metrics []string
-	Config  map[string]interface{}
+	Config  *yaml.Node
 	Tags    map[string]interface{}
 	Publish publishEntry
 }
@@ -51,9 +51,6 @@ func printExampleTask(ctxMan *proxy.ContextManager, pluginName string) {
 			{
 				Name:    aoName,
 				Metrics: mtsList,
-				Config: map[string]interface{}{
-					"config_variable": "value",
-				},
 				Tags: map[string]interface{}{
 					tagKey: map[string]interface{}{
 						"plugin_tag": "tag",
@@ -69,7 +66,26 @@ func printExampleTask(ctxMan *proxy.ContextManager, pluginName string) {
 		},
 	}
 
-	b, err := yaml.Marshal(taskExample)
+	temp := yaml.Node{}
+
+	err := yaml.Unmarshal([]byte(ctxMan.ExampleConfig__), &temp)
+	if err != nil {
+		fmt.Printf("Error: can't do (%v)", err)
+	}
+
+	m := map[string]interface{}{}
+	err = temp.Decode(m)
+	if err != nil {
+		fmt.Printf("Error: 1 (%v)", err)
+	}
+
+	bbbbbb, err := yaml.Marshal(&temp)
+	fmt.Printf("bbbbbb=%s\n", string(bbbbbb))
+	fmt.Printf("err=%#v\n", err)
+
+	taskExample.Plugins[0].Config = temp.Content[0]
+
+	b, err := yaml.Marshal(&taskExample)
 	if err != nil {
 		fmt.Printf("Error: can't print task information (%v)", err)
 	}

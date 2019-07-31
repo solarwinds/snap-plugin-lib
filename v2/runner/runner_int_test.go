@@ -482,7 +482,7 @@ type kubernetesCollector struct {
 	t *testing.T
 }
 
-func (kc *kubernetesCollector) DefineMetrics(ctx plugin.CollectorDefinition) error {
+func (kc *kubernetesCollector) PluginDefinition(ctx plugin.CollectorDefinition) error {
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Pending", "", true, "this includes time before being bound to a node, as well as time spent pulling images onto the host")
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Running", "count", true, "the pod has been bound to a node and all of the containers have been started")
 	ctx.DefineMetric("/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Succeeded", "", true, "all containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers")

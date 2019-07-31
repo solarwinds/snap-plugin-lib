@@ -50,6 +50,8 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
 	statsController stats.Controller // reference to statistics controller
+
+	ExampleConfig__ string // example config
 }
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
@@ -189,11 +191,16 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 	panic("implement")
 }
 
+func (cm *ContextManager) ExampleConfig(cfg interface{}) error {
+	cm.ExampleConfig__ = cfg.(string)
+	return nil
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
-		err := definable.DefineMetrics(cm)
+		err := definable.PluginDefinition(cm)
 		if err != nil {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
 		}

@@ -17,7 +17,7 @@ This file contains definition of namespace and namespace elements. Namespace ele
 
 /*
 Namespaces (very often referred as "selectors") are used in three different contexts:
-    - when defining metrics (DefineMetrics) by plugin
+    - when defining metrics (PluginDefinition) by plugin
     - when defining filters (task*.yaml) -
     - when adding metrics during collection (CollectMetrics)
 
