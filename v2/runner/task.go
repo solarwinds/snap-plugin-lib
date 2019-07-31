@@ -21,7 +21,7 @@ type scheduleEntry struct {
 type pluginEntry struct {
 	Name    string
 	Metrics []string
-	Config  *yaml.Node
+	Config  *yaml.Node `yaml:",omitempty"`
 	Tags    map[string]interface{}
 	Publish publishEntry
 }
@@ -66,24 +66,9 @@ func printExampleTask(ctxMan *proxy.ContextManager, pluginName string) {
 		},
 	}
 
-	temp := yaml.Node{}
-
-	err := yaml.Unmarshal([]byte(ctxMan.ExampleConfig__), &temp)
-	if err != nil {
-		fmt.Printf("Error: can't do (%v)", err)
+	if len(ctxMan.ExampleConfig.Content) != 0 {
+		taskExample.Plugins[0].Config = ctxMan.ExampleConfig.Content[0]
 	}
-
-	m := map[string]interface{}{}
-	err = temp.Decode(m)
-	if err != nil {
-		fmt.Printf("Error: 1 (%v)", err)
-	}
-
-	bbbbbb, err := yaml.Marshal(&temp)
-	fmt.Printf("bbbbbb=%s\n", string(bbbbbb))
-	fmt.Printf("err=%#v\n", err)
-
-	taskExample.Plugins[0].Config = temp.Content[0]
 
 	b, err := yaml.Marshal(&taskExample)
 	if err != nil {

@@ -26,13 +26,15 @@ var log = logrus.WithFields(logrus.Fields{
 type myCollector struct {
 }
 
-var exampleConfig = `    crand: 40
+var exampleConfig = `
+# Random value used to calculate metric4
+crand: 40
 
-    # other tree-like configuration
-    credentials:
-        user: admin
-        password: secure1
-        token: abcd-1234
+# other tree-like configuration
+credentials:
+   user: admin
+   password: secure1
+   token: abcd-1234
 `
 
 func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
@@ -44,7 +46,7 @@ func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 
 	def.DefineMetric("/example/nodefault/random5", "", false, "Random value")
 
-	def.ExampleConfig(exampleConfig)
+	def.DefineExampleConfig(exampleConfig)
 
 	return nil
 }

@@ -8,6 +8,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"sort"
 	"sync"
 	"time"
@@ -51,7 +52,7 @@ type ContextManager struct {
 
 	statsController stats.Controller // reference to statistics controller
 
-	ExampleConfig__ string // example config
+	ExampleConfig yaml.Node // example config
 }
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
@@ -191,8 +192,12 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 	panic("implement")
 }
 
-func (cm *ContextManager) ExampleConfig(cfg interface{}) error {
-	cm.ExampleConfig__ = cfg.(string)
+func (cm *ContextManager) DefineExampleConfig(cfg string) error {
+	err := yaml.Unmarshal([]byte(cfg), &cm.ExampleConfig)
+	if err != nil {
+		return fmt.Errorf("invalid YAML provided by user: %v", err)
+	}
+
 	return nil
 }
 

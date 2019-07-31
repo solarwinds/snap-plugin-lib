@@ -45,5 +45,5 @@ type CollectorDefinition interface {
 	DefineGlobalTags(string, map[string]string)
 
 	// Define example config (which will be presented when example task is printed)
-	ExampleConfig(interface{}) error
+	DefineExampleConfig(cfg string) error
 }
