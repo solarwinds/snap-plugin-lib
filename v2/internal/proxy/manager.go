@@ -8,7 +8,6 @@ package proxy
 import (
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"sort"
 	"sync"
 	"time"
@@ -18,6 +17,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 var log *logrus.Entry

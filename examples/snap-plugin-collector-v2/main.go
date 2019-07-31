@@ -32,9 +32,9 @@ crand: 40
 
 # other tree-like configuration
 credentials:
-   user: admin
-   password: secure1
-   token: abcd-1234
+  user: admin
+  password: secure1
+  token: abcd-1234
 `
 
 func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
