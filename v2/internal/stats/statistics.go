@@ -51,7 +51,7 @@ type tasksCounters struct {
 }
 
 type measurementInfo struct {
-	Occurred         eventTimes `json:"Occured"`
+	Occurred         eventTimes `json:"Occurred"`
 	CollectedMetrics int        `json:"Collected metrics"`
 }
 

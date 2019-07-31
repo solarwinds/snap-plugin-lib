@@ -73,7 +73,7 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 	if containsGroup(s) { // is it group []?
 		dynElem := s[1 : len(s)-1]
-		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+		eqIndex := strings.Index(dynElem, dynamicElementEqualIndicator)
 
 		if eqIndex != -1 { // is it group with value [group=id]
 			groupName := dynElem[0:eqIndex]
@@ -120,11 +120,11 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		}
 	}
 
-	if s == string(staticRecursiveAnyMatcher) { // is it **
+	if s == staticRecursiveAnyMatcher { // is it **
 		return newStaticRecursiveAnyElement(), nil
 	}
 
-	if s == string(staticAnyMatcher) { // is it *
+	if s == staticAnyMatcher { // is it *
 		return newStaticAnyElement(), nil
 	}
 

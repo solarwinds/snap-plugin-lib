@@ -174,7 +174,7 @@ func (*staticAnyElement) Match(s string) bool {
 }
 
 func (*staticAnyElement) String() string {
-	return string(staticAnyMatcher)
+	return staticAnyMatcher
 }
 
 func (*staticAnyElement) IsDynamic() bool { return false }
@@ -265,7 +265,7 @@ func newDynamicAnyElement(group string) *dynamicAnyElement {
 func (dae *dynamicAnyElement) Match(s string) bool {
 	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
-		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+		eqIndex := strings.Index(dynElem, dynamicElementEqualIndicator)
 
 		if eqIndex != -1 {
 			groupName := dynElem[0:eqIndex]
@@ -303,7 +303,7 @@ func newDynamicSpecificElement(group, value string) *dynamicSpecificElement {
 func (dse *dynamicSpecificElement) Match(s string) bool {
 	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
-		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+		eqIndex := strings.Index(dynElem, dynamicElementEqualIndicator)
 
 		if eqIndex != -1 {
 			groupName := dynElem[0:eqIndex]
@@ -345,7 +345,7 @@ func newDynamicRegexpElement(group string, r *regexp.Regexp) *dynamicRegexpEleme
 func (dre *dynamicRegexpElement) Match(s string) bool {
 	if containsGroup(s) {
 		dynElem := s[1 : len(s)-1]
-		eqIndex := strings.Index(dynElem, string(dynamicElementEqualIndicator))
+		eqIndex := strings.Index(dynElem, dynamicElementEqualIndicator)
 
 		if eqIndex != -1 {
 			groupName := dynElem[0:eqIndex]
