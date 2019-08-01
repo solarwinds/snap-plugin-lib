@@ -14,5 +14,5 @@ type LoadableCollector interface {
 }
 
 type DefinableCollector interface {
-	DefineMetrics(CollectorDefinition) error
+	PluginDefinition(CollectorDefinition) error
 }

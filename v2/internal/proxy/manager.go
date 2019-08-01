@@ -8,6 +8,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 var log *logrus.Entry
@@ -49,6 +51,8 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
 	statsController stats.Controller // reference to statistics controller
+
+	ExampleConfig yaml.Node // example config
 }
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
@@ -188,11 +192,20 @@ func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
 	panic("implement")
 }
 
+func (cm *ContextManager) DefineExampleConfig(cfg string) error {
+	err := yaml.Unmarshal([]byte(cfg), &cm.ExampleConfig)
+	if err != nil {
+		return fmt.Errorf("invalid YAML provided by user: %v", err)
+	}
+
+	return nil
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
-		err := definable.DefineMetrics(cm)
+		err := definable.PluginDefinition(cm)
 		if err != nil {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
 		}
@@ -216,4 +229,19 @@ func (cm *ContextManager) markTaskAsCompleted(id int) {
 	defer cm.activeTasksMutex.Unlock()
 
 	delete(cm.activeTasks, id)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+func (cm *ContextManager) ListDefaultMetrics() []string {
+	result := []string{}
+	for mt, meta := range cm.metricsMetadata {
+		if meta.isDefault {
+			result = append(result, mt)
+		}
+	}
+
+	sort.Strings(result)
+
+	return result
 }

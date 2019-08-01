@@ -27,32 +27,38 @@ type resources struct {
 }
 
 const (
-	errorStatus = 1
+	normalExitStatus = 0
+	errorExitStatus  = 1
 )
 
 func StartCollector(collector plugin.Collector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], os.Args[1:])
 	if err != nil {
 		fmt.Printf("Error occured during plugin startup (%v)", err)
-		os.Exit(errorStatus)
+		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(name, version, opt)
 	if err != nil {
 		fmt.Printf("Error occured when starting statistics controller (%v)", err)
-		os.Exit(errorStatus)
+		os.Exit(errorExitStatus)
 	}
 
 	contextManager := proxy.NewContextManager(collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
 
+	if opt.PrintExampleTask {
+		printExampleTask(contextManager, name)
+		os.Exit(normalExitStatus)
+	}
+
 	switch opt.DebugMode {
 	case false:
 		r, err := acquireResources(opt)
 		if err != nil {
 			fmt.Printf("Can't acquire resources for plugin services (%v)", err)
-			os.Exit(errorStatus)
+			os.Exit(errorExitStatus)
 		}
 
 		printMetaInformation(name, version, opt, r)
@@ -89,7 +95,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
 		fmt.Printf("Couldn't load a task in a standalone mode (reason: %v)", errLoad)
-		os.Exit(errorStatus)
+		os.Exit(errorExitStatus)
 	}
 
 	for runCount := uint(0); ; {
@@ -97,7 +103,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
 		if errColl != nil {
 			fmt.Printf("Error occurred during metrics collection in a standalone mode (reason: %v)", errColl)
-			os.Exit(errorStatus)
+			os.Exit(errorExitStatus)
 		}
 
 		// Print out metrics
@@ -119,7 +125,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 	errUnload := ctxManager.UnloadTask(singleModeTaskID)
 	if errUnload != nil {
 		fmt.Printf("Couldn't unload a task in a standalone mode (reason: %v)", errUnload)
-		os.Exit(errorStatus)
+		os.Exit(errorExitStatus)
 	}
 }
 
