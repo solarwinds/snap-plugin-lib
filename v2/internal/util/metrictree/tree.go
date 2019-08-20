@@ -100,20 +100,29 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValid(ns, false)
+	isValid, _ := tv.isValid(ns, false, false)
 	return isValid
 }
 
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.isValid(ns, true)
+	isValid, trace := tv.isValid(ns, true, false)
 	return isValid, trace
+}
+
+func (tv *TreeValidator) IsCompatible(ns string) (bool) {
+	isCompatible, _ := tv.isValid(ns, false, true)
+	return isCompatible
 }
 
 func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
 }
 
-func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
+func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bool) (bool, []string) {
+	if compatibilityMode && tv.strategy != metricDefinitionStrategy {
+		panic("compatibilityMode can be only used for definition tree")
+	}
+
 	nsElems := strings.Split(ns, NsSeparator)[1:]
 	groupIndicator := make([]string, len(nsElems))
 
@@ -133,8 +142,15 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 		}
 
 		if nsElems[visitedNode.level] != staticAnyMatcher {
-			if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
-				continue
+			switch compatibilityMode {
+			case false:
+				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
+					continue
+				}
+			case true:
+				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
+					continue
+				}
 			}
 		}
 
