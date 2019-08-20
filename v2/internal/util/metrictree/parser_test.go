@@ -145,6 +145,8 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		comparableType:   &dynamicAnyElement{},
 		shouldMatch:      []string{"[group=id1]", "[group=id3]", "id3", "group"},
 		shouldNotMatch:   []string{"[grp=id1]", "[group]", "[id1=group]", "*", "**", "{group}", ""},
+		compatible:       []string{"[group]", "[group=val]", "[group={reg.*}]", "val", "{reg.*}", "*", "**"},
+		notCompatible:    []string{"[group1]", "[group2=val]", "[group3={reg.*}]"},
 		isFilter:         false,
 	},
 	{
