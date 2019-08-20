@@ -174,7 +174,7 @@ func (*staticAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
 }
 
-func (*staticAnyElement) Compatible(s string) bool {
+func (sae *staticAnyElement) Compatible(s string) bool {
 	return false
 }
 
@@ -227,7 +227,19 @@ func (sse *staticSpecificElement) Match(s string) bool {
 	return sse.name == s
 }
 
-func (*staticSpecificElement) Compatible(s string) bool {
+func (sse *staticSpecificElement) Compatible(s string) bool {
+	if containsGroup(s) {
+		return false
+	}
+
+	if containsRegexp(s) || s == staticAnyMatcher || s == staticRecursiveAnyMatcher {
+		return true
+	}
+
+	if s == sse.name {
+		return true
+	}
+
 	return false
 }
 
@@ -295,8 +307,8 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
 }
 
-func (*dynamicAnyElement) Compatible(s string) bool {
-	return false
+func (dae *dynamicAnyElement) Compatible(s string) bool {
+	return true
 }
 
 func (dae *dynamicAnyElement) String() string {

@@ -134,6 +134,8 @@ type parseNamespaceElementValidScenario struct {
 	comparableType   namespaceElement
 	shouldMatch      []string
 	shouldNotMatch   []string
+	compatible       []string
+	notCompatible    []string
 	isFilter         bool
 }
 
@@ -185,6 +187,8 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		comparableType:   &staticSpecificElement{},
 		shouldMatch:      []string{"group1"},
 		shouldNotMatch:   []string{"group2", "group", "", "[dyn1=group1]", "[group1]", "*", "**", "{group}"},
+		compatible:       []string{"group1", "{reg.*}", "*", "**"},
+		notCompatible:    []string{"group2", "[group1]", "[group1=val]", "[group1={reg.*}]"},
 		isFilter:         false,
 	},
 	{
@@ -233,6 +237,20 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				for i, m := range tc.shouldNotMatch {
 					Convey(fmt.Sprintf("Scenario %d - Negative matching (%s to %s)", i, m, parsedEl.String()), func() {
 						So(parsedEl.Match(m), ShouldBeFalse)
+					})
+				}
+
+				// Assert compatibility (positive)
+				for i, m := range tc.compatible {
+					Convey(fmt.Sprintf("Scenario %d - Positive compatibility (%s to %s)", i, m, parsedEl.String()), func() {
+						So(parsedEl.Compatible(m), ShouldBeTrue)
+					})
+				}
+
+				// Assert compatibility (negative)
+				for i, m := range tc.compatible {
+					Convey(fmt.Sprintf("Scenario %d - Negative compatibility (%s to %s)", i, m, parsedEl.String()), func() {
+						So(parsedEl.Compatible(m), ShouldBeTrue)
 					})
 				}
 			})
