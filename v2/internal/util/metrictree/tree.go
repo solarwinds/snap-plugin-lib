@@ -41,6 +41,7 @@ package metrictree
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -96,7 +97,25 @@ func (tv *TreeValidator) AddRule(ns string) error {
 		return err
 	}
 
-	return tv.add(parsedNs)
+	switch tv.strategy {
+	case metricDefinitionStrategy:
+		if !parsedNs.IsUsableForDefinition() {
+			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in definition", ns)
+		}
+	case metricFilteringStrategy:
+		defPresent := tv.definitionTree.HasRules()
+		if !parsedNs.IsUsableForFiltering(defPresent) {
+			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in filtering when metric definition wasn't provided", ns)
+		}
+
+		if !tv.definitionTree.IsCompatible(ns) {
+			return fmt.Errorf("can't add rule (%s) - not compatible with any metric definition", ns)
+		}
+	default:
+		panic("invalid strategy")
+	}
+
+	return tv.updateTree(parsedNs)
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
@@ -201,24 +220,6 @@ func (tv *TreeValidator) ListRules() []string {
 
 	sort.Strings(nsList)
 	return nsList
-}
-
-func (tv *TreeValidator) add(parsedNs *Namespace) error {
-	switch tv.strategy {
-	case metricDefinitionStrategy:
-		if !parsedNs.IsUsableForDefinition() {
-			return errors.New("can't add rule - some namespace elements are not allowed in definition")
-		}
-	case metricFilteringStrategy:
-		defPresent := tv.definitionTree.HasRules()
-		if !parsedNs.IsUsableForFiltering(defPresent) {
-			return errors.New("can't add rule - some namespace elements are not allowed in filtering when metric definition wasn't provided")
-		}
-	default:
-		panic("invalid strategy")
-	}
-
-	return tv.updateTree(parsedNs)
 }
 
 // this function looks where to put new namespace elements and if tree conditions are met, updates the tree
