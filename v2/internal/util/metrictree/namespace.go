@@ -46,6 +46,7 @@ type Namespace struct {
 
 type namespaceElement interface {
 	Match(string) bool
+	Compatible(string) bool
 	String() string
 
 	IsDynamic() bool
@@ -173,6 +174,10 @@ func (*staticAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
 }
 
+func (*staticAnyElement) Compatible(s string) bool {
+	return false
+}
+
 func (*staticAnyElement) String() string {
 	return staticAnyMatcher
 }
@@ -192,6 +197,10 @@ func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
 
 func (*staticRecursiveAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
+}
+
+func (*staticRecursiveAnyElement) Compatible(s string) bool {
+	return false
 }
 
 func (*staticRecursiveAnyElement) String() string {
@@ -218,6 +227,10 @@ func (sse *staticSpecificElement) Match(s string) bool {
 	return sse.name == s
 }
 
+func (*staticSpecificElement) Compatible(s string) bool {
+	return false
+}
+
 func (sse *staticSpecificElement) String() string {
 	return sse.name
 }
@@ -240,6 +253,10 @@ func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 
 func (sre *staticRegexpElement) Match(s string) bool {
 	return !containsGroup(s) && isValidIdentifier(s) && sre.regExp.MatchString(s)
+}
+
+func (*staticRegexpElement) Compatible(s string) bool {
+	return false
 }
 
 func (sre *staticRegexpElement) String() string {
@@ -276,6 +293,10 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 	}
 
 	return isValidIdentifier(s)
+}
+
+func (*dynamicAnyElement) Compatible(s string) bool {
+	return false
 }
 
 func (dae *dynamicAnyElement) String() string {
@@ -320,6 +341,10 @@ func (dse *dynamicSpecificElement) Match(s string) bool {
 	return false
 }
 
+func (*dynamicSpecificElement) Compatible(s string) bool {
+	return false
+}
+
 func (dse *dynamicSpecificElement) String() string {
 	return fmt.Sprintf("[%s=%s]", dse.group, dse.value)
 }
@@ -359,6 +384,10 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 		}
 	}
 
+	return false
+}
+
+func (*dynamicRegexpElement) Compatible(s string) bool {
 	return false
 }
 
@@ -405,6 +434,10 @@ func (sse *staticSpecificAcceptingGroupElement) Match(s string) bool {
 	return false
 }
 
+func (*staticSpecificAcceptingGroupElement) Compatible(s string) bool {
+	return false
+}
+
 func (sse *staticSpecificAcceptingGroupElement) String() string {
 	return sse.name
 }
@@ -445,6 +478,10 @@ func (sre *staticRegexpAcceptingGroupElement) Match(s string) bool {
 		return sre.regExp.MatchString(parsedEl.(*dynamicSpecificElement).value)
 	}
 
+	return false
+}
+
+func (*staticRegexpAcceptingGroupElement) Compatible(s string) bool {
 	return false
 }
 
