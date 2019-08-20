@@ -320,10 +320,6 @@ func (dae *dynamicAnyElement) Compatible(s string) bool {
 		return groupName == dae.group
 	}
 
-	if s == staticAnyMatcher || s == staticRecursiveAnyMatcher {
-		return true // todo: remove
-	}
-
 	return true
 }
 
