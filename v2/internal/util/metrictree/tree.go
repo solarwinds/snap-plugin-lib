@@ -128,7 +128,7 @@ func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
 	return isValid, trace
 }
 
-func (tv *TreeValidator) IsCompatible(ns string) (bool) {
+func (tv *TreeValidator) IsCompatible(ns string) bool {
 	isCompatible, _ := tv.isValid(ns, false, true)
 	return isCompatible
 }
