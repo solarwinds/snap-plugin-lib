@@ -250,9 +250,9 @@ func TestParseNamespaceElement_ValidScenarios(t *testing.T) {
 				}
 
 				// Assert compatibility (negative)
-				for i, m := range tc.compatible {
+				for i, m := range tc.notCompatible {
 					Convey(fmt.Sprintf("Scenario %d - Negative compatibility (%s to %s)", i, m, parsedEl.String()), func() {
-						So(parsedEl.Compatible(m), ShouldBeTrue)
+						So(parsedEl.Compatible(m), ShouldBeFalse)
 					})
 				}
 			})
