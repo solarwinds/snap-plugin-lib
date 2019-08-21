@@ -18,8 +18,8 @@ This file contains definition of namespace and namespace elements. Namespace ele
 /*
 Namespaces (very often referred as "selectors") are used in three different contexts:
     - when defining metrics (PluginDefinition) by plugin
-    - when defining filters (task*.yaml) -
-    - when adding metrics during collection (CollectMetrics)
+    - when defining filters (requested metrics) (task*.yaml)
+    - when adding concrete metrics during collection (CollectMetrics)
 
 Not all forms are valid for different context. Ie.
     /plugin/[group]/metric
@@ -45,7 +45,15 @@ type Namespace struct {
 }
 
 type namespaceElement interface {
+	// used to validate "concrete metric" against "filters" and "definitions" (should add metric to collect result?).
+	// ie. "/plugin/[node=node123]/metric1" is valid against filter "/plugin/**" and definition "/plugin/[node]/metric1".
 	Match(string) bool
+
+	// check if "filters" match to "definition" (is given filter correct?).
+	// Used to throw away filters which wouldn't have any impact on collection at early stage (loading task).
+	// ie. Filters "/plugin/**", "/plugin/*/metric1", "/plugin/{node[1-3]{1,2}}" and compatible with definition "/plugin/[node]/metric1".
+	Compatible(string) bool
+
 	String() string
 
 	IsDynamic() bool
@@ -173,6 +181,10 @@ func (*staticAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
 }
 
+func (sae *staticAnyElement) Compatible(s string) bool {
+	return false
+}
+
 func (*staticAnyElement) String() string {
 	return staticAnyMatcher
 }
@@ -192,6 +204,10 @@ func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
 
 func (*staticRecursiveAnyElement) Match(s string) bool {
 	return isValidIdentifier(s)
+}
+
+func (*staticRecursiveAnyElement) Compatible(s string) bool {
+	return false
 }
 
 func (*staticRecursiveAnyElement) String() string {
@@ -218,6 +234,22 @@ func (sse *staticSpecificElement) Match(s string) bool {
 	return sse.name == s
 }
 
+func (sse *staticSpecificElement) Compatible(s string) bool {
+	if containsGroup(s) {
+		return false
+	}
+
+	if containsRegexp(s) || s == staticAnyMatcher || s == staticRecursiveAnyMatcher {
+		return true
+	}
+
+	if s == sse.name {
+		return true
+	}
+
+	return false
+}
+
 func (sse *staticSpecificElement) String() string {
 	return sse.name
 }
@@ -240,6 +272,10 @@ func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 
 func (sre *staticRegexpElement) Match(s string) bool {
 	return !containsGroup(s) && isValidIdentifier(s) && sre.regExp.MatchString(s)
+}
+
+func (*staticRegexpElement) Compatible(s string) bool {
+	return false
 }
 
 func (sre *staticRegexpElement) String() string {
@@ -276,6 +312,22 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 	}
 
 	return isValidIdentifier(s)
+}
+
+func (dae *dynamicAnyElement) Compatible(s string) bool {
+	if containsGroup(s) {
+		dynElem := s[1 : len(s)-1]
+		eqIndex := strings.Index(dynElem, dynamicElementEqualIndicator)
+
+		groupName := dynElem
+		if eqIndex != -1 {
+			groupName = dynElem[0:eqIndex]
+		}
+
+		return groupName == dae.group
+	}
+
+	return true
 }
 
 func (dae *dynamicAnyElement) String() string {
@@ -320,6 +372,10 @@ func (dse *dynamicSpecificElement) Match(s string) bool {
 	return false
 }
 
+func (*dynamicSpecificElement) Compatible(s string) bool {
+	return false
+}
+
 func (dse *dynamicSpecificElement) String() string {
 	return fmt.Sprintf("[%s=%s]", dse.group, dse.value)
 }
@@ -359,6 +415,10 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 		}
 	}
 
+	return false
+}
+
+func (*dynamicRegexpElement) Compatible(s string) bool {
 	return false
 }
 
@@ -405,6 +465,10 @@ func (sse *staticSpecificAcceptingGroupElement) Match(s string) bool {
 	return false
 }
 
+func (*staticSpecificAcceptingGroupElement) Compatible(s string) bool {
+	return false
+}
+
 func (sse *staticSpecificAcceptingGroupElement) String() string {
 	return sse.name
 }
@@ -445,6 +509,10 @@ func (sre *staticRegexpAcceptingGroupElement) Match(s string) bool {
 		return sre.regExp.MatchString(parsedEl.(*dynamicSpecificElement).value)
 	}
 
+	return false
+}
+
+func (*staticRegexpAcceptingGroupElement) Compatible(s string) bool {
 	return false
 }
 
