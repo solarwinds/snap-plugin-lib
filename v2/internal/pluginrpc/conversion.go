@@ -1,6 +1,7 @@
 package pluginrpc
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -82,7 +83,7 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	return grpcValue, nil
 }
 
-func toGRPCInfo(statistics stats.Statistics) *Info {
+func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 	pi := &statistics.PluginInfo
 	ts := &statistics.TasksSummary
 
@@ -91,7 +92,6 @@ func toGRPCInfo(statistics stats.Statistics) *Info {
 			Name:           pi.Name,
 			Version:        pi.Version,
 			CmdLineOptions: pi.CmdLineOptions,
-			Options:        nil, // todo: complete
 			Started:        toGRPCTime(pi.Started.Time),
 		},
 		TaskSummary: &TaskSummary{
@@ -109,13 +109,38 @@ func toGRPCInfo(statistics stats.Statistics) *Info {
 		TaskDetails: map[uint64]*TaskDetails{},
 	}
 
+	// Handle RawMessage - marshal to Json and unmarshal to typed struct
+	b, err := pi.Options.MarshalJSON()
+	if err != nil {
+		return info, fmt.Errorf("could't marshal options field: %v", err)
+	}
+
+	options := &types.Options{}
+	err = json.Unmarshal(b, options)
+	if err != nil {
+		return info, fmt.Errorf("could't unmarshal options field: %v", err)
+	}
+
+	info.PluginInfo.Options = &Options{
+		PluginIP:          options.PluginIp,
+		GrpcPort:          uint32(options.GrpcPort),
+		PprofPort:         uint32(options.PprofPort),
+		StatsPort:         uint32(options.StatsPort),
+		GrpcPingTimeout:   int64(options.GrpcPingTimeout),
+		GrpcPingMaxMissed: uint64(options.GrpcPingMaxMissed),
+		LogLevel:          "", // todo
+		EnablePprofServer: options.EnablePprofServer,
+		EnableStats:       options.EnableStats,
+		EnableStatsServer: options.EnableStatsServer,
+	}
+
 	for id, taskDetails := range statistics.TasksDetails {
 		c := &taskDetails.Counters
 		pt := &taskDetails.ProcessingTimes
 		lm := &taskDetails.LastMeasurement
 
 		info.TaskDetails[uint64(id)] = &TaskDetails{ // todo: conversion
-			Configuration: "", // todo
+			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
 			Filters:       taskDetails.Filters,
 			Counters: &TaskDetailCounters{
 				CollectRequests:          uint64(c.CollectRequests),
@@ -135,5 +160,5 @@ func toGRPCInfo(statistics stats.Statistics) *Info {
 		}
 	}
 
-	return info
+	return info, nil
 }

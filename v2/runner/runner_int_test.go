@@ -61,7 +61,7 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 	go func() {
 		statsController, _ := stats.NewEmptyController()
 		contextManager := proxy.NewContextManager(collector, statsController)
-		pluginrpc.StartGRPCController(contextManager, ln, 0, 0)
+		pluginrpc.StartGRPCController(contextManager, statsController, ln, 0, 0)
 		s.endCh <- true
 	}()
 

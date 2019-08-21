@@ -80,11 +80,15 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
 	log.Trace("GRPC Info() received")
 
+	var err error
 	response := &InfoResponse{}
 
 	select {
 	case statistics := <-cs.statsController.RequestStat():
-		response.Info = toGRPCInfo(statistics)
+		response.Info, err = toGRPCInfo(statistics)
+		if err != nil {
+			return response, fmt.Errorf("could't convert statistics to GRPC format: %v", err)
+		}
 	case <-ctx.Done():
 		return response, errors.New("couldn't retrieve statistics") // todo: check how this work
 	}
