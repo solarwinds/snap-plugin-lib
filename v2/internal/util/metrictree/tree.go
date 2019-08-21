@@ -41,6 +41,7 @@ package metrictree
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -96,24 +97,51 @@ func (tv *TreeValidator) AddRule(ns string) error {
 		return err
 	}
 
-	return tv.add(parsedNs)
+	switch tv.strategy {
+	case metricDefinitionStrategy:
+		if !parsedNs.IsUsableForDefinition() {
+			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in definition", ns)
+		}
+	case metricFilteringStrategy:
+		defPresent := tv.definitionTree.HasRules()
+		if !parsedNs.IsUsableForFiltering(defPresent) {
+			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in filtering when metric definition wasn't provided", ns)
+		}
+
+		if !tv.definitionTree.IsCompatible(ns) {
+			return fmt.Errorf("can't add rule (%s) - not compatible with any metric definition", ns)
+		}
+	default:
+		panic("invalid strategy")
+	}
+
+	return tv.updateTree(parsedNs)
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValid(ns, false)
+	isValid, _ := tv.isValid(ns, false, false)
 	return isValid
 }
 
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.isValid(ns, true)
+	isValid, trace := tv.isValid(ns, true, false)
 	return isValid, trace
+}
+
+func (tv *TreeValidator) IsCompatible(ns string) bool {
+	isCompatible, _ := tv.isValid(ns, false, true)
+	return isCompatible
 }
 
 func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
 }
 
-func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
+func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bool) (bool, []string) {
+	if compatibilityMode && tv.strategy != metricDefinitionStrategy {
+		panic("compatibilityMode can be only used for definition tree")
+	}
+
 	nsElems := strings.Split(ns, NsSeparator)[1:]
 	groupIndicator := make([]string, len(nsElems))
 
@@ -133,8 +161,15 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 		}
 
 		if nsElems[visitedNode.level] != staticAnyMatcher {
-			if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
-				continue
+			switch compatibilityMode {
+			case false:
+				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
+					continue
+				}
+			case true:
+				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
+					continue
+				}
 			}
 		}
 
@@ -185,24 +220,6 @@ func (tv *TreeValidator) ListRules() []string {
 
 	sort.Strings(nsList)
 	return nsList
-}
-
-func (tv *TreeValidator) add(parsedNs *Namespace) error {
-	switch tv.strategy {
-	case metricDefinitionStrategy:
-		if !parsedNs.IsUsableForDefinition() {
-			return errors.New("can't add rule - some namespace elements are not allowed in definition")
-		}
-	case metricFilteringStrategy:
-		defPresent := tv.definitionTree.HasRules()
-		if !parsedNs.IsUsableForFiltering(defPresent) {
-			return errors.New("can't add rule - some namespace elements are not allowed in filtering when metric definition wasn't provided")
-		}
-	default:
-		panic("invalid strategy")
-	}
-
-	return tv.updateTree(parsedNs)
 }
 
 // this function looks where to put new namespace elements and if tree conditions are met, updates the tree

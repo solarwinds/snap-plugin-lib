@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	. "github.com/smartystreets/goconvey/convey"
 )
-import . "github.com/smartystreets/goconvey/convey"
 
 type basicConfig struct {
 	Address struct {
