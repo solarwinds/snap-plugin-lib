@@ -80,7 +80,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsControlle
 	}
 
 	// main blocking operation
-	pluginrpc.StartGRPCController(ctxManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	pluginrpc.StartGRPCController(ctxManager, statsController, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }
 
 func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Options) {

@@ -2,7 +2,9 @@ package pluginrpc
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
@@ -18,10 +20,7 @@ func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 		Tags:      mt.Tags,
 		Value:     value,
 		Unit:      mt.Unit,
-		Timestamp: &Time{
-			Sec:  mt.Timestamp.Unix(),
-			Nsec: int64(mt.Timestamp.Nanosecond()),
-		},
+		Timestamp: toGRPCTime(mt.Timestamp),
 	}
 
 	return protoMt, nil
@@ -40,6 +39,13 @@ func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 	}
 
 	return grpcNs
+}
+
+func toGRPCTime(t time.Time) *Time {
+	return &Time{
+		Sec:  t.Unix(),
+		Nsec: int64(t.Nanosecond()),
+	}
 }
 
 // convert metric value to GRPC structure
@@ -74,4 +80,60 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	}
 
 	return grpcValue, nil
+}
+
+func (cs *collectService) toGRPCInfo(statistics stats.Statistics) *Info {
+	pi := &statistics.PluginInfo
+	ts := &statistics.TasksSummary
+
+	info := &Info{
+		PluginInfo: &PluginInfo{
+			Name:           pi.Name,
+			Version:        pi.Version,
+			CmdLineOptions: pi.CmdLineOptions,
+			Options:        nil, // todo: complete
+			Started:        toGRPCTime(pi.Started.Time),
+		},
+		TaskSummary: &TaskSummary{
+			Counters: &TaskSummaryCounters{
+				CurrentlyActiveTasks: uint64(ts.Counters.CurrentlyActiveTasks), // todo: uint64 types in original code
+				TotalActiveTasks:     uint64(ts.Counters.TotalActiveTasks),
+				TotalCollectRequests: uint64(ts.Counters.TotalCollectRequests),
+			},
+			ProcessingTimes: &ProcessingTimes{
+				Total:   int64(ts.ProcessingTimes.Total),
+				Average: int64(ts.ProcessingTimes.Average),
+				Maximum: int64(ts.ProcessingTimes.Maximum),
+			},
+		},
+		TaskDetails: map[uint64]*TaskDetails{},
+	}
+
+	for id, taskDetails := range statistics.TasksDetails {
+		c := &taskDetails.Counters
+		pt := &taskDetails.ProcessingTimes
+		lm := &taskDetails.LastMeasurement
+
+		info.TaskDetails[uint64(id)] = &TaskDetails{ // todo: conversion
+			Configuration: nil, // todo
+			Filters:       taskDetails.Filters,
+			Counters: &TaskDetailCounters{
+				CollectRequests:          uint64(c.CollectRequests),
+				TotalMetrics:             uint64(c.TotalMetrics),
+				AverageMetricsPerCollect: uint64(c.AvgMetricsPerCollect),
+			},
+			Loaded: toGRPCTime(taskDetails.Loaded.Time),
+			ProcessingTimes: &ProcessingTimes{
+				Total:   int64(pt.Total),
+				Average: int64(pt.Average),
+				Maximum: int64(pt.Maximum),
+			},
+			LastMeasurement: &LastMeasurement{
+				Occurred:         toGRPCTime(lm.Occurred.Time),
+				CollectedMetrics: uint64(lm.CollectedMetrics),
+			},
+		}
+	}
+
+	return info
 }

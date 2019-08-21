@@ -3,13 +3,13 @@
 
 package pluginrpc
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-
 import (
-	context "golang.org/x/net/context"
-	grpc "google.golang.org/grpc"
+	"fmt"
+	"math"
+
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -33,7 +33,7 @@ func (m *PingRequest) Reset()         { *m = PingRequest{} }
 func (m *PingRequest) String() string { return proto.CompactTextString(m) }
 func (*PingRequest) ProtoMessage()    {}
 func (*PingRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{0}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{0}
 }
 func (m *PingRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PingRequest.Unmarshal(m, b)
@@ -63,7 +63,7 @@ func (m *PingResponse) Reset()         { *m = PingResponse{} }
 func (m *PingResponse) String() string { return proto.CompactTextString(m) }
 func (*PingResponse) ProtoMessage()    {}
 func (*PingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{1}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{1}
 }
 func (m *PingResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PingResponse.Unmarshal(m, b)
@@ -93,7 +93,7 @@ func (m *KillRequest) Reset()         { *m = KillRequest{} }
 func (m *KillRequest) String() string { return proto.CompactTextString(m) }
 func (*KillRequest) ProtoMessage()    {}
 func (*KillRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{2}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{2}
 }
 func (m *KillRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KillRequest.Unmarshal(m, b)
@@ -123,7 +123,7 @@ func (m *KillResponse) Reset()         { *m = KillResponse{} }
 func (m *KillResponse) String() string { return proto.CompactTextString(m) }
 func (*KillResponse) ProtoMessage()    {}
 func (*KillResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{3}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{3}
 }
 func (m *KillResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KillResponse.Unmarshal(m, b)
@@ -154,7 +154,7 @@ func (m *CollectRequest) Reset()         { *m = CollectRequest{} }
 func (m *CollectRequest) String() string { return proto.CompactTextString(m) }
 func (*CollectRequest) ProtoMessage()    {}
 func (*CollectRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{4}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{4}
 }
 func (m *CollectRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CollectRequest.Unmarshal(m, b)
@@ -192,7 +192,7 @@ func (m *CollectResponse) Reset()         { *m = CollectResponse{} }
 func (m *CollectResponse) String() string { return proto.CompactTextString(m) }
 func (*CollectResponse) ProtoMessage()    {}
 func (*CollectResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{5}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{5}
 }
 func (m *CollectResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CollectResponse.Unmarshal(m, b)
@@ -232,7 +232,7 @@ func (m *LoadRequest) Reset()         { *m = LoadRequest{} }
 func (m *LoadRequest) String() string { return proto.CompactTextString(m) }
 func (*LoadRequest) ProtoMessage()    {}
 func (*LoadRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{6}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{6}
 }
 func (m *LoadRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LoadRequest.Unmarshal(m, b)
@@ -283,7 +283,7 @@ func (m *LoadResponse) Reset()         { *m = LoadResponse{} }
 func (m *LoadResponse) String() string { return proto.CompactTextString(m) }
 func (*LoadResponse) ProtoMessage()    {}
 func (*LoadResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{7}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{7}
 }
 func (m *LoadResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LoadResponse.Unmarshal(m, b)
@@ -314,7 +314,7 @@ func (m *UnloadRequest) Reset()         { *m = UnloadRequest{} }
 func (m *UnloadRequest) String() string { return proto.CompactTextString(m) }
 func (*UnloadRequest) ProtoMessage()    {}
 func (*UnloadRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{8}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{8}
 }
 func (m *UnloadRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UnloadRequest.Unmarshal(m, b)
@@ -351,7 +351,7 @@ func (m *UnloadResponse) Reset()         { *m = UnloadResponse{} }
 func (m *UnloadResponse) String() string { return proto.CompactTextString(m) }
 func (*UnloadResponse) ProtoMessage()    {}
 func (*UnloadResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{9}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{9}
 }
 func (m *UnloadResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UnloadResponse.Unmarshal(m, b)
@@ -381,7 +381,7 @@ func (m *InfoRequest) Reset()         { *m = InfoRequest{} }
 func (m *InfoRequest) String() string { return proto.CompactTextString(m) }
 func (*InfoRequest) ProtoMessage()    {}
 func (*InfoRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{10}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{10}
 }
 func (m *InfoRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InfoRequest.Unmarshal(m, b)
@@ -402,6 +402,7 @@ func (m *InfoRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_InfoRequest proto.InternalMessageInfo
 
 type InfoResponse struct {
+	Info                 *Info    `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -411,7 +412,7 @@ func (m *InfoResponse) Reset()         { *m = InfoResponse{} }
 func (m *InfoResponse) String() string { return proto.CompactTextString(m) }
 func (*InfoResponse) ProtoMessage()    {}
 func (*InfoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{11}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{11}
 }
 func (m *InfoResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InfoResponse.Unmarshal(m, b)
@@ -431,6 +432,13 @@ func (m *InfoResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_InfoResponse proto.InternalMessageInfo
 
+func (m *InfoResponse) GetInfo() *Info {
+	if m != nil {
+		return m.Info
+	}
+	return nil
+}
+
 type Metric struct {
 	Namespace            []*Namespace      `protobuf:"bytes,1,rep,name=namespace,proto3" json:"namespace,omitempty"`
 	Value                *MetricValue      `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
@@ -447,7 +455,7 @@ func (m *Metric) Reset()         { *m = Metric{} }
 func (m *Metric) String() string { return proto.CompactTextString(m) }
 func (*Metric) ProtoMessage()    {}
 func (*Metric) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{12}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{12}
 }
 func (m *Metric) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Metric.Unmarshal(m, b)
@@ -522,7 +530,7 @@ func (m *Namespace) Reset()         { *m = Namespace{} }
 func (m *Namespace) String() string { return proto.CompactTextString(m) }
 func (*Namespace) ProtoMessage()    {}
 func (*Namespace) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{13}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{13}
 }
 func (m *Namespace) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Namespace.Unmarshal(m, b)
@@ -584,7 +592,7 @@ func (m *MetricValue) Reset()         { *m = MetricValue{} }
 func (m *MetricValue) String() string { return proto.CompactTextString(m) }
 func (*MetricValue) ProtoMessage()    {}
 func (*MetricValue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{14}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{14}
 }
 func (m *MetricValue) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MetricValue.Unmarshal(m, b)
@@ -912,7 +920,7 @@ func (m *Time) Reset()         { *m = Time{} }
 func (m *Time) String() string { return proto.CompactTextString(m) }
 func (*Time) ProtoMessage()    {}
 func (*Time) Descriptor() ([]byte, []int) {
-	return fileDescriptor_plugin_61d282b59eae9afe, []int{15}
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{15}
 }
 func (m *Time) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Time.Unmarshal(m, b)
@@ -946,6 +954,572 @@ func (m *Time) GetNsec() int64 {
 	return 0
 }
 
+type Info struct {
+	PluginInfo           *PluginInfo             `protobuf:"bytes,1,opt,name=pluginInfo,proto3" json:"pluginInfo,omitempty"`
+	TaskSummary          *TaskSummary            `protobuf:"bytes,2,opt,name=taskSummary,proto3" json:"taskSummary,omitempty"`
+	TaskDetails          map[uint64]*TaskDetails `protobuf:"bytes,3,rep,name=taskDetails,proto3" json:"taskDetails,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
+}
+
+func (m *Info) Reset()         { *m = Info{} }
+func (m *Info) String() string { return proto.CompactTextString(m) }
+func (*Info) ProtoMessage()    {}
+func (*Info) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{16}
+}
+func (m *Info) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Info.Unmarshal(m, b)
+}
+func (m *Info) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Info.Marshal(b, m, deterministic)
+}
+func (dst *Info) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Info.Merge(dst, src)
+}
+func (m *Info) XXX_Size() int {
+	return xxx_messageInfo_Info.Size(m)
+}
+func (m *Info) XXX_DiscardUnknown() {
+	xxx_messageInfo_Info.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Info proto.InternalMessageInfo
+
+func (m *Info) GetPluginInfo() *PluginInfo {
+	if m != nil {
+		return m.PluginInfo
+	}
+	return nil
+}
+
+func (m *Info) GetTaskSummary() *TaskSummary {
+	if m != nil {
+		return m.TaskSummary
+	}
+	return nil
+}
+
+func (m *Info) GetTaskDetails() map[uint64]*TaskDetails {
+	if m != nil {
+		return m.TaskDetails
+	}
+	return nil
+}
+
+type PluginInfo struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Version              string   `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	CmdLineOptions       string   `protobuf:"bytes,3,opt,name=cmdLineOptions,proto3" json:"cmdLineOptions,omitempty"`
+	Options              *Options `protobuf:"bytes,4,opt,name=options,proto3" json:"options,omitempty"`
+	Started              *Time    `protobuf:"bytes,5,opt,name=started,proto3" json:"started,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PluginInfo) Reset()         { *m = PluginInfo{} }
+func (m *PluginInfo) String() string { return proto.CompactTextString(m) }
+func (*PluginInfo) ProtoMessage()    {}
+func (*PluginInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{17}
+}
+func (m *PluginInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PluginInfo.Unmarshal(m, b)
+}
+func (m *PluginInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PluginInfo.Marshal(b, m, deterministic)
+}
+func (dst *PluginInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PluginInfo.Merge(dst, src)
+}
+func (m *PluginInfo) XXX_Size() int {
+	return xxx_messageInfo_PluginInfo.Size(m)
+}
+func (m *PluginInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_PluginInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PluginInfo proto.InternalMessageInfo
+
+func (m *PluginInfo) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *PluginInfo) GetVersion() string {
+	if m != nil {
+		return m.Version
+	}
+	return ""
+}
+
+func (m *PluginInfo) GetCmdLineOptions() string {
+	if m != nil {
+		return m.CmdLineOptions
+	}
+	return ""
+}
+
+func (m *PluginInfo) GetOptions() *Options {
+	if m != nil {
+		return m.Options
+	}
+	return nil
+}
+
+func (m *PluginInfo) GetStarted() *Time {
+	if m != nil {
+		return m.Started
+	}
+	return nil
+}
+
+type Options struct {
+	PluginIP             string   `protobuf:"bytes,1,opt,name=pluginIP,proto3" json:"pluginIP,omitempty"`
+	GrpcPort             uint32   `protobuf:"varint,2,opt,name=grpcPort,proto3" json:"grpcPort,omitempty"`
+	PprofPort            uint32   `protobuf:"varint,3,opt,name=pprofPort,proto3" json:"pprofPort,omitempty"`
+	StatsPort            uint32   `protobuf:"varint,4,opt,name=statsPort,proto3" json:"statsPort,omitempty"`
+	GrpcPingTimeout      int64    `protobuf:"varint,5,opt,name=grpcPingTimeout,proto3" json:"grpcPingTimeout,omitempty"`
+	GrpcPingMaxMissed    uint64   `protobuf:"varint,6,opt,name=grpcPingMaxMissed,proto3" json:"grpcPingMaxMissed,omitempty"`
+	LogLevel             string   `protobuf:"bytes,7,opt,name=logLevel,proto3" json:"logLevel,omitempty"`
+	EnablePprofServer    bool     `protobuf:"varint,8,opt,name=enablePprofServer,proto3" json:"enablePprofServer,omitempty"`
+	EnableStats          bool     `protobuf:"varint,9,opt,name=enableStats,proto3" json:"enableStats,omitempty"`
+	EnableStatsServer    bool     `protobuf:"varint,10,opt,name=enableStatsServer,proto3" json:"enableStatsServer,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Options) Reset()         { *m = Options{} }
+func (m *Options) String() string { return proto.CompactTextString(m) }
+func (*Options) ProtoMessage()    {}
+func (*Options) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{18}
+}
+func (m *Options) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Options.Unmarshal(m, b)
+}
+func (m *Options) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Options.Marshal(b, m, deterministic)
+}
+func (dst *Options) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Options.Merge(dst, src)
+}
+func (m *Options) XXX_Size() int {
+	return xxx_messageInfo_Options.Size(m)
+}
+func (m *Options) XXX_DiscardUnknown() {
+	xxx_messageInfo_Options.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Options proto.InternalMessageInfo
+
+func (m *Options) GetPluginIP() string {
+	if m != nil {
+		return m.PluginIP
+	}
+	return ""
+}
+
+func (m *Options) GetGrpcPort() uint32 {
+	if m != nil {
+		return m.GrpcPort
+	}
+	return 0
+}
+
+func (m *Options) GetPprofPort() uint32 {
+	if m != nil {
+		return m.PprofPort
+	}
+	return 0
+}
+
+func (m *Options) GetStatsPort() uint32 {
+	if m != nil {
+		return m.StatsPort
+	}
+	return 0
+}
+
+func (m *Options) GetGrpcPingTimeout() int64 {
+	if m != nil {
+		return m.GrpcPingTimeout
+	}
+	return 0
+}
+
+func (m *Options) GetGrpcPingMaxMissed() uint64 {
+	if m != nil {
+		return m.GrpcPingMaxMissed
+	}
+	return 0
+}
+
+func (m *Options) GetLogLevel() string {
+	if m != nil {
+		return m.LogLevel
+	}
+	return ""
+}
+
+func (m *Options) GetEnablePprofServer() bool {
+	if m != nil {
+		return m.EnablePprofServer
+	}
+	return false
+}
+
+func (m *Options) GetEnableStats() bool {
+	if m != nil {
+		return m.EnableStats
+	}
+	return false
+}
+
+func (m *Options) GetEnableStatsServer() bool {
+	if m != nil {
+		return m.EnableStatsServer
+	}
+	return false
+}
+
+type TaskSummary struct {
+	Counters             *TaskSummaryCounters `protobuf:"bytes,1,opt,name=counters,proto3" json:"counters,omitempty"`
+	ProcessingTimes      *ProcessingTimes     `protobuf:"bytes,2,opt,name=processingTimes,proto3" json:"processingTimes,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *TaskSummary) Reset()         { *m = TaskSummary{} }
+func (m *TaskSummary) String() string { return proto.CompactTextString(m) }
+func (*TaskSummary) ProtoMessage()    {}
+func (*TaskSummary) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{19}
+}
+func (m *TaskSummary) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TaskSummary.Unmarshal(m, b)
+}
+func (m *TaskSummary) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TaskSummary.Marshal(b, m, deterministic)
+}
+func (dst *TaskSummary) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskSummary.Merge(dst, src)
+}
+func (m *TaskSummary) XXX_Size() int {
+	return xxx_messageInfo_TaskSummary.Size(m)
+}
+func (m *TaskSummary) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskSummary.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskSummary proto.InternalMessageInfo
+
+func (m *TaskSummary) GetCounters() *TaskSummaryCounters {
+	if m != nil {
+		return m.Counters
+	}
+	return nil
+}
+
+func (m *TaskSummary) GetProcessingTimes() *ProcessingTimes {
+	if m != nil {
+		return m.ProcessingTimes
+	}
+	return nil
+}
+
+type TaskDetails struct {
+	Configuration        string              `protobuf:"bytes,1,opt,name=configuration,proto3" json:"configuration,omitempty"`
+	Filters              []string            `protobuf:"bytes,2,rep,name=filters,proto3" json:"filters,omitempty"`
+	Counters             *TaskDetailCounters `protobuf:"bytes,3,opt,name=counters,proto3" json:"counters,omitempty"`
+	Loaded               *Time               `protobuf:"bytes,4,opt,name=loaded,proto3" json:"loaded,omitempty"`
+	ProcessingTimes      *ProcessingTimes    `protobuf:"bytes,5,opt,name=processingTimes,proto3" json:"processingTimes,omitempty"`
+	LastMeasurement      *LastMeasurement    `protobuf:"bytes,6,opt,name=lastMeasurement,proto3" json:"lastMeasurement,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *TaskDetails) Reset()         { *m = TaskDetails{} }
+func (m *TaskDetails) String() string { return proto.CompactTextString(m) }
+func (*TaskDetails) ProtoMessage()    {}
+func (*TaskDetails) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{20}
+}
+func (m *TaskDetails) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TaskDetails.Unmarshal(m, b)
+}
+func (m *TaskDetails) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TaskDetails.Marshal(b, m, deterministic)
+}
+func (dst *TaskDetails) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskDetails.Merge(dst, src)
+}
+func (m *TaskDetails) XXX_Size() int {
+	return xxx_messageInfo_TaskDetails.Size(m)
+}
+func (m *TaskDetails) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskDetails.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskDetails proto.InternalMessageInfo
+
+func (m *TaskDetails) GetConfiguration() string {
+	if m != nil {
+		return m.Configuration
+	}
+	return ""
+}
+
+func (m *TaskDetails) GetFilters() []string {
+	if m != nil {
+		return m.Filters
+	}
+	return nil
+}
+
+func (m *TaskDetails) GetCounters() *TaskDetailCounters {
+	if m != nil {
+		return m.Counters
+	}
+	return nil
+}
+
+func (m *TaskDetails) GetLoaded() *Time {
+	if m != nil {
+		return m.Loaded
+	}
+	return nil
+}
+
+func (m *TaskDetails) GetProcessingTimes() *ProcessingTimes {
+	if m != nil {
+		return m.ProcessingTimes
+	}
+	return nil
+}
+
+func (m *TaskDetails) GetLastMeasurement() *LastMeasurement {
+	if m != nil {
+		return m.LastMeasurement
+	}
+	return nil
+}
+
+type TaskSummaryCounters struct {
+	CurrentlyActiveTasks uint64   `protobuf:"varint,1,opt,name=currentlyActiveTasks,proto3" json:"currentlyActiveTasks,omitempty"`
+	TotalActiveTasks     uint64   `protobuf:"varint,2,opt,name=totalActiveTasks,proto3" json:"totalActiveTasks,omitempty"`
+	TotalCollectRequests uint64   `protobuf:"varint,3,opt,name=totalCollectRequests,proto3" json:"totalCollectRequests,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TaskSummaryCounters) Reset()         { *m = TaskSummaryCounters{} }
+func (m *TaskSummaryCounters) String() string { return proto.CompactTextString(m) }
+func (*TaskSummaryCounters) ProtoMessage()    {}
+func (*TaskSummaryCounters) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{21}
+}
+func (m *TaskSummaryCounters) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TaskSummaryCounters.Unmarshal(m, b)
+}
+func (m *TaskSummaryCounters) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TaskSummaryCounters.Marshal(b, m, deterministic)
+}
+func (dst *TaskSummaryCounters) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskSummaryCounters.Merge(dst, src)
+}
+func (m *TaskSummaryCounters) XXX_Size() int {
+	return xxx_messageInfo_TaskSummaryCounters.Size(m)
+}
+func (m *TaskSummaryCounters) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskSummaryCounters.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskSummaryCounters proto.InternalMessageInfo
+
+func (m *TaskSummaryCounters) GetCurrentlyActiveTasks() uint64 {
+	if m != nil {
+		return m.CurrentlyActiveTasks
+	}
+	return 0
+}
+
+func (m *TaskSummaryCounters) GetTotalActiveTasks() uint64 {
+	if m != nil {
+		return m.TotalActiveTasks
+	}
+	return 0
+}
+
+func (m *TaskSummaryCounters) GetTotalCollectRequests() uint64 {
+	if m != nil {
+		return m.TotalCollectRequests
+	}
+	return 0
+}
+
+type TaskDetailCounters struct {
+	CollectRequests          uint64   `protobuf:"varint,1,opt,name=collectRequests,proto3" json:"collectRequests,omitempty"`
+	TotalMetrics             uint64   `protobuf:"varint,2,opt,name=totalMetrics,proto3" json:"totalMetrics,omitempty"`
+	AverageMetricsPerCollect uint64   `protobuf:"varint,3,opt,name=averageMetricsPerCollect,proto3" json:"averageMetricsPerCollect,omitempty"`
+	XXX_NoUnkeyedLiteral     struct{} `json:"-"`
+	XXX_unrecognized         []byte   `json:"-"`
+	XXX_sizecache            int32    `json:"-"`
+}
+
+func (m *TaskDetailCounters) Reset()         { *m = TaskDetailCounters{} }
+func (m *TaskDetailCounters) String() string { return proto.CompactTextString(m) }
+func (*TaskDetailCounters) ProtoMessage()    {}
+func (*TaskDetailCounters) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{22}
+}
+func (m *TaskDetailCounters) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TaskDetailCounters.Unmarshal(m, b)
+}
+func (m *TaskDetailCounters) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TaskDetailCounters.Marshal(b, m, deterministic)
+}
+func (dst *TaskDetailCounters) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TaskDetailCounters.Merge(dst, src)
+}
+func (m *TaskDetailCounters) XXX_Size() int {
+	return xxx_messageInfo_TaskDetailCounters.Size(m)
+}
+func (m *TaskDetailCounters) XXX_DiscardUnknown() {
+	xxx_messageInfo_TaskDetailCounters.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TaskDetailCounters proto.InternalMessageInfo
+
+func (m *TaskDetailCounters) GetCollectRequests() uint64 {
+	if m != nil {
+		return m.CollectRequests
+	}
+	return 0
+}
+
+func (m *TaskDetailCounters) GetTotalMetrics() uint64 {
+	if m != nil {
+		return m.TotalMetrics
+	}
+	return 0
+}
+
+func (m *TaskDetailCounters) GetAverageMetricsPerCollect() uint64 {
+	if m != nil {
+		return m.AverageMetricsPerCollect
+	}
+	return 0
+}
+
+type ProcessingTimes struct {
+	Total                int64    `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Average              int64    `protobuf:"varint,2,opt,name=average,proto3" json:"average,omitempty"`
+	Maximum              int64    `protobuf:"varint,3,opt,name=maximum,proto3" json:"maximum,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ProcessingTimes) Reset()         { *m = ProcessingTimes{} }
+func (m *ProcessingTimes) String() string { return proto.CompactTextString(m) }
+func (*ProcessingTimes) ProtoMessage()    {}
+func (*ProcessingTimes) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{23}
+}
+func (m *ProcessingTimes) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ProcessingTimes.Unmarshal(m, b)
+}
+func (m *ProcessingTimes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ProcessingTimes.Marshal(b, m, deterministic)
+}
+func (dst *ProcessingTimes) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ProcessingTimes.Merge(dst, src)
+}
+func (m *ProcessingTimes) XXX_Size() int {
+	return xxx_messageInfo_ProcessingTimes.Size(m)
+}
+func (m *ProcessingTimes) XXX_DiscardUnknown() {
+	xxx_messageInfo_ProcessingTimes.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ProcessingTimes proto.InternalMessageInfo
+
+func (m *ProcessingTimes) GetTotal() int64 {
+	if m != nil {
+		return m.Total
+	}
+	return 0
+}
+
+func (m *ProcessingTimes) GetAverage() int64 {
+	if m != nil {
+		return m.Average
+	}
+	return 0
+}
+
+func (m *ProcessingTimes) GetMaximum() int64 {
+	if m != nil {
+		return m.Maximum
+	}
+	return 0
+}
+
+type LastMeasurement struct {
+	Occurred             *Time    `protobuf:"bytes,1,opt,name=occurred,proto3" json:"occurred,omitempty"`
+	CollectedMetrics     uint64   `protobuf:"varint,2,opt,name=collectedMetrics,proto3" json:"collectedMetrics,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LastMeasurement) Reset()         { *m = LastMeasurement{} }
+func (m *LastMeasurement) String() string { return proto.CompactTextString(m) }
+func (*LastMeasurement) ProtoMessage()    {}
+func (*LastMeasurement) Descriptor() ([]byte, []int) {
+	return fileDescriptor_plugin_0a2a5c8fda85551d, []int{24}
+}
+func (m *LastMeasurement) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LastMeasurement.Unmarshal(m, b)
+}
+func (m *LastMeasurement) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LastMeasurement.Marshal(b, m, deterministic)
+}
+func (dst *LastMeasurement) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LastMeasurement.Merge(dst, src)
+}
+func (m *LastMeasurement) XXX_Size() int {
+	return xxx_messageInfo_LastMeasurement.Size(m)
+}
+func (m *LastMeasurement) XXX_DiscardUnknown() {
+	xxx_messageInfo_LastMeasurement.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LastMeasurement proto.InternalMessageInfo
+
+func (m *LastMeasurement) GetOccurred() *Time {
+	if m != nil {
+		return m.Occurred
+	}
+	return nil
+}
+
+func (m *LastMeasurement) GetCollectedMetrics() uint64 {
+	if m != nil {
+		return m.CollectedMetrics
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*PingRequest)(nil), "pluginrpc.PingRequest")
 	proto.RegisterType((*PingResponse)(nil), "pluginrpc.PingResponse")
@@ -964,6 +1538,16 @@ func init() {
 	proto.RegisterType((*Namespace)(nil), "pluginrpc.Namespace")
 	proto.RegisterType((*MetricValue)(nil), "pluginrpc.MetricValue")
 	proto.RegisterType((*Time)(nil), "pluginrpc.Time")
+	proto.RegisterType((*Info)(nil), "pluginrpc.Info")
+	proto.RegisterMapType((map[uint64]*TaskDetails)(nil), "pluginrpc.Info.TaskDetailsEntry")
+	proto.RegisterType((*PluginInfo)(nil), "pluginrpc.PluginInfo")
+	proto.RegisterType((*Options)(nil), "pluginrpc.Options")
+	proto.RegisterType((*TaskSummary)(nil), "pluginrpc.TaskSummary")
+	proto.RegisterType((*TaskDetails)(nil), "pluginrpc.TaskDetails")
+	proto.RegisterType((*TaskSummaryCounters)(nil), "pluginrpc.TaskSummaryCounters")
+	proto.RegisterType((*TaskDetailCounters)(nil), "pluginrpc.TaskDetailCounters")
+	proto.RegisterType((*ProcessingTimes)(nil), "pluginrpc.ProcessingTimes")
+	proto.RegisterType((*LastMeasurement)(nil), "pluginrpc.LastMeasurement")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1262,53 +1846,91 @@ var _Collector_serviceDesc = grpc.ServiceDesc{
 	Metadata: "plugin.proto",
 }
 
-func init() { proto.RegisterFile("plugin.proto", fileDescriptor_plugin_61d282b59eae9afe) }
+func init() { proto.RegisterFile("plugin.proto", fileDescriptor_plugin_0a2a5c8fda85551d) }
 
-var fileDescriptor_plugin_61d282b59eae9afe = []byte{
-	// 710 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x54, 0xcb, 0x6e, 0xdb, 0x3a,
-	0x10, 0x8d, 0xfc, 0x8c, 0x46, 0x8e, 0x93, 0x4b, 0x04, 0x37, 0x8a, 0xb3, 0xb8, 0x86, 0x56, 0x0e,
-	0x90, 0xeb, 0x06, 0x8e, 0xe1, 0x14, 0x05, 0xba, 0xb1, 0xdb, 0x22, 0x41, 0x1f, 0x28, 0x98, 0xa4,
-	0x5d, 0x1a, 0xb2, 0xcc, 0x18, 0x6c, 0x64, 0x52, 0x15, 0x69, 0x01, 0xd9, 0x14, 0xfd, 0x8a, 0xfe,
-	0x4b, 0xff, 0xae, 0x20, 0x29, 0xcb, 0x54, 0x1d, 0xa0, 0xdd, 0x71, 0xe6, 0xcc, 0xcc, 0x99, 0x39,
-	0xb2, 0x0f, 0xb4, 0x92, 0x78, 0xb5, 0xa0, 0xac, 0x9f, 0xa4, 0x5c, 0x72, 0xe4, 0x9a, 0x28, 0x4d,
-	0xa2, 0x60, 0x0f, 0xbc, 0x8f, 0x94, 0x2d, 0x30, 0xf9, 0xba, 0x22, 0x42, 0x06, 0x6d, 0x68, 0x99,
-	0x50, 0x24, 0x9c, 0x09, 0xa2, 0xe0, 0xb7, 0x34, 0x8e, 0x2d, 0xd8, 0x84, 0x39, 0x7c, 0x0a, 0xed,
-	0x09, 0x8f, 0x63, 0x12, 0xc9, 0xbc, 0x02, 0x1d, 0x41, 0x53, 0x86, 0xe2, 0x61, 0x4a, 0xe7, 0xbe,
-	0xd3, 0x75, 0x7a, 0x75, 0xdc, 0x50, 0xe1, 0xf5, 0x3c, 0x98, 0xc0, 0x7e, 0x51, 0x6a, 0xba, 0xd1,
-	0x39, 0xc0, 0x92, 0xc8, 0x94, 0x46, 0x53, 0x41, 0xa4, 0xef, 0x74, 0xab, 0x3d, 0x6f, 0xf0, 0x4f,
-	0xbf, 0xd8, 0xad, 0xff, 0x5e, 0x83, 0xd8, 0x35, 0x45, 0x37, 0x44, 0x06, 0x29, 0x78, 0xef, 0x78,
-	0x38, 0xff, 0x13, 0x19, 0xfa, 0x0f, 0xbc, 0x2f, 0x82, 0xb3, 0x69, 0xc4, 0xd9, 0x3d, 0x5d, 0xf8,
-	0x95, 0xae, 0xd3, 0x6b, 0x61, 0x50, 0xa9, 0x89, 0xce, 0xa0, 0x53, 0x38, 0x28, 0xa8, 0xd5, 0x4e,
-	0x3c, 0x15, 0x7e, 0xb5, 0x5b, 0xed, 0xb9, 0x78, 0x7f, 0xcd, 0x96, 0xa7, 0xd5, 0xcd, 0x86, 0x33,
-	0xbf, 0xb9, 0x07, 0x7b, 0x77, 0x2c, 0xfe, 0x8b, 0x2d, 0x82, 0x03, 0x68, 0xaf, 0x2b, 0x37, 0x72,
-	0x5e, 0xb3, 0x7b, 0x6e, 0xc9, 0x69, 0xc2, 0x1c, 0xfe, 0x59, 0x81, 0x86, 0x39, 0x1a, 0x0d, 0xc0,
-	0x65, 0xe1, 0x92, 0x88, 0x24, 0x8c, 0x48, 0x2e, 0xcd, 0xa1, 0x25, 0xcd, 0x87, 0x35, 0x86, 0x37,
-	0x65, 0xe8, 0x0c, 0xea, 0x59, 0x18, 0xaf, 0x88, 0xbe, 0xd7, 0x1b, 0xfc, 0xbb, 0x25, 0xe5, 0x27,
-	0x85, 0x62, 0x53, 0x84, 0x9e, 0x41, 0x4d, 0x86, 0x0b, 0x73, 0xb6, 0x37, 0x38, 0xd9, 0x2a, 0xee,
-	0xdf, 0x86, 0x0b, 0xf1, 0x9a, 0xc9, 0xf4, 0x11, 0xeb, 0x42, 0xf4, 0x3f, 0xb8, 0x92, 0x2e, 0x89,
-	0x90, 0xe1, 0x32, 0xf1, 0x6b, 0x9a, 0x62, 0xdf, 0xea, 0xba, 0xa5, 0x4b, 0x82, 0x37, 0x15, 0xa8,
-	0x0b, 0xde, 0x9c, 0x88, 0x28, 0xa5, 0x89, 0xa4, 0x9c, 0xf9, 0xf5, 0xae, 0xd3, 0x73, 0xb1, 0x9d,
-	0x42, 0x08, 0x6a, 0x2b, 0x46, 0xa5, 0xdf, 0xd0, 0x90, 0x7e, 0x77, 0x2e, 0xc1, 0x2d, 0x78, 0xd1,
-	0x01, 0x54, 0x1f, 0xc8, 0xa3, 0x56, 0xd5, 0xc5, 0xea, 0x89, 0x0e, 0xed, 0x13, 0xdd, 0xfc, 0x94,
-	0x17, 0x95, 0xe7, 0x4e, 0xf0, 0x19, 0xdc, 0x42, 0x14, 0x35, 0x59, 0xc9, 0x92, 0x77, 0xea, 0xf7,
-	0xd3, 0xad, 0xbf, 0x6f, 0x59, 0xdd, 0xda, 0x32, 0xf8, 0x51, 0x01, 0xcf, 0x92, 0x0f, 0x1d, 0x43,
-	0x33, 0x9b, 0xde, 0xc7, 0x3c, 0x94, 0x7a, 0x7c, 0xe5, 0x6a, 0x07, 0x37, 0xb2, 0x37, 0x2a, 0x46,
-	0x27, 0xb0, 0x9b, 0x4d, 0xe7, 0x7c, 0x35, 0x8b, 0x0d, 0x8b, 0x73, 0xb5, 0x83, 0x9b, 0xd9, 0x2b,
-	0x9d, 0x30, 0x7d, 0x94, 0xc9, 0x8b, 0x81, 0x66, 0xa9, 0xeb, 0xbe, 0x6b, 0x15, 0x17, 0xd0, 0x68,
-	0xa8, 0x75, 0xad, 0xae, 0xa1, 0xd1, 0xd0, 0x8c, 0x5c, 0x99, 0x36, 0x25, 0xe1, 0x9e, 0x1e, 0x79,
-	0xa7, 0x13, 0x1b, 0x70, 0x34, 0xd4, 0x22, 0xd6, 0x0a, 0x70, 0x34, 0x44, 0x47, 0xd0, 0xc8, 0xa6,
-	0x33, 0xce, 0x63, 0xbf, 0xd9, 0x75, 0x7a, 0xbb, 0x57, 0x3b, 0xb8, 0x9e, 0x8d, 0x39, 0x8f, 0x0d,
-	0xdb, 0xec, 0x51, 0x12, 0xe1, 0xef, 0xaa, 0x3f, 0x86, 0x66, 0x1b, 0xab, 0xd8, 0x0c, 0x14, 0x32,
-	0xa5, 0x6c, 0xe1, 0xbb, 0x4a, 0x0a, 0x3d, 0xf0, 0x46, 0x27, 0xc6, 0x6d, 0x68, 0xcd, 0x43, 0x19,
-	0x4e, 0xb3, 0x30, 0xa5, 0x21, 0x93, 0xc1, 0x19, 0xd4, 0xd4, 0x37, 0x57, 0x5f, 0x49, 0x90, 0x48,
-	0x8b, 0x51, 0xc5, 0xea, 0xa9, 0xe5, 0x57, 0xa9, 0x8a, 0x4e, 0xe9, 0xf7, 0xe0, 0x1b, 0xc0, 0x84,
-	0x33, 0x99, 0x2a, 0x0f, 0x48, 0xd1, 0x25, 0xd4, 0x94, 0xcf, 0x20, 0xfb, 0x37, 0x6a, 0xf9, 0x50,
-	0xe7, 0x68, 0x2b, 0x9f, 0x7b, 0xc6, 0x25, 0xd4, 0x94, 0x03, 0x95, 0x1a, 0x2d, 0x87, 0x2a, 0x35,
-	0xda, 0x56, 0x35, 0xf8, 0x5e, 0x01, 0x37, 0x37, 0x20, 0x9e, 0xa2, 0x31, 0x34, 0xf3, 0x00, 0x1d,
-	0x5b, 0x1d, 0x65, 0x33, 0xeb, 0x74, 0x9e, 0x82, 0xcc, 0xbc, 0x73, 0x47, 0xad, 0xa2, 0x8c, 0xa1,
-	0xb4, 0x8a, 0xe5, 0x4e, 0xa5, 0x55, 0x6c, 0x07, 0x41, 0x2f, 0xa1, 0x61, 0x7c, 0x01, 0xf9, 0x56,
-	0x49, 0xc9, 0x54, 0x3a, 0xc7, 0x4f, 0x20, 0x1b, 0x09, 0x94, 0x6b, 0x94, 0x78, 0x2d, 0x57, 0x29,
-	0xf1, 0xda, 0xf6, 0x32, 0x6b, 0x68, 0xf7, 0xbf, 0xf8, 0x15, 0x00, 0x00, 0xff, 0xff, 0x5f, 0x31,
-	0x5d, 0x0d, 0x0d, 0x06, 0x00, 0x00,
+var fileDescriptor_plugin_0a2a5c8fda85551d = []byte{
+	// 1321 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x57, 0x5d, 0x6f, 0x1b, 0x45,
+	0x17, 0xee, 0xda, 0x8e, 0xed, 0x3d, 0x4e, 0xe2, 0x74, 0xde, 0xbe, 0xed, 0xd6, 0x7d, 0x5f, 0xb0,
+	0x16, 0x04, 0x2e, 0x84, 0x50, 0xb9, 0x21, 0x2d, 0x95, 0xb8, 0x20, 0x29, 0xa8, 0x11, 0x09, 0x44,
+	0x93, 0xb6, 0x5c, 0x70, 0x61, 0x4d, 0xd6, 0x13, 0x6b, 0xdb, 0xf5, 0x8e, 0x99, 0x99, 0x5d, 0x35,
+	0x37, 0x88, 0x7f, 0xc0, 0x05, 0x12, 0x97, 0xdc, 0xf3, 0x13, 0x10, 0xe2, 0x37, 0xf1, 0x17, 0xd0,
+	0x7c, 0xec, 0x7a, 0xd6, 0xde, 0xf2, 0x71, 0xb7, 0xe7, 0x3c, 0xcf, 0xf9, 0x98, 0x33, 0xe7, 0x78,
+	0x8e, 0x61, 0x73, 0x91, 0x64, 0xb3, 0x38, 0xdd, 0x5b, 0x70, 0x26, 0x19, 0xf2, 0x8d, 0xc4, 0x17,
+	0x51, 0xb8, 0x05, 0xbd, 0xb3, 0x38, 0x9d, 0x61, 0xfa, 0x6d, 0x46, 0x85, 0x0c, 0xb7, 0x61, 0xd3,
+	0x88, 0x62, 0xc1, 0x52, 0x41, 0x15, 0xfc, 0x45, 0x9c, 0x24, 0x0e, 0x6c, 0x44, 0x0b, 0xdf, 0x85,
+	0xed, 0x23, 0x96, 0x24, 0x34, 0x92, 0x96, 0x81, 0x6e, 0x41, 0x47, 0x12, 0xf1, 0x72, 0x12, 0x4f,
+	0x03, 0x6f, 0xe8, 0x8d, 0x36, 0x70, 0x5b, 0x89, 0xc7, 0xd3, 0xf0, 0x08, 0xfa, 0x25, 0xd5, 0x58,
+	0xa3, 0x7b, 0x00, 0x73, 0x2a, 0x79, 0x1c, 0x4d, 0x04, 0x95, 0x81, 0x37, 0x6c, 0x8e, 0x7a, 0xe3,
+	0xeb, 0x7b, 0x65, 0x6e, 0x7b, 0xa7, 0x1a, 0xc4, 0xbe, 0x21, 0x9d, 0x53, 0x19, 0x72, 0xe8, 0x9d,
+	0x30, 0x32, 0xfd, 0xbb, 0x60, 0xe8, 0x4d, 0xe8, 0xbd, 0x10, 0x2c, 0x9d, 0x44, 0x2c, 0xbd, 0x8c,
+	0x67, 0x41, 0x63, 0xe8, 0x8d, 0x36, 0x31, 0x28, 0xd5, 0x91, 0xd6, 0xa0, 0xbb, 0xb0, 0x53, 0x86,
+	0x56, 0x39, 0x31, 0x2e, 0x82, 0xe6, 0xb0, 0x39, 0xf2, 0x71, 0xbf, 0x88, 0x66, 0xd5, 0xea, 0xcc,
+	0x26, 0xa6, 0x3d, 0xf3, 0x08, 0xb6, 0x9e, 0xa5, 0xc9, 0x3f, 0xc8, 0x22, 0xdc, 0x81, 0xed, 0x82,
+	0xb9, 0x2c, 0xe7, 0x71, 0x7a, 0xc9, 0x8a, 0x72, 0xde, 0x87, 0x4d, 0x23, 0xda, 0x82, 0xbc, 0x05,
+	0xad, 0x38, 0xbd, 0x64, 0xda, 0x4d, 0x6f, 0xdc, 0x77, 0x4a, 0xa1, 0x69, 0x1a, 0x0c, 0x7f, 0x6d,
+	0x40, 0xdb, 0x54, 0x06, 0x8d, 0xc1, 0x4f, 0xc9, 0x9c, 0x8a, 0x05, 0x89, 0xa8, 0xad, 0xdf, 0x0d,
+	0xc7, 0xe8, 0xcb, 0x02, 0xc3, 0x4b, 0x1a, 0xda, 0x85, 0x8d, 0x9c, 0x24, 0x19, 0xd5, 0x45, 0xe9,
+	0x8d, 0x6f, 0xae, 0xd5, 0xfb, 0xb9, 0x42, 0xb1, 0x21, 0xa1, 0x0f, 0xa1, 0x25, 0xc9, 0xcc, 0xd4,
+	0xa6, 0x37, 0xbe, 0xb3, 0x46, 0xde, 0x7b, 0x4a, 0x66, 0xe2, 0xb3, 0x54, 0xf2, 0x2b, 0xac, 0x89,
+	0xe8, 0x03, 0xf0, 0x65, 0x3c, 0xa7, 0x42, 0x92, 0xf9, 0x22, 0x68, 0xad, 0x9d, 0xe3, 0x69, 0x3c,
+	0xa7, 0x78, 0xc9, 0x40, 0x43, 0xe8, 0x4d, 0xa9, 0x88, 0x78, 0xbc, 0x90, 0x31, 0x4b, 0x83, 0x8d,
+	0xa1, 0x37, 0xf2, 0xb1, 0xab, 0x42, 0x08, 0x5a, 0x59, 0x1a, 0xcb, 0xa0, 0xad, 0x21, 0xfd, 0x3d,
+	0x78, 0x00, 0x7e, 0x19, 0x17, 0xed, 0x40, 0xf3, 0x25, 0xbd, 0xd2, 0x35, 0xf3, 0xb1, 0xfa, 0x44,
+	0x37, 0xdc, 0x23, 0xfa, 0xf6, 0x28, 0x8f, 0x1a, 0x0f, 0xbd, 0xf0, 0x6b, 0xf0, 0xcb, 0xa2, 0x28,
+	0xcf, 0xaa, 0x2c, 0xd6, 0x52, 0x7f, 0xd7, 0x9b, 0xae, 0x66, 0xd9, 0x5c, 0xcb, 0x32, 0xfc, 0xa9,
+	0x01, 0x3d, 0xa7, 0x7c, 0xe8, 0x36, 0x74, 0xf2, 0xc9, 0x65, 0xc2, 0x88, 0xd4, 0xee, 0x1b, 0x4f,
+	0xae, 0xe1, 0x76, 0xfe, 0xb9, 0x92, 0xd1, 0x1d, 0xe8, 0xe6, 0x93, 0x29, 0xcb, 0x2e, 0x12, 0x13,
+	0xc5, 0x7b, 0x72, 0x0d, 0x77, 0xf2, 0xc7, 0x5a, 0x61, 0xec, 0xe2, 0x54, 0xde, 0x1f, 0xeb, 0x28,
+	0x1b, 0xda, 0xee, 0x58, 0xc9, 0x25, 0x74, 0xb0, 0xaf, 0xeb, 0xda, 0x2c, 0xa0, 0x83, 0x7d, 0xe3,
+	0x32, 0x33, 0x66, 0xaa, 0x84, 0x5b, 0xda, 0xe5, 0x33, 0xad, 0x58, 0x82, 0x07, 0xfb, 0xba, 0x88,
+	0xad, 0x12, 0x3c, 0xd8, 0x47, 0xb7, 0xa0, 0x9d, 0x4f, 0x2e, 0x18, 0x4b, 0x82, 0xce, 0xd0, 0x1b,
+	0x75, 0x9f, 0x5c, 0xc3, 0x1b, 0xf9, 0x21, 0x63, 0x89, 0x89, 0x76, 0x71, 0x25, 0xa9, 0x08, 0xba,
+	0x6a, 0x7a, 0x74, 0xb4, 0x43, 0x25, 0x1b, 0x87, 0x42, 0xf2, 0x38, 0x9d, 0x05, 0xbe, 0x2a, 0x85,
+	0x76, 0x78, 0xae, 0x15, 0x87, 0xdb, 0xb0, 0x39, 0x25, 0x92, 0x4c, 0x72, 0xc2, 0x63, 0x92, 0xca,
+	0x70, 0x17, 0x5a, 0xea, 0xce, 0xd5, 0x2d, 0x09, 0x1a, 0xe9, 0x62, 0x34, 0xb1, 0xfa, 0xd4, 0xe5,
+	0x57, 0xaa, 0x86, 0x56, 0xe9, 0xef, 0xf0, 0xc7, 0x06, 0xb4, 0x54, 0xab, 0xa3, 0x8f, 0x00, 0x4c,
+	0xd3, 0x1c, 0x2f, 0xe7, 0xe1, 0xbf, 0x4e, 0x1f, 0x9d, 0x95, 0x20, 0x76, 0x88, 0xe8, 0x21, 0xf4,
+	0xd4, 0xec, 0x9d, 0x67, 0xf3, 0x39, 0xe1, 0x57, 0x35, 0x2d, 0xfe, 0x74, 0x89, 0x62, 0x97, 0x8a,
+	0x0e, 0x8d, 0xe5, 0x63, 0x2a, 0x49, 0x9c, 0x14, 0xfd, 0x3e, 0x5c, 0x99, 0x40, 0x6d, 0x6e, 0x29,
+	0xa6, 0xe9, 0x5d, 0xa3, 0xc1, 0x73, 0xd8, 0x59, 0x25, 0xb8, 0xdd, 0xd9, 0x32, 0xdd, 0xf9, 0x17,
+	0x03, 0xe8, 0x58, 0xbb, 0x5d, 0xfb, 0x9b, 0x07, 0xb0, 0x3c, 0x70, 0x6d, 0xdf, 0x06, 0xd0, 0xc9,
+	0x29, 0x17, 0xaa, 0x3b, 0x4d, 0xe7, 0x16, 0x22, 0x7a, 0x07, 0xb6, 0xa3, 0xf9, 0xf4, 0x24, 0x4e,
+	0xe9, 0x57, 0xba, 0x55, 0x85, 0x6d, 0xdf, 0x15, 0x2d, 0xda, 0x85, 0x0e, 0xb3, 0x04, 0x33, 0xb6,
+	0xc8, 0x49, 0xcc, 0x92, 0x70, 0x41, 0x41, 0x77, 0xa1, 0x23, 0x24, 0xe1, 0x92, 0x4e, 0x75, 0xc3,
+	0xd5, 0x0c, 0x79, 0x81, 0x87, 0x7f, 0x34, 0xa0, 0x53, 0x04, 0x19, 0x40, 0xd7, 0xde, 0xd6, 0x99,
+	0x4d, 0xbf, 0x94, 0x15, 0x36, 0xe3, 0x8b, 0xe8, 0x8c, 0x71, 0xa9, 0xcf, 0xb0, 0x85, 0x4b, 0x19,
+	0xfd, 0x0f, 0xfc, 0xc5, 0x82, 0xb3, 0x4b, 0x0d, 0x36, 0x35, 0xb8, 0x54, 0x28, 0x54, 0x48, 0x22,
+	0x85, 0x46, 0x5b, 0x06, 0x2d, 0x15, 0x68, 0x04, 0x7d, 0xed, 0x27, 0x4e, 0x67, 0x2a, 0x31, 0x96,
+	0x49, 0x9d, 0x72, 0x13, 0xaf, 0xaa, 0xd1, 0x2e, 0x5c, 0x2f, 0x54, 0xa7, 0xe4, 0xd5, 0x69, 0x2c,
+	0x04, 0x9d, 0x9a, 0x91, 0xc1, 0xeb, 0x80, 0xca, 0x37, 0x61, 0xb3, 0x13, 0x9a, 0x53, 0x33, 0x3c,
+	0x3e, 0x2e, 0x65, 0xe5, 0x89, 0xa6, 0xe4, 0x22, 0xa1, 0x67, 0x2a, 0xc9, 0x73, 0xca, 0x73, 0xca,
+	0xf5, 0x1c, 0x75, 0xf1, 0x3a, 0xa0, 0x7e, 0x5e, 0x8c, 0xf2, 0x5c, 0x25, 0xad, 0x67, 0xaa, 0x8b,
+	0x5d, 0xd5, 0xd2, 0x9f, 0x16, 0xad, 0x3f, 0x70, 0xfd, 0x39, 0x40, 0xf8, 0x83, 0x07, 0x3d, 0xa7,
+	0xd1, 0xd1, 0x23, 0xe8, 0x46, 0x2c, 0x4b, 0x25, 0xe5, 0xc2, 0x8e, 0xd2, 0x1b, 0xf5, 0x23, 0x71,
+	0x64, 0x59, 0xb8, 0xe4, 0xa3, 0xc7, 0xd0, 0x5f, 0x70, 0x16, 0x51, 0x21, 0x6c, 0xa1, 0x84, 0xed,
+	0xdb, 0x81, 0x3b, 0x8d, 0x55, 0x06, 0x5e, 0x35, 0x09, 0x7f, 0x6f, 0x98, 0x8c, 0x6c, 0x73, 0xa3,
+	0xb7, 0x61, 0xcb, 0x3c, 0xcd, 0x19, 0x27, 0xfa, 0x27, 0xd5, 0x34, 0x43, 0x55, 0xa9, 0x9a, 0xfa,
+	0x32, 0x4e, 0x74, 0xda, 0x0d, 0xfd, 0x36, 0x17, 0x22, 0xfa, 0xd8, 0x39, 0x51, 0x53, 0xa7, 0xf3,
+	0xff, 0xda, 0x31, 0xaa, 0x39, 0xd0, 0xbb, 0xd0, 0x56, 0x4f, 0x32, 0x9d, 0xbe, 0xee, 0x75, 0xb2,
+	0x70, 0xdd, 0xc9, 0x37, 0xfe, 0xf5, 0xc9, 0x95, 0x97, 0x84, 0x08, 0x79, 0x4a, 0x89, 0xc8, 0x38,
+	0x9d, 0xd3, 0xd4, 0xbc, 0x64, 0x55, 0x2f, 0x27, 0x55, 0x06, 0x5e, 0x35, 0x09, 0x7f, 0xf1, 0xe0,
+	0x3f, 0x35, 0xf7, 0x84, 0xc6, 0x70, 0x23, 0xca, 0x38, 0xa7, 0xa9, 0x4c, 0xae, 0x3e, 0x8d, 0x64,
+	0x9c, 0x53, 0xc5, 0x12, 0xf6, 0xe7, 0xa6, 0x16, 0x43, 0xef, 0xc1, 0x8e, 0x64, 0x92, 0x24, 0x2e,
+	0xbf, 0xa1, 0xf9, 0x6b, 0x7a, 0xe5, 0x5f, 0xeb, 0xaa, 0x4b, 0x9e, 0xa9, 0x79, 0x0b, 0xd7, 0x62,
+	0xe1, 0xcf, 0x1e, 0xa0, 0xf5, 0x1b, 0x50, 0x63, 0x18, 0xad, 0x78, 0x31, 0x59, 0xae, 0xaa, 0x51,
+	0x08, 0x9b, 0xda, 0xb1, 0x79, 0x4f, 0x8b, 0xe4, 0x2a, 0x3a, 0xf4, 0x08, 0x02, 0x92, 0x53, 0x4e,
+	0x66, 0xd4, 0x6a, 0xce, 0x28, 0xb7, 0x89, 0xd8, 0xe4, 0x5e, 0x8b, 0x87, 0xdf, 0x40, 0x7f, 0xe5,
+	0xda, 0xd4, 0xb3, 0xaf, 0xdd, 0xdb, 0xf7, 0xc9, 0x08, 0xaa, 0xff, 0xac, 0x13, 0xfb, 0x48, 0x15,
+	0xa2, 0x42, 0xe6, 0xe4, 0x55, 0x3c, 0xcf, 0xe6, 0x3a, 0x5a, 0x13, 0x17, 0x62, 0xf8, 0x02, 0xfa,
+	0x2b, 0xb7, 0x89, 0xde, 0x87, 0x2e, 0x8b, 0xf4, 0x55, 0x4c, 0x6b, 0x36, 0x3b, 0xdd, 0x73, 0x25,
+	0x41, 0xdd, 0x8e, 0xad, 0x07, 0x9d, 0x56, 0x0b, 0xb0, 0xa6, 0x1f, 0x7f, 0x07, 0x70, 0xc4, 0x52,
+	0xc9, 0x95, 0x9e, 0xa3, 0x07, 0xd0, 0x52, 0x3f, 0x50, 0xc8, 0x7d, 0x50, 0x9c, 0xd5, 0x7e, 0x70,
+	0x6b, 0x4d, 0x6f, 0xb7, 0xce, 0x07, 0xd0, 0x52, 0x4b, 0x7d, 0xc5, 0xd0, 0x59, 0xfa, 0x2b, 0x86,
+	0xee, 0xf6, 0x3f, 0xfe, 0xbe, 0x01, 0xbe, 0x2d, 0x2a, 0xe3, 0xe8, 0x10, 0x3a, 0x56, 0x40, 0xb7,
+	0x1d, 0x8b, 0x6a, 0x7b, 0x0c, 0x06, 0x75, 0x90, 0xf1, 0x77, 0xcf, 0x53, 0xa9, 0xa8, 0x5d, 0xbb,
+	0x92, 0x8a, 0xb3, 0xf0, 0x57, 0x52, 0x71, 0x97, 0x72, 0xf4, 0x09, 0xb4, 0xcd, 0xaa, 0x8d, 0x02,
+	0x87, 0x52, 0xd9, 0xd3, 0x07, 0xb7, 0x6b, 0x90, 0x65, 0x09, 0xf4, 0xd3, 0x7a, 0x73, 0x75, 0xe5,
+	0xae, 0x89, 0xeb, 0x6e, 0xec, 0x17, 0x6d, 0xfd, 0x87, 0xea, 0xfe, 0x9f, 0x01, 0x00, 0x00, 0xff,
+	0xff, 0xa8, 0x2f, 0xfb, 0x3e, 0x60, 0x0d, 0x00, 0x00,
 }

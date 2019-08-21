@@ -1,8 +1,10 @@
 package pluginrpc
 
 import (
+	"errors"
 	"fmt"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"golang.org/x/net/context"
 )
 
@@ -11,12 +13,14 @@ const (
 )
 
 type collectService struct {
-	proxy CollectorProxy
+	proxy           CollectorProxy
+	statsController stats.Controller
 }
 
-func newCollectService(proxy CollectorProxy) CollectorServer {
+func newCollectService(proxy CollectorProxy, statsController stats.Controller) CollectorServer {
 	return &collectService{
-		proxy: proxy,
+		proxy:           proxy,
+		statsController: statsController,
 	}
 }
 
@@ -76,7 +80,14 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
 	log.Trace("GRPC Info() received")
 
-	// TODO: https://swicloud.atlassian.net/browse/AO-12736
+	response := &InfoResponse{}
 
-	return &InfoResponse{}, nil
+	select {
+	case statistics := <-cs.statsController.RequestStat():
+		fmt.Printf("stats=%#v\n", statistics)
+	case <-ctx.Done():
+		return response, errors.New("couldn't retrieve statistics") // todo: check how this work
+	}
+
+	return response, nil
 }

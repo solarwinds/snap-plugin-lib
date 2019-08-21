@@ -10,6 +10,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -18,12 +19,12 @@ const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 
-func StartGRPCController(proxy CollectorProxy, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+func StartGRPCController(proxy CollectorProxy, statsController stats.Controller, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
 
 	grpcServer := grpc.NewServer()
 	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
-	RegisterCollectorServer(grpcServer, newCollectService(proxy))
+	RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController))
 
 	go func() {
 		err := grpcServer.Serve(ln)
