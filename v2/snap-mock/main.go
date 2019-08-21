@@ -275,7 +275,10 @@ func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
 	defer fn()
 
 	resp, err := cc.Info(ctx, reqInfo)
-	return resp.Info, err
+	if err != nil {
+		return nil, err
+	}
+	return resp.Info, nil
 }
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, error) {
