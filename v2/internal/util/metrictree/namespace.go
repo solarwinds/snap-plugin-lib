@@ -18,8 +18,8 @@ This file contains definition of namespace and namespace elements. Namespace ele
 /*
 Namespaces (very often referred as "selectors") are used in three different contexts:
     - when defining metrics (PluginDefinition) by plugin
-    - when defining filters (task*.yaml) -
-    - when adding metrics during collection (CollectMetrics)
+    - when defining filters (requested metrics) (task*.yaml)
+    - when adding concrete metrics during collection (CollectMetrics)
 
 Not all forms are valid for different context. Ie.
     /plugin/[group]/metric
@@ -45,8 +45,15 @@ type Namespace struct {
 }
 
 type namespaceElement interface {
+	// used to validate "concrete metric" against "filters" and "definitions" (should add metric to collect result?).
+	// ie. "/plugin/[node=node123]/metric1" is valid against filter "/plugin/**" and definition "/plugin/[node]/metric1".
 	Match(string) bool
+
+	// check if "filters" match to "definition" (is given filter correct?).
+	// Used to throw away filters which wouldn't have any impact on collection at early stage (loading task).
+	// ie. Filters "/plugin/**", "/plugin/*/metric1", "/plugin/{node[1-3]{1,2}}" and compatible with definition "/plugin/[node]/metric1".
 	Compatible(string) bool
+
 	String() string
 
 	IsDynamic() bool
