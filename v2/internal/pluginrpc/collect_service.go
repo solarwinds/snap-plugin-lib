@@ -90,7 +90,7 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 			return response, fmt.Errorf("could't convert statistics to GRPC format: %v", err)
 		}
 	case <-ctx.Done():
-		return response, errors.New("couldn't retrieve statistics") // todo: check how this work
+		return response, errors.New("couldn't retrieve statistics due to deadline")
 	}
 
 	return response, nil

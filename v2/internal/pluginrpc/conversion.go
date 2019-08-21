@@ -96,7 +96,7 @@ func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 		},
 		TaskSummary: &TaskSummary{
 			Counters: &TaskSummaryCounters{
-				CurrentlyActiveTasks: uint64(ts.Counters.CurrentlyActiveTasks), // todo: uint64 types in original code
+				CurrentlyActiveTasks: uint64(ts.Counters.CurrentlyActiveTasks),
 				TotalActiveTasks:     uint64(ts.Counters.TotalActiveTasks),
 				TotalCollectRequests: uint64(ts.Counters.TotalCollectRequests),
 			},
@@ -128,7 +128,7 @@ func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 		StatsPort:         uint32(options.StatsPort),
 		GrpcPingTimeout:   int64(options.GrpcPingTimeout),
 		GrpcPingMaxMissed: uint64(options.GrpcPingMaxMissed),
-		LogLevel:          "", // todo
+		LogLevel:          uint32(options.LogLevel),
 		EnablePprofServer: options.EnablePprofServer,
 		EnableStats:       options.EnableStats,
 		EnableStatsServer: options.EnableStatsServer,
@@ -139,7 +139,7 @@ func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 		pt := &taskDetails.ProcessingTimes
 		lm := &taskDetails.LastMeasurement
 
-		info.TaskDetails[uint64(id)] = &TaskDetails{ // todo: conversion
+		info.TaskDetails[uint64(id)] = &TaskDetails{
 			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
 			Filters:       taskDetails.Filters,
 			Counters: &TaskDetailCounters{

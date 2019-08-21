@@ -132,7 +132,7 @@ message Options {
     uint32 statsPort = 4;
     int64 grpcPingTimeout = 5;
     uint64 grpcPingMaxMissed = 6;
-    string logLevel = 7;
+    uint32 logLevel = 7;
     bool enablePprofServer = 8;
     bool enableStats = 9;
     bool enableStatsServer = 10;
