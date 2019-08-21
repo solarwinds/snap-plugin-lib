@@ -84,7 +84,7 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 
 	select {
 	case statistics := <-cs.statsController.RequestStat():
-		fmt.Printf("stats=%#v\n", statistics)
+		response.Info = toGRPCInfo(statistics)
 	case <-ctx.Done():
 		return response, errors.New("couldn't retrieve statistics") // todo: check how this work
 	}

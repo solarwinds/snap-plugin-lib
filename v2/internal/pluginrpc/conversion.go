@@ -82,7 +82,7 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	return grpcValue, nil
 }
 
-func (cs *collectService) toGRPCInfo(statistics stats.Statistics) *Info {
+func toGRPCInfo(statistics stats.Statistics) *Info {
 	pi := &statistics.PluginInfo
 	ts := &statistics.TasksSummary
 
@@ -115,7 +115,7 @@ func (cs *collectService) toGRPCInfo(statistics stats.Statistics) *Info {
 		lm := &taskDetails.LastMeasurement
 
 		info.TaskDetails[uint64(id)] = &TaskDetails{ // todo: conversion
-			Configuration: nil, // todo
+			Configuration: "", // todo
 			Filters:       taskDetails.Filters,
 			Counters: &TaskDetailCounters{
 				CollectRequests:          uint64(c.CollectRequests),
