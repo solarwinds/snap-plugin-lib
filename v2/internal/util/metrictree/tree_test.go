@@ -142,11 +142,17 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 		So(v.AddRule("/plugin/group2/*/{metric[123]+}"), ShouldBeNil)
 		So(v.AddRule("/plugin/group3/id1/[dyn3=id2]/metric2"), ShouldBeNil)
 		So(v.AddRule("/plugin/group3/{id3+}/[dyn3={id4+}]/metric2"), ShouldBeNil)
+		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
+
+		// Add invalid filtering rules (no compatible with definitions)
+		So(v.AddRule("/plugin/group1/id1/metric12"), ShouldBeError)
+		So(v.AddRule("/plugins/group1/id1/metric1"), ShouldBeError)
+		So(v.AddRule("/plugin/group2/[sub2]/{metric[123]+}"), ShouldBeError)
+		So(v.AddRule("/plugin/group3/[dyn2]/[dyn4=val]/metric2"), ShouldBeError)
 
 		// Double-check that rules were applied
 		So(len(d.ListRules()), ShouldEqual, 6)
-
-		So(len(v.ListRules()), ShouldEqual, 4)
+		So(len(v.ListRules()), ShouldEqual, 5)
 
 		// Try to validate (filter) incoming metrics - positive scenarios
 		validMetricsToAdd := []string{
