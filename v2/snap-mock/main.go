@@ -165,7 +165,7 @@ func main() {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 			}
 
-			fmt.Printf("\n\nReceived %d metric(s)\n", len(recvMts))
+			fmt.Printf("\nReceived %d metric(s)\n", len(recvMts))
 			for _, mt := range recvMts {
 				fmt.Printf(" %s\n", mt)
 			}
@@ -176,7 +176,7 @@ func main() {
 					doneCh <- fmt.Errorf("can't send info request to plugin: %v", err)
 				}
 
-				fmt.Printf("\nReceived info:\n %v", info)
+				fmt.Printf("\nReceived info:\n %v\n", info)
 			}
 
 			if reqCounter == opt.MaxCollectRequests {
