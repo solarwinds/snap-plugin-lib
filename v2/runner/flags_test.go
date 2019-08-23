@@ -60,7 +60,7 @@ var parseScenarios = []parseScenario{
 		shouldBeValid:  false,
 	},
 	{ // 8
-		inputCmdLine:   "--enable-pprof-server=1 --pprof-port=5678",
+		inputCmdLine:   "--enable-profiling=1 --pprof-port=5678",
 		shouldBeParsed: true,
 		shouldBeValid:  true,
 	},
