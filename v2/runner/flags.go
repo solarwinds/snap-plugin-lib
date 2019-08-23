@@ -55,9 +55,9 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 		"log-level",
 		fmt.Sprintf("Minimal level of logged messages %s", allLogLevels))
 
-	flagParser.BoolVar(&opt.EnablePprofServer,
-		"enable-pprof-server", false,
-		"Enable profiling server")
+	flagParser.BoolVar(&opt.EnableProfiling,
+		"enable-profiling", false,
+		"Enable profiling (pprof server)")
 
 	flagParser.IntVar(&opt.PprofPort,
 		"pprof-port", defaultPProfPort,
@@ -160,7 +160,7 @@ func ValidateOptions(opt *types.Options) error {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}
 
-	if opt.PprofPort > 0 && !opt.EnablePprofServer {
+	if opt.PprofPort > 0 && !opt.EnableProfiling {
 		return fmt.Errorf("-enable-pprof flag should be set when configuring pprof port")
 	}
 

@@ -23,12 +23,12 @@ limitations under the License.
 package rpc
 
 import (
-	fmt "fmt"
-	math "math"
+	"fmt"
+	"math"
 
-	proto "github.com/golang/protobuf/proto"
-	context "golang.org/x/net/context"
-	grpc "google.golang.org/grpc"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

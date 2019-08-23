@@ -15,7 +15,7 @@ type Options struct {
 	GrpcPingMaxMissed uint
 
 	LogLevel          logrus.Level
-	EnablePprofServer bool
+	EnableProfiling   bool
 	EnableStats       bool // enable calculation statistics
 	EnableStatsServer bool // if true, start statistics HTTP server
 	PprofPort         int  `json:",omitempty"`

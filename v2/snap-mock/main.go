@@ -39,6 +39,7 @@ type Options struct {
 	PingInterval       time.Duration
 	MaxCollectRequests int
 	SendKill           bool
+	RequestInfo        bool
 
 	PluginConfig string
 	PluginFilter string
@@ -91,7 +92,11 @@ func parseCmdLine() *Options {
 
 	flag.BoolVar(&opt.SendKill,
 		"send-kill", false,
-		"When set, Kill request will be set after 'max-collect-requests' collects ")
+		"When set, Kill request will be sent after 'max-collect-requests' collects ")
+
+	flag.BoolVar(&opt.RequestInfo,
+		"request-info", false,
+		"When set, Info request will be sent after each collect")
 
 	flag.Parse()
 
@@ -160,11 +165,19 @@ func main() {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 			}
 
-			fmt.Printf("Recived %d metric(s)\n", len(recvMts))
+			fmt.Printf("\nReceived %d metric(s)\n", len(recvMts))
 			for _, mt := range recvMts {
 				fmt.Printf(" %s\n", mt)
 			}
-			fmt.Printf("\n")
+
+			if opt.RequestInfo {
+				info, err := doInfoRequest(collClient)
+				if err != nil {
+					doneCh <- fmt.Errorf("can't send info request to plugin: %v", err)
+				}
+
+				fmt.Printf("\nReceived info:\n %v\n", info)
+			}
 
 			if reqCounter == opt.MaxCollectRequests {
 				break
@@ -253,6 +266,19 @@ func doKillRequest(cc pluginrpc.ControllerClient) error {
 
 	_, err := cc.Kill(ctx, reqKill)
 	return err
+}
+
+func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
+	reqInfo := &pluginrpc.InfoRequest{}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	resp, err := cc.Info(ctx, reqInfo)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Info, nil
 }
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, error) {
