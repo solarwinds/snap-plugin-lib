@@ -65,7 +65,7 @@ func printMetaInformation(name string, version string, opt *types.Options, r *re
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		fmt.Printf("Can't provide plugin metadata information (reason: %v)\n", err)
+		fmt.Fprintf(os.Stderr, "Can't provide plugin metadata information (reason: %v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 

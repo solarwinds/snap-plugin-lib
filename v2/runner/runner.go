@@ -34,13 +34,13 @@ const (
 func StartCollector(collector plugin.Collector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], os.Args[1:])
 	if err != nil {
-		fmt.Printf("Error occured during plugin startup (%v)", err)
+		fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(name, version, opt)
 	if err != nil {
-		fmt.Printf("Error occured when starting statistics controller (%v)", err)
+		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
@@ -57,7 +57,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	case false:
 		r, err := acquireResources(opt)
 		if err != nil {
-			fmt.Printf("Can't acquire resources for plugin services (%v)", err)
+			fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
 			os.Exit(errorExitStatus)
 		}
 
@@ -94,7 +94,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 
 	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
-		fmt.Printf("Couldn't load a task in a standalone mode (reason: %v)", errLoad)
+		fmt.Fprintf(os.Stderr, "Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
 		os.Exit(errorExitStatus)
 	}
 
@@ -102,7 +102,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 		// Request metrics collection
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
 		if errColl != nil {
-			fmt.Printf("Error occurred during metrics collection in a standalone mode (reason: %v)", errColl)
+			fmt.Fprintf(os.Stderr, "Error occurred during metrics collection in a standalone mode (reason: %v)\n", errColl)
 			os.Exit(errorExitStatus)
 		}
 
@@ -124,7 +124,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 
 	errUnload := ctxManager.UnloadTask(singleModeTaskID)
 	if errUnload != nil {
-		fmt.Printf("Couldn't unload a task in a standalone mode (reason: %v)", errUnload)
+		fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
 	}
 }
