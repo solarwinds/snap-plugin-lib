@@ -19,15 +19,15 @@ const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 
-func StartGRPCController(proxy CollectorProxy, statsController stats.Controller, ln net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+func StartGRPCController(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
 
 	grpcServer := grpc.NewServer()
 	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
-	RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController))
+	RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
 
 	go func() {
-		err := grpcServer.Serve(ln)
+		err := grpcServer.Serve(grpcLn)
 		if err != nil {
 			closeChan <- err
 		}

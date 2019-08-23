@@ -83,7 +83,7 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	return grpcValue, nil
 }
 
-func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
+func toGRPCInfo(statistics stats.Statistics, pprofLocation string) (*Info, error) {
 	pi := &statistics.PluginInfo
 	ts := &statistics.TasksSummary
 
@@ -135,7 +135,7 @@ func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 	}
 
 	if options.EnableProfiling {
-		info.PluginInfo.Options.ProfilingLocation = fmt.Sprintf("%s:%d", options.PluginIp, options.PprofPort)
+		info.PluginInfo.Options.ProfilingLocation = pprofLocation
 	}
 
 	for id, taskDetails := range statistics.TasksDetails {

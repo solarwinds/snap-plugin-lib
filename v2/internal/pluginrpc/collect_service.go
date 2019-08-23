@@ -3,6 +3,7 @@ package pluginrpc
 import (
 	"errors"
 	"fmt"
+	"net"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"golang.org/x/net/context"
@@ -15,12 +16,14 @@ const (
 type collectService struct {
 	proxy           CollectorProxy
 	statsController stats.Controller
+	pprofLn         net.Listener
 }
 
-func newCollectService(proxy CollectorProxy, statsController stats.Controller) CollectorServer {
+func newCollectService(proxy CollectorProxy, statsController stats.Controller, pprofLn net.Listener) CollectorServer {
 	return &collectService{
 		proxy:           proxy,
 		statsController: statsController,
+		pprofLn:         pprofLn,
 	}
 }
 
@@ -85,7 +88,7 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 
 	select {
 	case statistics := <-cs.statsController.RequestStat():
-		response.Info, err = toGRPCInfo(statistics)
+		response.Info, err = toGRPCInfo(statistics, cs.pprofLn.Addr().String())
 		if err != nil {
 			return response, fmt.Errorf("could't convert statistics to GRPC format: %v", err)
 		}
