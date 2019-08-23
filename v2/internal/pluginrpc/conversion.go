@@ -124,14 +124,18 @@ func toGRPCInfo(statistics stats.Statistics) (*Info, error) {
 	info.PluginInfo.Options = &Options{
 		PluginIP:          options.PluginIp,
 		GrpcPort:          uint32(options.GrpcPort),
-		PprofPort:         uint32(options.PprofPort),
 		StatsPort:         uint32(options.StatsPort),
 		GrpcPingTimeout:   int64(options.GrpcPingTimeout),
 		GrpcPingMaxMissed: uint64(options.GrpcPingMaxMissed),
 		LogLevel:          uint32(options.LogLevel),
-		EnablePprofServer: options.EnablePprofServer,
+		EnableProfiling:   options.EnableProfiling,
+		ProfilingLocation: "",
 		EnableStats:       options.EnableStats,
 		EnableStatsServer: options.EnableStatsServer,
+	}
+
+	if options.EnableProfiling {
+		info.PluginInfo.Options.ProfilingLocation = fmt.Sprintf("%s:%d", options.PluginIp, options.PprofPort)
 	}
 
 	for id, taskDetails := range statistics.TasksDetails {

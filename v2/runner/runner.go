@@ -69,7 +69,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 }
 
 func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *types.Options) {
-	if opt.EnablePprofServer {
+	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 	}
@@ -138,7 +138,7 @@ func acquireResources(opt *types.Options) (*resources, error) {
 		return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
 	}
 
-	if opt.EnablePprofServer {
+	if opt.EnableProfiling {
 		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.PprofPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for PProf server (%s)", err)

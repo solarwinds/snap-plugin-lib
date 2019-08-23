@@ -24,10 +24,9 @@ type meta struct {
 		Port int    // Port on which GRPC service is being served
 	}
 
-	PProf struct {
-		Enabled bool   // true, if pprof server is enabled (started)
-		IP      string // IP on which pprof service is being served
-		Port    int    // Port on which pprof service is being served
+	Profiling struct {
+		Enabled  bool   // true, if profiling (pprof server) is enabled (started)
+		Location string // location with profiling data (IP and Port for pprof)
 	}
 
 	Stats struct {
@@ -50,10 +49,9 @@ func printMetaInformation(name string, version string, opt *types.Options, r *re
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
 
-	m.PProf.Enabled = opt.EnablePprofServer
-	if opt.EnablePprofServer {
-		m.PProf.IP = ip
-		m.PProf.Port = r.pprofListener.Addr().(*net.TCPAddr).Port
+	m.Profiling.Enabled = opt.EnableProfiling
+	if opt.EnableProfiling {
+		m.Profiling.Location = fmt.Sprintf("%s:%d", ip, r.pprofListener.Addr().(*net.TCPAddr).Port)
 	}
 
 	m.Stats.Enabled = opt.EnableStatsServer
