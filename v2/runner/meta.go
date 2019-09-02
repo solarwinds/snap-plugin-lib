@@ -10,13 +10,23 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
+type PluginType int
+
+const (
+	PluginTypeCollector PluginType = iota
+	PluginTypeProcessor
+	PluginTypePublisher
+	PluginTypeStreamingCollector
+)
+
 // Structure contains information about running services (used by snap)
 type meta struct {
 	GRPCVersion string // Message definition version (ie. 2.0.0)
 
 	Plugin struct {
-		Name    string // Plugin name
-		Version string // Plugin version
+		Name    string     // Plugin name
+		Version string     // Plugin version
+		Type    PluginType // Plugin type (collector, publisher, etc.)
 	}
 
 	GRPC struct {
@@ -45,6 +55,7 @@ func printMetaInformation(name string, version string, opt *types.Options, r *re
 
 	m.Plugin.Name = name
 	m.Plugin.Version = version
+	m.Plugin.Type = PluginTypeCollector
 
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
@@ -63,7 +74,7 @@ func printMetaInformation(name string, version string, opt *types.Options, r *re
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't provide plugin metadata information (reason: %v)\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Can't provide plugin metadata information (reason: %v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
