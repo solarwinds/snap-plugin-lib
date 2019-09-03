@@ -117,3 +117,89 @@ example.time.hour 16 {map[]}
 example.time.minute 5 {map[]}
 example.time.second 44 {map[]}
 ```
+
+#### Running plugin with snap-mock
+
+Debug mode should be sufficient in majority of cases, although there will be scenarios when running with snap-mock enables additional testing capability.
+
+To work correctly plugin should be run with several flags as follows:
+```bash
+./02-testing -grpc-ping-max-missed=0 -grpc-port=50123
+```
+
+By providing `-grpc-ping-max-missed=0` plugin won't exit after not receiving 3 ping from snap (or its equivalent, like snap-mock).
+
+Now, in other console you should locate snap-mock, compile it and execute:
+
+```bash
+cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/v2/snap-mock
+go build
+./snap-mock -plugin-port=50123 -max-collect-requests=3 -collect-interval=5s -send-kill=1
+```
+
+> Make sure that `-grpc-port` (provided for plugin) and `-plugin-port` (provided for snap-mock) are the same.
+
+> `-send-kill` flag causes that both: plugin and snap-mock will complete execution after working.
+
+Output of snap-mock:
+```
+
+Received 5 metric(s)
+ example.date.day v_int64:3  [map[]]
+ example.date.month v_int64:9  [map[]]
+ example.time.hour v_int64:16  [map[]]
+ example.time.minute v_int64:39  [map[]]
+ example.time.second v_int64:30  [map[]]
+
+Received 5 metric(s)
+ example.date.day v_int64:3  [map[]]
+ example.date.month v_int64:9  [map[]]
+ example.time.hour v_int64:16  [map[]]
+ example.time.minute v_int64:39  [map[]]
+ example.time.second v_int64:35  [map[]]
+
+Received 5 metric(s)
+ example.date.day v_int64:3  [map[]]
+ example.date.month v_int64:9  [map[]]
+ example.time.hour v_int64:16  [map[]]
+ example.time.minute v_int64:39  [map[]]
+ example.time.second v_int64:40  [map[]]
+```
+
+Output of plugin:
+```
+{"GRPCVersion":"2.0.0","Plugin":{"Name":"example","Version":"1.0.0"},"GRPC":{"IP":"127.0.0.1","Port":50123},"Profiling":{"Enabled":false,"Location":""},"Stats":{"Enabled":false,"IP":"","Port":0}}
+time="2019-09-03T16:39:30+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:30+02:00" level=trace msg="GRPC Load() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:30+02:00" level=trace msg="GRPC Collect() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:30+02:00" level=debug msg="Collect completed" elapsed=0s layer=lib module=plugin-proxy
+time="2019-09-03T16:39:30+02:00" level=debug msg="metrics chunk has been sent to snap" layer=lib len=5 module=plugin-rpc
+time="2019-09-03T16:39:32+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:34+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:35+02:00" level=trace msg="GRPC Collect() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:35+02:00" level=debug msg="Collect completed" elapsed=0s layer=lib module=plugin-proxy
+time="2019-09-03T16:39:35+02:00" level=debug msg="metrics chunk has been sent to snap" layer=lib len=5 module=plugin-rpc
+time="2019-09-03T16:39:36+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:38+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:40+02:00" level=trace msg="GRPC Ping() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:40+02:00" level=trace msg="GRPC Collect() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:40+02:00" level=debug msg="Collect completed" elapsed=0s layer=lib module=plugin-proxy
+time="2019-09-03T16:39:40+02:00" level=debug msg="metrics chunk has been sent to snap" layer=lib len=5 module=plugin-rpc
+time="2019-09-03T16:39:41+02:00" level=trace msg="GRPC Unload() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:41+02:00" level=trace msg="GRPC Kill() received" layer=lib module=plugin-rpc
+time="2019-09-03T16:39:41+02:00" level=debug msg="GRPC server stopped gracefully" layer=lib module=plugin-rpc
+```
+
+What we can see from debug logs:
+- GRPC Collect was called 3 times, every 5 seconds 
+- Plugin receives GRPC Ping periodically ("GRPC Ping() received")
+- GRPC Kill() is called at the end causing plugin to quit
+
+There are also other entries:
+- first line is metadata in JSON format used by snap. 
+- GRPC Load() and GRPC Unload() calls will be covered later. In short, collection can be requested by several independent tasks and Load() allows to provide indepencdent configuration for a single task. 
+- `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid limits, in case plugin sends large portions of metrics)
+
+As you can see we achieved almost the adequate testing results as in the debug mode (3 request every 5 seconds).
+The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same plugin would be triggered in production environment. 
+Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice. 

@@ -14,7 +14,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 
 	// Convert data to metric form
 	_ = ctx.AddMetric("/example/date/day", t.Day())
-	_ = ctx.AddMetric("/example/date/month", t.Month())
+	_ = ctx.AddMetric("/example/date/month", int(t.Month()))
 	_ = ctx.AddMetric("/example/time/hour", t.Hour())
 	_ = ctx.AddMetric("/example/time/minute", t.Minute())
 	_ = ctx.AddMetric("/example/time/second", t.Second())

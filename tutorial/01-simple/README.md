@@ -96,4 +96,4 @@ func main() {
 ```
 
 main() function will usually have the same implementation (with different parameters depending of plugin).
-Runner takes care about establishing valid comunication between snap deamon and plugin.
+Runner takes care about establishing valid communication between snap daemon and plugin.
