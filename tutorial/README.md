@@ -38,7 +38,7 @@ Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin
 # Content 
 
 * [Introduction - Simple plugin](/tutorial/01-simple/README.md)
-* [Testing](/tutorial/02/README.md)
+* [Testing](/tutorial/02-testing/README.md)
 * [Basic concepts]((/tutorial/03/README.md))
 * [Advanced plugin - overview](/tutorial/04/README.md)
 * [Defining plugin metadata (metrics and configuration)](/tutorial/05/README.md)

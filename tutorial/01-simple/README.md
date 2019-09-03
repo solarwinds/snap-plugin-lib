@@ -4,7 +4,7 @@
 
 The simplest plugin gathering only 1 metric (every time with the same value) can written as follows.
 
-```
+```go
 package main
 
 import (
@@ -26,13 +26,13 @@ func main() {
 
 ### Headers
 
-```
+```go
 package main
 ```
 
 This instruction will tell go compiler that should build executable file from this package.
 
-```
+```go
 import (
     "github.com/librato/snap-plugin-lib-go/v2/plugin"
     "github.com/librato/snap-plugin-lib-go/v2/runner"
@@ -45,7 +45,7 @@ Import section lists required dependencies:
 
 ### Collector code
 
-```
+```go
 type simpleCollector struct{}
 
 func (s simpleCollector) Collect(ctx plugin.Context) error {
@@ -60,7 +60,7 @@ In our simple case we are gathering one metric "/example/metric1" containing val
 
 Following code will present date and time collector, which produce 5 metrics associated with day, month, hour, minute and second of time.
 
-```
+```go
 type simpleCollector struct{}
 
 func (s simpleCollector) Collect(ctx plugin.Context) error {
@@ -89,7 +89,7 @@ Intermediate strings serves as groups (collector subfunctions) and simplifies fi
 
 ### Runner
 
-```
+```go
 func main() {
     runner.StartCollector(&simpleCollector{}, "example", "1.0.0")
 }

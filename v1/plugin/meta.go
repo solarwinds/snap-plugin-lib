@@ -20,7 +20,6 @@ limitations under the License.
 package plugin
 
 import (
-	"encoding/json"
 	"time"
 
 	"google.golang.org/grpc"
@@ -125,7 +124,6 @@ type meta struct {
 	Version    int
 	RPCType    metaRPCType
 	RPCVersion string
-	sdfsdf json.Number
 
 	ConcurrencyCount int
 	Exclusive        bool
