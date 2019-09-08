@@ -37,9 +37,14 @@ Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin
 
 # Content 
 
-* [Introduction - Simple plugin](/tutorial/01-simple/README.md)
-* [Testing](/tutorial/02-testing/README.md)
-* [Basic concepts]((/tutorial/03/README.md))
-* [Advanced plugin - overview](/tutorial/04/README.md)
-* [Defining plugin metadata (metrics and configuration)](/tutorial/05/README.md)
-* [Other features](/tutorial/06/README.md)
+- Simple date/time collector:
+  * [Introduction - Simple plugin](/tutorial/01-simple/README.md)
+  * [Testing](/tutorial/02-testing/README.md)
+  * [Configuration and state](/tutorial/03-concepts/README.md)
+  * [Metrics - filters, definition, tags](/tutorial/04-metrics/README.md)
+  * [Useful tools](/tutorial/05-tools/README.md)
+- Process collector:
+  * [Advanced plugin - overview](/tutorial/06-overview/README.md)
+  * [Dynamic metrics](/tutorial/07-dynmetrics/README.md)
+  * [Other features](/tutorial/08-collector/README.md)
+- [FAQ](/tutorial/faq/README.md)
