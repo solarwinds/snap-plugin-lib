@@ -1,2 +1,2 @@
-# Tutorial (6)
+# System collector
 
