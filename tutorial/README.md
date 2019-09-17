@@ -48,5 +48,4 @@ Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin
   * [Gathering data (Proxy)](/tutorial/07-proxy/README.md)
   * [Collector](/tutorial/08-collector/README.md)
   * [Handle configuration](/tutorial/09-config/README.md)
-  * [Summary](/tutorial/10-summary/README.md)
 - [FAQ](/tutorial/faq/README.md)
