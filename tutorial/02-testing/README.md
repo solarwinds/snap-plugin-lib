@@ -2,25 +2,26 @@
 
 ## Compile plugin
 
-To compile plugin simply go to folder containing written code in [Previous Chapter](/tutorial/01-simple) and execute command:
+To build executable file simply go to folder containing written code (see: [Previous Chapter](/tutorial/01-simple)) and execute command:
 ```
 go build
 ```
-which result in building executable file named as folder containing go code, or
+Binary name is depending on folder in which `main` file is located. 
+
+To force own custom name of binary, use:
 ```
 go build -o binaryName
 ```
-to produce binary with custom name.
 
-Instead of compiling you own code, you can reuse tutorial example:
+ Instead of compiling you own code, you can reuse tutorial example(s):
 ```bash
 cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/tutorial/02-testing
 go build
-``` 
+```
 
 > Note:
-> Further commands will use binary name based on examples in tutorial folder (`01-simple`, `02-testing`, etc)
-> For windows you should replace it with `01-simple.exe`, `02-testing.exe` etc. 
+> Further commands will use binary name based on examples in tutorial folders (`01-simple`, `02-testing`, etc)
+> For windows you probably should replace it with `01-simple.exe`, `02-testing.exe` etc. 
 
 ## Execution
 
@@ -30,7 +31,7 @@ The simplest way of validating plugin is run binary without any arguments.
 ```bash
 ./02-testing
 ```
-In valid scenario collector should print out metadata information and after some time quit execution with error message:
+In valid scenario collector should print out metadata information and quit after some time with error message:
 ```
 {"GRPCVersion":"2.0.0","Plugin":{"Name":"example","Version":"1.0.0"},"GRPC":{"IP":"127.0.0.1","Port":56302},"Profiling":{"Enabled":false,"Location":""},"Stats":{"Enabled":false,"IP":"","Port":0}}
 time="2019-09-03T15:12:10+02:00" level=warning msg="Ping timeout occurred" layer=lib max=3 missed=1 module=plugin-rpc
@@ -67,11 +68,11 @@ From the perspective of plugin developer the most important options are:
 | -debug-collect-interval | Interval between consecutive collect requests (default 5s)                      |
 | -log-level              |  Minimal level of logged messages (you should use either `debug` or `trace`)    | 
 
-> Other useful flags, like: `-plugin-config`, `-plugin-filter` and `*stats*` related will be discussed later. **TODO**link
+> Other useful flags, like: `-plugin-config`, `-plugin-filter` and `*stats*` related will be discussed later. (see: [Stats](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#stats-server))
   
 #### Debug-mode
 
-To execute collection run binary in debug-mode.
+To execute collection, run binary in debug-mode.
 
 ```bash
 ./02-testing -debug-mode=1
@@ -191,15 +192,16 @@ time="2019-09-03T16:39:41+02:00" level=debug msg="GRPC server stopped gracefully
 ```
 
 What we can see from debug logs:
-- GRPC Collect was called 3 times, every 5 seconds 
-- Plugin receives GRPC Ping periodically ("GRPC Ping() received")
-- GRPC Kill() is called at the end causing plugin to quit
+- GRPC `Collect()` was called 3 times, every 5 seconds 
+- Plugin receives GRPC Ping periodically (`"GRPC Ping() received"`)
+- GRPC `Kill()` is called at the end causing plugin to quit
 
 There are also other entries:
 - first line is metadata in JSON format used by snap. 
-- GRPC Load() and GRPC Unload() calls will be covered later. In short, collection can be requested by several independent tasks and Load() allows to provide indepencdent configuration for a single task. 
-- `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid limits, in case plugin sends large portions of metrics)
+- GRPC `Load()` and GRPC `Unload()` calls will be covered later. In short, collection can be requested by several independent tasks and `Load()` allows to handle independent configuration for a single task. 
+- `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid some internal limits when plugin want to send large portions of metrics)
 
 As you can see we achieved almost the adequate testing results as in the debug mode (3 request every 5 seconds).
-The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same plugin would be triggered in production environment. 
-Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice. 
+The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same way, which plugin would be triggered in production environment. 
+Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice.
+Snap-mock will useful to observe how plugin react with different tasks (several configurations requested at the same time).

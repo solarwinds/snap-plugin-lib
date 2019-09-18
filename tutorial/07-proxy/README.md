@@ -3,7 +3,7 @@
 ## Obtaining system information - Psutil library
 
 Go language has a lot of 3rd part libraries that we can use instead of writing own functionality.
-Retrieving system information is quite common for any developer and in golang ecosystem we could easily found library that offers easy-to-use cross platform api.
+Retrieving system information is quite common task for any developer and in golang ecosystem we could easily find library that offers easy-to-use cross platform API.
 For our plugin we will use [gopsutil](https://github.com/shirou/gopsutil).
 
 What we need is retrieving:
@@ -47,7 +47,7 @@ import (
 
 > `cpu.Percent` returns array. Total value is in the first element of it.
 
-> `mem.VirtualMemory` return general information structure. Field `.UserPercent` provides interesting us information.
+> `mem.VirtualMemory` return general information structure. Field `.UserPercent` provides measurement we are interested in.
 
 ## Implementing `Data` Module
 

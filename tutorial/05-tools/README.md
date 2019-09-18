@@ -3,9 +3,9 @@
 ## Example configuration
 
 Plugin creator can provide example configuration to simplify task-file creation.
-Currently supported format is YAML (comments).
-Example:
+Currently supported format is YAML (due to ability to add comments).
 
+Example:
 ```go
  func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error {
  	cfg := `
@@ -27,7 +27,7 @@ User can print/create default task based on metadata provided by plugin creator.
 ./05-tools -print-example-task
 ```
 
-**TODO**Adjust output
+Output:
 ```yaml
 version: 2
 schedule:

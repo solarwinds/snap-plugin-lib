@@ -2,7 +2,7 @@
 
 ## Code
 
-The simplest plugin gathering only 1 metric (every time with the same value) can written as follows.
+The simplest plugin gathering only 1 metric (every time with the same value) can be written as follows.
 
 ```go
 package main
@@ -39,9 +39,9 @@ import (
 )
 ```
 
-Import section lists required dependencies:
-- /v2/plugin - contains interfaces definition (ie. Collector) which we can implement
-- /v2/runner - contains implementation of StartCollector() which is used in main function
+Import section enumerates required dependencies:
+- `/v2/plugin` - contains interfaces definition (ie. `Collector`) which we should implement
+- `/v2/runner` - contains implementation of `StartCollector()` which is used in main function
 
 ### Collector code
 
@@ -54,11 +54,16 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-Here we defined collector code. 
-In short it's an object of any type implementing Collect() method, which is the "heart" of plugin - saying what needs to be done. 
-In our simple case we are gathering one metric "/example/metric1" containing value 10, by calling `ctx.AddMetric(metricName, value)` but in real case those values would vary in time depending on the state of observed system.
+Above code shows the simplest implementation of collector.
+Method `Collect()` needs to be always provided - it's the "heart" of plugin, saying what needs to be done.
+We are gathering one metric `/example/metric1` containing value `10`, by calling `ctx.AddMetric(metricName, value)`.
+In real application those values would vary in time (depending on the state of observed system).
 
-Following code will present date and time collector, which produce 5 metrics associated with day, month, hour, minute and second of time.
+Following code is a little more complicated.
+It gather current date and time, producing 5 metrics associated with current day, month, hour, minute and second of time.
+
+> Although its practicality is doubtful, it will be suffient to show different set of plugin-lib v2 features.
+> If you want to learn straightaway how to write useful collector, visit [Chapter 6](/tutorial/06-overview/README.md) of this tutorial. 
 
 ```go
 type simpleCollector struct{}
@@ -81,11 +86,11 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 At the beginning we are simulating data collection by obtaining current system time. 
 In real plugins those code would be replaced with some REST request, file reading, SQL query etc.
 
-When we have access to time object, we create 5 metrics - each of which is associated with a separated value associated with time.
-Also we have introducted metric groups: date and time (second position in metric name).
-Metric form will be described later in details but in short metrics can contain at least two strings separated by "/". 
+When we have access to `time` object, we create 5 metrics - each of which is associated with a separated value.
+Also we have introduced metric groups: date and time (second position in metric name).
+Metric form will be described later in details but in short metrics should contain at least two strings separated by "/". 
 Usually the first one is plugin name and the last one is metric purpose.
-Intermediate strings serves as groups (collector subfunctions) and simplifies filtering.
+Intermediate strings serves as groups (collector sub-functions) and simplifies filtering.
 
 ### Runner
 
@@ -97,3 +102,4 @@ func main() {
 
 main() function will usually have the same implementation (with different parameters depending of plugin).
 Runner takes care about establishing valid communication between snap daemon and plugin.
+User can focus only on the collector implementation details.

@@ -2,24 +2,30 @@
 
 ## What's collector
 
-Collector is a small application gathering information about any observed system. 
+Collector is a small application gathering information about observed system. 
 You can collect CPU utilization, database statistics, message broker queue's sizes or whatever you want in a form of metric.
 
 ## What's metric
 
-Metric holds information about single measurement (it's usually pair of string and number)
-**TODO**More
+Metric holds information about single measurement. It consists of:
+- name: (ie. `/system/total/cpu`)
+- associated value (ie. `10`)
+- unit (ie. `%`, `s.`)
+- description 
+- tags (additional textual data)
+- time of measurements
 
 ### Snap deamon vs snap collectors
 
-In production environment plugins are controlled by snap:
+When used in production, plugins are controlled by snap daemon.
+Simplified algorithm may be described as follows:
 1) Snap reads and forward configuration (credentials, requested metrics etc.) to plugin
 2) Periodically (usally 60s) snap requests collection of metrics for different plugins 
 3) Each plugin responds with own set of metrics. 
 
 ## Intro
 
-This tutorial will teach you how to write custom collector plugin in Go language, able to work with snap deamon. 
+This tutorial will teach you how to write custom collector plugin in Go language, that you could later use in production. 
 
 We will start from a very simple example - building a minimal plugin and testing that it's working correctly. 
 After you obtain basics, we will teach you how to write real, useful collector (gathering sysytem metrics) utilizing advanced features that plugin-go V2 has to offer:

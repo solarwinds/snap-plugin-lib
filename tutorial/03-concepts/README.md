@@ -1,6 +1,6 @@
 # Basic concepts
 
-In chapter 1 and 2 you've learned how to write a very simple collector. 
+In [Chapter 1](/tutorial/01-simple/README.md) and [Chapter 2](/tutorial/02-testing/README.md) you've learned how to write and validate a simple collector. 
 Now we will introduce some more advanced concepts that version 2 of plugin-lib-go introduced to help developer build their plugins easier and faster.
 
 ## Tasks
@@ -13,7 +13,7 @@ Plugin-lib-go provides facilities for maintaining different tasks.
 
 ### Context 
 
-You might have notice, that to define plugin algorithm we have to provide implementation of Collect method:  
+You might have notice, that when we defined plugin algorithm we had to provide implementation of `Collect` method:  
 
 ```go
 func (s simpleCollector) Collect(ctx plugin.Context) error {
@@ -54,7 +54,7 @@ func (s simpleCollector) Unload(ctx plugin.Context) error {
 
 #### Configuration
 
-Example plugin defined 5 metrics - one of them gives information about current hour (0-23)
+Example plugin defined 5 metrics - one of them gives information about current hour (0-23).
 We may dynamically request different format (short: 0-11, long:0-23) by defining configuration for a task.
 Plugin will expect configuration in JSON format. In our case it may be simply:
 ```json
@@ -67,7 +67,7 @@ We can access configuration fields in two ways.
 - by accessing method `ctx.Config` which implements simplified access to configuration values
 - by accessing method `ctx.RawConfig` which return JSON object that needs to be manually unmarshaled to user-defined.
 
-In this chapter we will use first method. Second one will be presented in **TODO**link
+In this chapter we will use first method. Second one will be presented in [Chapter 9](/tutorial/09-config/README.md) **TODO**linktoanchor**
 
 Let's create a helper method which read `format` field:
 ```go
@@ -145,9 +145,9 @@ example.time.second 21 {map[]}
 #### State
 
 Sometimes you need to remember some values between consecutive collections or after processing configuration in `Load()` method.
-In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store are read objects for a given task (context).
+In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
-> You should use struct variables to store state, since it's not task-aware.
+> You should use `simpleCollector` struct members to store state, since it's not task-aware.
 
 Let's add a new metric (`/example/count/running`) which provide information how long plugin is running (or being more precisely: for how long task is loaded)
 

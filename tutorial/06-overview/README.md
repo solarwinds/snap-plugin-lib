@@ -1,7 +1,7 @@
 # Advanced Plugin - Introduction
 
 In previous chapters you've learnt how to write very simple plugin and utilize functionality that library offers. 
-Now, we will teach you how to build advanced, practical collector which will gather basic information about monitored minisystem:
+Now, we will teach you how to build advanced, practical collector which will gather basic information about monitored system:
 - cpu usage (percentage) for each running process 
 - memory usage (percentage) for each running process
 - total cpu usage (percentage)
@@ -15,7 +15,7 @@ In our simple example, a metric could held following information
 - metric name (namespace), ie. `/example/time/hour`
 - value, ie. `11`
 - additional text information (tags), ie. `weekday: Monday`
-- unit, ie. `second` (could be defined in `DefinePlugin` method) **TODO**link
+- unit, ie. `second` (could be defined in `DefinePlugin` method)
 - measurement time (added by a library)
 
 Total CPU and memory usage can be represented by two following metrics:
@@ -32,7 +32,7 @@ That functionality is offered by dynamic metrics. We can define it in `PluginDef
 - `/minisystem/processes/[processName]/cpu`
 - `/minisystem/processes/[processName]/memory`
 
-Then, we iterate over a list of processes, we can replace `processName` with concrete name, ie.
+Then, when we would iterate over a list of processes, we can replace `processName` with concrete name, ie.
 - `/minisystem/processes/mysql/cpu`
 - `/minisystem/processes/mysql/memory`
 - `/minisystem/processes/chrome/cpu`

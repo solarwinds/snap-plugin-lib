@@ -14,11 +14,13 @@ So far we have written collector providing 6 metrics:
 
 Every time collector is running, all 6 metrics are being gathered.
 That might not always be the case.
-We might want to request only collecting subsets of all possible measurements.
-
+We might want to collect only subsets of all possible measurements.
 Good news - all filtering is done internally by plugin so there is no need to change any line of code.
 
-To filter metrics we provide additional parameter during execution (in production it would be entries in task file **TODO**link):
+> In production environment requesting all metrics may cause huge impact on system if plugin requires advanced processing.
+> You should always benchmark you plugin in different situations.
+
+To filter metrics we provide additional parameter during execution (in production it would be entries in task file **TODO**link**):
 ```bash
 ./04-metrics -debug-mode=1 -debug-collect-counts=3 -debug-collect-interval=5s -plugin-filter="/example/date/*"
 ```
@@ -77,11 +79,11 @@ func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 `DefineMetric()` has four arguments:
 - metric name,
 - unit (used by AppOptics front-end),
-- indication if metric is default (see: `example task` **TODO**link)
+- indication if metric is default (see: [Example task](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#printing-example-task-file))
 - metric description (used by AppOptics front-end)
 
-There are two major adventages of providing this list:
-1. user can obtain accurate default task, by running `./04-metrics -print-example-task` command **TODO**output
+There are two major advantages of providing this list:
+1. user can obtain accurate default task (see: [Example task](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#printing-example-task-file))
 2. additional validation when metrics are calculated - user can't add metric which was not defined
 
 Try to add following code at the end of `Collect()` metric:
