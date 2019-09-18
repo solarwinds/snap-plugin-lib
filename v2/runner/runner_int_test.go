@@ -4,6 +4,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"testing"
@@ -85,25 +86,25 @@ func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
 	return response, err
 }
 
-func (s *SuiteT) sendLoad(taskID int, configJSON []byte, selectors []string) (*pluginrpc.LoadResponse, error) {
+func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadResponse, error) {
 	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadRequest{
-		TaskId:          int32(taskID),
+		TaskId:          taskID,
 		JsonConfig:      configJSON,
 		MetricSelectors: selectors,
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendUnload(taskID int) (*pluginrpc.UnloadResponse, error) {
+func (s *SuiteT) sendUnload(taskID string) (*pluginrpc.UnloadResponse, error) {
 	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadRequest{
-		TaskId: int32(taskID),
+		TaskId: taskID,
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendCollect(taskID int) (*pluginrpc.CollectResponse, error) {
+func (s *SuiteT) sendCollect(taskID string) (*pluginrpc.CollectResponse, error) {
 	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc.CollectRequest{
-		TaskId: int32(taskID),
+		TaskId: taskID,
 	})
 	if err != nil {
 		return nil, err
@@ -178,7 +179,7 @@ func (s *SuiteT) TestSimpleCollector() {
 
 		Convey("Client is able to send load request", func() {
 			// Act
-			loadResponse, loadErr := s.sendLoad(1, jsonConfig, mtsSelector)
+			loadResponse, loadErr := s.sendLoad("task-1", jsonConfig, mtsSelector)
 
 			// Assert
 			So(loadErr, ShouldBeNil)
@@ -187,7 +188,7 @@ func (s *SuiteT) TestSimpleCollector() {
 
 		Convey("Client is able to send collect request", func() {
 			// Act
-			collectResponse, collectErr := s.sendCollect(1)
+			collectResponse, collectErr := s.sendCollect("task-1")
 
 			// Assert
 			So(collectErr, ShouldBeNil)
@@ -198,7 +199,7 @@ func (s *SuiteT) TestSimpleCollector() {
 		Convey("Client is able to send several collect request once after another", func() {
 			// Act
 			for i := 0; i < 5; i++ {
-				_, _ = s.sendCollect(1)
+				_, _ = s.sendCollect("task-1")
 			}
 
 			// Assert
@@ -252,8 +253,8 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 
 		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
 		go func() {
-			_, _ = s.sendLoad(1, jsonConfig, mtsSelector)
-			_, err := s.sendCollect(1)
+			_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+			_, err := s.sendCollect("task-1")
 			errCh <- err
 		}()
 
@@ -296,11 +297,11 @@ func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
 		const numberOfCollectorsWithSameID = 5
 
 		for id := 1; id <= numberOfCollectors; id++ {
-			_, _ = s.sendLoad(id, jsonConfig, mtsSelector)
+			_, _ = s.sendLoad(fmt.Sprintf("task-%d", id), jsonConfig, mtsSelector)
 
 			for i := 1; i <= numberOfCollectorsWithSameID; i++ {
 				go func(id int) {
-					_, err := s.sendCollect(id)
+					_, err := s.sendCollect(fmt.Sprintf("task-%d", id))
 					errCh <- err
 				}(id)
 			}
@@ -317,7 +318,7 @@ func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
 		So(errorCounter, ShouldEqual, (numberOfCollectors*numberOfCollectorsWithSameID)-numberOfCollectors) // only 1 task from each id should complete without error
 
 		// validate that when collect is completed you can requested it
-		_, err := s.sendCollect(1)
+		_, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
 
 		time.Sleep(2 * time.Second)
@@ -411,20 +412,20 @@ func (s *SuiteT) TestConfigurableCollector() {
 
 	Convey("Validate that load and unload works in valid scenarios", s.T(), func() {
 		{
-			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 			So(err, ShouldBeNil)
 			So(configurableCollector.loadCalls, ShouldEqual, 1)
 		}
 		{
-			_, err := s.sendCollect(1)
+			_, err := s.sendCollect("task-1")
 			So(err, ShouldBeNil)
 		}
 		{
-			_, err := s.sendCollect(1)
+			_, err := s.sendCollect("task-1")
 			So(err, ShouldBeNil)
 		}
 		{
-			_, err := s.sendUnload(1)
+			_, err := s.sendUnload("task-1")
 			So(err, ShouldBeNil)
 			So(configurableCollector.unloadCalls, ShouldEqual, 1)
 		}
@@ -434,37 +435,37 @@ func (s *SuiteT) TestConfigurableCollector() {
 		configurableCollector.resetCallCounters()
 
 		{
-			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 			So(err, ShouldBeNil)
 			So(configurableCollector.loadCalls, ShouldEqual, 1)
 		}
 		{
-			_, err := s.sendLoad(2, jsonConfig, mtsSelector)
+			_, err := s.sendLoad("task-2", jsonConfig, mtsSelector)
 			So(err, ShouldBeNil)
 			So(configurableCollector.loadCalls, ShouldEqual, 2)
 		}
 		{ // Shouldn't accept load of the same task
-			_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+			_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 			So(err, ShouldBeError)
 			So(configurableCollector.loadCalls, ShouldEqual, 2)
 		}
 		{ // Shouldn't accept unload of the same task which was loaded
-			_, err := s.sendUnload(3)
+			_, err := s.sendUnload("task-3")
 			So(err, ShouldBeError)
 			So(configurableCollector.unloadCalls, ShouldEqual, 0)
 		}
 		{
-			_, err := s.sendUnload(1)
+			_, err := s.sendUnload("task-1")
 			So(err, ShouldBeNil)
 			So(configurableCollector.unloadCalls, ShouldEqual, 1)
 		}
 		{ // Shouldn't accept unload of the task that is already unloaded
-			_, err := s.sendUnload(1)
+			_, err := s.sendUnload("task-1")
 			So(err, ShouldBeError)
 			So(configurableCollector.unloadCalls, ShouldEqual, 1)
 		}
 		{
-			_, err := s.sendUnload(2)
+			_, err := s.sendUnload("task-2")
 			So(err, ShouldBeNil)
 			So(configurableCollector.unloadCalls, ShouldEqual, 2)
 		}
@@ -605,10 +606,10 @@ func (s *SuiteT) TestKubernetesCollector() {
 
 	Convey("Validate that collector can gather metric based on definition and filter", s.T(), func() {
 		// Act
-		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 		So(err, ShouldBeNil)
 
-		collMts, err := s.sendCollect(1)
+		collMts, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
 		So(len(collMts.MetricSet), ShouldEqual, 8)
 
@@ -677,10 +678,10 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 
 	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
 		// Act
-		_, err := s.sendLoad(1, jsonConfig, mtsSelector)
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 		So(err, ShouldBeNil)
 
-		collMts, err := s.sendCollect(1)
+		collMts, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
 		So(len(collMts.MetricSet), ShouldEqual, 5)
 

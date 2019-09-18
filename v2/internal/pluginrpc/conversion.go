@@ -106,7 +106,7 @@ func toGRPCInfo(statistics stats.Statistics, pprofLocation string) (*Info, error
 				Maximum: int64(ts.ProcessingTimes.Maximum),
 			},
 		},
-		TaskDetails: map[uint64]*TaskDetails{},
+		TaskDetails: map[string]*TaskDetails{},
 	}
 
 	// Handle RawMessage - marshal to Json and unmarshal to typed struct
@@ -143,7 +143,7 @@ func toGRPCInfo(statistics stats.Statistics, pprofLocation string) (*Info, error
 		pt := &taskDetails.ProcessingTimes
 		lm := &taskDetails.LastMeasurement
 
-		info.TaskDetails[uint64(id)] = &TaskDetails{
+		info.TaskDetails[id] = &TaskDetails{
 			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
 			Filters:       taskDetails.Filters,
 			Counters: &TaskDetailCounters{

@@ -39,7 +39,7 @@ message KillResponse {
 // Service Collector definition
 
 message CollectRequest {
-    int32 task_id = 1;
+    string task_id = 1;
 }
 
 message CollectResponse {
@@ -47,7 +47,7 @@ message CollectResponse {
 }
 
 message LoadRequest {
-    int32 task_id = 1;
+    string task_id = 1;
     bytes json_config = 2;
     repeated string metric_selectors = 3;
 }
@@ -57,7 +57,7 @@ message LoadResponse {
 }
 
 message UnloadRequest {
-    int32 task_id = 1;
+    string task_id = 1;
 }
 
 message UnloadResponse {
@@ -114,7 +114,7 @@ message Time {
 message Info {
     PluginInfo pluginInfo = 1;
     TaskSummary taskSummary = 2;
-    map<uint64, TaskDetails> taskDetails = 3;
+    map<string, TaskDetails> taskDetails = 3;
 }
 
 message PluginInfo {

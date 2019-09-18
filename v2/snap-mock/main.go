@@ -20,7 +20,7 @@ const (
 	defaultGRPCPort        = 0
 	defaultConfig          = "{}"
 	defaultFilter          = ""
-	defaultTaskID          = 0
+	defaultTaskID          = ""
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
 
@@ -43,7 +43,7 @@ type Options struct {
 
 	PluginConfig string
 	PluginFilter string
-	TaskId       int
+	TaskId       string
 }
 
 const (
@@ -66,9 +66,9 @@ func parseCmdLine() *Options {
 		"plugin-port", defaultGRPCPort,
 		"Port of GRPC Server run by plugin")
 
-	flag.IntVar(&opt.TaskId,
+	flag.StringVar(&opt.TaskId,
 		"task-id", defaultTaskID,
-		"Task identifier used to make GRPC requests (0 means random)")
+		"Task identifier used to make GRPC requests ('' means random)")
 
 	flag.StringVar(&opt.PluginConfig,
 		"plugin-config", defaultConfig,
@@ -101,7 +101,7 @@ func parseCmdLine() *Options {
 	flag.Parse()
 
 	if opt.TaskId == defaultTaskID {
-		opt.TaskId = rand.Intn(maxTaskId)
+		opt.TaskId = fmt.Sprintf("task-%d", rand.Intn(maxTaskId))
 	}
 
 	return opt
@@ -232,7 +232,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	}
 
 	reqLoad := &pluginrpc.LoadRequest{
-		TaskId:          int32(opt.TaskId),
+		TaskId:          opt.TaskId,
 		JsonConfig:      []byte(opt.PluginConfig),
 		MetricSelectors: filter,
 	}
@@ -247,7 +247,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 
 func doUnloadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	reqUnload := &pluginrpc.UnloadRequest{
-		TaskId: int32(opt.TaskId),
+		TaskId: opt.TaskId,
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
@@ -285,7 +285,7 @@ func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, err
 	var recvMts []string
 
 	reqColl := &pluginrpc.CollectRequest{
-		TaskId: int32(opt.TaskId),
+		TaskId: opt.TaskId,
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)

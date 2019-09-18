@@ -23,9 +23,9 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 type Controller interface {
 	Close()
 	RequestStat() chan Statistics
-	UpdateLoadStat(taskId int, config string, filters []string)
-	UpdateUnloadStat(taskId int)
-	UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time)
+	UpdateLoadStat(taskId string, config string, filters []string)
+	UpdateUnloadStat(taskId string)
+	UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 				Options:        optJson,
 			},
 			TasksSummary: tasksSummary{},
-			TasksDetails: map[int]taskDetails{},
+			TasksDetails: map[string]taskDetails{},
 		},
 	}
 
@@ -110,7 +110,7 @@ func (sc *StatisticsController) RequestStat() chan Statistics {
 	return respCh
 }
 
-func (sc *StatisticsController) UpdateLoadStat(taskId int, config string, filters []string) {
+func (sc *StatisticsController) UpdateLoadStat(taskId string, config string, filters []string) {
 	sc.incomingStatsCh <- &loadTaskStat{
 		sm:      sc,
 		taskId:  taskId,
@@ -119,14 +119,14 @@ func (sc *StatisticsController) UpdateLoadStat(taskId int, config string, filter
 	}
 }
 
-func (sc *StatisticsController) UpdateUnloadStat(taskId int) {
+func (sc *StatisticsController) UpdateUnloadStat(taskId string) {
 	sc.incomingStatsCh <- &unloadTaskStat{
 		sm:     sc,
 		taskId: taskId,
 	}
 }
 
-func (sc *StatisticsController) UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time) {
+func (sc *StatisticsController) UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 	sc.incomingStatsCh <- &collectTaskStat{
 		sm:           sc,
 		taskId:       taskId,
@@ -139,7 +139,7 @@ func (sc *StatisticsController) UpdateCollectStat(taskId int, metricsCount int, 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func (sc *StatisticsController) applyLoadStat(taskId int, config string, filters []string) {
+func (sc *StatisticsController) applyLoadStat(taskId string, config string, filters []string) {
 	log.WithFields(logrus.Fields{
 		"task-id":        taskId,
 		"statistic-type": "Load",
@@ -163,7 +163,7 @@ func (sc *StatisticsController) applyLoadStat(taskId int, config string, filters
 	}
 }
 
-func (sc *StatisticsController) applyUnloadStat(taskId int) {
+func (sc *StatisticsController) applyUnloadStat(taskId string) {
 	log.WithFields(logrus.Fields{
 		"task-id":        taskId,
 		"statistic-type": "Unload",
@@ -176,7 +176,7 @@ func (sc *StatisticsController) applyUnloadStat(taskId int) {
 	delete(sc.stats.TasksDetails, taskId)
 }
 
-func (sc *StatisticsController) applyCollectStat(taskId int, metricsCount int, success bool, startTime, completeTime time.Time) {
+func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int, success bool, startTime, completeTime time.Time) {
 	log.WithFields(logrus.Fields{
 		"task-id":        taskId,
 		"statistic-type": "Collect",
@@ -249,11 +249,11 @@ func (d *EmptyController) RequestStat() chan Statistics {
 	return statCh
 }
 
-func (d *EmptyController) UpdateLoadStat(taskId int, config string, filters []string) {
+func (d *EmptyController) UpdateLoadStat(taskId string, config string, filters []string) {
 }
 
-func (d *EmptyController) UpdateUnloadStat(taskId int) {
+func (d *EmptyController) UpdateUnloadStat(taskId string) {
 }
 
-func (d *EmptyController) UpdateCollectStat(taskId int, metricsCount int, success bool, startTime, endTime time.Time) {
+func (d *EmptyController) UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 }

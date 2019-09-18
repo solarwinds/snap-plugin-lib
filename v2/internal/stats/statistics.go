@@ -6,9 +6,9 @@ import (
 )
 
 type Statistics struct {
-	PluginInfo   pluginInfo          `json:"Plugin info"`
-	TasksSummary tasksSummary        `json:"Tasks summary"`
-	TasksDetails map[int]taskDetails `json:"Task details"`
+	PluginInfo   pluginInfo             `json:"Plugin info"`
+	TasksSummary tasksSummary           `json:"Tasks summary"`
+	TasksDetails map[string]taskDetails `json:"Task details"`
 }
 
 /*****************************************************************************/

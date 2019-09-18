@@ -84,7 +84,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsControlle
 }
 
 func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Options) {
-	const singleModeTaskID = 1
+	const singleModeTaskID = "task-1"
 
 	// Load task based on command line options
 	filter := []string{}
