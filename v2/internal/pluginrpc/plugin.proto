@@ -16,6 +16,10 @@ service Collector {
     rpc Info (InfoRequest) returns (InfoResponse);
 }
 
+service Publisher {
+    rpc Publish (stream PublishRequest) returns (CollectRequest);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Service Controller definition
 
@@ -69,6 +73,17 @@ message InfoRequest {
 
 message InfoResponse {
     Info info = 1;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Service Publisher definition
+
+message PublishRequest {
+    // todo: should pass metrics later
+}
+
+message PublishResponse {
+    // empty
 }
 
 ///////////////////////////////////////////////////////////////////////////////
