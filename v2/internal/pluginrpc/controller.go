@@ -19,15 +19,26 @@ const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 
-func StartGRPCController(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	closeChan := make(chan error, 1)
-
+func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	grpcServer := grpc.NewServer()
-	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 	RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
 
+	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
+}
+
+func StartPublisherGRPC(grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	grpcServer := grpc.NewServer()
+	RegisterPublisherServer(grpcServer, newPublishingService())
+
+	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
+}
+
+func startGRPC(grpcServer *grpc.Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	closeChan := make(chan error, 1)
+	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
+
 	go func() {
-		err := grpcServer.Serve(grpcLn)
+		err := grpcServer.Serve(grpcLn) // blocking
 		if err != nil {
 			closeChan <- err
 		}
