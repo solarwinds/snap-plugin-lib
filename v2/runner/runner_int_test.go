@@ -88,7 +88,7 @@ func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
 
 func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadResponse, error) {
 	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadRequest{
-		TaskId:          []byte(taskID),
+		TaskId:          taskID,
 		JsonConfig:      configJSON,
 		MetricSelectors: selectors,
 	})
@@ -97,14 +97,14 @@ func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) 
 
 func (s *SuiteT) sendUnload(taskID string) (*pluginrpc.UnloadResponse, error) {
 	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadRequest{
-		TaskId: []byte(taskID),
+		TaskId: taskID,
 	})
 	return response, err
 }
 
 func (s *SuiteT) sendCollect(taskID string) (*pluginrpc.CollectResponse, error) {
 	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc.CollectRequest{
-		TaskId: []byte(taskID),
+		TaskId: taskID,
 	})
 	if err != nil {
 		return nil, err

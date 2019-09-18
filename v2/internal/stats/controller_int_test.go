@@ -46,7 +46,7 @@ func TestStatistics(t *testing.T) {
 			So(ts.Counters.TotalCollectRequests, ShouldEqual, 3)
 
 			td := sc.stats.TasksDetails
-			So(td, ShouldContainKey, 1)
+			So(td, ShouldContainKey, "task-1")
 			So(td["task-1"].Counters.CollectRequests, ShouldEqual, 3)
 			So(td["task-1"].Counters.TotalMetrics, ShouldEqual, 21)
 			So(td["task-1"].LastMeasurement.CollectedMetrics, ShouldEqual, 11)
@@ -71,8 +71,8 @@ func TestStatistics(t *testing.T) {
 			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
 
 			td := sc.stats.TasksDetails
-			So(td, ShouldContainKey, 1)
-			So(td, ShouldContainKey, 2)
+			So(td, ShouldContainKey, "task-1")
+			So(td, ShouldContainKey, "task-2")
 			So(td["task-2"].Counters.CollectRequests, ShouldEqual, 3)
 			So(td["task-2"].Counters.TotalMetrics, ShouldEqual, 30)
 			So(td["task-2"].LastMeasurement.CollectedMetrics, ShouldEqual, 10)
@@ -94,8 +94,8 @@ func TestStatistics(t *testing.T) {
 			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
 
 			td := sc.stats.TasksDetails
-			So(td, ShouldNotContainKey, 1)
-			So(td, ShouldContainKey, 2)
+			So(td, ShouldNotContainKey, "task-1")
+			So(td, ShouldContainKey, "task-2")
 		}
 
 		// Load task3 and perform some operations
@@ -117,8 +117,8 @@ func TestStatistics(t *testing.T) {
 			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
 
 			td := sc.stats.TasksDetails
-			So(td, ShouldContainKey, 2)
-			So(td, ShouldContainKey, 3)
+			So(td, ShouldContainKey, "task-2")
+			So(td, ShouldContainKey, "task-3")
 
 			So(td["task-2"].Counters.CollectRequests, ShouldEqual, 4)
 			So(td["task-2"].Counters.TotalMetrics, ShouldEqual, 33)
@@ -144,9 +144,9 @@ func TestStatistics(t *testing.T) {
 			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
 
 			td := sc.stats.TasksDetails
-			So(td, ShouldNotContainKey, 1)
-			So(td, ShouldNotContainKey, 2)
-			So(td, ShouldNotContainKey, 3)
+			So(td, ShouldNotContainKey, "task-1")
+			So(td, ShouldNotContainKey, "task-2")
+			So(td, ShouldNotContainKey, "task-3")
 		}
 
 		// Finalize

@@ -79,13 +79,13 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 
 func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 	if !cm.activateTask(id) {
-		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
+		return nil, fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return nil, fmt.Errorf("can't find a context for a given id: %d", id)
+		return nil, fmt.Errorf("can't find a context for a given id: %s", id)
 	}
 	context := contextIf.(*pluginContext)
 
@@ -108,7 +108,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
 	if !cm.activateTask(id) {
-		return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
+		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
 
@@ -143,7 +143,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 
 func (cm *ContextManager) UnloadTask(id string) error {
 	if !cm.activateTask(id) {
-		return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
+		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.markTaskAsCompleted(id)
 
@@ -156,7 +156,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
 		err := loadable.Unload(context)
 		if err != nil {
-			return fmt.Errorf("error occured when trying to unload a task (%d): %v", id, err)
+			return fmt.Errorf("error occured when trying to unload a task (%s): %v", id, err)
 		}
 	}
 
