@@ -192,7 +192,7 @@ Here we are calling `mem.VirutalUsage` and retrieve value from field `.UserPerce
 
 ## Smoke tests
 
-Let's create a test file to manually validate that function are working correctly (`./collector/proxy/proxy_test.go`)
+Let's create a test file to manually validate that functions are working correctly (`./collector/proxy/proxy_test.go`)
 
 > Be aware that tests presented in this chapter are not good candidates for stable regressions.
 > They are introduced simply to show result of our initial implementation
