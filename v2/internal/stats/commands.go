@@ -14,7 +14,7 @@ type StatCommand interface {
 
 type loadTaskStat struct {
 	sm      *StatisticsController
-	taskId  int
+	taskId  string
 	config  string
 	filters []string
 }
@@ -27,7 +27,7 @@ func (ts *loadTaskStat) ApplyStat() {
 
 type unloadTaskStat struct {
 	sm     *StatisticsController
-	taskId int
+	taskId string
 }
 
 func (ts *unloadTaskStat) ApplyStat() {
@@ -38,7 +38,7 @@ func (ts *unloadTaskStat) ApplyStat() {
 
 type collectTaskStat struct {
 	sm           *StatisticsController
-	taskId       int
+	taskId       string
 	metricsCount int
 	success      bool
 	startTime    time.Time

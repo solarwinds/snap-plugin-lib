@@ -30,7 +30,7 @@ func newCollectService(proxy CollectorProxy, statsController stats.Controller, p
 func (cs *collectService) Collect(request *CollectRequest, stream Collector_CollectServer) error {
 	log.Trace("GRPC Collect() received")
 
-	taskID := int(request.GetTaskId())
+	taskID := string(request.GetTaskId())
 
 	pluginMts, err := cs.proxy.RequestCollect(taskID)
 	if err != nil {
@@ -65,7 +65,7 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*LoadResponse, error) {
 	log.Trace("GRPC Load() received")
 
-	taskID := int(request.GetTaskId())
+	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
@@ -75,7 +75,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*Load
 func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
 	log.Trace("GRPC Unload() received")
 
-	taskID := int(request.GetTaskId())
+	taskID := string(request.GetTaskId())
 
 	return &UnloadResponse{}, cs.proxy.UnloadTask(taskID)
 }

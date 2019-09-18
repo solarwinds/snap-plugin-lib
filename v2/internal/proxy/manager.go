@@ -27,9 +27,9 @@ func init() {
 }
 
 type Collector interface {
-	RequestCollect(id int) ([]*types.Metric, error)
-	LoadTask(id int, config []byte, selectors []string) error
-	UnloadTask(id int) error
+	RequestCollect(id string) ([]*types.Metric, error)
+	LoadTask(id string, config []byte, selectors []string) error
+	UnloadTask(id string) error
 }
 
 type metricMetadata struct {
@@ -42,8 +42,8 @@ type ContextManager struct {
 	collector  plugin.Collector // reference to custom plugin code
 	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
-	activeTasksMutex sync.RWMutex     // mutex associated with activeTasks
-	activeTasks      map[int]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
+	activeTasksMutex sync.RWMutex        // mutex associated with activeTasks
+	activeTasks      map[string]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -59,7 +59,7 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 	cm := &ContextManager{
 		collector:   collector,
 		contextMap:  sync.Map{},
-		activeTasks: map[int]struct{}{},
+		activeTasks: map[string]struct{}{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
 
@@ -77,7 +77,7 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
+func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 	if !cm.activateTask(id) {
 		return nil, fmt.Errorf("can't process collect request, other request for the same id (%d) is in progress", id)
 	}
@@ -106,7 +106,7 @@ func (cm *ContextManager) RequestCollect(id int) ([]*types.Metric, error) {
 	return context.sessionMts, nil
 }
 
-func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string) error {
+func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
 	if !cm.activateTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%d) is in progress", id)
 	}
@@ -141,7 +141,7 @@ func (cm *ContextManager) LoadTask(id int, rawConfig []byte, mtsFilter []string)
 	return nil
 }
 
-func (cm *ContextManager) UnloadTask(id int) error {
+func (cm *ContextManager) UnloadTask(id string) error {
 	if !cm.activateTask(id) {
 		return fmt.Errorf("can't process unload request, other request for the same id (%d) is in progress", id)
 	}
@@ -212,7 +212,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 	}
 }
 
-func (cm *ContextManager) activateTask(id int) bool {
+func (cm *ContextManager) activateTask(id string) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
@@ -224,7 +224,7 @@ func (cm *ContextManager) activateTask(id int) bool {
 	return true
 }
 
-func (cm *ContextManager) markTaskAsCompleted(id int) {
+func (cm *ContextManager) markTaskAsCompleted(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
