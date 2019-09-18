@@ -35,8 +35,6 @@ func (s simpleCollector) format(ctx plugin.Context) string {
 	return "long"
 }
 
-
-
 func (s simpleCollector) Load(ctx plugin.Context) error {
 	ctx.Store("startTime", time.Now())
 	return nil

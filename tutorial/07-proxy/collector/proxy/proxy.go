@@ -2,11 +2,12 @@ package proxy
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/librato/snap-plugin-lib-go/tutorial/07-proxy/collector/data"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
-	"time"
 )
 
 const defaultCPUMeasurementTime = 1 * time.Second

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
-	"time"
 )
 
 type simpleCollector struct{}
@@ -19,7 +20,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 	_ = ctx.AddMetric("/example/time/minute", t.Minute())
 	_ = ctx.AddMetric("/example/time/second", t.Second())
 
-	return nil;
+	return nil
 }
 
 func main() {

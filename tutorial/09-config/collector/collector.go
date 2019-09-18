@@ -2,10 +2,11 @@ package collector
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"regexp"
 	"strings"
+
+	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 var sanitizeRegex = regexp.MustCompile(`[()[\]{}<> ,./?;':"|^!\-_+\\]+`)
