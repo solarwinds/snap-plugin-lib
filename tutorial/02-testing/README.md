@@ -13,7 +13,7 @@ To force own custom name of binary, use:
 go build -o binaryName
 ```
 
- Instead of compiling you own code, you can reuse tutorial example(s):
+ Instead of compiling your own code, you can reuse tutorial example(s):
 ```bash
 cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/tutorial/02-testing
 go build
@@ -40,7 +40,7 @@ time="2019-09-03T15:12:16+02:00" level=warning msg="Ping timeout occurred" layer
 time="2019-09-03T15:12:16+02:00" level=error msg="Major error occurred - plugin will be shut down" error="ping message missed 3 times (timeout: 3s)" layer=lib module=plugin-rpc
 ```
 
-Observed scenario is valid. Executing without any arguments means that plugin expects to be controller by snap daemon.
+Observed scenario is valid. Executing without any arguments means that plugin expects to be controlled by snap daemon.
 Since snap is not running, plugin quits.
 
 ### Validating metric
@@ -95,7 +95,7 @@ You can request several collects, using other flags:
 ./02-testing -debug-mode=1 -debug-collect-counts=3 -debug-collect-interval=5s
 ```
 
-Output will contains 3 sets of metrics calculated every 5 seconds:
+Output will contain 3 sets of metrics calculated every 5 seconds:
 ```
 Gathered metrics (length=5):
 example.date.day 3 {map[]}
@@ -128,9 +128,9 @@ To work correctly plugin should be run with several flags as follows:
 ./02-testing -grpc-ping-max-missed=0 -grpc-port=50123
 ```
 
-By providing `-grpc-ping-max-missed=0` plugin won't exit after not receiving 3 ping from snap (or its equivalent, like snap-mock).
+By providing `-grpc-ping-max-missed=0` plugin won't exit after not receiving 3 pings from snap (or its equivalent, like snap-mock).
 
-Now, in other console you should locate snap-mock, compile it and execute:
+Now, in other console, you should locate snap-mock, compile it and execute:
 
 ```bash
 cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/v2/snap-mock

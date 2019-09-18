@@ -2,7 +2,7 @@
 
 ## Code
 
-The simplest plugin gathering only 1 metric (every time with the same value) can be written as follows.
+The simplest plugin, gathering only 1 metric (every time with the same value) can be written as follows.
 
 ```go
 package main
@@ -30,7 +30,7 @@ func main() {
 package main
 ```
 
-This instruction will tell go compiler that should build executable file from this package.
+This instruction will tell go compiler that it should build executable file from this package.
 
 ```go
 import (
@@ -60,9 +60,9 @@ We are gathering one metric `/example/metric1` containing value `10`, by calling
 In real application those values would vary in time (depending on the state of observed system).
 
 Following code is a little more complicated.
-It gather current date and time, producing 5 metrics associated with current day, month, hour, minute and second of time.
+It gathers current date and time, producing 5 metrics associated with current day, month, hour, minute and second.
 
-> Although its practicality is doubtful, it will be suffient to show different set of plugin-lib v2 features.
+> Although its practicality is doubtful, it will be sufficient to show different set of plugin-lib v2 features.
 > If you want to learn straightaway how to write useful collector, visit [Chapter 6](/tutorial/06-overview/README.md) of this tutorial. 
 
 ```go
@@ -88,9 +88,9 @@ In real plugins those code would be replaced with some REST request, file readin
 
 When we have access to `time` object, we create 5 metrics - each of which is associated with a separated value.
 Also we have introduced metric groups: date and time (second position in metric name).
-Metric form will be described later in details but in short metrics should contain at least two strings separated by "/". 
+Metric form will be described later in detail, but in short, metrics should contain at least two strings separated by "/". 
 Usually the first one is plugin name and the last one is metric purpose.
-Intermediate strings serves as groups (collector sub-functions) and simplifies filtering.
+Intermediate strings serve as groups (collector sub-functions) and simplifies filtering.
 
 ### Runner
 
@@ -100,6 +100,6 @@ func main() {
 }
 ```
 
-main() function will usually have the same implementation (with different parameters depending of plugin).
+main() function will usually have the same implementation (with different parameters depending on plugin).
 Runner takes care about establishing valid communication between snap daemon and plugin.
 User can focus only on the collector implementation details.

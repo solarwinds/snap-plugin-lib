@@ -13,7 +13,7 @@ Plugin-lib-go provides facilities for maintaining different tasks.
 
 ### Context 
 
-You might have notice, that when we defined plugin algorithm we had to provide implementation of `Collect` method:  
+You might have noticed, that when we defined plugin algorithm, we had to provide implementation of `Collect` method:  
 
 ```go
 func (s simpleCollector) Collect(ctx plugin.Context) error {
@@ -23,7 +23,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-`Collect` takes one argument, which is context - an object associated with current tasks which allows:
+`Collect` takes one argument, which is context - an object associated with current tasks, which allows:
 - adding metrics (measurements) during current collection request,
 - access configuration values, 
 - to maintain state between collections for the same task,
@@ -36,10 +36,10 @@ We will slightly modify our previous example in order to check those features.
 When a task is defined for a plugin, snap will send a `Load()` request to plugin containing:
 - task identifier - unique number maintained by snap
 - JSON-like object with configuration fields
-- list of metrics that user want to gather - we can request only subset of "measurements"
+- list of metrics that user wants to gather - we can request only subset of "measurements"
 
 When a task is no longer needed snap may send an `Unload()` request. 
-As for `Load()` we can provide some custom code which will be executed when the task is finished.
+As for `Load()`, we can provide some custom code which will be executed when the task is finished.
 
 Let's introduce empty custom implementation of those methods:
 ```go
@@ -65,7 +65,7 @@ Plugin will expect configuration in JSON format. In our case it may be simply:
 
 We can access configuration fields in two ways.
 - by accessing method `ctx.Config` which implements simplified access to configuration values
-- by accessing method `ctx.RawConfig` which return JSON object that needs to be manually unmarshaled to user-defined.
+- by accessing method `ctx.RawConfig` which returns JSON object that needs to be manually unmarshaled to user-defined.
 
 In this chapter we will use first method. Second one will be presented in [Chapter 9](/tutorial/09-config/README.md) **TODO**linktoanchor**
 
@@ -144,14 +144,14 @@ example.time.second 21 {map[]}
 
 #### State
 
-Sometimes you need to remember some values between consecutive collections or after processing configuration in `Load()` method.
+Sometimes you need to remember some values between consecutive collections, or after processing configuration in `Load()` method.
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
 > You should use `simpleCollector` struct members to store state, since it's not task-aware.
 
-Let's add a new metric (`/example/count/running`) which provide information how long plugin is running (or being more precisely: for how long task is loaded)
+Let's add a new metric (`/example/count/running`) which provide information how long plugin is running (or being more precisely: for how long task is being loaded)
 
-In order to be able to calculate plugin running duration we have to save current time in `Load()` method:
+In order to enable plugin running duration calculation, we have to save current time in `Load()` method:
 ```go
 func (s simpleCollector) Load(ctx plugin.Context) error {
 	ctx.Store("startTime", time.Now())
