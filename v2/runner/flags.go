@@ -31,8 +31,10 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
+func newFlagParser(name string, pType PluginType, opt *types.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
+
+	// common flags
 
 	flagParser.StringVar(&opt.PluginIp,
 		"plugin-ip", defaultPluginIP,
@@ -75,29 +77,33 @@ func newFlagParser(name string, opt *types.Options) *flag.FlagSet {
 		"stats-port", defaultStatsPort,
 		"Port on which stats server will be available")
 
-	flagParser.BoolVar(&opt.PrintExampleTask,
-		"print-example-task", false,
-		"Print-out example task for a plugin")
+	// custom flags
 
-	flagParser.BoolVar(&opt.DebugMode,
-		"debug-mode", false,
-		"Run plugin in debug mode (standalone)")
+	if pType == PluginTypeCollector {
+		flagParser.BoolVar(&opt.PrintExampleTask,
+			"print-example-task", false,
+			"Print-out example task for a plugin")
 
-	flagParser.UintVar(&opt.DebugCollectCounts,
-		"debug-collect-counts", defaultCollectCount,
-		"Number of collect requests executed in debug mode (0 - infinitely)")
+		flagParser.BoolVar(&opt.DebugMode,
+			"debug-mode", false,
+			"Run plugin in debug mode (standalone)")
 
-	flagParser.DurationVar(&opt.DebugCollectInterval,
-		"debug-collect-interval", defaultCollectInterval,
-		"Interval between consecutive collect requests")
+		flagParser.UintVar(&opt.DebugCollectCounts,
+			"debug-collect-counts", defaultCollectCount,
+			"Number of collect requests executed in debug mode (0 - infinitely)")
 
-	flagParser.StringVar(&opt.PluginConfig,
-		"plugin-config", defaultConfig,
-		"Collector configuration in debug mode")
+		flagParser.DurationVar(&opt.DebugCollectInterval,
+			"debug-collect-interval", defaultCollectInterval,
+			"Interval between consecutive collect requests")
 
-	flagParser.StringVar(&opt.PluginFilter,
-		"plugin-filter", defaultFilter,
-		fmt.Sprintf("Default filtering definition (separated by %s)", filterSeparator))
+		flagParser.StringVar(&opt.PluginConfig,
+			"plugin-config", defaultConfig,
+			"Collector configuration in debug mode")
+
+		flagParser.StringVar(&opt.PluginFilter,
+			"plugin-filter", defaultFilter,
+			fmt.Sprintf("Default filtering definition (separated by %s)", filterSeparator))
+	}
 
 	return flagParser
 }
@@ -134,12 +140,12 @@ func (l *logLevelHandler) Set(s string) error {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func ParseCmdLineOptions(pluginName string, args []string) (*types.Options, error) {
+func ParseCmdLineOptions(pluginName string, pluginType PluginType, args []string) (*types.Options, error) {
 	opt := &types.Options{
 		LogLevel: defaultLogLevel,
 	}
 
-	flagParser := newFlagParser(pluginName, opt)
+	flagParser := newFlagParser(pluginName, pluginType, opt)
 
 	err := flagParser.Parse(args)
 	if err != nil {

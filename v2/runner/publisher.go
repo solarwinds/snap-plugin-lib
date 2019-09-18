@@ -2,13 +2,14 @@ package runner
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"os"
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], os.Args[1:]) // todo: publish has limited set of flags
+	opt, err := ParseCmdLineOptions(os.Args[0], PluginTypePublisher, os.Args[1:])
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -16,7 +17,7 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 
 	//contextManager := proxy.NewContextManager(publisher)
 
-	r, err := acquireResources(opt) // todo: but no pprof and stats
+	r, err := acquireResources(opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
 		os.Exit(errorExitStatus)

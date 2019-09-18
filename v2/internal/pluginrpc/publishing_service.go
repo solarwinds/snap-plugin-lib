@@ -8,8 +8,7 @@ type publishingService struct {
 }
 
 func newPublishingService() PublisherServer {
-	return &publishingService{
-	}
+	return &publishingService{}
 }
 
 func (ps *publishingService) Publish(stream Publisher_PublishServer) error {

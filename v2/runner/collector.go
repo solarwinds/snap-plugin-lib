@@ -32,7 +32,7 @@ const (
 )
 
 func StartCollector(collector plugin.Collector, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], os.Args[1:])
+	opt, err := ParseCmdLineOptions(os.Args[0], PluginTypeCollector, os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
