@@ -103,3 +103,8 @@ func main() {
 main() function will usually have the same implementation (with different parameters depending on plugin).
 Runner takes care about establishing valid communication between snap daemon and plugin.
 User can focus only on the collector implementation details.
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Next Chapter: [Testing](/tutorial/02-testing/README.md)

@@ -205,3 +205,9 @@ As you can see we achieved almost the adequate testing results as in the debug m
 The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same way, which plugin would be triggered in production environment. 
 Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice.
 Snap-mock will be useful to observe how plugin reacts with different tasks (several configurations requested at the same time).
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Introduction - Simple plugin](/tutorial/01-simple/README.md)
+- Next Chapter: [Basic concepts - Configuration and state](/tutorial/03-concepts/README.md)

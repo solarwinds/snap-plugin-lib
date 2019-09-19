@@ -264,3 +264,9 @@ go test ./... -v
 ```
 
 to see all information procuded by `fmt.Printf`
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Advanced Plugin - Introduction](/tutorial/06-overview/README.md)
+- Next Chapter: [Implementing System collector](/tutorial/08-collector/README.md)

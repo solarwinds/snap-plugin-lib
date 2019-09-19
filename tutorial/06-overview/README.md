@@ -88,3 +88,10 @@ Collector structure will look as follows:
 `Proxy` module will retrieve system measurement using psutil library.
 Separating `Collector` and `Proxy` will enable us to easily write unit tests. 
 `Data` module will contain structures shared between `Collector` and `Proxy`.
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Useful tools](/tutorial/05-tools/README.md)
+- Next Chapter: [Gathering data (Proxy Collector)](/tutorial/07-proxy/README.md)
+

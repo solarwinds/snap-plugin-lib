@@ -233,3 +233,9 @@ func (s simpleCollector) Load(ctx plugin.Context) error {
 ```
 
 This approach will be used also in [Chapter 9](/tutorial/09-config/README.md).
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Testing](/tutorial/02-testing/README.md)
+- Next Chapter: [Metrics - filters, definition, tags](/tutorial/04-metrics/README.md)

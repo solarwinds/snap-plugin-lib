@@ -145,3 +145,10 @@ example.time.minute 17 {map[]}
 example.time.second 2 {map[]}
 example.count.running 0 {map[]}
 ```
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Basic concepts - Configuration and state](/tutorial/03-concepts/README.md)
+- Next Chapter: [Useful tools](/tutorial/05-tools/README.md)
+

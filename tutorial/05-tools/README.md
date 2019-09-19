@@ -175,3 +175,9 @@ When plugin is controlled by snap-mock user can run profiling server in the back
 ```
 
 To access pprof Web-GUI browse http://127.0.0.1:8081/debug/pprof/
+
+----
+
+* [Table of contents](/tutorial/README.md)
+- Previous Chapter: [Metrics - filters, definition, tags](/tutorial/04-metrics/README.md)
+- Next Chapter: [Advanced Plugin - Introduction](/tutorial/06-overview/README.md)
