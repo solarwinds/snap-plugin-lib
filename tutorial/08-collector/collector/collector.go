@@ -57,11 +57,7 @@ func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 		return fmt.Errorf("can't create metric for total cpu utilization: %v", err)
 	}
 
-	err = ctx.AddMetric("/minisystem/usage/cpu", cpu)
-	if err != nil {
-		panic("metric not defined")
-	}
-
+	_ = ctx.AddMetric("/minisystem/usage/cpu", cpu)
 	return nil
 }
 
@@ -71,11 +67,7 @@ func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
 		return fmt.Errorf("can't create metric for total memory utilization: %v", err)
 	}
 
-	err = ctx.AddMetric("/minisystem/usage/memory", memory)
-	if err != nil {
-		panic("metric not defined")
-	}
-
+	_ = ctx.AddMetric("/minisystem/usage/memory", memory)
 	return nil
 }
 
@@ -89,16 +81,10 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
 		pName := s.sanitizeName(p.ProcessName)
 
 		cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-		err = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
-		if err != nil {
-			fmt.Printf("%v\n", err)
-		}
+		_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
 
 		memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-		err = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
-		if err != nil {
-			fmt.Printf("%v\n", err)
-		}
+		_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
 	}
 
 	return nil
