@@ -56,7 +56,7 @@ plugins:
 
 ## Stats server
 
-When plugin is controller by snap-mock, user can gather several statistics:
+When plugin is controlled by snap-mock, user can gather several statistics:
 - options used to start plugin,
 - number of tasks currently loaded,
 - number of collect request,
@@ -69,13 +69,13 @@ To enable this feature simply run plugin with following arguments:
 ./05-tools -grpc-port=50123 -log-level=debug -enable-stats -enable-stats-server -stats-port=8080
 ```
 
-To simulate two independent tasks call snap-mock twice:
+To simulate two independent tasks, call snap-mock twice:
 ```bash
 ./snap-mock -plugin-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=1 &
 ./snap-mock -plugin-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=2 &
 ```
 
-To see output of stats server open browser on address http://127.0.0.1:8080/stats.
+To see output of stats server, open a browser on address http://127.0.0.1:8080/stats.
 
 Example output:
 ```json

@@ -1,6 +1,6 @@
 # Advanced Plugin - Introduction
 
-In previous chapters you've learnt how to write very simple plugin and utilize functionality that library offers. 
+In previous chapters you've learnt how to write very simple plugin and utilize functionality that the library has to offer. 
 Now, we will teach you how to build advanced, practical collector which will gather basic information about monitored system:
 - cpu usage (percentage) for each running process 
 - memory usage (percentage) for each running process
@@ -11,7 +11,7 @@ Now, we will teach you how to build advanced, practical collector which will gat
 
 ## Static metrics
 
-In our simple example, a metric could held following information
+In our simple example, a metric could hold following information
 - metric name (namespace), ie. `/example/time/hour`
 - value, ie. `11`
 - additional text information (tags), ie. `weekday: Monday`
@@ -58,7 +58,7 @@ System collector will add information about PID to processes related metrics.
 ## Configuration 
 
 In typical system with many running processes, administrator may be interested with only those, which takes meaningful level of resources (ie. CPU > 5%).
-Also, accuracy of some measurements may be related to the duration of time measurement takes.
+Also, accuracy of some measurements may be related to the duration that the measurement takes.
 
 Giving that requirements, our example configuration may be written as:
 
@@ -72,11 +72,11 @@ Giving that requirements, our example configuration may be written as:
 }
 ```
 
-Configuration handling will be done in [Chapter 8](/tutorial/08-collector/README.md).
+Configuration handling will be covered in [Chapter 8](/tutorial/08-collector/README.md).
 
 ## Code structure
 
-Since created plugin is more complicated and will require a lot coding we will structure go files into separate submodules.
+Since created plugin is more complicated and will require a lot of coding, we will structure go files into separate submodules.
 
 Collector structure will look as follows:
 - main.go
@@ -86,5 +86,5 @@ Collector structure will look as follows:
 
 `Collector` module will contain code related to plugin (implementation of `Load`, `Unload`, `Collect` and `DefineMetrics`).
 `Proxy` module will retrieve system measurement using psutil library.
-Separating `Collector` and `Proxy` enabling us to easily write unit tests. 
+Separating `Collector` and `Proxy` will enable us to easily write unit tests. 
 `Data` module will contain structures shared between `Collector` and `Proxy`.

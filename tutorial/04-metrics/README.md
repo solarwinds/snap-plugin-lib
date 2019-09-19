@@ -78,7 +78,7 @@ func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 
 `DefineMetric()` has four arguments:
 - metric name,
-- unit (used by AppOptics front-end),
+- unit (used i.e. by AppOptics front end),
 - indication if metric is default (see: [Example task](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#printing-example-task-file))
 - metric description (used by AppOptics front-end)
 
@@ -118,7 +118,7 @@ example.count.running 0 {map[]}
 
 ## Tags
 
-Metric can hold addition information apart from its name and value. 
+Metric can hold additional information apart from its name and value. 
 Tags are pairs of strings associated with metric.
 
 We can add information about weekday (ie. Monday) to existing metric `/example/date/day` by calling:
@@ -135,7 +135,7 @@ After requesting metrics:
 $ ./04-metrics -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s
 ```
 
-We got addition information:
+We got additional information:
 ```
 Gathered metrics (length=6):
 example.date.day 9 {map[weekday:Monday]}

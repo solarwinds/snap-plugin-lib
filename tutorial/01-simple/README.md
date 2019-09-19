@@ -55,14 +55,14 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 ```
 
 Above code shows the simplest implementation of collector.
-Method `Collect()` needs to be always provided - it's the "heart" of plugin, saying what needs to be done.
+Method `Collect()` needs to be always provided - it's the "heart" of a plugin, saying what needs to be done.
 We are gathering one metric `/example/metric1` containing value `10`, by calling `ctx.AddMetric(metricName, value)`.
 In real application those values would vary in time (depending on the state of observed system).
 
 Following code is a little more complicated.
 It gathers current date and time, producing 5 metrics associated with current day, month, hour, minute and second.
 
-> Although its practicality is doubtful, it will be sufficient to show different set of plugin-lib v2 features.
+> Although it's practicality doubtful, it will be sufficient to show different set of plugin-lib v2 features.
 > If you want to learn straightaway how to write useful collector, visit [Chapter 6](/tutorial/06-overview/README.md) of this tutorial. 
 
 ```go

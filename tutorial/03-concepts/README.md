@@ -23,7 +23,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-`Collect` takes one argument, which is context - an object associated with current tasks, which allows:
+`Collect` takes one argument, which is a context - an object associated with current tasks, which allows:
 - adding metrics (measurements) during current collection request,
 - access configuration values, 
 - to maintain state between collections for the same task,
@@ -65,11 +65,11 @@ Plugin will expect configuration in JSON format. In our case it may be simply:
 
 We can access configuration fields in two ways.
 - by accessing method `ctx.Config` which implements simplified access to configuration values
-- by accessing method `ctx.RawConfig` which returns JSON object that needs to be manually unmarshaled to user-defined.
+- by accessing method `ctx.RawConfig` which returns JSON object (bytes) that needs to be manually unmarshaled.
 
 In this chapter we will use first method. Second one will be presented in [Chapter 9](/tutorial/09-config/README.md) **TODO**linktoanchor**
 
-Let's create a helper method which read `format` field:
+Let's create a helper method which reads `format` field:
 ```go
 func (s simpleCollector) format(ctx plugin.Context) string {
 	fm, _ := ctx.Config("format")

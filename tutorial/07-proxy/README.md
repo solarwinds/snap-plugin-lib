@@ -31,7 +31,7 @@ func Do() {
 }
 ```
 
-Total CPU and memory are accesses by: 
+Total CPU and memory are accessed by: 
 ```go
 cpu.Percent(1 * time.Second, false) // result[0] 
 mem.VirtualMemory()                 .. result.UsedPercent
@@ -51,11 +51,11 @@ import (
 
 ## Implementing `Data` Module
 
-As mention earlier `Data` module will contains common structures. 
+As mention earlier `Data` module will contain common structures. 
 We need one to hold simplified information about process. 
 Also, our collector module should not depend on gopsutil library directly.
 
-So far only files we need is `./collector/data/processinfo.go` containing only simple structure 
+So far only file we need is `./collector/data/processinfo.go` containing only simple structure 
 
 ```go
 package data
@@ -153,7 +153,7 @@ func (p proxyCollector) ProcessesInfo() ([]data.ProcessInfo, error) {
 ```
 
 First a list of all processes is obtained from psutil (`process.Processes()`). 
-Then we iterate over each process and reads: name, cpu and memory utilization and PID. 
+Then we iterate over each process and read: name, cpu and memory utilization and PID. 
 At the end (of iteration) we create simplified structure representing single process.
 Function returns list of all such structures. 
 

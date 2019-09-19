@@ -199,9 +199,9 @@ What we can see from debug logs:
 There are also other entries:
 - first line is metadata in JSON format used by snap. 
 - GRPC `Load()` and GRPC `Unload()` calls will be covered later. In short, collection can be requested by several independent tasks and `Load()` allows to handle independent configuration for a single task. 
-- `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid some internal limits when plugin want to send large portions of metrics)
+- `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid some internal limits of GRPC when plugin want to send large portions of metrics)
 
 As you can see we achieved almost the adequate testing results as in the debug mode (3 request every 5 seconds).
 The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same way, which plugin would be triggered in production environment. 
 Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice.
-Snap-mock will useful to observe how plugin react with different tasks (several configurations requested at the same time).
+Snap-mock will be useful to observe how plugin reacts with different tasks (several configurations requested at the same time).

@@ -25,7 +25,7 @@ Simplified algorithm may be described as follows:
 
 ## Intro
 
-This tutorial will teach you how to write custom collector plugin in Go language, that you could later use in production. 
+This tutorial will teach you how to write custom collector plugin in Go language, that you could later use in your production environment. 
 
 We will start from a very simple example - building a minimal plugin and testing that it's working correctly. 
 After you obtain basics, we will teach you how to write real, useful collector (gathering sysytem metrics) utilizing advanced features that plugin-go V2 has to offer:
