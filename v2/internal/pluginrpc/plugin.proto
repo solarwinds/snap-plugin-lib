@@ -17,7 +17,7 @@ service Collector {
 }
 
 service Publisher {
-    rpc Publish (stream PublishRequest) returns (CollectRequest);
+    rpc Publish (stream PublishRequest) returns (PublishResponse);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ message InfoResponse {
 // Service Publisher definition
 
 message PublishRequest {
-    // todo: should pass metrics later
+    repeated Metric metric_set = 1;
 }
 
 message PublishResponse {
