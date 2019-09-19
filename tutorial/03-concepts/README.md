@@ -206,3 +206,30 @@ example.time.second 24 {map[]}
 example.count.running 10 {map[]}
 ```
 
+#### State and Configuration
+
+State may be also used to optimize processing configuration values. 
+In [previous section](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#configuration) "format" option was read during each collection.
+We could read it only once during `Load()` and store in context. 
+
+Example:
+```go
+func (s simpleCollector) format(ctx plugin.Context) string {
+    fm, _ := ctx.Load("configFormat")
+    return fm.(string)
+}
+  
+func (s simpleCollector) Load(ctx plugin.Context) error {
+    fm, _ := ctx.Config("format")
+    if fm == "short" {
+        ctx.Store("configFormat", "short")
+    } else {
+        ctx.Store("configFormat", "long")
+    }
+  
+    ctx.Store("startTime", time.Now())
+    return nil
+ }
+```
+
+This approach will be used also in [Chapter 9](/tutorial/09-config/README.md).
