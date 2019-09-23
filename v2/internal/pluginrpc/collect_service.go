@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	"golang.org/x/net/context"
 )
 

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
