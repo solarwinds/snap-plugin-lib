@@ -2,9 +2,9 @@ package pluginrpc
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"io"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 

@@ -2,10 +2,10 @@ package runner
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
