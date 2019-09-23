@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
