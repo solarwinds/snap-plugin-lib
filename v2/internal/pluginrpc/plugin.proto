@@ -79,7 +79,8 @@ message InfoResponse {
 // Service Publisher definition
 
 message PublishRequest {
-    repeated Metric metric_set = 1;
+    string task_id = 1;
+    repeated Metric metric_set = 2;
 }
 
 message PublishResponse {

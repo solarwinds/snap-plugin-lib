@@ -41,7 +41,7 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Publisher related methods
 
-func (cm *ContextManager) RequestPublish(id string) error {
+func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	return nil
 }
 
