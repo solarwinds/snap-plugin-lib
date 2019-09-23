@@ -7,8 +7,8 @@ type Publisher interface {
 type PublishContext interface {
 	Context
 
-	ListMetrics(MetricFilter) []Metric
-	ListAllMetrics() []Metric
+	ListMetrics()
+	ListAllMetrics()
 	HasMetric(ns string)
 	Count() int
 }

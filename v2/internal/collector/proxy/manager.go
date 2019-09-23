@@ -23,7 +23,7 @@ import (
 var log *logrus.Entry
 
 func init() {
-	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-proxy"})
+	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
 }
 
 type Collector interface {
