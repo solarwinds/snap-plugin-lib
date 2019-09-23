@@ -1,6 +1,9 @@
 package main
 
-import "github.com/librato/snap-plugin-lib-go/v2/runner"
+import (
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/runner"
+)
 
 const (
 	pluginName    = "example"
@@ -10,7 +13,7 @@ const (
 type myPublisher struct {
 }
 
-func (m myPublisher) Publish() error {
+func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 	return nil
 }
 

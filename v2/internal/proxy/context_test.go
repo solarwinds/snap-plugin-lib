@@ -138,7 +138,7 @@ func (sc *storedClient) Count() int {
 
 type mockCollector struct{}
 
-func (*mockCollector) Collect(plugin.Context) error {
+func (*mockCollector) Collect(plugin.CollectContext) error {
 	return nil
 }
 

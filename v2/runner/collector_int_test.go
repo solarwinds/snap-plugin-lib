@@ -141,7 +141,7 @@ type simpleCollector struct {
 	collectCalls int
 }
 
-func (sc *simpleCollector) Collect(ctx plugin.Context) error {
+func (sc *simpleCollector) Collect(ctx plugin.CollectContext) error {
 	sc.collectCalls++
 	return nil
 }
@@ -232,7 +232,7 @@ type longRunningCollector struct {
 	collectDuration time.Duration
 }
 
-func (c *longRunningCollector) Collect(ctx plugin.Context) error {
+func (c *longRunningCollector) Collect(ctx plugin.CollectContext) error {
 	c.collectCalls++
 	time.Sleep(c.collectDuration)
 	return nil
@@ -359,7 +359,7 @@ func (cc *configurableCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 
-func (cc *configurableCollector) Collect(ctx plugin.Context) error {
+func (cc *configurableCollector) Collect(ctx plugin.CollectContext) error {
 	Convey("Validate collector can access objects defined during Load() execution", cc.t, func() {
 		// Act
 		obj1, ok1 := ctx.Load("obj1")
@@ -527,7 +527,7 @@ func (kc *kubernetesCollector) PluginDefinition(ctx plugin.CollectorDefinition) 
 	return nil
 }
 
-func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
+func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 	Convey("Validate that user can obtain proper information about reasonableness to process metrics or metrics groups", kc.t, func() {
 		So(ctx.ShouldProcess("/kubernetes/deployment/*/*/spec/paused"), ShouldBeTrue)                  // ok
 		So(ctx.ShouldProcess("/kubernetes/deployment/*/*/spec/*"), ShouldBeTrue)                       // ok
@@ -628,7 +628,7 @@ type noDefinitionCollector struct {
 	t            *testing.T
 }
 
-func (ndc *noDefinitionCollector) Collect(ctx plugin.Context) error {
+func (ndc *noDefinitionCollector) Collect(ctx plugin.CollectContext) error {
 	ndc.collectCalls++
 
 	Convey("Validate that user can obtain proper information about reasonableness to process metrics or metrics groups", ndc.t, func() {
