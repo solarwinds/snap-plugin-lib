@@ -41,7 +41,7 @@ time="2019-09-03T15:12:16+02:00" level=error msg="Major error occurred - plugin 
 ```
 
 Observed scenario is valid. Executing without any arguments means that plugin expects to be controlled by snap daemon.
-Since snap is not running, plugin quits.
+Since snap is not running (and not calling plugin with keepalive-like "ping" operation), plugin quits.
 
 ### Validating metric
 

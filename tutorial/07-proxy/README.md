@@ -34,7 +34,7 @@ func Do() {
 Total CPU and memory are accessed by: 
 ```go
 cpu.Percent(1 * time.Second, false) // result[0] 
-mem.VirtualMemory()                 .. result.UsedPercent
+mem.VirtualMemory()                 // result.UsedPercent
 ```
 
 from other gopsutil modules:

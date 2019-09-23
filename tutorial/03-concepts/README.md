@@ -6,7 +6,7 @@ Now we will introduce some more advanced concepts that version 2 of plugin-lib-g
 ## Tasks
 
 In typical situation plugins are controlled and managed by snap.
-With snap v3 (along with plugin-lib-go v2) user configures one or several task that will be requested from a single or several plugins.
+In snap v3 (along with plugin-lib-go v2) user configures one or several tasks that will be requested from a single or several plugins.
 A single task contains information about configuration and requested metrics.
 When several tasks are requested from the same plugin, by default only one instance of plugin's binary will be run by snap. 
 Plugin-lib-go provides facilities for maintaining different tasks.
@@ -34,7 +34,7 @@ We will slightly modify our previous example in order to check those features.
 ### Load(), Unload()
 
 When a task is defined for a plugin, snap will send a `Load()` request to plugin containing:
-- task identifier - unique number maintained by snap
+- task identifier - unique value maintained by snap
 - JSON-like object with configuration fields
 - list of metrics that user wants to gather - we can request only subset of "measurements"
 
@@ -51,6 +51,8 @@ func (s simpleCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 ```
+
+> Keep in mind, however, this doesn't mean the plugin is no longer needed as there might be some other tasks still running that rely on this plugin.
 
 #### Configuration
 
@@ -144,10 +146,16 @@ example.time.second 21 {map[]}
 
 #### State
 
-Sometimes you need to remember some values between consecutive collections, or after processing configuration in `Load()` method.
+Sometimes you need to remember some values and objects between consecutive collections, ie:
+- credentials,
+- objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
+- cashes,
+- post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#state-and-configuration)),
+- custom statistics.
+
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
-> You should use `simpleCollector` struct members to store state, since it's not task-aware.
+> You shouldn't use `simpleCollector` struct members to store state, since it's not task-aware.
 
 Let's add a new metric (`/example/count/running`) which provide information how long plugin is running (or being more precisely: for how long task is being loaded)
 
