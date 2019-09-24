@@ -1,5 +1,6 @@
 package plugin
 
+// todo: document
 type Publisher interface {
 	Publish(ctx PublishContext) error
 }

@@ -2,6 +2,7 @@ package plugin
 
 import "time"
 
+// todo: document
 type Metric interface {
 	Namespace() []NamespaceElement
 	Value() interface{}
