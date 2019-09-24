@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	metricSeparator = "."
+	metricSeparator = "/"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,39 +72,62 @@ func (m *Metric) Value() interface{} {
 }
 
 func (m *Metric) Tags() map[string]string {
-	panic("implement me")
+	return m.Tags_
 }
 
 func (m *Metric) Timestamp() time.Time {
-	panic("implement me")
+	return m.Timestamp_
 }
 
-func (m *Metric) HasTagWithKey(key string) {
-	panic("implement me")
+func (m *Metric) HasTagWithKey(key string) bool {
+	_, ok := m.Tags_[key]
+	return ok
 }
 
-func (m *Metric) HasTagWithValue(key string) {
-	panic("implement me")
+func (m *Metric) HasTagWithValue(value string) bool {
+	for _, v := range m.Tags_ {
+		if v == value {
+			return true
+		}
+	}
+
+	return false
 }
 
-func (m *Metric) HasTag(key string, value string) {
-	panic("implement me")
+func (m *Metric) HasTag(key string, value string) bool {
+	for k, v := range m.Tags_ {
+		if k == key && v == value {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (m *Metric) HasNsElement(el string) bool {
-	panic("implement me")
+	for _, nsElem := range m.Namespace_ {
+		if el == nsElem.String() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (m *Metric) HasNsElementOn(el string, pos int) bool {
-	panic("implement me")
+	if pos < len(m.Namespace_) {
+		if el == m.Namespace_[pos].String() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (m *Metric) NamespaceText() string {
-	panic("implement me")
-}
-
-func (m *Metric) String() string {
 	var sb strings.Builder
+
+	sb.WriteString(metricSeparator)
 
 	for i, ns := range m.Namespace_ {
 		sb.WriteString(ns.String())
@@ -114,6 +137,9 @@ func (m *Metric) String() string {
 		}
 	}
 
-	sb.WriteString(fmt.Sprintf(" %v {%v}", m.Value_, m.Tags_))
 	return sb.String()
+}
+
+func (m *Metric) String() string {
+	return fmt.Sprintf("%s %v {%v}", m.NamespaceText(), m.Value_, m.Tags_)
 }

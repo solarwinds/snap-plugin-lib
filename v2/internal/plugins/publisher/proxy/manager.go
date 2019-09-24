@@ -56,6 +56,8 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	}
 	context := contextIf.(*pluginContext)
 
+	context.sessionMts = mts // metrics to publish are set withing context
+
 	startTime := time.Now()
 	err := cm.publisher.Publish(context) // calling to user defined code
 	endTime := time.Now()

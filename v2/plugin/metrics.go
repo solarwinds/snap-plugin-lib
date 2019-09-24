@@ -9,9 +9,9 @@ type Metric interface {
 	Tags() map[string]string
 	Timestamp() time.Time
 
-	HasTagWithKey(key string)
-	HasTagWithValue(key string)
-	HasTag(key string, value string)
+	HasTagWithKey(key string) bool
+	HasTagWithValue(key string) bool
+	HasTag(key string, value string) bool
 
 	HasNsElement(el string) bool
 	HasNsElementOn(el string, pos int) bool
