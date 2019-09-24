@@ -9,6 +9,8 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
+var logPublishService = log.WithField("service", "Publish")
+
 type publishingService struct {
 	proxy proxy.Publisher
 }
@@ -20,12 +22,10 @@ func newPublishingService(proxy proxy.Publisher) PublisherServer {
 }
 
 func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
-	logF := log.WithField("function", "Publish")
+	logPublishService.Trace("GRPC Publish() received")
 
 	id := ""
 	mts := []*types.Metric{}
-
-	logF.Trace("GRPC Publish() received")
 
 	for {
 		publishPartialReq, err := stream.Recv()
@@ -37,14 +37,14 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 			return fmt.Errorf("failure when reading from publish stream: %s", err.Error())
 		}
 
-		logF.WithField("length", len(publishPartialReq.MetricSet)).Debug("Metrics chunk received from snap")
+		logPublishService.WithField("length", len(publishPartialReq.MetricSet)).Debug("Metrics chunk received from snap")
 
 		id = publishPartialReq.TaskId
 
 		for _, protoMt := range publishPartialReq.MetricSet {
 			mt, err := fromGRPCMetric(protoMt)
 			if err != nil {
-				logF.WithError(err).Error("can't read metric from GRPC stream")
+				logPublishService.WithError(err).Error("can't read metric from GRPC stream")
 				continue
 			}
 			mts = append(mts, &mt)
@@ -52,7 +52,7 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 	}
 
 	if len(mts) != 0 {
-		logF.WithField("length", len(mts)).Debug("metric will be published")
+		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
 		err := ps.proxy.RequestPublish(id, mts)
 		if err != nil {
@@ -60,14 +60,14 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 			return err
 		}
 	} else {
-		logF.Info("nothing to publish, request will be ignored")
+		logPublishService.Info("nothing to publish, request will be ignored")
 	}
 
 	return stream.SendAndClose(&PublishResponse{})
 }
 
 func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherRequest) (*LoadPublisherResponse, error) {
-	log.Trace("GRPC Load() received")
+	logPublishService.Trace("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
@@ -76,7 +76,7 @@ func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherReq
 }
 
 func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublisherRequest) (*UnloadPublisherResponse, error) {
-	log.Trace("GRPC Unload() received")
+	logPublishService.Trace("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 

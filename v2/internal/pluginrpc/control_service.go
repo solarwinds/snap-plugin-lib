@@ -15,6 +15,8 @@ const (
 )
 
 var (
+	logControlService = log.WithField("service", "Control")
+
 	RequestedKillError = errors.New("kill requested")
 )
 
@@ -46,7 +48,7 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 }
 
 func (cs *controlService) Ping(context.Context, *PingRequest) (*PingResponse, error) {
-	log.Trace("GRPC Ping() received ")
+	logControlService.Trace("GRPC Ping() received ")
 
 	cs.pingCh <- struct{}{}
 
@@ -54,7 +56,7 @@ func (cs *controlService) Ping(context.Context, *PingRequest) (*PingResponse, er
 }
 
 func (cs *controlService) Kill(context.Context, *KillRequest) (*KillResponse, error) {
-	log.Trace("GRPC Kill() received")
+	logControlService.Trace("GRPC Kill() received")
 
 	cs.closeCh <- RequestedKillError
 

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	metricSeparator = "."
+	metricSeparator = "/"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,11 +72,11 @@ func (m *Metric) Value() interface{} {
 }
 
 func (m *Metric) Tags() map[string]string {
-	panic("implement me")
+	return m.Tags_
 }
 
 func (m *Metric) Timestamp() time.Time {
-	panic("implement me")
+	return m.Timestamp_
 }
 
 func (m *Metric) HasTagWithKey(key string) {
@@ -100,11 +100,9 @@ func (m *Metric) HasNsElementOn(el string, pos int) bool {
 }
 
 func (m *Metric) NamespaceText() string {
-	panic("implement me")
-}
-
-func (m *Metric) String() string {
 	var sb strings.Builder
+
+	sb.WriteString(metricSeparator)
 
 	for i, ns := range m.Namespace_ {
 		sb.WriteString(ns.String())
@@ -114,6 +112,9 @@ func (m *Metric) String() string {
 		}
 	}
 
-	sb.WriteString(fmt.Sprintf(" %v {%v}", m.Value_, m.Tags_))
 	return sb.String()
+}
+
+func (m *Metric) String() string {
+	return fmt.Sprintf("%s %v {%v}", m.NamespaceText(), m.Value_, m.Tags_)
 }

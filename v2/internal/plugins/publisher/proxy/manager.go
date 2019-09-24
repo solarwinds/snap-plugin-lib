@@ -35,7 +35,7 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 	cm := &ContextManager{
 		publisher:   publisher,
 		contextMap:  sync.Map{},
-		activeTasks: nil,
+		activeTasks: map[string]struct{}{},
 	}
 
 	return cm
@@ -55,6 +55,8 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 		return fmt.Errorf("can't find a context for a given id: %s", id)
 	}
 	context := contextIf.(*pluginContext)
+
+	context.sessionMts = mts // metrics to publish are set withing context
 
 	startTime := time.Now()
 	err := cm.publisher.Publish(context) // calling to user defined code

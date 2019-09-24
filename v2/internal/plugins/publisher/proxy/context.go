@@ -16,7 +16,7 @@ type pluginContext struct {
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
 
-	sessionMts []types.Metric
+	sessionMts []*types.Metric
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
@@ -74,7 +74,7 @@ func (pc *pluginContext) ListAllMetrics() []plugin.Metric {
 	mts := make([]plugin.Metric, 0, len(pc.sessionMts))
 
 	for _, mt := range pc.sessionMts {
-		mts = append(mts, &mt)
+		mts = append(mts, mt)
 	}
 
 	return mts
