@@ -110,9 +110,9 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	for i, nsElem := range nsDefFormat {
 		groupName := groupPositions[i]
 		mtNamespace = append(mtNamespace, types.NamespaceElement{
-			Name:        groupName,
-			Value:       pc.extractStaticValue(nsElem),
-			Description: pc.ctxManager.groupsDescription[groupName],
+			Name_:        groupName,
+			Value_:       pc.extractStaticValue(nsElem),
+			Description_: pc.ctxManager.groupsDescription[groupName],
 		})
 
 		if groupPositions[i] != "" {
@@ -124,12 +124,12 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	mtMeta := pc.metricMeta(nsDescKey)
 
 	pc.sessionMts = append(pc.sessionMts, &types.Metric{
-		Namespace:   mtNamespace,
-		Value:       v,
-		Tags:        tags,
-		Unit:        mtMeta.unit,
-		Timestamp:   time.Now(),
-		Description: mtMeta.description,
+		Namespace_:   mtNamespace,
+		Value_:       v,
+		Tags_:        tags,
+		Unit_:        mtMeta.unit,
+		Timestamp_:   time.Now(),
+		Description_: mtMeta.description,
 	})
 
 	return nil

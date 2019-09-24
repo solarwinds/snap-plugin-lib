@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
-
-const nsSeparator = metrictree.NsSeparator
 
 type pluginContext struct {
 	rawConfig          []byte // todo: make common context
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
+
+	sessionMts []types.Metric
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
@@ -69,18 +70,16 @@ func (pc *pluginContext) Load(key string) (interface{}, bool) {
 	return obj, ok
 }
 
-func (pc *pluginContext) ListMetrics() {
-	return
-}
+func (pc *pluginContext) ListAllMetrics() []plugin.Metric {
+	mts := make([]plugin.Metric, 0, len(pc.sessionMts))
 
-func (pc *pluginContext) ListAllMetrics() {
-	return
-}
+	for _, mt := range pc.sessionMts {
+		mts = append(mts, &mt)
+	}
 
-func (pc *pluginContext) HasMetric(ns string) {
-	return
+	return mts
 }
 
 func (pc *pluginContext) Count() int {
-	return 0
+	return len(pc.sessionMts)
 }

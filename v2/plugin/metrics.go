@@ -4,7 +4,7 @@ import "time"
 
 type Metric interface {
 	Namespace() []NamespaceElement
-	Data() interface{}
+	Value() interface{}
 	Tags() map[string]string
 	Timestamp() time.Time
 

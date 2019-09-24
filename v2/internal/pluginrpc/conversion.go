@@ -11,17 +11,17 @@ import (
 
 // convert metric to GRPC structure
 func toGRPCMetric(mt *types.Metric) (*Metric, error) {
-	value, err := toGRPCValue(mt.Value)
+	value, err := toGRPCValue(mt.Value_)
 	if err != nil {
 		return nil, fmt.Errorf("can't convert metric to GRPC structure: %v", err)
 	}
 
 	protoMt := &Metric{
-		Namespace: toGRPCNamespace(mt.Namespace),
-		Tags:      mt.Tags,
+		Namespace: toGRPCNamespace(mt.Namespace_),
+		Tags:      mt.Tags_,
 		Value:     value,
-		Unit:      mt.Unit,
-		Timestamp: toGRPCTime(mt.Timestamp),
+		Unit:      mt.Unit_,
+		Timestamp: toGRPCTime(mt.Timestamp_),
 	}
 
 	return protoMt, nil
@@ -34,12 +34,12 @@ func fromGRPCMetric(mt *Metric) (types.Metric, error) {
 	}
 
 	retMt := types.Metric{
-		Namespace:   fromGRPCNamespace(mt.Namespace),
-		Value:       data,
-		Tags:        mt.Tags,
-		Unit:        mt.Unit,
-		Timestamp:   fromGRPCTime(mt.Timestamp),
-		Description: mt.Description,
+		Namespace_:   fromGRPCNamespace(mt.Namespace),
+		Value_:       data,
+		Tags_:        mt.Tags,
+		Unit_:        mt.Unit,
+		Timestamp_:   fromGRPCTime(mt.Timestamp),
+		Description_: mt.Description,
 	}
 
 	return retMt, err
@@ -51,9 +51,9 @@ func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 
 	for _, nsElem := range ns {
 		grpcNs = append(grpcNs, &Namespace{
-			Name:        nsElem.Name,
-			Value:       nsElem.Value,
-			Description: nsElem.Description,
+			Name:        nsElem.Name_,
+			Value:       nsElem.Value_,
+			Description: nsElem.Description_,
 		})
 	}
 
@@ -65,9 +65,9 @@ func fromGRPCNamespace(ns []*Namespace) []types.NamespaceElement {
 
 	for _, nsElem := range ns {
 		retNsElem = append(retNsElem, types.NamespaceElement{
-			Name:        nsElem.Name,
-			Value:       nsElem.Value,
-			Description: nsElem.Description,
+			Name_:        nsElem.Name,
+			Value_:       nsElem.Value,
+			Description_: nsElem.Description,
 		})
 	}
 

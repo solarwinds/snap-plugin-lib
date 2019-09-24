@@ -12,9 +12,9 @@ type LoadablePublisher interface {
 type PublishContext interface {
 	Context
 
-	ListMetrics()
-	ListAllMetrics()
-	HasMetric(ns string)
+	ListAllMetrics() []Metric
+	//ListMetrics()
+	//HasMetric(ns string)
 	Count() int
 }
 

@@ -14,6 +14,9 @@ type myPublisher struct {
 }
 
 func (m myPublisher) Publish(ctx plugin.PublishContext) error {
+	ctx.ListAllMetrics() // todo: move it
+	ctx.Count()
+
 	return nil
 }
 

@@ -43,7 +43,7 @@ type Metric struct {
 }
 
 // Converts a metric to an protobuf metric.
-// Returns an error in the case where the metric.Data is not one of the
+// Returns an error in the case where the metric.Value is not one of the
 // supported types.
 func toProtoMetric(mt Metric) (*rpc.Metric, error) {
 	if mt.Timestamp == (time.Time{}) {
