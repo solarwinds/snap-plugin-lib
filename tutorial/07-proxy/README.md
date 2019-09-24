@@ -263,7 +263,7 @@ or
 go test ./... -v
 ```
 
-to see all information procuded by `fmt.Printf`
+to see output by `fmt.Printf`
 
 ----
 

@@ -149,7 +149,7 @@ example.time.second 21 {map[]}
 Sometimes you need to remember some values and objects between consecutive collections, ie:
 - credentials,
 - objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
-- cashes,
+- cashe,
 - post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#state-and-configuration)),
 - custom statistics.
 
