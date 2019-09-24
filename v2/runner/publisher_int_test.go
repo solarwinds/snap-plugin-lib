@@ -4,6 +4,11 @@ package runner
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"testing"
+	"time"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
@@ -13,8 +18,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
-	"net"
-	"testing"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,17 +101,58 @@ func (s *PublisherMediumSuite) startPublisherClient(addr string) {
 	s.publisherControlClient = pluginrpc.NewControllerClient(s.publisherGRPCConnection)
 }
 
-func (s *PublisherMediumSuite) sendPing() (*pluginrpc.PingResponse, error) {
-	response, err := s.publisherControlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
+func (s *PublisherMediumSuite) sendPings() error {
+	_, errC := s.collectorControlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
+	_, errP := s.publisherControlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
+
+	if errC != nil || errP != nil {
+		return fmt.Errorf("At least one ping wasn't sent properly")
+	}
+
+	return nil
+}
+
+func (s *PublisherMediumSuite) sendKills() error {
+	_, errC := s.collectorControlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
+	_, errP := s.publisherControlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
+
+	if errC != nil || errP != nil {
+		return fmt.Errorf("At least one kill wasn't sent properly")
+	}
+
+	return nil
+}
+
+func (s *PublisherMediumSuite) sendCollectorLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadCollectorResponse, error) {
+	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadCollectorRequest{
+		TaskId:          taskID,
+		JsonConfig:      configJSON,
+		MetricSelectors: selectors,
+	})
 	return response, err
 }
 
-func (s *PublisherMediumSuite) sendKill() (*pluginrpc.KillResponse, error) {
-	response, err := s.publisherControlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
+func (s *PublisherMediumSuite) sendPublisherLoad(taskID string, configJSON []byte) (*pluginrpc.LoadPublisherResponse, error) {
+	response, err := s.publisherClient.Load(context.Background(), &pluginrpc.LoadPublisherRequest{
+		TaskId:     taskID,
+		JsonConfig: configJSON,
+	})
 	return response, err
 }
 
-// todo: Load, Unload for Publisher
+func (s *PublisherMediumSuite) sendCollectorUnload(taskID string) (*pluginrpc.UnloadCollectorResponse, error) {
+	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadCollectorRequest{
+		TaskId: taskID,
+	})
+	return response, err
+}
+
+func (s *PublisherMediumSuite) sendPublisherUnload(taskID string) (*pluginrpc.UnloadPublisherResponse, error) {
+	response, err := s.publisherClient.Unload(context.Background(), &pluginrpc.UnloadPublisherRequest{
+		TaskId: taskID,
+	})
+	return response, err
+}
 
 func (s *PublisherMediumSuite) requestCollectPublishCycle(collectTaskID, publishTaskID string) {
 
@@ -122,9 +166,11 @@ func TestPublisherMedium(t *testing.T) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type simpleCollector2 struct{} // todo: change name
+type simpleCollector2 struct{}
 
 func (s simpleCollector2) Collect(ctx plugin.CollectContext) error {
+	log.Trace("Collect")
+
 	_ = ctx.AddMetric("/example/group1/metric1", 11)
 	_ = ctx.AddMetric("/example/group1/metric2", 12)
 	_ = ctx.AddMetric("/example/group1/metric3", 13)
@@ -142,6 +188,8 @@ type simplePublisher struct {
 }
 
 func (p simplePublisher) Publish(ctx plugin.PublishContext) error {
+	log.Trace("Publish")
+
 	Convey("", p.t, func() {
 
 	})
@@ -160,7 +208,58 @@ func (s *PublisherMediumSuite) TestSimplePublisher() {
 	s.startCollectorClient(lnColl.Addr().String()) // collector client (snap)
 	s.startPublisherClient(lnPub.Addr().String())  // collector client (snap)
 
-	Convey("", s.T(), func() {
+	Convey("Test that publisher can process all metrics produced by collector", s.T(), func() {
 
+		_, err := s.sendCollectorLoad("task-collector-1", []byte("{}"), []string{})
+		So(err, ShouldBeNil)
+
+		_, err = s.sendPublisherLoad("task-publisher-1", []byte("{}"))
+		So(err, ShouldBeNil)
+
+		err = s.sendPings()
+		So(err, ShouldBeNil)
+
+		// do something
+		time.Sleep(1 * time.Second)
+		// do something
+
+		err = s.sendPings()
+		So(err, ShouldBeNil)
+
+		_, err = s.sendCollectorUnload("task-collector-1")
+		So(err, ShouldBeNil)
+
+		_, err = s.sendPublisherUnload("task-publisher-1")
+		So(err, ShouldBeNil)
+
+		err = s.sendPings()
+		So(err, ShouldBeNil)
+
+		err = s.sendKills()
+		So(err, ShouldBeNil)
+
+		completeCh := make(chan bool, 1)
+
+		go func() {
+			for i := 0; i < 2; i++ {
+				select {
+				case <-s.endControllerCh:
+					// ok
+				case <-s.endPublisherCh:
+					// ok
+				case <-time.After(3 * time.Second):
+					break
+				}
+			}
+
+			completeCh <- true
+		}()
+
+		select {
+		case <-completeCh:
+		// ok
+		case <-time.After(10 * time.Second):
+			s.T().Fatal("plugin should have been ended")
+		}
 	})
 }

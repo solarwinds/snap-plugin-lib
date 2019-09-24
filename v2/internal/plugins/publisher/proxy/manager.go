@@ -35,7 +35,7 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 	cm := &ContextManager{
 		publisher:   publisher,
 		contextMap:  sync.Map{},
-		activeTasks: nil,
+		activeTasks: map[string]struct{}{},
 	}
 
 	return cm

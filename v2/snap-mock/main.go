@@ -231,7 +231,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 		filter = strings.Split(opt.PluginFilter, filterSeparator)
 	}
 
-	reqLoad := &pluginrpc.LoadRequest{
+	reqLoad := &pluginrpc.LoadCollectorRequest{
 		TaskId:          opt.TaskId,
 		JsonConfig:      []byte(opt.PluginConfig),
 		MetricSelectors: filter,
@@ -246,7 +246,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 }
 
 func doUnloadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
-	reqUnload := &pluginrpc.UnloadRequest{
+	reqUnload := &pluginrpc.UnloadCollectorRequest{
 		TaskId: opt.TaskId,
 	}
 
