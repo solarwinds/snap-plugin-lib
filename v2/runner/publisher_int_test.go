@@ -218,10 +218,214 @@ func TestPublisherMedium(t *testing.T) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type noConfigCollector struct{}
+type oneMetricCollector struct {
+	collectCalls int
+}
 
-func (s noConfigCollector) Collect(ctx plugin.CollectContext) error {
-	log.Trace("Collect")
+func (s *oneMetricCollector) Collect(ctx plugin.CollectContext) error {
+	s.collectCalls++
+	_ = ctx.AddMetricWithTags("/example/group1/metric1", 1, map[string]string{"k1": "v1", "k3": "v3"})
+	return nil
+}
+
+type configurablePublisher struct {
+	t            *testing.T
+	loadCalls    int
+	unloadCalls  int
+	publishCalls int
+}
+
+func (p *configurablePublisher) Load(ctx plugin.Context) error {
+	p.loadCalls++
+
+	ctx.Store("stringValue", "value")
+	ctx.Store("intValue", 10)
+
+	Convey("Validate that Publisher has access to context features in Load method", p.t, func() {
+		cInterval, ok := ctx.Config("config.interval")
+		So(cInterval, ShouldEqual, "10s")
+		So(ok, ShouldBeTrue)
+
+		cDuration, ok := ctx.Config("config.duration")
+		So(cDuration, ShouldEqual, "20s")
+		So(ok, ShouldBeTrue)
+
+		_, ok = ctx.Config("config.timeout")
+		So(ok, ShouldBeFalse)
+	})
+
+	return nil
+}
+
+func (p *configurablePublisher) Unload(ctx plugin.Context) error {
+	p.unloadCalls++
+
+	return nil
+}
+
+func (p *configurablePublisher) Publish(ctx plugin.PublishContext) error {
+	p.publishCalls++
+
+	Convey("Validate that Publisher has access to context features in Collect method", p.t, func() {
+		Convey("Metrics API", func() {
+			// Act
+			mts := ctx.ListAllMetrics()
+
+			// Assert
+			So(ctx.Count(), ShouldEqual, 1)
+			So(len(mts), ShouldEqual, 1)
+
+			So(mts[0].HasTag("k1", "v1"), ShouldBeTrue)
+			So(mts[0].HasTag("k2", "v2"), ShouldBeFalse)
+			So(mts[0].HasTag("k3", "v3"), ShouldBeTrue)
+
+			So(mts[0].HasTagWithKey("k1"), ShouldBeTrue)
+			So(mts[0].HasTagWithKey("k2"), ShouldBeFalse)
+			So(mts[0].HasTagWithKey("k3"), ShouldBeTrue)
+
+			So(mts[0].HasTagWithValue("v1"), ShouldBeTrue)
+			So(mts[0].HasTagWithValue("v2"), ShouldBeFalse)
+			So(mts[0].HasTagWithValue("v3"), ShouldBeTrue)
+
+			So(mts[0].HasNsElementOn("example", 0), ShouldBeTrue)
+			So(mts[0].HasNsElementOn("group1", 1), ShouldBeTrue)
+			So(mts[0].HasNsElementOn("metric1", 2), ShouldBeTrue)
+			So(mts[0].HasNsElementOn("metric2", 2), ShouldBeFalse)
+			So(mts[0].HasNsElementOn("metric1", 3), ShouldBeFalse)
+
+			So(mts[0].HasNsElement("example"), ShouldBeTrue)
+			So(mts[0].HasNsElement("group1"), ShouldBeTrue)
+			So(mts[0].HasNsElement("metric1"), ShouldBeTrue)
+			So(mts[0].HasNsElement("metric2"), ShouldBeFalse)
+		})
+
+		Convey("Config API", func() {
+			cInterval, ok := ctx.Config("config.interval")
+			So(cInterval, ShouldEqual, "10s")
+			So(ok, ShouldBeTrue)
+
+			cDuration, ok := ctx.Config("config.duration")
+			So(cDuration, ShouldEqual, "20s")
+			So(ok, ShouldBeTrue)
+
+			_, ok = ctx.Config("config.timeout")
+			So(ok, ShouldBeFalse)
+		})
+
+		Convey("State API", func() {
+			v1, ok := ctx.Load("stringValue")
+			So(v1, ShouldEqual, "value")
+			So(ok, ShouldBeTrue)
+
+			v2, ok := ctx.Load("intValue")
+			So(v2, ShouldEqual, 10)
+			So(ok, ShouldBeTrue)
+		})
+	})
+
+	return nil
+}
+
+func (s *PublisherMediumSuite) TestConfigurablePublisher() {
+	// Arrange
+	publisherConfig := []byte(`{
+"config": {
+	"interval": "10s",
+	"duration": "20s"
+}}`)
+
+	collector := &oneMetricCollector{}
+	publisher := &configurablePublisher{t: s.T()}
+
+	lnColl := s.startCollector(collector) // collector server (plugin)
+	lnPub := s.startPublisher(publisher)  // publisher server (plugin)
+
+	s.startCollectorClient(lnColl.Addr().String()) // collector client (snap)
+	s.startPublisherClient(lnPub.Addr().String())  // collector client (snap)
+
+	Convey("Test that publisher can access context methods", s.T(), func() {
+
+		Convey("Loading tasks for collector and publisher", func() {
+			_, err := s.sendCollectorLoad("task-collector-1", []byte("{}"), []string{})
+			So(err, ShouldBeNil)
+
+			_, err = s.sendPublisherLoad("task-publisher-1", publisherConfig)
+			So(err, ShouldBeNil)
+
+			So(collector.collectCalls, ShouldEqual, 0)
+			So(publisher.publishCalls, ShouldEqual, 0)
+			So(publisher.loadCalls, ShouldEqual, 1)
+			So(publisher.unloadCalls, ShouldEqual, 0)
+
+			// validation is also done in Load method of publisher
+		})
+
+		Convey("Publisher can process all metrics gathered by collector", func() {
+			err := s.requestCollectPublishCycle("task-collector-1", "task-publisher-1")
+			So(err, ShouldBeNil)
+
+			So(collector.collectCalls, ShouldEqual, 1)
+			So(publisher.publishCalls, ShouldEqual, 1)
+			So(publisher.loadCalls, ShouldEqual, 1)
+			So(publisher.unloadCalls, ShouldEqual, 0)
+
+			// validation is done in Publish method of publisher
+		})
+
+		Convey("Unloading tasks from collector and publisher", func() {
+			_, err := s.sendCollectorUnload("task-collector-1")
+			So(err, ShouldBeNil)
+
+			_, err = s.sendPublisherUnload("task-publisher-1")
+			So(err, ShouldBeNil)
+
+			So(collector.collectCalls, ShouldEqual, 1)
+			So(publisher.publishCalls, ShouldEqual, 1)
+			So(publisher.loadCalls, ShouldEqual, 1)
+			So(publisher.unloadCalls, ShouldEqual, 1)
+		})
+
+		Convey("Sending kills requests for collector and publisher", func() {
+			err := s.sendKills()
+			So(err, ShouldBeNil)
+		})
+
+		Convey("Validate that both plugins quit", func() {
+			completeCh := make(chan bool, 1)
+
+			go func() {
+				for i := 0; i < 2; i++ {
+					select {
+					case <-s.endControllerCh:
+						// ok
+					case <-s.endPublisherCh:
+						// ok
+					case <-time.After(3 * time.Second):
+						break
+					}
+				}
+
+				completeCh <- true
+			}()
+
+			select {
+			case <-completeCh:
+			// ok
+			case <-time.After(10 * time.Second):
+				s.T().Fatal("plugin should have been ended")
+			}
+		})
+	})
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type noConfigCollector struct {
+	collectCalls int
+}
+
+func (s *noConfigCollector) Collect(ctx plugin.CollectContext) error {
+	s.collectCalls++
 
 	_ = ctx.AddMetricWithTags("/example/group1/metric1", 11, map[string]string{"k1": "v1"})
 	_ = ctx.AddMetric("/example/group1/metric2", 12)
@@ -236,11 +440,12 @@ func (s noConfigCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 type simplePublisher struct {
-	t *testing.T
+	t            *testing.T
+	publishCalls int
 }
 
-func (p simplePublisher) Publish(ctx plugin.PublishContext) error {
-	log.Trace("Publish")
+func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
+	p.publishCalls++
 
 	Convey("Validate that all collected metrics are accessed from Publish", p.t, func() {
 		// Act
@@ -253,6 +458,9 @@ func (p simplePublisher) Publish(ctx plugin.PublishContext) error {
 		So(mts[0].NamespaceText(), ShouldEqual, "/example/group1/metric1")
 		So(mts[0].Value(), ShouldEqual, 11)
 		So(mts[0].Tags(), ShouldResemble, map[string]string{"k1": "v1"})
+		So(mts[0].HasTag("k1", "v1"), ShouldBeTrue)
+		So(mts[0].HasTagWithKey("k1"), ShouldBeTrue)
+		So(mts[0].HasTagWithValue("v1"), ShouldBeTrue)
 
 		So(mts[1].NamespaceText(), ShouldEqual, "/example/group1/metric2")
 		So(mts[1].Value(), ShouldEqual, 12)
@@ -265,6 +473,9 @@ func (p simplePublisher) Publish(ctx plugin.PublishContext) error {
 		So(mts[3].NamespaceText(), ShouldEqual, "/example/group1/metric4")
 		So(mts[3].Value(), ShouldEqual, 14)
 		So(mts[3].Tags(), ShouldResemble, map[string]string{"k3": "v3", "k2": "v2"})
+		So(mts[3].HasTag("k2", "v2"), ShouldBeTrue)
+		So(mts[3].HasTagWithKey("k3"), ShouldBeTrue)
+		So(mts[3].HasTagWithValue("v3"), ShouldBeTrue)
 
 		So(mts[4].NamespaceText(), ShouldEqual, "/example/group1/metric5")
 		So(mts[4].Value(), ShouldEqual, 15)
@@ -311,6 +522,9 @@ func (s *PublisherMediumSuite) TestSimplePublisher() {
 		Convey("Publisher can process all metrics gathered by collector", func() {
 			err := s.requestCollectPublishCycle("task-collector-1", "task-publisher-1")
 			So(err, ShouldBeNil)
+
+			So(collector.collectCalls, ShouldEqual, 1)
+			So(publisher.publishCalls, ShouldEqual, 1)
 
 			// validation is done in Publish method of publisher
 		})

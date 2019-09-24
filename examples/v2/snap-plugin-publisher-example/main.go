@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )
@@ -14,8 +15,11 @@ type myPublisher struct {
 }
 
 func (m myPublisher) Publish(ctx plugin.PublishContext) error {
-	ctx.ListAllMetrics() // todo: move it
-	ctx.Count()
+	fmt.Printf("Number of metrics: %v\n", ctx.Count())
+
+	for _, mt := range ctx.ListAllMetrics() {
+		fmt.Printf(" - %v=%v [%v]\n", mt.NamespaceText(), mt.Value(), mt.Tags())
+	}
 
 	return nil
 }
