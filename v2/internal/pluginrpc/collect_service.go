@@ -62,22 +62,22 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 	return nil
 }
 
-func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*LoadResponse, error) {
+func (cs *collectService) Load(ctx context.Context, request *LoadCollectorRequest) (*LoadCollectorResponse, error) {
 	log.Trace("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
-	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
+	return &LoadCollectorResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }
 
-func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
+func (cs *collectService) Unload(ctx context.Context, request *UnloadCollectorRequest) (*UnloadCollectorResponse, error) {
 	log.Trace("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 
-	return &UnloadResponse{}, cs.proxy.UnloadTask(taskID)
+	return &UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {

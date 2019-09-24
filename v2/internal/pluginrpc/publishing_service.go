@@ -1,15 +1,12 @@
 package pluginrpc
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-)
-
-const (
-	maxPublishChunkSize = 100
 )
 
 type publishingService struct {
@@ -67,4 +64,21 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 	}
 
 	return stream.SendAndClose(&PublishResponse{})
+}
+
+func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherRequest) (*LoadPublisherResponse, error) {
+	log.Trace("GRPC Load() received")
+
+	taskID := string(request.GetTaskId())
+	jsonConfig := request.GetJsonConfig()
+
+	return &LoadPublisherResponse{}, ps.proxy.LoadTask(taskID, jsonConfig)
+}
+
+func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublisherRequest) (*UnloadPublisherResponse, error) {
+	log.Trace("GRPC Unload() received")
+
+	taskID := string(request.GetTaskId())
+
+	return &UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
 }

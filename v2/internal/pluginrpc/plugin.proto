@@ -11,13 +11,15 @@ service Controller {
 
 service Collector {
     rpc Collect (CollectRequest) returns (stream CollectResponse);
-    rpc Load (LoadRequest) returns (LoadResponse);
-    rpc Unload (UnloadRequest) returns (UnloadResponse);
+    rpc Load (LoadCollectorRequest) returns (LoadCollectorResponse);
+    rpc Unload (UnloadCollectorRequest) returns (UnloadCollectorResponse);
     rpc Info (InfoRequest) returns (InfoResponse);
 }
 
 service Publisher {
     rpc Publish (stream PublishRequest) returns (PublishResponse);
+    rpc Load (LoadPublisherRequest) returns (LoadPublisherResponse);
+    rpc Unload (UnloadPublisherRequest) returns (UnloadPublisherResponse);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,21 +52,21 @@ message CollectResponse {
     repeated Metric metric_set = 1;
 }
 
-message LoadRequest {
+message LoadCollectorRequest {
     string task_id = 1;
     bytes json_config = 2;
     repeated string metric_selectors = 3;
 }
 
-message LoadResponse {
+message LoadCollectorResponse {
     // empty
 }
 
-message UnloadRequest {
+message UnloadCollectorRequest {
     string task_id = 1;
 }
 
-message UnloadResponse {
+message UnloadCollectorResponse {
     // empty
 }
 
@@ -84,6 +86,23 @@ message PublishRequest {
 }
 
 message PublishResponse {
+    // empty
+}
+
+message LoadPublisherRequest {
+    string task_id = 1;
+    bytes json_config = 2;
+}
+
+message LoadPublisherResponse {
+    // empty
+}
+
+message UnloadPublisherRequest {
+    string task_id = 1;
+}
+
+message UnloadPublisherResponse {
     // empty
 }
 
