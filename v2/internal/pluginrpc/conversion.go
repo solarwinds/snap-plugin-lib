@@ -27,6 +27,24 @@ func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 	return protoMt, nil
 }
 
+func fromGRPCMetric(mt *Metric) (types.Metric, error) {
+	data, err := fromGRPCValue(mt.Value)
+	if err != nil {
+		return types.Metric{}, fmt.Errorf("can't convert metric from GRPC structure: %v", err)
+	}
+
+	retMt := types.Metric{
+		Namespace:   fromGRPCNamespace(mt.Namespace),
+		Value:       data,
+		Tags:        mt.Tags,
+		Unit:        mt.Unit,
+		Timestamp:   fromGRPCTime(mt.Timestamp),
+		Description: mt.Description,
+	}
+
+	return retMt, err
+}
+
 // convert namespace to GRPC structure
 func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 	grpcNs := make([]*Namespace, 0, len(ns))
@@ -42,11 +60,29 @@ func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 	return grpcNs
 }
 
+func fromGRPCNamespace(ns []*Namespace) []types.NamespaceElement {
+	retNsElem := make([]types.NamespaceElement, 0, len(ns))
+
+	for _, nsElem := range ns {
+		retNsElem = append(retNsElem, types.NamespaceElement{
+			Name:        nsElem.Name,
+			Value:       nsElem.Value,
+			Description: nsElem.Description,
+		})
+	}
+
+	return retNsElem
+}
+
 func toGRPCTime(t time.Time) *Time {
 	return &Time{
 		Sec:  t.Unix(),
 		Nsec: int64(t.Nanosecond()),
 	}
+}
+
+func fromGRPCTime(t *Time) time.Time {
+	return time.Unix(t.Sec, t.Nsec)
 }
 
 // convert metric value to GRPC structure
@@ -81,6 +117,31 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	}
 
 	return grpcValue, nil
+}
+
+func fromGRPCValue(v *MetricValue) (interface{}, error) {
+	switch v.DataVariant.(type) {
+	case *MetricValue_VString:
+		return v.GetVString(), nil
+	case *MetricValue_VDouble:
+		return v.GetVDouble(), nil
+	case *MetricValue_VFloat:
+		return v.GetVFloat(), nil
+	case *MetricValue_VInt32:
+		return v.GetVInt32(), nil
+	case *MetricValue_VInt64:
+		return v.GetVInt64(), nil
+	case *MetricValue_VUint32:
+		return v.GetVInt32(), nil
+	case *MetricValue_VUint64:
+		return v.GetVUint64(), nil
+	case *MetricValue_VBytes:
+		return v.GetVBytes(), nil
+	case *MetricValue_VBool:
+		return v.GetVBool(), nil
+	}
+
+	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
 }
 
 func toGRPCInfo(statistics stats.Statistics, pprofLocation string) (*Info, error) {

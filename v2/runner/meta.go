@@ -46,7 +46,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, opt *types.Options, r *resources) {
+func printMetaInformation(name string, version string, typ PluginType, opt *types.Options, r *resources) {
 	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
 
 	m := meta{
@@ -55,7 +55,7 @@ func printMetaInformation(name string, version string, opt *types.Options, r *re
 
 	m.Plugin.Name = name
 	m.Plugin.Version = version
-	m.Plugin.Type = PluginTypeCollector
+	m.Plugin.Type = typ
 
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port

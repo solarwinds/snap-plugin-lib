@@ -97,7 +97,7 @@ func TestParseCmdLineOptions(t *testing.T) {
 				}
 
 				// Act
-				opt, err := ParseCmdLineOptions("plugin", inputCmd)
+				opt, err := ParseCmdLineOptions("plugin", PluginTypeCollector, inputCmd)
 
 				// Assert
 				if testCase.shouldBeParsed {
