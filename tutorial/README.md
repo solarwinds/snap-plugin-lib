@@ -35,7 +35,7 @@ After you obtain basics, we will teach you how to write real, useful collector (
 - store state between independent collection requests
 - etc.
 
-Each part of tutorial contain complete golang source code, which you can run and modify dependending on your needs.
+Each part of the tutorial contain complete golang source code, which you can run and modify depending on your needs.
 
 ## Version 2
 
