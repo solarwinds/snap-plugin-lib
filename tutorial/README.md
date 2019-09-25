@@ -2,7 +2,7 @@
 
 ## What's collector
 
-Collector is a small application gathering information about observed system. 
+Collector is a small application which gather information about the observed system. 
 You can collect CPU utilization, database statistics, message broker queue's sizes or other type of information, in a metric form.
 
 ## What's metric
