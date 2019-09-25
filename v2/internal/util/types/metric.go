@@ -60,8 +60,8 @@ type Metric struct {
 func (m *Metric) Namespace() []plugin.NamespaceElement {
 	ns := make([]plugin.NamespaceElement, 0, len(m.Namespace_))
 
-	for _, nsElem := range m.Namespace_ {
-		ns = append(ns, &nsElem)
+	for i := range m.Namespace_ {
+		ns = append(ns, &m.Namespace_[i])
 	}
 
 	return ns
