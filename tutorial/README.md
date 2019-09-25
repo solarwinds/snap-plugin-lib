@@ -20,7 +20,7 @@ Metric holds information about single measurement. It consists of:
 When used in production, plugins are controlled by snap daemon.
 Simplified algorithm may be described as follows:
 1) Snap reads and forward configuration (credentials, requested metrics etc.) to plugin
-2) Periodically (usally 60s) snap requests collection of metrics for different plugins 
+2) Periodically (typically 60s) snap requests collection of metrics for different plugins 
 3) Each plugin responds with its own set of metrics
 
 ## Intro
