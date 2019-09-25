@@ -41,7 +41,7 @@ import (
 
 Import section enumerates required dependencies:
 - `/v2/plugin` - contains interfaces definition (ie. `Collector`) which we should implement
-- `/v2/runner` - contains implementation of `StartCollector()` which is used in main function
+- `/v2/runner` - contains implementation of `StartCollector()` which is used in the main function
 
 ### Collector code
 
