@@ -26,13 +26,13 @@ Total CPU and memory usage can be represented by two following metrics:
 
 Sometimes it's very useful to define metric in a way that specific element (or elements) of its name is not constant.
 When gathering cpu or memory utilization for each process, we don't know the list of processes running in minisystem.
-It would be convenient to define some kind of template name, based on which concrete metrics could be generated.
+It would be convenient to define some kind of a template name, based on which concrete metrics could be generated.
 
 That functionality is offered by dynamic metrics. We can define it in `PluginDefinition` using special form of metric name:
 - `/minisystem/processes/[processName]/cpu`
 - `/minisystem/processes/[processName]/memory`
 
-Then, when we would iterate over a list of processes, we can replace `processName` with concrete name, ie.
+Then, when we would iterate over a list of processes, we can replace `processName` with a concrete name, ie.
 - `/minisystem/processes/mysql/cpu`
 - `/minisystem/processes/mysql/memory`
 - `/minisystem/processes/chrome/cpu`
@@ -52,12 +52,12 @@ We will write related code in [Chapter 8](/tutorial/08-collector/README.md).
 
 ### Tags
 
-As we mentioned many times, tags offer additional information associated with measurement. 
+As previously stated, tags offer additional information associated with measurement. 
 System collector will add information about PID to processes related metrics.
 
 ## Configuration 
 
-In typical system with many running processes, administrator may be interested with only those, which takes meaningful level of resources (ie. CPU > 5%).
+In a typical system with many running processes, only specific thresholds might be of interest (ie. CPU > 5%).
 Also, accuracy of some measurements may be related to the duration that the measurement takes.
 
 Giving that requirements, our example configuration may be written as:

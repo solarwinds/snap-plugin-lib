@@ -1,11 +1,11 @@
 # Basic concepts
 
 In [Chapter 1](/tutorial/01-simple/README.md) and [Chapter 2](/tutorial/02-testing/README.md) you've learned how to write and validate a simple collector. 
-Now we will introduce some more advanced concepts that version 2 of plugin-lib-go introduced to help developer build their plugins easier and faster.
+Now we will introduce more advanced concepts that version 2 of plugin-lib-go introduced, this will help developer build their plugins easier and faster.
 
 ## Tasks
 
-In typical situation plugins are controlled and managed by snap.
+In a typical situation plugins are controlled and managed by snap.
 In snap v3 (along with plugin-lib-go v2) user configures one or several tasks that will be requested from a single or several plugins.
 A single task contains information about configuration and requested metrics.
 When several tasks are requested from the same plugin, by default only one instance of plugin's binary will be run by snap. 
@@ -13,7 +13,7 @@ Plugin-lib-go provides facilities for maintaining different tasks.
 
 ### Context 
 
-You might have noticed, that when we defined plugin algorithm, we had to provide implementation of `Collect` method:  
+Previously, when we defined a plugin algorithm we had to provide implementation of `Collect` method:  
 
 ```go
 func (s simpleCollector) Collect(ctx plugin.Context) error {
@@ -33,10 +33,10 @@ We will slightly modify our previous example in order to check those features.
 
 ### Load(), Unload()
 
-When a task is defined for a plugin, snap will send a `Load()` request to plugin containing:
+When task is defined for a plugin, snap will send a `Load()` request to plugin containing:
 - task identifier - unique value maintained by snap
 - JSON-like object with configuration fields
-- list of metrics that user wants to gather - we can request only subset of "measurements"
+- list of metrics that user wants to gather - we can request only a subset of "measurements"
 
 When a task is no longer needed snap may send an `Unload()` request. 
 As for `Load()`, we can provide some custom code which will be executed when the task is finished.
@@ -66,10 +66,10 @@ Plugin will expect configuration in JSON format. In our case it may be simply:
 ```
 
 We can access configuration fields in two ways.
-- by accessing method `ctx.Config` which implements simplified access to configuration values
+- by accessing method `ctx.Config` which implements simplified access to the configuration values
 - by accessing method `ctx.RawConfig` which returns JSON object (bytes) that needs to be manually unmarshaled.
 
-In this chapter we will use first method. Second one will be presented in [Chapter 9](/tutorial/09-config/README.md) **TODO**linktoanchor**
+First method will be introduced in this chapter. Alternative will be presented in [Chapter 9](/tutorial/09-config/README.md) **TODO**linktoanchor**
 
 Let's create a helper method which reads `format` field:
 ```go
@@ -81,10 +81,10 @@ func (s simpleCollector) format(ctx plugin.Context) string {
 	return "long"
 }
 ```
-`ctx.Config` returns two values: string associated with field, and bool flag indicating that field was present in configuration.
+`ctx.Config` returns two values: field associated string and a bool flag indicating that the field was present in configuration.
 If `format` field had value `short` we will return it, otherwise default `long` is returned in other situations.
 
-> Notice, that `ctx.Config()` always return string even if value in JSON was provided in other format like int or bool.
+> Notice, that `ctx.Config()` always return a string even if different data type was provided in JSON, for example int or bool.
 > If you want strict type control use `ctx.RawConfig()`.
 
 Modified version of `Collect` method:
@@ -111,7 +111,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-Now we can test it from a command line (requesting short format):
+Now we can test it using command line (requesting short format):
 ```bash
 ./03-concepts -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s -plugin-config='{"format": "short"}'
 ```
@@ -126,7 +126,7 @@ example.time.minute 34 {map[]}
 example.time.second 15 {map[]}
 ```
 
-Analogically, long format requested by any of following command:
+Analogically, long format requested by any of the following commands:
 ```bash
 ./03-concepts -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s -plugin-config='{"format": "long"}'
 ./03-concepts -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s -plugin-config='{"format": "other"}'
@@ -146,7 +146,7 @@ example.time.second 21 {map[]}
 
 #### State
 
-Sometimes you need to remember some values and objects between consecutive collections, ie:
+At times, you will need to remember values and objects between consecutive collections, ie:
 - credentials,
 - objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
 - cashe,
@@ -155,9 +155,9 @@ Sometimes you need to remember some values and objects between consecutive colle
 
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
-> You shouldn't use `simpleCollector` struct members to store state, since it's not task-aware.
+> You shouldn't use `simpleCollector` struct members to store state, it's not task-aware.
 
-Let's add a new metric (`/example/count/running`) which provide information how long plugin is running (or being more precisely: for how long task is being loaded)
+Let's add a new metric (`/example/count/running`) which provide plugin runtime information (or being more precise, load time of a particular task)
 
 In order to enable plugin running duration calculation, we have to save current time in `Load()` method:
 ```go
@@ -217,8 +217,8 @@ example.count.running 10 {map[]}
 #### State and Configuration
 
 State may be also used to optimize processing configuration values. 
-In [previous section](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#configuration) "format" option was read during each collection.
-We could read it only once during `Load()` and store in context. 
+In the [previous section](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#configuration) "format" option was read during each collection.
+Alternatively, we could read it only once during `Load()` and store in context. 
 
 Example:
 ```go

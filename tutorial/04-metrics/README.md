@@ -13,11 +13,10 @@ So far we have written collector providing 6 metrics:
 ```
 
 Every time collector is running, all 6 metrics are being gathered.
-That might not always be the case.
-We might want to collect only subsets of all possible measurements.
-Good news - all filtering is done internally by plugin so there is no need to change any line of code.
+However, we might want to collect only a subset of all possible measurements.
+Good news is that all filtering is done internally by the plugin, therefore there is no need for code modifications.
 
-> In production environment requesting all metrics may cause huge impact on system if plugin requires advanced processing.
+> In production environment requesting all metrics may cause huge impact on the system if a plugin requires advanced processing.
 > You should always benchmark you plugin in different situations.
 
 To filter metrics we use additional parameter during execution (in production it would be entries in the task file **TODO**link**):
@@ -42,7 +41,7 @@ example.date.month 9 {map[]}
 
 Other examples of filters:
 - `/example/*/day` - return only day metrics
-- `/example/count/running` - return only running metric
+- `/example/count/running` - return only running metrics
 - **TODO** regexp - command line issue fix
 
 You can combine filters using `;`, ie.
@@ -60,7 +59,7 @@ example.count.running 0 {map[]}
 
 ## Defining metrics 
 
-Plugin creator can add some useful metadata, like list of supported metrics.
+Plugin creator can add some useful metadata, for example a list of supported metrics.
 To do so, simply define a new method:
 
 ```
@@ -104,7 +103,7 @@ When executing the code (by requesting metrics)
 ./04-metrics -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s
 ```
 
-you will have the information that new metric could not have been added (due to not matching definition)
+you will have information that new metric was not added (due to not matching the definition)
 ```
 couldn't match metric with plugin definition: /example/other/undefined
 Gathered metrics (length=6):
@@ -135,7 +134,7 @@ After requesting metrics:
 $ ./04-metrics -debug-mode=1 -debug-collect-counts=1 -debug-collect-interval=5s
 ```
 
-We got additional information:
+We received additional information:
 ```
 Gathered metrics (length=6):
 example.date.day 9 {map[weekday:Monday]}

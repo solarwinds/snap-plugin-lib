@@ -100,9 +100,9 @@ func main() {
 }
 ```
 
-main() function will usually have the same implementation (with different parameters depending on plugin).
-Runner takes care about establishing valid communication between snap daemon and plugin.
-User can focus only on the collector implementation details.
+main() function will usually have the same implementation (with different parameters depending on a plugin).
+Runner takes care of establishing a valid communication between snap daemon and plugin.
+Therefore user can focus only on the collector implementation details.
 
 ----
 

@@ -2,11 +2,11 @@
 
 ## Obtaining system information - Psutil library
 
-Go language has a lot of 3rd part libraries that we can use instead of writing own functionality.
-Retrieving system information is quite common task for any developer and in golang ecosystem we could easily find library that offers easy-to-use cross platform API.
+Go language has numerous 3rd party libraries that we can use, instead of writing our own functionalities.
+Retrieving system information is quite a common task for any developer and in golang ecosystem we could easily find library that offers easy-to-use cross platform API.
 For our plugin we will use [gopsutil](https://github.com/shirou/gopsutil).
 
-What we need is retrieving:
+What we need to retrieve is:
 - processes names (metric name)
 - cpu utilization of each process (value) 
 - memory utilization of each process (value)
@@ -16,7 +16,7 @@ What we need is retrieving:
 
 ### API
 
-First four information can be obtained via following snippet (for now let's ignore errors):
+First four can be obtained via the following snippet (for now let's ignore errors):
 ```go
 import ("github.com/shirou/gopsutil/process")
 
@@ -45,15 +45,15 @@ import (
 )
 ```
 
-> `cpu.Percent` returns array. Total value is in the first element of it.
+> `cpu.Percent` returns an array. Total value is in the first element of the array.
 
 > `mem.VirtualMemory` return general information structure. Field `.UserPercent` provides measurement we are interested in.
 
 ## Implementing `Data` Module
 
 As mention earlier `Data` module will contain common structures. 
-We need one to hold simplified information about process. 
-Also, our collector module should not depend on gopsutil library directly.
+We need one to hold simplified information about the process. 
+Also, our collector module should not depend on the gopsutil library directly.
 
 So far only file we need is `./collector/data/processinfo.go` containing only simple structure 
 
@@ -95,7 +95,7 @@ Later we will be able to configure it, but now let's define const value
 const defaultCPUMeasurementTime = 1 * time.Second
 ``` 
 
-Now, let's define interface which will be used by `Collector`.
+Now, let's define interface which will be used by the `Collector`.
 
 ```go
 type Proxy interface {
@@ -172,8 +172,8 @@ func (p proxyCollector) TotalCpuUsage() (float64, error) {
 }
 ```
 
-We are calling `cpu.Percent` API and in case of failure returning wrapped error.
-Also, we are checking that slice returned from gopsutil has one element (can have more if second argument is true).
+We are calling `cpu.Percent` API and in case of a failure returning wrapped error.
+Additionally, we are checking that slice returned from gopsutil has only one element (it can have more if the second argument is true).
 If everything is correct, total cpu is returned.
 
 Last method:
@@ -207,7 +207,7 @@ import (
 )
 ```
 
-Simple test (we are checking if result is different that 0.0 which in real situation may not always be the case)
+Simple test (we are checking if result is different from 0.0 which in real situation may not always be the case)
 ```go
 func TestTotalCPUUsage(t *testing.T) {
 	p := proxyCollector{}

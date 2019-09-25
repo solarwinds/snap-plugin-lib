@@ -2,13 +2,13 @@
 
 ## Compile plugin
 
-To build executable file simply go to folder containing written code (see: [Previous Chapter](/tutorial/01-simple)) and execute command:
+To build executable file simply go to the folder containing written code (see: [Previous Chapter](/tutorial/01-simple)) and execute command:
 ```
 go build
 ```
-Binary name is depending on folder in which `main` file is located. 
+Binary name depends on the folder in which `main` file is located. 
 
-To force own custom name of binary, use:
+To force custom name of a binary, use:
 ```
 go build -o binaryName
 ```
@@ -20,18 +20,19 @@ go build
 ```
 
 > Note:
-> Further commands will use binary name based on examples in tutorial folders (`01-simple`, `02-testing`, etc)
+> Further commands will use binary name based on the examples in tutorial folders (`01-simple`, `02-testing`, etc)
 > For windows you probably should replace it with `01-simple.exe`, `02-testing.exe` etc. 
 
 ## Execution
 
 ### Smoke-test (No-argument provided)
 
-The simplest way of validating plugin is run binary without any arguments.
+The simplest way of validating plugin is to run binary without any arguments.
 ```bash
 ./02-testing
 ```
-In valid scenario collector should print out metadata information and quit after some time with error message:
+
+In a valid scenario collector should print out metadata information and quit after some time with an error message:
 ```
 {"GRPCVersion":"2.0.0","Plugin":{"Name":"example","Version":"1.0.0"},"GRPC":{"IP":"127.0.0.1","Port":56302},"Profiling":{"Enabled":false,"Location":""},"Stats":{"Enabled":false,"IP":"","Port":0}}
 time="2019-09-03T15:12:10+02:00" level=warning msg="Ping timeout occurred" layer=lib max=3 missed=1 module=plugin-rpc
@@ -40,8 +41,8 @@ time="2019-09-03T15:12:16+02:00" level=warning msg="Ping timeout occurred" layer
 time="2019-09-03T15:12:16+02:00" level=error msg="Major error occurred - plugin will be shut down" error="ping message missed 3 times (timeout: 3s)" layer=lib module=plugin-rpc
 ```
 
-Observed scenario is valid. Executing without any arguments means that plugin expects to be controlled by snap daemon.
-Since snap is not running (and not calling plugin with keepalive-like "ping" operation), plugin quits.
+Observed scenario is valid. Executing without any arguments means that this plugin expects to be controlled by the snap daemon.
+Since snap is not running (and not calling plugin with a keepalive-like "ping" operation), plugin will quit.
 
 ### Validating metric
 
@@ -59,7 +60,7 @@ You can execute plugin binary with some additional arguments. To list them you c
 ./02-testing -h
 ```
 
-From the perspective of plugin developer the most important options are:
+From the perspective of a plugin developer the most important options are:
 
 |Flag                     | Description                                                                     |
 |-------------------------|---------------------------------------------------------------------------------|
@@ -72,7 +73,7 @@ From the perspective of plugin developer the most important options are:
   
 #### Debug-mode
 
-To execute collection, run binary in debug-mode.
+To execute the collection, run binary in debug-mode.
 
 ```bash
 ./02-testing -debug-mode=1
@@ -88,7 +89,7 @@ example.time.minute 58 {map[]}
 example.time.second 53 {map[]}
 ```
 
-Values of metrics depends of course on the current date and time and will be different on your testing environment, but the metric names should be the same.
+Metric values depend on the current date and time and will differ on your testing environment, however the metric names should be the same.
 
 You can request several collects, using other flags:
 ```bash
@@ -121,14 +122,14 @@ example.time.second 44 {map[]}
 
 #### Running plugin with snap-mock
 
-Debug mode should be sufficient in majority of cases, although there will be scenarios when running with snap-mock enables additional testing capability.
+Debug mode should be sufficient in the majority of cases; nevertheless it is possible that running with a snap-mock will enable additional testing capabilities.
 
-To work correctly plugin should be run with several flags as follows:
+To work correctly plugin should be run with the following flags:
 ```bash
 ./02-testing -grpc-ping-max-missed=0 -grpc-port=50123
 ```
 
-By providing `-grpc-ping-max-missed=0` plugin won't exit after not receiving 3 pings from snap (or its equivalent, like snap-mock).
+By providing `-grpc-ping-max-missed=0`, plugin will not exit when 3 pings are not received from snap (or its equivalent, like snap-mock).
 
 Now, in other console, you should locate snap-mock, compile it and execute:
 
@@ -140,7 +141,7 @@ go build
 
 > Make sure that `-grpc-port` (provided for plugin) and `-plugin-port` (provided for snap-mock) are the same.
 
-> `-send-kill` flag causes that both: plugin and snap-mock will complete execution after working.
+> `-send-kill` flag causes both, plugin and snap-mock, to complete with an execute.
 
 Output of snap-mock:
 ```
@@ -191,7 +192,7 @@ time="2019-09-03T16:39:41+02:00" level=trace msg="GRPC Kill() received" layer=li
 time="2019-09-03T16:39:41+02:00" level=debug msg="GRPC server stopped gracefully" layer=lib module=plugin-rpc
 ```
 
-What we can see from debug logs:
+What we can notice in the debug logs:
 - GRPC `Collect()` was called 3 times, every 5 seconds 
 - Plugin receives GRPC Ping periodically (`"GRPC Ping() received"`)
 - GRPC `Kill()` is called at the end causing plugin to quit
@@ -201,10 +202,10 @@ There are also other entries:
 - GRPC `Load()` and GRPC `Unload()` calls will be covered later. In short, collection can be requested by several independent tasks and `Load()` allows to handle independent configuration for a single task. 
 - `metrics chunk has been sent to snap` means that metrics are sent in portions to snap (generally to avoid some internal limits of GRPC when plugin want to send large portions of metrics)
 
-As you can see we achieved almost the adequate testing results as in the debug mode (3 request every 5 seconds).
-The difference is that with current approach we trigger collection via GRPC API (the same way that snap does), so it's the same way, which plugin would be triggered in production environment. 
-Debug-mode calls defined methods internally (without utilizing GRPC communication), but if want to validate collection logic it suffice.
-Snap-mock will be useful to observe how plugin reacts with different tasks (several configurations requested at the same time).
+As you can see we almost achieved the adequate testing results as in the debug mode (3 request every 5 seconds).
+The difference is that with the current approach we trigger collection via GRPC API (the same way snap does), hence it's the same way plugin would be triggered in the production environment.  
+Debug-mode calls defined methods internally (without utilizing GRPC communication), but it is sufficient in the collection logic validation.
+Snap-mock will be useful in observing how a plugin reacts with different tasks (several configurations requested at the same time).
 
 ----
 

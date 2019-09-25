@@ -21,7 +21,7 @@ Example:
 
 ## Printing example task-file
 
-User can print/create default task based on metadata provided by plugin creator.
+User can print/create default task based on metadata provided by the plugin creator.
 
 ```bash
 ./05-tools -print-example-task
