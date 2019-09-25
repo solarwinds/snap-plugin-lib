@@ -253,7 +253,7 @@ func TestProcessesInfo(t *testing.T) {
 }
 ```
 
-We can execute using following command line to see only result of test (passed/failed)
+We can execute using the following command line to see passed/failed result of a test
 ```bash
 go test ./...
 ```
