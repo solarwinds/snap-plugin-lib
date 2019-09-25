@@ -97,11 +97,11 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	matchFilters, _ := pc.metricsFilters.IsValid(ns)
 
 	if !matchDefinition {
-		return fmt.Errorf("couldn't match metric with plugin definition: %v", err)
+		return fmt.Errorf("couldn't match metric with plugin definition: %v", ns)
 	}
 
 	if !matchFilters {
-		return fmt.Errorf("couldn't match metrics with plugin filters: %v", err)
+		return fmt.Errorf("couldn't match metrics with plugin filters: %v", ns)
 	}
 
 	var mtNamespace []types.NamespaceElement
