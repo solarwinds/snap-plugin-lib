@@ -15,5 +15,3 @@ type PublishContext interface {
 	ListAllMetrics() []Metric
 	Count() int
 }
-
-type MetricFilter func(Metric) bool
