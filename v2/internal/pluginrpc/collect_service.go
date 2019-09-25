@@ -30,7 +30,7 @@ func newCollectService(proxy CollectorProxy, statsController stats.Controller, p
 }
 
 func (cs *collectService) Collect(request *CollectRequest, stream Collector_CollectServer) error {
-	logCollectService.Trace("GRPC Collect() received")
+	logCollectService.Debug("GRPC Collect() received")
 
 	taskID := string(request.GetTaskId())
 
@@ -65,7 +65,7 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 }
 
 func (cs *collectService) Load(ctx context.Context, request *LoadCollectorRequest) (*LoadCollectorResponse, error) {
-	logCollectService.Trace("GRPC Load() received")
+	logCollectService.Debug("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
@@ -75,7 +75,7 @@ func (cs *collectService) Load(ctx context.Context, request *LoadCollectorReques
 }
 
 func (cs *collectService) Unload(ctx context.Context, request *UnloadCollectorRequest) (*UnloadCollectorResponse, error) {
-	logCollectService.Trace("GRPC Unload() received")
+	logCollectService.Debug("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 
@@ -83,7 +83,7 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadCollectorRe
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
-	logCollectService.Trace("GRPC Info() received")
+	logCollectService.Debug("GRPC Info() received")
 
 	var err error
 	response := &InfoResponse{}

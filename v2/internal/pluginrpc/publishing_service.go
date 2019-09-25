@@ -22,7 +22,7 @@ func newPublishingService(proxy proxy.Publisher) PublisherServer {
 }
 
 func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
-	logPublishService.Trace("GRPC Publish() received")
+	logPublishService.Debug("GRPC Publish() received")
 
 	id := ""
 	mts := []*types.Metric{}
@@ -67,7 +67,7 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 }
 
 func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherRequest) (*LoadPublisherResponse, error) {
-	logPublishService.Trace("GRPC Load() received")
+	logPublishService.Debug("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
@@ -76,7 +76,7 @@ func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherReq
 }
 
 func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublisherRequest) (*UnloadPublisherResponse, error) {
-	logPublishService.Trace("GRPC Unload() received")
+	logPublishService.Debug("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 
