@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -39,11 +40,10 @@ type metricMetadata struct {
 }
 
 type ContextManager struct {
+	*commonProxy.ContextManager
+
 	collector  plugin.Collector // reference to custom plugin code
 	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
-
-	activeTasksMutex sync.RWMutex        // mutex associated with activeTasks
-	activeTasks      map[string]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -57,9 +57,10 @@ type ContextManager struct {
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
-		collector:   collector,
-		contextMap:  sync.Map{},
-		activeTasks: map[string]struct{}{},
+		ContextManager: commonProxy.NewContextManager(),
+
+		collector:  collector,
+		contextMap: sync.Map{},
 
 		metricsDefinition: metrictree.NewMetricDefinition(),
 
@@ -78,10 +79,10 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return nil, fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -107,10 +108,10 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	if _, ok := cm.contextMap.Load(id); ok {
 		return errors.New("context with given id was already defined")
@@ -142,10 +143,10 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -210,25 +211,6 @@ func (cm *ContextManager) RequestPluginDefinition() {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
 		}
 	}
-}
-
-func (cm *ContextManager) activateTask(id string) bool {
-	cm.activeTasksMutex.Lock()
-	defer cm.activeTasksMutex.Unlock()
-
-	if _, ok := cm.activeTasks[id]; ok {
-		return false
-	}
-
-	cm.activeTasks[id] = struct{}{}
-	return true
-}
-
-func (cm *ContextManager) markTaskAsCompleted(id string) {
-	cm.activeTasksMutex.Lock()
-	defer cm.activeTasksMutex.Unlock()
-
-	delete(cm.activeTasks, id)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

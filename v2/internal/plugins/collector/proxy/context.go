@@ -3,27 +3,22 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 const nsSeparator = metrictree.NsSeparator
 
 type pluginContext struct {
-	rawConfig          []byte
-	flattenedConfig    map[string]string
-	storedObjects      map[string]interface{}
-	storedObjectsMutex sync.RWMutex
-	metricsFilters     *metrictree.TreeValidator // metric filters defined by task (yaml)
+	*commonProxy.Context
 
-	sessionMts []*types.Metric
-
-	ctxManager *ContextManager // back-reference to context manager
+	metricsFilters *metrictree.TreeValidator // metric filters defined by task (yaml)
+	sessionMts     []*types.Metric
+	ctxManager     *ContextManager // back-reference to context manager
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
@@ -31,53 +26,19 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 		return nil, errors.New("can't create context without valid context manager")
 	}
 
-	flattenedConfig, err := simpleconfig.JSONToFlatMap(rawConfig)
+	baseContext, err := commonProxy.NewContext(rawConfig)
 	if err != nil {
-		return nil, fmt.Errorf("can't create context due to invalid json: %v", err)
+		return nil, err
 	}
 
 	pc := &pluginContext{
-		rawConfig:       rawConfig,
-		flattenedConfig: flattenedConfig,
-		storedObjects:   map[string]interface{}{},
+		Context:        baseContext,
+		metricsFilters: metrictree.NewMetricFilter(ctxManager.metricsDefinition),
+		ctxManager:     ctxManager,
+		sessionMts:     nil,
 	}
-
-	pc.metricsFilters = metrictree.NewMetricFilter(ctxManager.metricsDefinition)
-	pc.ctxManager = ctxManager
 
 	return pc, nil
-}
-
-func (pc *pluginContext) Config(key string) (string, bool) {
-	v, ok := pc.flattenedConfig[key]
-	return v, ok
-}
-
-func (pc *pluginContext) ConfigKeys() []string {
-	var keysList []string
-	for k := range pc.flattenedConfig {
-		keysList = append(keysList, k)
-	}
-	return keysList
-}
-
-func (pc *pluginContext) RawConfig() []byte {
-	return pc.rawConfig
-}
-
-func (pc *pluginContext) Store(key string, obj interface{}) {
-	pc.storedObjectsMutex.Lock()
-	defer pc.storedObjectsMutex.Unlock()
-
-	pc.storedObjects[key] = obj
-}
-
-func (pc *pluginContext) Load(key string) (interface{}, bool) {
-	pc.storedObjectsMutex.RLock()
-	defer pc.storedObjectsMutex.RUnlock()
-
-	obj, ok := pc.storedObjects[key]
-	return obj, ok
 }
 
 func (pc *pluginContext) AddMetric(ns string, v interface{}) error {

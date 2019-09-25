@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )

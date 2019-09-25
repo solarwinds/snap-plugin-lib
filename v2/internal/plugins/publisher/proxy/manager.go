@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -24,18 +25,17 @@ type Publisher interface {
 }
 
 type ContextManager struct {
-	publisher  plugin.Publisher
-	contextMap sync.Map // todo: is it possible to make those 3 common
+	*commonProxy.ContextManager
 
-	activeTasksMutex sync.RWMutex        // mutex associated with activeTasks
-	activeTasks      map[string]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
+	publisher  plugin.Publisher
+	contextMap sync.Map
 }
 
 func NewContextManager(publisher plugin.Publisher) *ContextManager {
 	cm := &ContextManager{
-		publisher:   publisher,
-		contextMap:  sync.Map{},
-		activeTasks: map[string]struct{}{},
+		ContextManager: commonProxy.NewContextManager(),
+		publisher:      publisher,
+		contextMap:     sync.Map{},
 	}
 
 	return cm
@@ -45,10 +45,10 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 // proxy.Publisher related methods
 
 func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return fmt.Errorf("can't process publish request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -74,10 +74,10 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 }
 
 func (cm *ContextManager) LoadTask(id string, config []byte) error {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	if _, ok := cm.contextMap.Load(id); ok {
 		return errors.New("context with given id was already defined")
@@ -103,10 +103,10 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	if !cm.activateTask(id) {
+	if !cm.ActivateTask(id) {
 		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 	}
-	defer cm.markTaskAsCompleted(id)
+	defer cm.MarkTaskAsCompleted(id)
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -126,25 +126,4 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
 
 	return nil
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-func (cm *ContextManager) activateTask(id string) bool {
-	cm.activeTasksMutex.Lock()
-	defer cm.activeTasksMutex.Unlock()
-
-	if _, ok := cm.activeTasks[id]; ok {
-		return false
-	}
-
-	cm.activeTasks[id] = struct{}{}
-	return true
-}
-
-func (cm *ContextManager) markTaskAsCompleted(id string) {
-	cm.activeTasksMutex.Lock()
-	defer cm.activeTasksMutex.Unlock()
-
-	delete(cm.activeTasks, id)
 }
