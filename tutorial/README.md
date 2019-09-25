@@ -3,7 +3,7 @@
 ## What's collector
 
 Collector is a small application gathering information about observed system. 
-You can collect CPU utilization, database statistics, message broker queue's sizes or whatever you want in a form of metric.
+You can collect CPU utilization, database statistics, message broker queue's sizes or other type of information, in a metric form.
 
 ## What's metric
 
