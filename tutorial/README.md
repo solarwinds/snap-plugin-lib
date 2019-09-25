@@ -15,7 +15,7 @@ Metric holds information about single measurement. It consists of:
 - tags (additional textual data)
 - time of measurements
 
-### Snap deamon vs snap collectors
+### Snap daemon vs snap collectors
 
 When used in production, plugins are controlled by snap daemon.
 Simplified algorithm may be described as follows:
