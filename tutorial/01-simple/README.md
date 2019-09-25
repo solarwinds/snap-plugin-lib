@@ -30,7 +30,7 @@ func main() {
 package main
 ```
 
-This instruction will tell go compiler that it should build executable file from this package.
+This instruction will instruct go compiler that it should build executable file from this package.
 
 ```go
 import (
