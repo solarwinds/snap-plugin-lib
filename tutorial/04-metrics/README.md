@@ -20,7 +20,7 @@ Good news - all filtering is done internally by plugin so there is no need to ch
 > In production environment requesting all metrics may cause huge impact on system if plugin requires advanced processing.
 > You should always benchmark you plugin in different situations.
 
-To filter metrics we provide additional parameter during execution (in production it would be entries in task file **TODO**link**):
+To filter metrics we use additional parameter during execution (in production it would be entries in the task file **TODO**link**):
 ```bash
 ./04-metrics -debug-mode=1 -debug-collect-counts=3 -debug-collect-interval=5s -plugin-filter="/example/date/*"
 ```
