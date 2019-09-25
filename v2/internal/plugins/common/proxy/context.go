@@ -27,34 +27,34 @@ func NewContext(rawConfig []byte) (*Context, error) {
 	}, nil
 }
 
-func (pc *Context) Config(key string) (string, bool) {
-	v, ok := pc.flattenedConfig[key]
+func (c *Context) Config(key string) (string, bool) {
+	v, ok := c.flattenedConfig[key]
 	return v, ok
 }
 
-func (pc *Context) ConfigKeys() []string {
+func (c *Context) ConfigKeys() []string {
 	var keysList []string
-	for k := range pc.flattenedConfig {
+	for k := range c.flattenedConfig {
 		keysList = append(keysList, k)
 	}
 	return keysList
 }
 
-func (pc *Context) RawConfig() []byte {
-	return pc.rawConfig
+func (c *Context) RawConfig() []byte {
+	return c.rawConfig
 }
 
-func (pc *Context) Store(key string, obj interface{}) {
-	pc.storedObjectsMutex.Lock()
-	defer pc.storedObjectsMutex.Unlock()
+func (c *Context) Store(key string, obj interface{}) {
+	c.storedObjectsMutex.Lock()
+	defer c.storedObjectsMutex.Unlock()
 
-	pc.storedObjects[key] = obj
+	c.storedObjects[key] = obj
 }
 
-func (pc *Context) Load(key string) (interface{}, bool) {
-	pc.storedObjectsMutex.RLock()
-	defer pc.storedObjectsMutex.RUnlock()
+func (c *Context) Load(key string) (interface{}, bool) {
+	c.storedObjectsMutex.RLock()
+	defer c.storedObjectsMutex.RUnlock()
 
-	obj, ok := pc.storedObjects[key]
+	obj, ok := c.storedObjects[key]
 	return obj, ok
 }
