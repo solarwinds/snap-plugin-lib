@@ -115,7 +115,7 @@ func (m *Metric) HasNsElement(el string) bool {
 }
 
 func (m *Metric) HasNsElementOn(el string, pos int) bool {
-	if pos < len(m.Namespace_) {
+	if pos < len(m.Namespace_) && pos >= 0 {
 		if el == m.Namespace_[pos].String() {
 			return true
 		}
