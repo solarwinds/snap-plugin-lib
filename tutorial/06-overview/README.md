@@ -1,6 +1,6 @@
 # Advanced Plugin - Introduction
 
-In previous chapters you've learnt how to write very simple plugin and utilize functionality that the library has to offer. 
+In the previous chapters you've learnt how to write a very simple plugin and utilize functionality that the library provided. 
 Now, we will teach you how to build advanced, practical collector which will gather basic information about monitored system:
 - cpu usage (percentage) for each running process 
 - memory usage (percentage) for each running process
@@ -11,7 +11,7 @@ Now, we will teach you how to build advanced, practical collector which will gat
 
 ## Static metrics
 
-In our simple example, a metric could hold following information
+In our simple example, a metric could hold the following information
 - metric name (namespace), ie. `/example/time/hour`
 - value, ie. `11`
 - additional text information (tags), ie. `weekday: Monday`

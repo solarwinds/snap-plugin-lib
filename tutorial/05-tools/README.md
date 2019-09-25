@@ -64,7 +64,7 @@ When plugin is controlled by snap-mock, user can gather several statistics:
 - total number of metrics
 - etc.
 
-To enable this feature simply run plugin with following arguments:
+To enable this feature simply run plugin with the following arguments:
 ```bash
 ./05-tools -grpc-port=50123 -log-level=debug -enable-stats -enable-stats-server -stats-port=8080
 ```
