@@ -424,8 +424,23 @@ type noConfigCollector struct {
 	collectCalls int
 }
 
-func (s *noConfigCollector) Collect(ctx plugin.CollectContext) error {
-	s.collectCalls++
+func (c *noConfigCollector) PluginDefinition(def plugin.CollectorDefinition) error {
+	def.DefineMetric("/example/group1/metric1", "b", true, "description 11")
+	def.DefineMetric("/example/group1/metric2", "b", true, "description 12")
+	def.DefineMetric("/example/group1/metric3", "b", true, "description 13")
+	def.DefineMetric("/example/group1/metric4", "b", true, "description 14")
+	def.DefineMetric("/example/group1/metric5", "b", true, "description 15")
+	def.DefineMetric("/example/group2/metric1", "B", true, "description 21")
+	def.DefineMetric("/example/group2/metric2", "B", true, "description 22")
+
+	def.DefineGroup("dyngroup", "dyngroup description")
+	def.DefineMetric("/example/group3/[dyngroup]/metric1", "B", true, "description 31")
+
+	return nil
+}
+
+func (c *noConfigCollector) Collect(ctx plugin.CollectContext) error {
+	c.collectCalls++
 
 	_ = ctx.AddMetricWithTags("/example/group1/metric1", 11, map[string]string{"k1": "v1"})
 	_ = ctx.AddMetric("/example/group1/metric2", 12)
@@ -435,6 +450,8 @@ func (s *noConfigCollector) Collect(ctx plugin.CollectContext) error {
 
 	_ = ctx.AddMetric("/example/group2/metric1", 21)
 	_ = ctx.AddMetric("/example/group2/metric2", 22)
+
+	_ = ctx.AddMetric("/example/group3/[dyngroup=abc]/metric1", 31)
 
 	return nil
 }
@@ -452,8 +469,8 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 		mts := ctx.ListAllMetrics()
 
 		// Assert
-		So(ctx.Count(), ShouldEqual, 7)
-		So(len(mts), ShouldEqual, 7)
+		So(ctx.Count(), ShouldEqual, 8)
+		So(len(mts), ShouldEqual, 8)
 
 		So(mts[0].NamespaceText(), ShouldEqual, "/example/group1/metric1")
 		So(mts[0].Value(), ShouldEqual, 11)
@@ -461,14 +478,20 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 		So(mts[0].HasTag("k1", "v1"), ShouldBeTrue)
 		So(mts[0].HasTagWithKey("k1"), ShouldBeTrue)
 		So(mts[0].HasTagWithValue("v1"), ShouldBeTrue)
+		So(mts[0].Description(), ShouldEqual, "description 11")
+		So(mts[0].Unit(), ShouldEqual, "b")
 
 		So(mts[1].NamespaceText(), ShouldEqual, "/example/group1/metric2")
 		So(mts[1].Value(), ShouldEqual, 12)
 		So(mts[1].Tags(), ShouldResemble, map[string]string{})
+		So(mts[1].Description(), ShouldEqual, "description 12")
+		So(mts[1].Unit(), ShouldEqual, "b")
 
 		So(mts[2].NamespaceText(), ShouldEqual, "/example/group1/metric3")
 		So(mts[2].Value(), ShouldEqual, 13)
 		So(mts[2].Tags(), ShouldResemble, map[string]string{})
+		So(mts[2].Description(), ShouldEqual, "description 13")
+		So(mts[2].Unit(), ShouldEqual, "b")
 
 		So(mts[3].NamespaceText(), ShouldEqual, "/example/group1/metric4")
 		So(mts[3].Value(), ShouldEqual, 14)
@@ -476,18 +499,37 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 		So(mts[3].HasTag("k2", "v2"), ShouldBeTrue)
 		So(mts[3].HasTagWithKey("k3"), ShouldBeTrue)
 		So(mts[3].HasTagWithValue("v3"), ShouldBeTrue)
+		So(mts[3].Description(), ShouldEqual, "description 14")
+		So(mts[3].Unit(), ShouldEqual, "b")
 
 		So(mts[4].NamespaceText(), ShouldEqual, "/example/group1/metric5")
 		So(mts[4].Value(), ShouldEqual, 15)
 		So(mts[4].Tags(), ShouldResemble, map[string]string{})
+		So(mts[4].Description(), ShouldEqual, "description 15")
+		So(mts[4].Unit(), ShouldEqual, "b")
 
 		So(mts[5].NamespaceText(), ShouldEqual, "/example/group2/metric1")
 		So(mts[5].Value(), ShouldEqual, 21)
 		So(mts[5].Tags(), ShouldResemble, map[string]string{})
+		So(mts[5].Description(), ShouldEqual, "description 21")
+		So(mts[5].Unit(), ShouldEqual, "B")
 
 		So(mts[6].NamespaceText(), ShouldEqual, "/example/group2/metric2")
 		So(mts[6].Value(), ShouldEqual, 22)
 		So(mts[6].Tags(), ShouldResemble, map[string]string{})
+		So(mts[6].Description(), ShouldEqual, "description 22")
+		So(mts[6].Unit(), ShouldEqual, "B")
+
+		So(mts[7].NamespaceText(), ShouldEqual, "/example/group3/[dyngroup=abc]/metric1")
+		So(mts[7].Value(), ShouldEqual, 31)
+		So(mts[7].Tags(), ShouldResemble, map[string]string{})
+		So(mts[7].Description(), ShouldEqual, "description 31")
+		So(mts[7].Unit(), ShouldEqual, "B")
+
+		So(mts[7].Namespace()[2].IsDynamic(), ShouldBeTrue)
+		So(mts[7].Namespace()[2].Name(), ShouldEqual, "dyngroup")
+		So(mts[7].Namespace()[2].Value(), ShouldEqual, "abc")
+		So(mts[7].Namespace()[2].Description(), ShouldEqual, "dyngroup description")
 	})
 
 	return nil

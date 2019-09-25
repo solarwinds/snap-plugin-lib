@@ -75,6 +75,14 @@ func (m *Metric) Tags() map[string]string {
 	return m.Tags_
 }
 
+func (m *Metric) Unit() string {
+	return m.Unit_
+}
+
+func (m *Metric) Description() string {
+	return m.Description_
+}
+
 func (m *Metric) Timestamp() time.Time {
 	return m.Timestamp_
 }

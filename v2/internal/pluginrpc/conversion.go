@@ -17,11 +17,12 @@ func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 	}
 
 	protoMt := &Metric{
-		Namespace: toGRPCNamespace(mt.Namespace_),
-		Tags:      mt.Tags_,
-		Value:     value,
-		Unit:      mt.Unit_,
-		Timestamp: toGRPCTime(mt.Timestamp_),
+		Namespace:   toGRPCNamespace(mt.Namespace_),
+		Tags:        mt.Tags_,
+		Value:       value,
+		Unit:        mt.Unit_,
+		Timestamp:   toGRPCTime(mt.Timestamp_),
+		Description: mt.Description_,
 	}
 
 	return protoMt, nil

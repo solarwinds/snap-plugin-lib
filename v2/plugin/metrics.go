@@ -13,6 +13,12 @@ type Metric interface {
 	// Text-like object associated with measurement
 	Tags() map[string]string
 
+	// Description of measurement
+	Description() string
+
+	// Unit of measurement value
+	Unit() string
+
 	// Time, when measurement was taken
 	Timestamp() time.Time
 
