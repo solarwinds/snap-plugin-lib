@@ -21,7 +21,7 @@ When used in production, plugins are controlled by snap daemon.
 Simplified algorithm may be described as follows:
 1) Snap reads and forward configuration (credentials, requested metrics etc.) to plugin
 2) Periodically (usally 60s) snap requests collection of metrics for different plugins 
-3) Each plugin responds with own set of metrics. 
+3) Each plugin responds with its own set of metrics
 
 ## Intro
 
