@@ -54,7 +54,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-Above code shows the simplest implementation of collector.
+Above code shows the simplest implementation of the collector.
 Method `Collect()` needs to be always provided - it's the "heart" of a plugin, saying what needs to be done.
 We are gathering one metric `/example/metric1` containing value `10`, by calling `ctx.AddMetric(metricName, value)`.
 In real application those values would vary in time (depending on the state of observed system).
