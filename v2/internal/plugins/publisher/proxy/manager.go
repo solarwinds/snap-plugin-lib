@@ -62,7 +62,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	err := cm.publisher.Publish(context) // calling to user defined code
 	endTime := time.Now()
 
-	// todo: stats
+	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
 
 	if err != nil {
 		return fmt.Errorf("user-defined Publish method ended with error: %v", err)
@@ -97,7 +97,7 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 
 	cm.contextMap.Store(id, newCtx)
 
-	// todo: update stats
+	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
 
 	return nil
 }
@@ -123,7 +123,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 
 	cm.contextMap.Delete(id)
 
-	// todo: update stats
+	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
 
 	return nil
 }

@@ -33,7 +33,7 @@ func (ns *NamespaceElement) Description() string {
 }
 
 func (ns *NamespaceElement) IsDynamic() bool {
-	return ns.Name_ != "" // todo: check
+	return ns.Name_ != ""
 }
 
 func (ns *NamespaceElement) String() string {
