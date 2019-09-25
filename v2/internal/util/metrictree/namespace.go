@@ -1,5 +1,5 @@
 /*
-This file contains definition of namespace and namespace elements. amespace element can consist of:
+This file contains definition of namespace and namespace elements. Namespace element can consist of:
 - static names
 - groups - elements which can hold additional values (and are converted to tags by AO)
 - regular expressions - used to restrict metrics sent to AO

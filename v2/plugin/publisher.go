@@ -1,6 +1,5 @@
 package plugin
 
-// todo: document
 type Publisher interface {
 	Publish(ctx PublishContext) error
 }
@@ -14,8 +13,6 @@ type PublishContext interface {
 	Context
 
 	ListAllMetrics() []Metric
-	//ListMetrics()
-	//HasMetric(ns string)
 	Count() int
 }
 
