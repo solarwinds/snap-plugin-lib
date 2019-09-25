@@ -84,7 +84,7 @@ func (s simpleCollector) Collect(ctx plugin.Context) error {
 ```
 
 At the beginning we are simulating data collection by obtaining current system time. 
-In real plugins those code would be replaced with some REST request, file reading, SQL query etc.
+In real plugins this code would be replaced with some REST request, file reading, SQL query etc.
 
 When we have access to `time` object, we create 5 metrics - each of which is associated with a separated value.
 Also we have introduced metric groups: date and time (second position in metric name).
