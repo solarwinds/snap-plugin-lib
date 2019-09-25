@@ -81,7 +81,7 @@ func (pc *pluginContext) Load(key string) (interface{}, bool) {
 }
 
 func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
-	return pc.AddMetricWithTags(ns, v, nil)
+	return pc.AddMetricWithTags(ns, v, map[string]string{})
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {

@@ -464,11 +464,11 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 
 		So(mts[1].NamespaceText(), ShouldEqual, "/example/group1/metric2")
 		So(mts[1].Value(), ShouldEqual, 12)
-		So(mts[1].Tags(), ShouldBeNil)
+		So(mts[1].Tags(), ShouldResemble, map[string]string{})
 
 		So(mts[2].NamespaceText(), ShouldEqual, "/example/group1/metric3")
 		So(mts[2].Value(), ShouldEqual, 13)
-		So(mts[2].Tags(), ShouldBeNil) // todo: nil vs empty map
+		So(mts[2].Tags(), ShouldResemble, map[string]string{})
 
 		So(mts[3].NamespaceText(), ShouldEqual, "/example/group1/metric4")
 		So(mts[3].Value(), ShouldEqual, 14)
@@ -479,15 +479,15 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 
 		So(mts[4].NamespaceText(), ShouldEqual, "/example/group1/metric5")
 		So(mts[4].Value(), ShouldEqual, 15)
-		So(mts[4].Tags(), ShouldBeNil)
+		So(mts[4].Tags(), ShouldResemble, map[string]string{})
 
 		So(mts[5].NamespaceText(), ShouldEqual, "/example/group2/metric1")
 		So(mts[5].Value(), ShouldEqual, 21)
-		So(mts[5].Tags(), ShouldBeNil)
+		So(mts[5].Tags(), ShouldResemble, map[string]string{})
 
 		So(mts[6].NamespaceText(), ShouldEqual, "/example/group2/metric2")
 		So(mts[6].Value(), ShouldEqual, 22)
-		So(mts[6].Tags(), ShouldBeNil)
+		So(mts[6].Tags(), ShouldResemble, map[string]string{})
 	})
 
 	return nil

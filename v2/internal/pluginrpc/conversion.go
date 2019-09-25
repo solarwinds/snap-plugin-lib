@@ -33,10 +33,15 @@ func fromGRPCMetric(mt *Metric) (types.Metric, error) {
 		return types.Metric{}, fmt.Errorf("can't convert metric from GRPC structure: %v", err)
 	}
 
+	tags := map[string]string{}
+	if mt.Tags != nil {
+		tags = mt.Tags
+	}
+
 	retMt := types.Metric{
 		Namespace_:   fromGRPCNamespace(mt.Namespace),
 		Value_:       data,
-		Tags_:        mt.Tags,
+		Tags_:        tags,
 		Unit_:        mt.Unit,
 		Timestamp_:   fromGRPCTime(mt.Timestamp),
 		Description_: mt.Description,
