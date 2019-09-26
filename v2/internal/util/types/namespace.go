@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 type Namespace []NamespaceElement
@@ -41,6 +43,14 @@ func (ns Namespace) String() string {
 	}
 
 	return sb.String()
+}
+
+func (ns Namespace) Len() int {
+	return len(ns)
+}
+
+func (ns Namespace) At(pos int) plugin.NamespaceElement {
+	return &ns[pos]
 }
 
 ///////////////////////////////////////////////////////////////////////////////

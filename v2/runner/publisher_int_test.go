@@ -5,7 +5,6 @@ package runner
 import (
 	"context"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"io"
 	"net"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -527,10 +527,11 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 		So(mts[7].Description(), ShouldEqual, "description 31")
 		So(mts[7].Unit(), ShouldEqual, "B")
 
-		//So(mts[7].Namespace()[2].IsDynamic(), ShouldBeTrue) // todo
-		//So(mts[7].Namespace()[2].Name(), ShouldEqual, "dyngroup")
-		//So(mts[7].Namespace()[2].Value(), ShouldEqual, "abc")
-		//So(mts[7].Namespace()[2].Description(), ShouldEqual, "dyngroup description")
+		mts[7].Namespace()
+		So(mts[7].Namespace().At(2).IsDynamic(), ShouldBeTrue)
+		So(mts[7].Namespace().At(2).Name(), ShouldEqual, "dyngroup")
+		So(mts[7].Namespace().At(2).Value(), ShouldEqual, "abc")
+		So(mts[7].Namespace().At(2).Description(), ShouldEqual, "dyngroup description")
 	})
 
 	return nil

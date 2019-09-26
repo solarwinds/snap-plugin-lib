@@ -49,9 +49,11 @@ func TestStaticMetric(t *testing.T) {
 			So(mt.Namespace().HasElementOn("cpu", 4), ShouldBeFalse)
 			So(mt.Namespace().HasElementOn("usage", -1), ShouldBeFalse)
 
-			//So(mt.Namespace()[0].IsDynamic(), ShouldBeFalse) // todo: uncomment
-			//So(mt.Namespace()[1].IsDynamic(), ShouldBeFalse)
-			//So(mt.Namespace()[2].IsDynamic(), ShouldBeFalse)
+			So(mt.Namespace().Len(), ShouldEqual, 3)
+
+			So(mt.Namespace().At(0).IsDynamic(), ShouldBeFalse)
+			So(mt.Namespace().At(1).IsDynamic(), ShouldBeFalse)
+			So(mt.Namespace().At(2).IsDynamic(), ShouldBeFalse)
 		})
 
 		Convey("Metric API", func() {
@@ -118,16 +120,16 @@ func TestDynamicMetric(t *testing.T) {
 			So(mt.Namespace().HasElementOn("network", 4), ShouldBeFalse)
 			So(mt.Namespace().HasElementOn("in_bytes", 5), ShouldBeFalse)
 
-			//So(len(mt.Namespace()), ShouldEqual, 4) // todo: uncomment
+			So(mt.Namespace().Len(), ShouldEqual, 4)
 
-			//So(mt.Namespace()[2].IsDynamic(), ShouldBeTrue)
-			//So(mt.Namespace()[0].IsDynamic(), ShouldBeFalse)
-			//So(mt.Namespace()[1].IsDynamic(), ShouldBeFalse)
-			//So(mt.Namespace()[3].IsDynamic(), ShouldBeFalse)
-			//
-			//So(mt.Namespace()[2].Value(), ShouldEqual, "enp0s3")
-			//So(mt.Namespace()[2].Name(), ShouldEqual, "interface")
-			//So(mt.Namespace()[2].Description(), ShouldEqual, "Name of network interface")
+			So(mt.Namespace().At(2).IsDynamic(), ShouldBeTrue)
+			So(mt.Namespace().At(0).IsDynamic(), ShouldBeFalse)
+			So(mt.Namespace().At(1).IsDynamic(), ShouldBeFalse)
+			So(mt.Namespace().At(3).IsDynamic(), ShouldBeFalse)
+
+			So(mt.Namespace().At(2).Value(), ShouldEqual, "enp0s3")
+			So(mt.Namespace().At(2).Name(), ShouldEqual, "interface")
+			So(mt.Namespace().At(2).Description(), ShouldEqual, "Name of network interface")
 		})
 
 		Convey("Tags API", func() {

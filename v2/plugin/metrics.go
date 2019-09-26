@@ -25,6 +25,12 @@ type Metric interface {
 
 // Representation of AppOptics measurement name
 type Namespace interface {
+	// Return namespace element at the given position
+	At(pos int) NamespaceElement
+
+	// Return length of the element
+	Len() int
+
 	// True, when metric name contains given element
 	HasElement(el string) bool
 
