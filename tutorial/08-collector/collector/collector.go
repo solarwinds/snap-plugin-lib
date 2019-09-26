@@ -32,7 +32,7 @@ func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 	return nil
 }
 
-func (s systemCollector) Collect(ctx plugin.Context) error {
+func (s systemCollector) Collect(ctx plugin.CollectContext) error {
 	err := s.collectTotalCPU(ctx)
 	if err != nil {
 		return err

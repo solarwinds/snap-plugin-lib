@@ -9,7 +9,7 @@ import (
 
 type simpleCollector struct{}
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	// Collect data
 	t := time.Now()
 
