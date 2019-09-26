@@ -5,13 +5,13 @@ import "time"
 // Representation of AppOptics measurement
 type Metric interface {
 	// Name of metric, ie: [system, cpu, percentage]
-	Namespace() []NamespaceElement
+	Namespace() Namespace
 
 	// Value associated with measurement
 	Value() interface{}
 
 	// Text-like object associated with measurement
-	Tags() map[string]string
+	Tags() Tags
 
 	// Description of measurement
 	Description() string
@@ -21,24 +21,18 @@ type Metric interface {
 
 	// Time, when measurement was taken
 	Timestamp() time.Time
+}
 
-	// True, when metric contains tag with specific key
-	HasTagWithKey(key string) bool
-
-	// True, when metric contains tag with specific value
-	HasTagWithValue(key string) bool
-
-	// True, when metric contains specific
-	HasTag(key string, value string) bool
-
+// Representation of AppOptics measurement name
+type Namespace interface {
 	// True, when metric name contains given element
-	HasNsElement(el string) bool
+	HasElement(el string) bool
 
 	// True, when metric name contains element on a given position
-	HasNsElementOn(el string, pos int) bool
+	HasElementOn(el string, pos int) bool
 
 	// Name of metric, ie: /system/cpu/percentage
-	NamespaceText() string
+	String() string
 }
 
 // Representation of part of AppOptics measurement name
@@ -54,4 +48,16 @@ type NamespaceElement interface {
 
 	// True, if element is dynamic
 	IsDynamic() bool
+}
+
+// Representation of additional textual information associated with metric
+type Tags interface {
+	// True, when metric contains tag with specific key
+	ContainsKey(key string) bool
+
+	// True, when metric contains tag with specific value
+	ContainsValue(key string) bool
+
+	// True, when metric contains specific
+	Contains(key string, value string) bool
 }

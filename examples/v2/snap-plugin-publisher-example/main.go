@@ -19,7 +19,7 @@ func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 	fmt.Printf("Number of metrics: %v\n", ctx.Count())
 
 	for _, mt := range ctx.ListAllMetrics() {
-		fmt.Printf(" - %v=%v [%v]\n", mt.NamespaceText(), mt.Value(), mt.Tags())
+		fmt.Printf(" - %s=%v [%v]\n", mt.Namespace(), mt.Value(), mt.Tags())
 	}
 
 	return nil
