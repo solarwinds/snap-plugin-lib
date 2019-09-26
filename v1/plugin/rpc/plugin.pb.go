@@ -663,7 +663,7 @@ func _Metric_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 		b.EncodeVarint(uint64(x.Uint64Data))
 	case nil:
 	default:
-		return fmt.Errorf("Metric.Data has unexpected type %T", x)
+		return fmt.Errorf("Metric.Value has unexpected type %T", x)
 	}
 	return nil
 }

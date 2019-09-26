@@ -5,23 +5,24 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 // convert metric to GRPC structure
 func toGRPCMetric(mt *types.Metric) (*Metric, error) {
-	value, err := toGRPCValue(mt.Value)
+	value, err := toGRPCValue(mt.Value_)
 	if err != nil {
 		return nil, fmt.Errorf("can't convert metric to GRPC structure: %v", err)
 	}
 
 	protoMt := &Metric{
-		Namespace: toGRPCNamespace(mt.Namespace),
-		Tags:      mt.Tags,
-		Value:     value,
-		Unit:      mt.Unit,
-		Timestamp: toGRPCTime(mt.Timestamp),
+		Namespace:   toGRPCNamespace(mt.Namespace_),
+		Tags:        mt.Tags_,
+		Value:       value,
+		Unit:        mt.Unit_,
+		Timestamp:   toGRPCTime(mt.Timestamp_),
+		Description: mt.Description_,
 	}
 
 	return protoMt, nil
@@ -33,13 +34,18 @@ func fromGRPCMetric(mt *Metric) (types.Metric, error) {
 		return types.Metric{}, fmt.Errorf("can't convert metric from GRPC structure: %v", err)
 	}
 
+	tags := map[string]string{}
+	if mt.Tags != nil {
+		tags = mt.Tags
+	}
+
 	retMt := types.Metric{
-		Namespace:   fromGRPCNamespace(mt.Namespace),
-		Value:       data,
-		Tags:        mt.Tags,
-		Unit:        mt.Unit,
-		Timestamp:   fromGRPCTime(mt.Timestamp),
-		Description: mt.Description,
+		Namespace_:   fromGRPCNamespace(mt.Namespace),
+		Value_:       data,
+		Tags_:        tags,
+		Unit_:        mt.Unit,
+		Timestamp_:   fromGRPCTime(mt.Timestamp),
+		Description_: mt.Description,
 	}
 
 	return retMt, err
@@ -51,9 +57,9 @@ func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 
 	for _, nsElem := range ns {
 		grpcNs = append(grpcNs, &Namespace{
-			Name:        nsElem.Name,
-			Value:       nsElem.Value,
-			Description: nsElem.Description,
+			Name:        nsElem.Name_,
+			Value:       nsElem.Value_,
+			Description: nsElem.Description_,
 		})
 	}
 
@@ -65,9 +71,9 @@ func fromGRPCNamespace(ns []*Namespace) []types.NamespaceElement {
 
 	for _, nsElem := range ns {
 		retNsElem = append(retNsElem, types.NamespaceElement{
-			Name:        nsElem.Name,
-			Value:       nsElem.Value,
-			Description: nsElem.Description,
+			Name_:        nsElem.Name,
+			Value_:       nsElem.Value,
+			Description_: nsElem.Description,
 		})
 	}
 

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
@@ -133,7 +133,7 @@ func (bc *benchCollector) DefineMetrics(colDef plugin.CollectorDefinition) error
 	return nil
 }
 
-func (bc *benchCollector) Collect(ctx plugin.Context) error {
+func (bc *benchCollector) Collect(ctx plugin.CollectContext) error {
 	for i := 0; i < len(metricsToValidateAll); i += bc.addMetricRatio {
 		err := ctx.AddMetric(metricsToValidateAll[i], i)
 		if err != nil {

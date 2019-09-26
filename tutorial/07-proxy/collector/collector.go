@@ -19,6 +19,6 @@ func New(proxy proxy.Proxy) systemCollector {
 	}
 }
 
-func (s systemCollector) Collect(plugin.Context) error {
+func (s systemCollector) Collect(plugin.CollectContext) error {
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
@@ -15,7 +16,7 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	//contextManager := proxy.NewContextManager(publisher)
+	contextManager := proxy.NewContextManager(publisher)
 
 	r, err := acquireResources(opt)
 	if err != nil {
@@ -24,5 +25,5 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	printMetaInformation(name, version, PluginTypePublisher, opt, r)
-	pluginrpc.StartPublisherGRPC(r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	pluginrpc.StartPublisherGRPC(contextManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }

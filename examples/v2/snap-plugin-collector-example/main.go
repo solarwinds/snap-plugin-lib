@@ -51,7 +51,7 @@ func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	return nil
 }
 
-func (*myCollector) Collect(ctx plugin.Context) error {
+func (*myCollector) Collect(ctx plugin.CollectContext) error {
 	log.Trace("Collect executed")
 
 	// Simulate collector processing

@@ -2,48 +2,54 @@ package types
 
 import (
 	"fmt"
-	"strings"
 	"time"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 const (
-	metricSeparator = "."
+	metricSeparator = "/"
 )
 
-type NamespaceElement struct {
-	Name        string
-	Value       string
-	Description string
-}
-
 type Metric struct {
-	Namespace   []NamespaceElement
-	Value       interface{}
-	Tags        map[string]string
-	Unit        string
-	Timestamp   time.Time
-	Description string
+	Namespace_   []NamespaceElement
+	Value_       interface{}
+	Tags_        Tags
+	Unit_        string
+	Timestamp_   time.Time
+	Description_ string
 }
 
-func (ns *NamespaceElement) String() string {
-	if ns.Name == "" {
-		return ns.Value
+func (m Metric) Namespace() plugin.Namespace {
+	ns := make(Namespace, 0, len(m.Namespace_))
+
+	for i := range m.Namespace_ {
+		ns = append(ns, m.Namespace_[i])
 	}
 
-	return fmt.Sprintf("[%s=%s]", ns.Name, ns.Value)
+	return ns
 }
 
-func (m *Metric) String() string {
-	var sb strings.Builder
+func (m Metric) Value() interface{} {
+	return m.Value_
+}
 
-	for i, ns := range m.Namespace {
-		sb.WriteString(ns.String())
+func (m Metric) Tags() plugin.Tags {
+	return m.Tags_
+}
 
-		if i != len(m.Namespace)-1 {
-			sb.WriteString(metricSeparator)
-		}
-	}
+func (m Metric) Unit() string {
+	return m.Unit_
+}
 
-	sb.WriteString(fmt.Sprintf(" %v {%v}", m.Value, m.Tags))
-	return sb.String()
+func (m Metric) Description() string {
+	return m.Description_
+}
+
+func (m Metric) Timestamp() time.Time {
+	return m.Timestamp_
+}
+
+func (m Metric) String() string {
+	return fmt.Sprintf("%s %v {%v}", m.Namespace().String(), m.Value_, m.Tags_)
 }

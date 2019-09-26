@@ -26,7 +26,7 @@ func (s simpleCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	// Collect data
 	t := time.Now()
 
