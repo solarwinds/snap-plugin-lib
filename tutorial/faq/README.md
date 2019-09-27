@@ -1,4 +1,10 @@
-# Tutorial (6)
+# FAQ (Frequently Asked Questions)
+
+##### Should I have to handle error value from ctx.AddMetric() and ctx.AddMetricWithTag() ?
+
+##### I added a metric, but can't find it in the result.
+
+##### How I can test that my plugin is working correctly?
 
 ----
 
