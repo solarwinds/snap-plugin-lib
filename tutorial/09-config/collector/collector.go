@@ -62,7 +62,7 @@ func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 }
 
 func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
-	memory, err := s.proxyCollector.TotalCpuUsage()
+	memory, err := s.proxyCollector.TotalMemoryUsage()
 	if err != nil {
 		return fmt.Errorf("can't create metric for total memory utilization: %v", err)
 	}
