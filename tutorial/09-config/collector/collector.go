@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -60,7 +61,10 @@ func (s systemCollector) Unload(ctx plugin.Context) error {
 }
 
 func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
-	cpu, err := s.proxyCollector.TotalCpuUsage()
+	cfg := getConfig(ctx)
+	measurementDur, _ := time.ParseDuration(cfg.TotalCpuMeasureDuration)
+
+	cpu, err := s.proxyCollector.TotalCpuUsage(measurementDur)
 	if err != nil {
 		return fmt.Errorf("can't create metric for total cpu utilization: %v", err)
 	}
@@ -85,14 +89,20 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
 		return fmt.Errorf("can't create metrics associated with processes")
 	}
 
+	cfg := getConfig(ctx)
+
 	for _, p := range procsInfo {
 		pName := s.sanitizeName(p.ProcessName)
 
-		cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-		_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		if p.CpuUsage >= cfg.Processes.MinCpuUsage {
+			cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
+			_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		}
 
-		memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-		_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		if p.MemoryUsage >= cfg.Processes.MinMemoryUsage {
+			memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
+			_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		}
 	}
 
 	return nil

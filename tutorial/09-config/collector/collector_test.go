@@ -2,6 +2,7 @@ package collector
 
 import (
 	"testing"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/data"
 	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
@@ -20,8 +21,8 @@ func (m *mockProxy) ProcessesInfo() ([]data.ProcessInfo, error) {
 	return args.Get(0).([]data.ProcessInfo), args.Error(1)
 }
 
-func (m *mockProxy) TotalCpuUsage() (float64, error) {
-	args := m.Called()
+func (m *mockProxy) TotalCpuUsage(d time.Duration) (float64, error) {
+	args := m.Called(d)
 	return args.Get(0).(float64), args.Error(1)
 }
 
@@ -32,23 +33,45 @@ func (m *mockProxy) TotalMemoryUsage() (float64, error) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func TestCollectTotalMemory(t *testing.T) {
+func TestCollectProcessMetrics(t *testing.T) {
 	// Arrange
 	proxy := &mockProxy{}
 	ctx := &pluginMock.Context{}
 
-	proxy.On("TotalMemoryUsage").
-		Return(15.0, nil).Once()
+	processList := []data.ProcessInfo{
+		{"mysql", 0.3, 0.3, 1232},
+		{"rabbit", 0.1, 0.2, 4514},
+		{"chrome", 0.5, 0.4, 2012},
+	}
 
-	ctx.On("AddMetric", mock.Anything, mock.Anything).
-		Return(nil).Once()
+	pluginConfig := &config{
+		Processes: configProcesses{
+			MinCpuUsage:    0.3,
+			MinMemoryUsage: 0.4,
+		},
+	}
+
+	ctx.On("Load", "config").
+		Once().Return(pluginConfig, true)
+
+	proxy.On("ProcessesInfo").
+		Return(processList, nil).Once()
+
+	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=mysql]/cpu", 0.3, map[string]string{"PID": "1232"}).
+		Once().Return(nil)
+
+	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=chrome]/cpu", 0.5, map[string]string{"PID": "2012"}).
+		Once().Return(nil)
+
+	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=chrome]/memory", 0.4, map[string]string{"PID": "2012"}).
+		Once().Return(nil)
 
 	c := systemCollector{
 		proxyCollector: proxy,
 	}
 
 	// Act
-	err := c.collectTotalMemory(ctx)
+	err := c.collectProcessesInfo(ctx)
 
 	// Assert
 	require.Nil(t, err)

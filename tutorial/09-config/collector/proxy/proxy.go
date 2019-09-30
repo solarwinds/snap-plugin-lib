@@ -14,7 +14,7 @@ const defaultCPUMeasurementTime = 1 * time.Second
 
 type Proxy interface {
 	ProcessesInfo() ([]data.ProcessInfo, error)
-	TotalCpuUsage() (float64, error)
+	TotalCpuUsage(time.Duration) (float64, error)
 	TotalMemoryUsage() (float64, error)
 }
 
@@ -59,8 +59,8 @@ func (p proxyCollector) ProcessesInfo() ([]data.ProcessInfo, error) {
 	return procInfo, nil
 }
 
-func (p proxyCollector) TotalCpuUsage() (float64, error) {
-	totalCpu, err := cpu.Percent(defaultCPUMeasurementTime, false)
+func (p proxyCollector) TotalCpuUsage(d time.Duration) (float64, error) {
+	totalCpu, err := cpu.Percent(d, false)
 	if err != nil {
 		return 0, fmt.Errorf("can't obtain cpu information: %v", err)
 	}
