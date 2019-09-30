@@ -51,6 +51,14 @@ func (s systemCollector) Collect(ctx plugin.Context) error {
 	return nil
 }
 
+func (s systemCollector) Load(ctx plugin.Context) error {
+	return handleConfig(ctx)
+}
+
+func (s systemCollector) Unload(ctx plugin.Context) error {
+	return nil
+}
+
 func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 	cpu, err := s.proxyCollector.TotalCpuUsage()
 	if err != nil {

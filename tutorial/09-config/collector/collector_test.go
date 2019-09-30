@@ -1,66 +1,13 @@
 package collector
 
 import (
-	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/data"
-	"github.com/smartystreets/assertions"
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/librato/snap-plugin-lib-go/tutorial/09-config/collector/data"
+	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
-
-///////////////////////////////////////////////////////////////////////////////
-
-type mockContext struct {
-	mock.Mock
-}
-
-func (m *mockContext) Config(key string) (string, bool) {
-	args := m.Called(key)
-	return args.String(0), args.Bool(1)
-}
-
-func (m *mockContext) ConfigKeys() []string {
-	args := m.Called()
-	return args.Get(0).([]string)
-}
-
-func (m *mockContext) RawConfig() []byte {
-	args := m.Called()
-	return args.Get(0).([]byte)
-}
-
-func (m *mockContext) Store(key string, value interface{}) {
-	m.Called(key, value)
-}
-
-func (m *mockContext) Load(key string) (interface{}, bool) {
-	args := m.Called(key)
-	return args.Get(0), args.Bool(1)
-}
-
-func (m *mockContext) AddMetric(ns string, value interface{}) error {
-	args := m.Called(ns, value)
-	return args.Error(0)
-}
-
-func (m *mockContext) AddMetricWithTags(ns string, value interface{}, tags map[string]string) error {
-	args := m.Called(ns, value, tags)
-	return args.Error(0)
-}
-
-func (m *mockContext) ApplyTagsByPath(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
-	return args.Error(0)
-}
-
-func (m *mockContext) ApplyTagsByRegExp(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
-	return args.Error(0)
-}
-
-func (m *mockContext) ShouldProcess(ns string) bool {
-	args := m.Called(ns)
-	return args.Bool(0)
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -86,8 +33,9 @@ func (m *mockProxy) TotalMemoryUsage() (float64, error) {
 ///////////////////////////////////////////////////////////////////////////////
 
 func TestCollectTotalMemory(t *testing.T) {
+	// Arrange
 	proxy := &mockProxy{}
-	ctx := &mockContext{}
+	ctx := &pluginMock.Context{}
 
 	proxy.On("TotalMemoryUsage").
 		Return(15.0, nil).Once()
@@ -99,6 +47,9 @@ func TestCollectTotalMemory(t *testing.T) {
 		proxyCollector: proxy,
 	}
 
+	// Act
 	err := c.collectTotalMemory(ctx)
-	assertions.ShouldBeNil(err)
+
+	// Assert
+	require.Nil(t, err)
 }
