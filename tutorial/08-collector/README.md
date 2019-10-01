@@ -1,11 +1,11 @@
 # System collector
 
-In the previous chapter we have written code responsible for gathering system information, yet enable to work in snap environment.
-Now will write a missing part.  
+In the previous chapter we have written code responsible for gathering system information, yet unable to work in snap environment.
+Now will complement a missing part of the collector.  
 
 ## Implementing `Collector` Module
 
-Let's start from creating a structure representing our collector which hold reference to `Proxy` interface (in `./collector/collector.go`)
+Let's start from creating a structure representing our collector, holding reference to `Proxy` interface (in `./collector/collector.go`)
 
 ```go
 type systemCollector struct {
@@ -19,13 +19,13 @@ func New(proxy proxy.Proxy) plugin.Collector {
 }
 ```
 
-Next, important step is to provide implementation of `Collect` and `PluginDefinition`.
-Due to the fact that we will be collecting dynamic metrics the second method is required.
+Next step is to provide implementations of `Collect` and `PluginDefinition` methods.
+Due to the fact that we will be collecting dynamic metrics, the second method is required.
 
-> When plugin collects only static metrics (as in the case of first plugin), `PluginDefinition` is not required. 
-> However, it's a good practice to provide as much information about plugin as possible by plugin's creator. 
+> `PluginDefinition` is not required when plugin collects only static metrics. 
+> However, it's a good practice to provide as much information about plugin as possible to help others understand its purpose (and produce better results, ie. when running plugin with `-print-example-task` flag) 
 
-Let's start from the second one:
+Let's start from defining the second one:
 ```go
 func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	def.DefineGroup("processName", "process name")
@@ -44,10 +44,10 @@ Then we are defining 4 metrics, 2 of which are dynamic.
 > Dynamic element is always surrounded by `[]` in definition.
 
 > Metrics can contain more than 1 dynamic elements, but there are restrictions:
-> - first and last elements must be static (ie. `/minisystem/devices/[type]/[producer]/mem_usage)
-> - you can't define static and dynamic element at the same position when they have common prefix (ie. for `/minisystem/[processName]/cpu`, `/minisystem/usage/cpu`: `[processName]` and `usage` have the same prefix - it's not allowed)
+> - first and last element have to be static (ie. `/minisystem/devices/[type]/[producer]/mem_usage)
+> - you can't define static and dynamic element at the same position when they have common prefix. For example: 2nd elements of given metrics `/minisystem/[processName]/cpu`, `/minisystem/usage/cpu`: `[processName]` and `usage` have the same prefix; it's not allowed)
 
-Before we introduce `Collect` implementation let's implement method which convert measurements (of type defined in `data` module) into metrics:
+Before we introduce `Collect` implementation let's implement helper methods which will convert measurements (of type defined in `data` module) into metrics:
 
 ```
 func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
@@ -64,9 +64,10 @@ func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 In the first line we are calling `TotalCpuUsage`, which is part of `Proxy` interface. 
 Then we handle possible errors by wrapping it into new one.
 If there were no error, metric is added to results by calling `ctx.AddMetric()`.
-(refer to **TODO** why not to handle errors)
 
-`collectTotalMemory` is almost the same:
+> You can ignore error value returned from `ctx.AddMetric()`. It's should be rather used only during debugging (see [explanation](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial_ch89/tutorial/faq#should-i-have-to-handle-error-value-from-ctxaddmetric-and-ctxaddmetricwithtag-))    
+
+`collectTotalMemory` is similar to method we have just implemented:
 ```go
 func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
 	memory, err := s.proxyCollector.TotalCpuUsage()
@@ -79,7 +80,7 @@ func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
 }
 ```
 
-The last helper method is a little bit more complicated:
+The last helper method will be a little bit more complicated:
 ```go
 func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
 	procsInfo, err := s.proxyCollector.ProcessesInfo()
@@ -102,8 +103,10 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
 ```
 At the begging we are getting list of processes by calling `ProcessesInfo()` on `Proxy` interface.
 After handling error, we are iterating over each element from results and create two metrics: one related to cpu, one related to memory.
-Please take a look that we are using special format for dynamic element (ie. `/minisystem/processes/\[processName=mysql\]/memory")
+
+Be aware that we are using special format for dynamic element (`/minisystem/processes/[processName=mysql]/memory`).
 Generally syntax `/minisystem/processes/mysql/memory` would be also allowed, but it's much more readable for other developers to use '[]' when adding dynamic elements.
+
 Last but not least, pay attention that we needed to sanitize process name (since it will become part of metric name).
 
 > Valid character for namespace elements are letters, numbers and `_`
@@ -116,7 +119,7 @@ func (s systemCollector) sanitizeName(n string) string {
 }
 ```
 
-When all helpers are finished we can finally implement `Collect`.
+When all helpers are finished, we can finally implement `Collect`.
 ```go
 func (s systemCollector) Collect(ctx plugin.Context) error {
 	err := s.collectTotalCPU(ctx)
