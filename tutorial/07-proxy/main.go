@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/librato/snap-plugin-lib-go/tutorial/08-collector/collector"
-	"github.com/librato/snap-plugin-lib-go/tutorial/08-collector/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/tutorial/07-proxy/collector"
+	"github.com/librato/snap-plugin-lib-go/tutorial/07-proxy/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )
 
