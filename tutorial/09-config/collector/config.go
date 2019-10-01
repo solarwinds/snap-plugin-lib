@@ -49,11 +49,11 @@ func handleConfig(ctx plugin.Context) error {
 		return fmt.Errorf("invalid value for totalCpuMeasureDuration: %v", err)
 	}
 
-	if cfg.Processes.MinCpuUsage < 0 || cfg.Processes.MinCpuUsage > 1 {
+	if cfg.Processes.MinCpuUsage < 0 || cfg.Processes.MinCpuUsage > 100 {
 		return fmt.Errorf("invalid value for minCpuUsage: %v", err)
 	}
 
-	if cfg.Processes.MinMemoryUsage < 0 || cfg.Processes.MinMemoryUsage > 1 {
+	if cfg.Processes.MinMemoryUsage < 0 || cfg.Processes.MinMemoryUsage > 100 {
 		return fmt.Errorf("invalid value for minMemoryUsage: %v", err)
 	}
 
