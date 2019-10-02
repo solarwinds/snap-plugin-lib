@@ -39,9 +39,9 @@ func TestCollectProcessMetrics(t *testing.T) {
 	ctx := &pluginMock.Context{}
 
 	processList := []data.ProcessInfo{
-		{"mysql", 0.3, 0.3, 1232},
-		{"rabbit", 0.1, 0.2, 4514},
-		{"chrome", 0.5, 0.4, 2012},
+		{ProcessName: "mysql", CpuUsage: 0.3, MemoryUsage: 0.3, PID: 1232},
+		{ProcessName: "rabbit", CpuUsage: 0.1, MemoryUsage: 0.2, PID: 4514},
+		{ProcessName: "chrome", CpuUsage: 0.5, MemoryUsage: 0.4, PID: 2012},
 	}
 
 	pluginConfig := &config{
