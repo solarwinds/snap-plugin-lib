@@ -58,7 +58,7 @@ func TestConfig_ValidationError(t *testing.T) {
 	expectedCfg := defaultConfig()
 
 	ctx.On("RawConfig").
-		Once().Return([]byte(`{"processes": {"minCpuUsage": 1.10, "minMemoryUsage": 0.15}, "totalCpuMeasureDuration": "5s"}`))
+		Once().Return([]byte(`{"processes": {"minCpuUsage": 110, "minMemoryUsage": 15}, "totalCpuMeasureDuration": "5s"}`))
 
 	ctx.On("Store", "config", expectedCfg).
 		Once().Return()
