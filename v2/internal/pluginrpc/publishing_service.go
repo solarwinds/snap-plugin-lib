@@ -1,31 +1,34 @@
 package pluginrpc
 
 import (
+	"context"
 	"fmt"
 	"io"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
-const (
-	maxPublishChunkSize = 100
-)
+var logPublishService = log.WithField("service", "Publish")
 
 type publishingService struct {
+	proxy proxy.Publisher
 }
 
-func newPublishingService() PublisherServer {
-	return &publishingService{}
+func newPublishingService(proxy proxy.Publisher) PublisherServer {
+	return &publishingService{
+		proxy: proxy,
+	}
 }
 
 func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
-	logF := log.WithField("function", "Publish")
-	mts := []types.Metric{}
+	logPublishService.Debug("GRPC Publish() received")
 
-	logF.Trace("GRPC Publish() received")
+	id := ""
+	mts := []*types.Metric{}
 
 	for {
-		protoMts, err := stream.Recv()
+		publishPartialReq, err := stream.Recv()
 		if err != nil {
 			if err == io.EOF { // OK, expected end of stream
 				break
@@ -34,26 +37,48 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 			return fmt.Errorf("failure when reading from publish stream: %s", err.Error())
 		}
 
-		logF.WithField("length", len(protoMts.MetricSet)).Debug("Metrics chunk received from snap")
+		logPublishService.WithField("length", len(publishPartialReq.MetricSet)).Debug("Metrics chunk received from snap")
 
-		for _, protoMt := range protoMts.MetricSet {
+		id = publishPartialReq.TaskId
+
+		for _, protoMt := range publishPartialReq.MetricSet {
 			mt, err := fromGRPCMetric(protoMt)
 			if err != nil {
-				logF.WithError(err).Error("can't read metric from GRPC stream")
+				logPublishService.WithError(err).Error("can't read metric from GRPC stream")
 				continue
 			}
-			mts = append(mts, mt)
+			mts = append(mts, &mt)
 		}
 	}
 
 	if len(mts) != 0 {
-		logF.WithField("length", len(mts)).Debug("metric will be published")
+		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
-		// todo: publish everything
+		err := ps.proxy.RequestPublish(id, mts)
+		if err != nil {
+			_ = stream.SendAndClose(&PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
+			return err
+		}
 	} else {
-		logF.Info("nothing to publish, request will be ignored")
+		logPublishService.Info("nothing to publish, request will be ignored")
 	}
 
-	reply := &PublishResponse{}
-	return stream.SendAndClose(reply)
+	return stream.SendAndClose(&PublishResponse{})
+}
+
+func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherRequest) (*LoadPublisherResponse, error) {
+	logPublishService.Debug("GRPC Load() received")
+
+	taskID := string(request.GetTaskId())
+	jsonConfig := request.GetJsonConfig()
+
+	return &LoadPublisherResponse{}, ps.proxy.LoadTask(taskID, jsonConfig)
+}
+
+func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublisherRequest) (*UnloadPublisherResponse, error) {
+	logPublishService.Debug("GRPC Unload() received")
+
+	taskID := string(request.GetTaskId())
+
+	return &UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -30,8 +29,7 @@ func TestContextAPI_Config(t *testing.T) {
     	"user": "admin"
 	}`)
 
-	ctxMan := NewContextManager(&mockCollector{}, nil)
-	ctx, cErr := NewPluginContext(ctxMan, jsonConfig)
+	ctx, cErr := NewContext(jsonConfig)
 
 	Convey("Validate Context API for handling configuration", t, func() {
 
@@ -108,7 +106,7 @@ func TestContextAPI_Config(t *testing.T) {
 				// Act
 				rawJson := ctx.RawConfig()
 				cfg := basicConfig{}
-				err := json.Unmarshal([]byte(rawJson), &cfg)
+				err := json.Unmarshal(rawJson, &cfg)
 
 				// Assert
 				So(err, ShouldBeNil)
@@ -136,18 +134,11 @@ func (sc *storedClient) Count() int {
 	return sc.count
 }
 
-type mockCollector struct{}
-
-func (*mockCollector) Collect(plugin.Context) error {
-	return nil
-}
-
 func TestContextAPI_Storage(t *testing.T) {
 	Convey("Validate Context API for handling storage", t, func() {
 		// Arrange
 		emptyConfig := []byte("{}")
-		ctxMan := NewContextManager(&mockCollector{}, nil)
-		ctx, cErr := NewPluginContext(ctxMan, emptyConfig)
+		ctx, cErr := NewContext(emptyConfig)
 
 		So(cErr, ShouldBeNil)
 

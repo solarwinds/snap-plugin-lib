@@ -33,7 +33,7 @@ func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 	return nil
 }
 
-func (s systemCollector) Collect(ctx plugin.Context) error {
+func (s systemCollector) Collect(ctx plugin.CollectContext) error {
 	err := s.collectTotalCPU(ctx)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (s systemCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 
-func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
+func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
 	measurementDur, _ := time.ParseDuration(cfg.TotalCpuMeasureDuration)
 
@@ -73,8 +73,9 @@ func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 	return nil
 }
 
-func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
+func (s systemCollector) collectTotalMemory(ctx plugin.CollectContext) error {
 	memory, err := s.proxyCollector.TotalMemoryUsage()
+
 	if err != nil {
 		return fmt.Errorf("can't create metric for total memory utilization: %v", err)
 	}
@@ -83,7 +84,7 @@ func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
 	return nil
 }
 
-func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
+func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 	procsInfo, err := s.proxyCollector.ProcessesInfo()
 	if err != nil {
 		return fmt.Errorf("can't create metrics associated with processes")

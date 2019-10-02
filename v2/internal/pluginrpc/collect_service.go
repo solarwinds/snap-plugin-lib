@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	"golang.org/x/net/context"
 )
 
 const (
 	maxCollectChunkSize = 100
 )
+
+var logCollectService = log.WithField("service", "Collect")
 
 type collectService struct {
 	proxy           CollectorProxy
@@ -28,7 +30,7 @@ func newCollectService(proxy CollectorProxy, statsController stats.Controller, p
 }
 
 func (cs *collectService) Collect(request *CollectRequest, stream Collector_CollectServer) error {
-	log.Trace("GRPC Collect() received")
+	logCollectService.Debug("GRPC Collect() received")
 
 	taskID := string(request.GetTaskId())
 
@@ -41,7 +43,7 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
 		if err != nil {
-			log.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
+			logCollectService.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
 		}
 
 		protoMts = append(protoMts, protoMt)
@@ -51,37 +53,37 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 				MetricSet: protoMts,
 			})
 			if err != nil {
-				log.WithError(err).Error("can't send metric chunk over GRPC")
+				logCollectService.WithError(err).Error("can't send metric chunk over GRPC")
 				return err
 			}
 
-			log.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
+			logCollectService.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
 		}
 	}
 
 	return nil
 }
 
-func (cs *collectService) Load(ctx context.Context, request *LoadRequest) (*LoadResponse, error) {
-	log.Trace("GRPC Load() received")
+func (cs *collectService) Load(ctx context.Context, request *LoadCollectorRequest) (*LoadCollectorResponse, error) {
+	logCollectService.Debug("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
-	return &LoadResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
+	return &LoadCollectorResponse{}, cs.proxy.LoadTask(taskID, jsonConfig, metrics)
 }
 
-func (cs *collectService) Unload(ctx context.Context, request *UnloadRequest) (*UnloadResponse, error) {
-	log.Trace("GRPC Unload() received")
+func (cs *collectService) Unload(ctx context.Context, request *UnloadCollectorRequest) (*UnloadCollectorResponse, error) {
+	logCollectService.Debug("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 
-	return &UnloadResponse{}, cs.proxy.UnloadTask(taskID)
+	return &UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
-	log.Trace("GRPC Info() received")
+	logCollectService.Debug("GRPC Info() received")
 
 	var err error
 	response := &InfoResponse{}

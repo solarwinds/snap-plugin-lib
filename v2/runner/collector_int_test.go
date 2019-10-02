@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -86,8 +86,8 @@ func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
 	return response, err
 }
 
-func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadResponse, error) {
-	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadRequest{
+func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadCollectorResponse, error) {
+	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadCollectorRequest{
 		TaskId:          taskID,
 		JsonConfig:      configJSON,
 		MetricSelectors: selectors,
@@ -95,8 +95,8 @@ func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) 
 	return response, err
 }
 
-func (s *SuiteT) sendUnload(taskID string) (*pluginrpc.UnloadResponse, error) {
-	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadRequest{
+func (s *SuiteT) sendUnload(taskID string) (*pluginrpc.UnloadCollectorResponse, error) {
+	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadCollectorRequest{
 		TaskId: taskID,
 	})
 	return response, err
@@ -141,7 +141,7 @@ type simpleCollector struct {
 	collectCalls int
 }
 
-func (sc *simpleCollector) Collect(ctx plugin.Context) error {
+func (sc *simpleCollector) Collect(ctx plugin.CollectContext) error {
 	sc.collectCalls++
 	return nil
 }
@@ -232,7 +232,7 @@ type longRunningCollector struct {
 	collectDuration time.Duration
 }
 
-func (c *longRunningCollector) Collect(ctx plugin.Context) error {
+func (c *longRunningCollector) Collect(ctx plugin.CollectContext) error {
 	c.collectCalls++
 	time.Sleep(c.collectDuration)
 	return nil
@@ -359,7 +359,7 @@ func (cc *configurableCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 
-func (cc *configurableCollector) Collect(ctx plugin.Context) error {
+func (cc *configurableCollector) Collect(ctx plugin.CollectContext) error {
 	Convey("Validate collector can access objects defined during Load() execution", cc.t, func() {
 		// Act
 		obj1, ok1 := ctx.Load("obj1")
@@ -527,7 +527,7 @@ func (kc *kubernetesCollector) PluginDefinition(ctx plugin.CollectorDefinition) 
 	return nil
 }
 
-func (kc *kubernetesCollector) Collect(ctx plugin.Context) error {
+func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 	Convey("Validate that user can obtain proper information about reasonableness to process metrics or metrics groups", kc.t, func() {
 		So(ctx.ShouldProcess("/kubernetes/deployment/*/*/spec/paused"), ShouldBeTrue)                  // ok
 		So(ctx.ShouldProcess("/kubernetes/deployment/*/*/spec/*"), ShouldBeTrue)                       // ok
@@ -628,7 +628,7 @@ type noDefinitionCollector struct {
 	t            *testing.T
 }
 
-func (ndc *noDefinitionCollector) Collect(ctx plugin.Context) error {
+func (ndc *noDefinitionCollector) Collect(ctx plugin.CollectContext) error {
 	ndc.collectCalls++
 
 	Convey("Validate that user can obtain proper information about reasonableness to process metrics or metrics groups", ndc.t, func() {
