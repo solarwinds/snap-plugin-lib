@@ -1,7 +1,7 @@
 # System collector
 
 In the previous chapter we have written code responsible for gathering system information, yet unable to work in snap environment.
-Now will complement a missing part of the collector.  
+Now we will complement a missing part of the collector.  
 
 ## Implementing `Collector` Module
 
@@ -25,7 +25,7 @@ Due to the fact that we will be collecting dynamic metrics, the second method is
 > `PluginDefinition` is not required when plugin collects only static metrics. 
 > However, it's a good practice to provide as much information about plugin as possible to help others understand its purpose (and produce better results, ie. when running plugin with `-print-example-task` flag) 
 
-Let's start from defining the second one:
+Let's start from implementing the second one:
 ```go
 func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	def.DefineGroup("processName", "process name")
@@ -38,7 +38,7 @@ func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 	return nil
 }
 ```
-At the beginning we are defining a dynamic element (ofter referred as a group) binding its name with a description.
+At the beginning we are defining a dynamic element (often referred as a group) binding its name with a description.
 Then we are defining 4 metrics, 2 of which are dynamic. 
 
 > Dynamic element is always surrounded by `[]` in definition.
@@ -47,7 +47,7 @@ Then we are defining 4 metrics, 2 of which are dynamic.
 > - first and last element have to be static (ie. `/minisystem/devices/[type]/[producer]/mem_usage)
 > - you can't define static and dynamic element at the same position when they have common prefix. For example: 2nd elements of given metrics `/minisystem/[processName]/cpu`, `/minisystem/usage/cpu`: `[processName]` and `usage` have the same prefix; it's not allowed)
 
-Before we introduce `Collect` implementation let's implement helper methods which will convert measurements (of type defined in `data` module) into metrics:
+Before we introduce `Collect` implementation let's add some helper methods which will convert measurements (of type defined in `data` module) into metrics:
 
 ```
 func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
@@ -105,7 +105,7 @@ At the begging we are getting list of processes by calling `ProcessesInfo()` on 
 After handling error, we are iterating over each element from results and create two metrics: one related to cpu, one related to memory.
 
 Be aware that we are using special format for dynamic element (`/minisystem/processes/[processName=mysql]/memory`).
-Generally syntax `/minisystem/processes/mysql/memory` would be also allowed, but it's much more readable for other developers to use '[]' when adding dynamic elements.
+Generally syntax `/minisystem/processes/mysql/memory` would be also allowed, but it's much more readable for other developers to use '[]' when working with dynamic elements.
 
 Last but not least, pay attention that we needed to sanitize process name (since it will become part of metric name).
 
@@ -141,7 +141,7 @@ func (s systemCollector) Collect(ctx plugin.Context) error {
 }
 ```
 
-Method simply calls all helpers and end with errors if any problem arise. 
+Method simply calls all helpers and finishes with error if any problem arise. 
 
 > Instead of returning error from `Collect` which is signal to framework that measurement went wrong, we could just log errors and continue gathering other metrics.
 > It's up to developer to decide if it's satisfactory to return only partial measurement. 

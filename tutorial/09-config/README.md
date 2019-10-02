@@ -5,11 +5,11 @@
 ### Overview
 
 A plugin written in [Chapter 8](/tutorial/08-collector/README.md) already provided us quite useful functionality.
-Yet, when we look at metrics associated with processes there is a lot of metric produced - also for processes which cpu and memory utilization is infinitesimal.
+Yet, when we look at results there is a lot of metric produced, many of which associated with no-essential information (small utilization of cpu and memory by majority of processes).
 We might want to track only processes which resource utilization is above specific threshold. 
 Configuration is perfect way to dynamically provide it: in one system administator may be interested in tracking processes which use above 50% of total memory, in other those values may differ.
 
-In [Overview](/tutorial/06-overview/README.md) we've already mentioned that config will be given as a JSON:
+In [Overview](/tutorial/06-overview/README.md) we've already mentioned that config will be given as a JSON, ie.
 ```json
 {
     "processes": {
@@ -23,9 +23,9 @@ In [Overview](/tutorial/06-overview/README.md) we've already mentioned that conf
 ### Implementation
 
 Now, let's write code associated with configuration:
-- basic validation (ie. `minCpuUsage` should be within range <0;1>)
-- providing default values when JSON is not completed
-- accessing configuration values from `Collect` and `Load`
+- basic validation (ie. `minCpuUsage` and `minMemoryUsage` should be within range <0;100>)
+- providing default values when JSON is not completed (or empty)
+- accessing configuration values from `Collect`
 
 Majority of the code will be put into new file (`./collector/config.go`)
 
@@ -56,7 +56,7 @@ type configProcesses struct {
 }
 ```
 Go language offers very simple API to convert (unmarchal) bytes into native structures.
-You may notice that our `config` and `configProcesses` fields are the same (ignoring word case) to expected from JSON.
+You may notice that our `config` and `configProcesses` contains the same fields as expected from JSON.
 
 Now, we can implement first function (factory method), which will return default configuration.
 ```go
@@ -71,21 +71,21 @@ func defaultConfig() *config {
 }
 ```
 
-After that we are able to implement handleConfig partially: 
+After that we are able to implement `handleConfig` partially: 
 ```go
 func handleConfig(ctx plugin.Context) error {
-    // (...)
+	// (...)
 	return nil
 }
 ```
 
-First step is to create structure representing default configuration. 
-Then we should marshal JSON configuration received from snap (we can access it via `ctx.RawConfig()`)
-If JSON is not complete (or even empty) it's not a problem, since we are operating on structure partially filled in by default.
+First step is to create variable (structure) representing default configuration. 
+Then we should unmarshal JSON configuration received from snap (we can access it via `ctx.RawConfig()`)
+If JSON doesn't contain all fields it's not a problem, default values will be preserved.
 
 ```go
-    // (...)
-    cfg := defaultConfig()
+	// (...)
+	cfg := defaultConfig()
 
 	err := json.Unmarshal(ctx.RawConfig(), cfg)
 	if err != nil {
@@ -97,14 +97,13 @@ If JSON is not complete (or even empty) it's not a problem, since we are operati
 > We will validate how our plugin react on passing different JSON configurations in unit tests.
 > Till now, you can take a look at test code in `./collector/config_test.go`.
 
-We have now access to passed configuration via cfg variable.
-What we can do next is to validate values of configuration fields, especially: 
-- `totalCpuMeasureDuration` should represent string based on which `time.Duration` object can be build later.
+What we can do next is validation:
+- `totalCpuMeasureDuration` should represent string, based on which `time.Duration` can be created later.
 - `minCpuUsage` and `minMemoryUsage` should be in range <0;100> 
 
 Code responsible for validation is given below:
 ```go
-    // (...)
+	// (...)
 	_, err = time.ParseDuration(cfg.TotalCpuMeasureDuration)
 	if err != nil {
 		return fmt.Errorf("invalid value for totalCpuMeasureDuration: %v", err)
@@ -117,14 +116,14 @@ Code responsible for validation is given below:
 	if cfg.Processes.MinMemoryUsage < 0 || cfg.Processes.MinMemoryUsage > 100 {
 		return fmt.Errorf("invalid value for minMemoryUsage: %v", err)
 	}
-    // (...)
+	// (...)
 ```
 
-When unmarshalling and validation ended without error we can store final structure and access it from `Collect`.
+If there were no error during processing, we can store configuration structure (to access it later from `Collect`).
 ```go
-    // (...)
-    ctx.Store(configObjectKey, cfg)
-    return nil
+	// (...)
+	ctx.Store(configObjectKey, cfg)
+	return nil
 ```
 
 Complete function:
@@ -156,7 +155,7 @@ func handleConfig(ctx plugin.Context) error {
 }
 ```
 
-One more thing that left is helper method to will give access to remember structure.
+One more thing that needs to be done is helper method that will give access to remembered configuration structure.
 ```go
 func getConfig(ctx plugin.Context) *config {
 	obj, ok := ctx.Load(configObjectKey)
@@ -166,15 +165,12 @@ func getConfig(ctx plugin.Context) *config {
 	return obj.(*config)
 }
 ```
+We are simply calling `ctx.Load()` with casting to appropriate type.
+If someone will call `getConfig()` before `handleConfig()` we would get default config (other solution would be throw error or panic in such case).
 
-What's is done here is simply calling `ctx.Load()` with cast to appropriate type.
-Also we added safety net: if someone will call `getConfig()` before `handleConfig()` we would get default config.
-Other solutions would be to return error (as a additional parameter) or throw panic (since it's generally developer mistake to call `getConfig()` earlier).
+### Implementing `Collect`
 
-### `Collect`
-
-All configuration helpers are in place. 
-No we can change Collector code.
+Since all configuration helpers are in place, we can implement `Load` and update helpers called from `Collect`.
 
 At first let's process configuration in `Load` stage:
 ```go
@@ -183,8 +179,9 @@ func (s systemCollector) Load(ctx plugin.Context) error {
 }
 ```
 
-collectTotalCPU at some point calls blocking operation of gopsutil. 
-Based on entry from configuration how long blocking should take (how precise result will be).  
+You might remember that `collectTotalCPU` at some point calls blocking operation of gopsutil library. 
+Having configuration object in place, we can now decide how long that duration should be.
+Let's update `collectTotalCPU`  
 ```go
 func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 	cfg := getConfig(ctx)
@@ -200,7 +197,7 @@ func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
 }
 ``` 
 
-Notice, that we needed to change proxy API: TotalCpuUsage is now taking one parameter - duration.
+Notice, that we needed to change proxy API: `TotalCpuUsage` is now taking one parameter: the duration.
 ```go
 type Proxy interface {
 	ProcessesInfo() ([]data.ProcessInfo, error)
@@ -218,9 +215,8 @@ func (p proxyCollector) TotalCpuUsage(d time.Duration) (float64, error) {
 }
 ```
 
-Other function which we should modified a bit is `collectProcessesInfo`. 
-In short: when processes uses cpu below given limit, metric shouldn't be created.
-New function is given below:
+Other function which we will modify is `collectProcessesInfo`.
+When processes uses cpu or memory below given limit, metric shouldn't be created.
 ```go
 func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
 	procsInfo, err := s.proxyCollector.ProcessesInfo()
