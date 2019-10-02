@@ -14,7 +14,7 @@ import (
 
 type simpleCollector struct{}
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
     _ = ctx.AddMetric("/example/metric1", 10)
     return nil;
 }
@@ -48,7 +48,7 @@ Import section enumerates required dependencies:
 ```go
 type simpleCollector struct{}
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
     _ = ctx.AddMetric("/example/metric1", 10)
     return nil;
 }
@@ -68,7 +68,7 @@ It gathers current date and time, producing 5 metrics associated with current da
 ```go
 type simpleCollector struct{}
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
     // Collect data
     t := time.Now()
 

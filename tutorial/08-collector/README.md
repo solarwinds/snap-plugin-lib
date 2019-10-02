@@ -49,8 +49,8 @@ Then we are defining 4 metrics, 2 of which are dynamic.
 
 Before we introduce `Collect` implementation let's add some helper methods which will convert measurements (of type defined in `data` module) into metrics:
 
-```
-func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
+```go
+func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cpu, err := s.proxyCollector.TotalCpuUsage()
 	if err != nil {
 		return fmt.Errorf("can't create metric for total cpu utilization: %v", err)
@@ -69,7 +69,7 @@ If there were no error, metric is added to results by calling `ctx.AddMetric()`.
 
 `collectTotalMemory` is similar to method we have just implemented:
 ```go
-func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
+func (s systemCollector) collectTotalMemory(ctx plugin.CollectContext) error {
 	memory, err := s.proxyCollector.TotalCpuUsage()
 	if err != nil {
 		return fmt.Errorf("can't create metric for total memory utilization: %v", err)
@@ -82,7 +82,7 @@ func (s systemCollector) collectTotalMemory(ctx plugin.Context) error {
 
 The last helper method will be a little bit more complicated:
 ```go
-func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
+func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 	procsInfo, err := s.proxyCollector.ProcessesInfo()
 	if err != nil {
 		return fmt.Errorf("can't create metrics associated with processes")
@@ -121,7 +121,7 @@ func (s systemCollector) sanitizeName(n string) string {
 
 When all helpers are finished, we can finally implement `Collect`.
 ```go
-func (s systemCollector) Collect(ctx plugin.Context) error {
+func (s systemCollector) Collect(ctx plugin.CollectContext) error {
 	err := s.collectTotalCPU(ctx)
 	if err != nil {
 		return err

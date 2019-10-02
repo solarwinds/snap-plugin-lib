@@ -88,7 +88,7 @@ There are two major advantages of providing this list:
 Try to add following code at the end of `Collect()` metric:
 
 ```go
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
     // ...
 
 	err := ctx.AddMetric("/example/other/undefined", 10)

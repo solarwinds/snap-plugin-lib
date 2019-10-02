@@ -16,7 +16,7 @@ Plugin-lib-go provides facilities for maintaining different tasks.
 Previously, when we defined a plugin algorithm we had to provide implementation of `Collect` method:  
 
 ```go
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
     ...
 	_ = ctx.AddMetric("/example/date/day", t.Day())
     ...
@@ -90,7 +90,7 @@ If `format` field had value `short` we will return it, otherwise default `long` 
 Modified version of `Collect` method:
 
 ```go
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	// Collect data
 	t := time.Now()
 
@@ -170,7 +170,7 @@ func (s simpleCollector) Load(ctx plugin.Context) error {
 We modify `Collect()` method to use that variable every iteration:
 ```go
 
-func (s simpleCollector) Collect(ctx plugin.Context) error {
+func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	// ...
 
 	// Count metrics

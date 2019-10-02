@@ -183,7 +183,7 @@ You might remember that `collectTotalCPU` at some point calls blocking operation
 Having configuration object in place, we can now decide how long that duration should be.
 Let's update `collectTotalCPU`  
 ```go
-func (s systemCollector) collectTotalCPU(ctx plugin.Context) error {
+func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
 	measurementDur, _ := time.ParseDuration(cfg.TotalCpuMeasureDuration)
 
@@ -218,7 +218,7 @@ func (p proxyCollector) TotalCpuUsage(d time.Duration) (float64, error) {
 Other function which we will modify is `collectProcessesInfo`.
 When processes uses cpu or memory below given limit, metric shouldn't be created.
 ```go
-func (s systemCollector) collectProcessesInfo(ctx plugin.Context) error {
+func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 	procsInfo, err := s.proxyCollector.ProcessesInfo()
 	if err != nil {
 		return fmt.Errorf("can't create metrics associated with processes")
