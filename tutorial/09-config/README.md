@@ -4,10 +4,10 @@
 
 ### Overview
 
-A plugin written in [Chapter 8](/tutorial/08-collector/README.md) already provided us quite useful functionality.
+A plugin written in [Chapter 8](/tutorial/08-collector/README.md) already provides quite useful functionality.
 Yet, when we look at results there is a lot of metric produced, many of which associated with no-essential information (small utilization of cpu and memory by majority of processes).
 We might want to track only processes which resource utilization is above specific threshold. 
-Configuration is perfect way to dynamically provide it: in one system administator may be interested in tracking processes which use above 50% of total memory, in other those values may differ.
+Configuration is a perfect way to dynamically provide it.
 
 In [Overview](/tutorial/06-overview/README.md) we've already mentioned that config will be given as a JSON, ie.
 ```json
@@ -55,7 +55,7 @@ type configProcesses struct {
 	MinMemoryUsage float64
 }
 ```
-Go language offers very simple API to convert (unmarchal) bytes into native structures.
+Go language offers very simple API to convert (unmarshal) bytes into native structures.
 You may notice that our `config` and `configProcesses` contains the same fields as expected from JSON.
 
 Now, we can implement first function (factory method), which will return default configuration.
@@ -94,7 +94,7 @@ If JSON doesn't contain all fields it's not a problem, default values will be pr
     // (...)
 ```
 
-> We will validate how our plugin react on passing different JSON configurations in unit tests.
+> We will validate how our plugin reacts on passing different JSON configurations in unit tests.
 > Till now, you can take a look at test code in `./collector/config_test.go`.
 
 What we can do next is validation:
@@ -119,7 +119,7 @@ Code responsible for validation is given below:
 	// (...)
 ```
 
-If there were no error during processing, we can store configuration structure (to access it later from `Collect`).
+If there were no errors during processing, we can store configuration structure (to access it later from `Collect`).
 ```go
 	// (...)
 	ctx.Store(configObjectKey, cfg)
@@ -166,7 +166,7 @@ func getConfig(ctx plugin.Context) *config {
 }
 ```
 We are simply calling `ctx.Load()` with casting to appropriate type.
-If someone will call `getConfig()` before `handleConfig()` we would get default config (other solution would be throw error or panic in such case).
+If someone will call `getConfig()` before `handleConfig()` default configuration will be returned (other solution would be throw error or panic in such case).
 
 ### Implementing `Collect`
 
@@ -180,8 +180,7 @@ func (s systemCollector) Load(ctx plugin.Context) error {
 ```
 
 You might remember that `collectTotalCPU` at some point calls blocking operation of gopsutil library. 
-Having configuration object in place, we can now decide how long that duration should be.
-Let's update `collectTotalCPU`  
+Having configuration object in place, we can now pass timeout as an argument to `collectTotalCPU`.
 ```go
 func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
@@ -209,8 +208,8 @@ type Proxy interface {
 The change in function `TotalCpuUsage` is simple (using passed parameter instead default value).
 Remaining code should be left unchanged.  
 ```go
-func (p proxyCollector) TotalCpuUsage(d time.Duration) (float64, error) {
-	totalCpu, err := cpu.Percent(d, false)
+func (p proxyCollector) TotalCpuUsage(timeout time.Duration) (float64, error) {
+	totalCpu, err := cpu.Percent(timeout, false)
 	...
 }
 ```
@@ -245,10 +244,10 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 ```
 
 After retrieving process list we are calling `getConfig(ctx)` which returns processed configuration.
-Then, in the loop, we are checking if cpu and memory values are greater that given thresholds.
+Then, in the loop, we are checking if cpu and memory values are greater than given thresholds.
 If so, metrics are created (so only the most "meaningful" resources are gathered).
 
-> You can take a look at example unit test in `./collector/collector_test.go` which validates using limits.
+> You can take a look at example unit test in `./collector/collector_test.go` which validates usage of limits.
 
 ----
 

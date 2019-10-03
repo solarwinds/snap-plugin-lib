@@ -1,10 +1,10 @@
 # FAQ (Frequently Asked Questions)
 
-##### Do I have to implement all 4 methods (`Collect`, `Load`, `Unload`, `DifinePlugin`) in order to enable plugin to work in snap environment?
+##### Do I have to implement all 4 methods (`Collect`, `Load`, `Unload`, `DefinePlugin`) in order to enable plugin to work in snap environment?
 
 Simple plugin may require to implement only `Collect` method.
 
-For a "production" plugin implementing all 4 methods are beneficial:
+For a "production" plugin implementing all of the four methods gives following benefits:
 - `Collect` takes care about gathering measurement
 - `Load` (in pair with `Unload`) is used for processing configuration, creating shared objects etc.
 - `DefinePlugin` helps in maintenance of plugin: providing metadata of what collector may produce.
@@ -25,11 +25,11 @@ Notice that error may be returned in following situations:
 - you are trying to add metric which namespace contains disallowed characters (developer error) 
 - you are trying to add metric which is filtered (due to using `-plugin-filter` flag or defining subset of requested metrics) - actually not a logical error 
 
-If you find yourself in situation when you can't find why metric is not present in a result set you can check the value returned from `AddMetric` in debug mode (or temporary printing it out).
+If you find yourself in a situation when you can't find why metric is not present in a result set you can check the value returned from `AddMetric` in debug mode (or temporarily printing it out).
 
 ----
 
-##### How I can test that my plugin is working correctly?
+##### How I can test if my plugin is working correctly?
 
 There are several ways to achieve that at different levels:
 - you can write unit tests - library provides `mock.Context` if you want to test `Collect` method (take a loot at `./collector/09-config/collector/*_test.go` to see how it can be done)

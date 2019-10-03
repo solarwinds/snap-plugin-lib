@@ -59,8 +59,8 @@ func (p proxyCollector) ProcessesInfo() ([]data.ProcessInfo, error) {
 	return procInfo, nil
 }
 
-func (p proxyCollector) TotalCpuUsage(d time.Duration) (float64, error) {
-	totalCpu, err := cpu.Percent(d, false)
+func (p proxyCollector) TotalCpuUsage(timeout time.Duration) (float64, error) {
+	totalCpu, err := cpu.Percent(timeout, false)
 	if err != nil {
 		return 0, fmt.Errorf("can't obtain cpu information: %v", err)
 	}

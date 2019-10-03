@@ -1,7 +1,7 @@
 # System collector
 
 In the previous chapter we have written code responsible for gathering system information, yet unable to work in snap environment.
-Now we will complement a missing part of the collector.  
+Now we will complete a missing part of the collector.  
 
 ## Implementing `Collector` Module
 
@@ -43,7 +43,7 @@ Then we are defining 4 metrics, 2 of which are dynamic.
 
 > Dynamic element is always surrounded by `[]` in definition.
 
-> Metrics can contain more than 1 dynamic elements, but there are restrictions:
+> Metrics can contain more than 1 dynamic element, but there are restrictions:
 > - first and last element have to be static (ie. `/minisystem/devices/[type]/[producer]/mem_usage)
 > - you can't define static and dynamic element at the same position when they have common prefix. For example: 2nd elements of given metrics `/minisystem/[processName]/cpu`, `/minisystem/usage/cpu`: `[processName]` and `usage` have the same prefix; it's not allowed)
 
@@ -63,7 +63,7 @@ func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 
 In the first line we are calling `TotalCpuUsage`, which is part of `Proxy` interface. 
 Then we handle possible errors by wrapping it into new one.
-If there were no error, metric is added to results by calling `ctx.AddMetric()`.
+If there were no errors, metric is added to results by calling `ctx.AddMetric()`.
 
 > You can ignore error value returned from `ctx.AddMetric()`. It's should be rather used only during debugging (see [explanation](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial_ch89/tutorial/faq#should-i-have-to-handle-error-value-from-ctxaddmetric-and-ctxaddmetricwithtag-))    
 
@@ -105,7 +105,7 @@ At the begging we are getting list of processes by calling `ProcessesInfo()` on 
 After handling error, we are iterating over each element from results and create two metrics: one related to cpu, one related to memory.
 
 Be aware that we are using special format for dynamic element (`/minisystem/processes/[processName=mysql]/memory`).
-Generally syntax `/minisystem/processes/mysql/memory` would be also allowed, but it's much more readable for other developers to use '[]' when working with dynamic elements.
+Generally syntax `/minisystem/processes/mysql/memory` is also allowed, but it's much more readable for other developers to use '[]' when working with dynamic elements.
 
 Last but not least, pay attention that we needed to sanitize process name (since it will become part of metric name).
 
