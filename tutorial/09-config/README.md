@@ -87,7 +87,7 @@ In case some fields are not set in JSON, the defaults will be preserved.
 	// (...)
 	cfg := defaultConfig()
 
-	err := json.Unmarshal(ctx.RawConfig(), cfg)
+	err := json.Unmarshal(ctx.RawConfig(), &cfg)
 	if err != nil {
 		return fmt.Errorf("invalid config: %v", err)
 	}

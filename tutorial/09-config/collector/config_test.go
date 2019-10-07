@@ -41,7 +41,7 @@ func TestConfig_EmptyJSON(t *testing.T) {
 	ctx.On("RawConfig").
 		Once().Return([]byte(`{}`))
 
-	ctx.On("Store", "config", expectedCfg).
+	ctx.On("Store", "config", &expectedCfg).
 		Once().Return()
 
 	// Act

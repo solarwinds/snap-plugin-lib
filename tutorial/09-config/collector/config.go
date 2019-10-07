@@ -39,7 +39,7 @@ func defaultConfig() config {
 func handleConfig(ctx plugin.Context) error {
 	cfg := defaultConfig()
 
-	err := json.Unmarshal(ctx.RawConfig(), cfg)
+	err := json.Unmarshal(ctx.RawConfig(), &cfg)
 	if err != nil {
 		return fmt.Errorf("invalid config: %v", err)
 	}
