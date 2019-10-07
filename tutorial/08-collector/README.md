@@ -23,7 +23,7 @@ Next step is to provide implementations of `Collect` and `PluginDefinition` meth
 Due to the fact that we will be collecting dynamic metrics, the second method is required.
 
 > `PluginDefinition` is not required when plugin collects only static metrics. 
-> However, it's a good practice to provide as much information about plugin as possible to help others understand its purpose (and produce better results, ie. when running plugin with `-print-example-task` flag) 
+> However, it's a good practice to provide as much information about plugin as possible to help others understand its purpose (and produce better results, ie. when running a plugin with `-print-example-task` flag) 
 
 Let's start from implementing the second one:
 ```go
@@ -38,7 +38,7 @@ func (s systemCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 	return nil
 }
 ```
-At the beginning we are defining a dynamic element (often referred as a group) binding its name with a description.
+At the beginning we are defining a dynamic element (often referred to a group) binding its name with a description.
 Then we are defining 4 metrics, 2 of which are dynamic. 
 
 > Dynamic element is always surrounded by `[]` in definition.

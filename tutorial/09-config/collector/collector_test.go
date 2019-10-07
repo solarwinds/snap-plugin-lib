@@ -55,7 +55,7 @@ func TestCollectProcessMetrics(t *testing.T) {
 		Once().Return(pluginConfig, true)
 
 	proxy.On("ProcessesInfo").
-		Return(processList, nil).Once()
+		Once().Return(processList, nil)
 
 	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=mysql]/cpu", 0.3, map[string]string{"PID": "1232"}).
 		Once().Return(nil)
