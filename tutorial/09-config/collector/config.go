@@ -26,8 +26,8 @@ type configProcesses struct {
 	MinMemoryUsage float64
 }
 
-func defaultConfig() *config {
-	return &config{
+func defaultConfig() config {
+	return config{
 		Processes: configProcesses{
 			MinCpuUsage:    defaultMinCpuUsage,
 			MinMemoryUsage: defaultMinMemoryUsage,
@@ -57,15 +57,15 @@ func handleConfig(ctx plugin.Context) error {
 		return fmt.Errorf("invalid value for minMemoryUsage: %v", err)
 	}
 
-	ctx.Store(configObjectKey, cfg)
+	ctx.Store(configObjectKey, &cfg)
 
 	return nil
 }
 
-func getConfig(ctx plugin.Context) *config {
+func getConfig(ctx plugin.Context) config {
 	obj, ok := ctx.Load(configObjectKey)
 	if !ok {
 		return defaultConfig()
 	}
-	return obj.(*config)
+	return *(obj.(*config))
 }

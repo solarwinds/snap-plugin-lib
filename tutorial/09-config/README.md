@@ -60,8 +60,8 @@ You may notice that our `config` and `configProcesses` contains the same fields 
 
 Now, we can implement first function (factory method), which will return default configuration.
 ```go
-func defaultConfig() *config {
-	return &config{
+func defaultConfig() config {
+	return config{
 		Processes: configProcesses{
 			MinCpuUsage:    defaultMinCpuUsage,
 			MinMemoryUsage: defaultMinMemoryUsage,
@@ -149,7 +149,7 @@ func handleConfig(ctx plugin.Context) error {
 		return fmt.Errorf("invalid value for minMemoryUsage: %v", err)
 	}
 
-	ctx.Store(configObjectKey, cfg)
+	ctx.Store(configObjectKey, &cfg)
 
 	return nil
 }
@@ -157,12 +157,12 @@ func handleConfig(ctx plugin.Context) error {
 
 The last thing to do is helper method that will give access to remembered configuration structure.
 ```go
-func getConfig(ctx plugin.Context) *config {
+func getConfig(ctx plugin.Context) config {
 	obj, ok := ctx.Load(configObjectKey)
 	if !ok {
 		return defaultConfig()
 	}
-	return obj.(*config)
+	return *(obj.(*config))
 }
 ```
 We are simply calling `ctx.Load()` with casting to appropriate type.
