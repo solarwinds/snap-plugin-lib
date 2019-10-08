@@ -91,7 +91,7 @@ Separating `Collector` and `Proxy` will enable us to easily write unit tests.
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Useful tools](/v2/tutorial/05-tools/README.md)
 - Next Chapter: [Gathering data (Proxy Collector)](/v2/tutorial/07-proxy/README.md)
 

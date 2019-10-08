@@ -1,4 +1,4 @@
-# Tutorial
+# Plugin library - Overview
 
 ## What's a collector
 
@@ -23,7 +23,7 @@ Simplified algorithm may be described as follows:
 2) Periodically (typically 60s) snap requests collection of metrics for different plugins 
 3) Each plugin responds with its own set of metrics
 
-## Intro
+## Tutorial
 
 This tutorial will teach you how to write a custom collector plugin in Go language, which in turn can be used in your production environment. 
 
@@ -37,9 +37,7 @@ After you obtain the basics, we will instruct you how to write real, useful coll
 
 Each part of the tutorial contain complete golang source code, which you can run and modify depending on your needs.
 
-## Version 2
-
-Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin catalog related to version 1 can be found in the [Writing a Plugin](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial#writing-a-plugin) section.
+> Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin catalog related to version 1 can be found in the [Writing a Plugin](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial#writing-a-plugin) section.
 
 # Content 
 

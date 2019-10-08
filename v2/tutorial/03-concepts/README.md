@@ -69,7 +69,7 @@ We can access configuration fields in two ways.
 - by accessing method `ctx.Config` which implements simplified access to the configuration values
 - by accessing method `ctx.RawConfig` which returns JSON object (bytes) that needs to be manually unmarshaled.
 
-First method will be introduced in this chapter. Alternative will be presented in [Chapter 9](/v2/tutorial/09-config/README.md) **TODO**linktoanchor**
+First method will be introduced in this chapter. Alternative will be presented in [Chapter 9](/v2/tutorial/09-config/README.md)
 
 Let's create a helper method which reads `format` field:
 ```go
@@ -150,7 +150,7 @@ At times, you will need to remember values and objects between consecutive colle
 - credentials,
 - objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
 - cashe,
-- post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#state-and-configuration)),
+- post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/blob/ao-12231-tutorial_ch89/v2/tutorial/03-concepts/README.md#state-and-configuration)),
 - custom statistics.
 
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
@@ -217,7 +217,7 @@ example.count.running 10 {map[]}
 #### State and Configuration
 
 State may be also used to optimize processing configuration values. 
-In the [previous section](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/03-concepts#configuration) "format" option was read during each collection.
+In the [previous section](https://github.com/librato/snap-plugin-lib-go/blob/ao-12231-tutorial_ch89/v2/tutorial/03-concepts/README.md#configuration) "format" option was read during each collection.
 Alternatively, we could read it only once during `Load()` and store in context. 
 
 Example:
@@ -244,6 +244,6 @@ This approach will be used also in [Chapter 9](/v2/tutorial/09-config/README.md)
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Testing](/v2/tutorial/02-testing/README.md)
 - Next Chapter: [Metrics - filters, definition, tags](/v2/tutorial/04-metrics/README.md)

@@ -106,5 +106,5 @@ Therefore user can focus only on the collector implementation details.
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Next Chapter: [Testing](/v2/tutorial/02-testing/README.md)

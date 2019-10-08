@@ -267,6 +267,6 @@ to see output by `fmt.Printf`
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Advanced Plugin - Introduction](/v2/tutorial/06-overview/README.md)
 - Next Chapter: [Implementing System collector](/v2/tutorial/08-collector/README.md)

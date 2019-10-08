@@ -251,6 +251,6 @@ If so, metrics are created (so only the most "meaningful" resources are gathered
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Implementing System collector](/v2/tutorial/08-collector/README.md)
 - Next Chapter: [FAQ](/v2/tutorial/faq/README.md)

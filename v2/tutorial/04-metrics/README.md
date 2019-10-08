@@ -19,7 +19,7 @@ Good news is that all filtering is done internally by the plugin, therefore ther
 > In production environment requesting all metrics may cause huge impact on the system if a plugin requires advanced processing.
 > You should always benchmark you plugin in different situations.
 
-To filter metrics we use additional parameter during execution (in production it would be entries in the task file **TODO**link**):
+To filter metrics we use additional parameter during execution (in production it would be entries in the task file):
 ```bash
 ./04-metrics -debug-mode=1 -debug-collect-counts=3 -debug-collect-interval=5s -plugin-filter="/example/date/*"
 ```
@@ -42,7 +42,7 @@ example.date.month 9 {map[]}
 Other examples of filters:
 - `/example/*/day` - return only day metrics
 - `/example/count/running` - return only running metrics
-- **TODO** regexp - command line issue fix
+- `/example/date/{m.*}` - return metrics based on regular expression
 
 You can combine filters using `;`, ie.
 ```
@@ -147,7 +147,7 @@ example.count.running 0 {map[]}
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Basic concepts - Configuration and state](/v2/tutorial/03-concepts/README.md)
 - Next Chapter: [Useful tools](/v2/tutorial/05-tools/README.md)
 

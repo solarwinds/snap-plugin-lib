@@ -209,6 +209,6 @@ Snap-mock will be useful in observing how a plugin reacts with different tasks (
 
 ----
 
-* [Table of contents](/v2/tutorial/README.md)
+* [Table of contents](/v2/README.md)
 - Previous Chapter: [Introduction - Simple plugin](/v2/tutorial/01-simple/README.md)
 - Next Chapter: [Basic concepts - Configuration and state](/v2/tutorial/03-concepts/README.md)
