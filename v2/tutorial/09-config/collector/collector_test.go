@@ -1,11 +1,11 @@
 package collector
 
 import (
-	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"testing"
 	"time"
 
 	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
+	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

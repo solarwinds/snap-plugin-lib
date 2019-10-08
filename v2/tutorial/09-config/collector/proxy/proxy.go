@@ -2,9 +2,9 @@ package proxy
 
 import (
 	"fmt"
-	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"time"
 
+	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
