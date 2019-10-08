@@ -1,6 +1,6 @@
 # Basic concepts
 
-In [Chapter 1](/v2/tutorialial/01-simple/README.md) and [Chapter 2](/v2/tutorialial/02-testing/README.md) you've learned how to write and validate a simple collector. 
+In [Chapter 1](/v2/tutorial/01-simple/README.md) and [Chapter 2](/v2/tutorial/02-testing/README.md) you've learned how to write and validate a simple collector. 
 Now we will introduce more advanced concepts that version 2 of plugin-lib-go introduced, this will help developer build their plugins easier and faster.
 
 ## Tasks
@@ -69,7 +69,7 @@ We can access configuration fields in two ways.
 - by accessing method `ctx.Config` which implements simplified access to the configuration values
 - by accessing method `ctx.RawConfig` which returns JSON object (bytes) that needs to be manually unmarshaled.
 
-First method will be introduced in this chapter. Alternative will be presented in [Chapter 9](/v2/tutorialial/09-config/README.md) **TODO**linktoanchor**
+First method will be introduced in this chapter. Alternative will be presented in [Chapter 9](/v2/tutorial/09-config/README.md) **TODO**linktoanchor**
 
 Let's create a helper method which reads `format` field:
 ```go
@@ -240,10 +240,10 @@ func (s simpleCollector) Load(ctx plugin.Context) error {
  }
 ```
 
-This approach will be used also in [Chapter 9](/v2/tutorialial/09-config/README.md).
+This approach will be used also in [Chapter 9](/v2/tutorial/09-config/README.md).
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Testing](/v2/tutorialial/02-testing/README.md)
-- Next Chapter: [Metrics - filters, definition, tags](/v2/tutorialial/04-metrics/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Testing](/v2/tutorial/02-testing/README.md)
+- Next Chapter: [Metrics - filters, definition, tags](/v2/tutorial/04-metrics/README.md)

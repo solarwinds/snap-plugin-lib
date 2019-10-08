@@ -44,14 +44,14 @@ Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin
 # Content 
 
 - Simple example - Date/Time collector:
-  * [Introduction](/v2/tutorialial/01-simple/README.md)
-  * [Testing](/v2/tutorialial/02-testing/README.md)
-  * [Configuration and state](/v2/tutorialial/03-concepts/README.md)
-  * [Metrics - filters, definition, tags](/v2/tutorialial/04-metrics/README.md)
-  * [Useful tools](/v2/tutorialial/05-tools/README.md)
+  * [Introduction](/v2/tutorial/01-simple/README.md)
+  * [Testing](/v2/tutorial/02-testing/README.md)
+  * [Configuration and state](/v2/tutorial/03-concepts/README.md)
+  * [Metrics - filters, definition, tags](/v2/tutorial/04-metrics/README.md)
+  * [Useful tools](/v2/tutorial/05-tools/README.md)
 - Advanced example - System collector:
-  * [Overview](/v2/tutorialial/06-overview/README.md)
-  * [Gathering data (Proxy)](/v2/tutorialial/07-proxy/README.md)
-  * [Collector](/v2/tutorialial/08-collector/README.md)
-  * [Handle configuration](/v2/tutorialial/09-config/README.md)
-- [FAQ](/v2/tutorialial/faq/README.md)
+  * [Overview](/v2/tutorial/06-overview/README.md)
+  * [Gathering data (Proxy)](/v2/tutorial/07-proxy/README.md)
+  * [Collector](/v2/tutorial/08-collector/README.md)
+  * [Handle configuration](/v2/tutorial/09-config/README.md)
+- [FAQ](/v2/tutorial/faq/README.md)

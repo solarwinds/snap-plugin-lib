@@ -48,7 +48,7 @@ To sum up, our plugin will define 4 metrics:
 - `/minisystem/processes/[processName]/cpu`
 - `/minisystem/processes/[processName]/memory`
 
-We will write related code in [Chapter 8](/v2/tutorialial/08-collector/README.md).
+We will write related code in [Chapter 8](/v2/tutorial/08-collector/README.md).
 
 ### Tags
 
@@ -72,7 +72,7 @@ Giving that requirements, our example configuration may be written as:
 }
 ```
 
-Configuration handling will be covered in [Chapter 8](/v2/tutorialial/08-collector/README.md).
+Configuration handling will be covered in [Chapter 8](/v2/tutorial/08-collector/README.md).
 
 ## Code structure
 
@@ -91,7 +91,7 @@ Separating `Collector` and `Proxy` will enable us to easily write unit tests.
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Useful tools](/v2/tutorialial/05-tools/README.md)
-- Next Chapter: [Gathering data (Proxy Collector)](/v2/tutorialial/07-proxy/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Useful tools](/v2/tutorial/05-tools/README.md)
+- Next Chapter: [Gathering data (Proxy Collector)](/v2/tutorial/07-proxy/README.md)
 

@@ -4,12 +4,12 @@
 
 ### Overview
 
-A plugin written in [Chapter 8](/v2/tutorialial/08-collector/README.md) already provides quite useful functionality.
+A plugin written in [Chapter 8](/v2/tutorial/08-collector/README.md) already provides quite useful functionality.
 Yet, when we look at a result, there are many metrics produced, lots of them associated with no-essential information (small utilization of cpu and memory by majority of processes).
 We might want to track only processes which resource utilization is above specific threshold. 
 Configuration is a perfect way to dynamically provide it.
 
-In [Overview](/v2/tutorialial/06-overview/README.md) we've already mentioned that config will be given as a JSON, ie.
+In [Overview](/v2/tutorial/06-overview/README.md) we've already mentioned that config will be given as a JSON, ie.
 ```json
 {
     "processes": {
@@ -251,6 +251,6 @@ If so, metrics are created (so only the most "meaningful" resources are gathered
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Implementing System collector](/v2/tutorialial/08-collector/README.md)
-- Next Chapter: [FAQ](/v2/tutorialial/faq/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Implementing System collector](/v2/tutorial/08-collector/README.md)
+- Next Chapter: [FAQ](/v2/tutorial/faq/README.md)

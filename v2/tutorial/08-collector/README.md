@@ -178,6 +178,6 @@ minisystem.processes.[processName=08_collector_exe].memory 0.04088011011481285 {
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Gathering data (Proxy Collector)](/v2/tutorialial/07-proxy/README.md)
-- Next Chapter: [Handle configuration](/v2/tutorialial/09-config/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Gathering data (Proxy Collector)](/v2/tutorial/07-proxy/README.md)
+- Next Chapter: [Handle configuration](/v2/tutorial/09-config/README.md)

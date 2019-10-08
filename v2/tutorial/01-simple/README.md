@@ -63,7 +63,7 @@ Following code is a little more complicated.
 It gathers current date and time, producing 5 metrics associated with current day, month, hour, minute and second.
 
 > Although it's practicality doubtful, it will be sufficient to show different set of plugin-lib v2 features.
-> If you want to learn straightaway how to write useful collector, visit [Chapter 6](/v2/tutorialial/06-overview/README.md) of this tutorial. 
+> If you want to learn straightaway how to write useful collector, visit [Chapter 6](/v2/tutorial/06-overview/README.md) of this tutorial. 
 
 ```go
 type simpleCollector struct{}
@@ -106,5 +106,5 @@ Therefore user can focus only on the collector implementation details.
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Next Chapter: [Testing](/v2/tutorialial/02-testing/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Next Chapter: [Testing](/v2/tutorial/02-testing/README.md)

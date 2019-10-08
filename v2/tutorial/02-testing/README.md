@@ -2,7 +2,7 @@
 
 ## Compile plugin
 
-To build executable file simply go to the folder containing written code (see: [Previous Chapter](/v2/tutorialial/01-simple)) and execute command:
+To build executable file simply go to the folder containing written code (see: [Previous Chapter](/v2/tutorial/01-simple)) and execute command:
 ```
 go build
 ```
@@ -209,6 +209,6 @@ Snap-mock will be useful in observing how a plugin reacts with different tasks (
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Introduction - Simple plugin](/v2/tutorialial/01-simple/README.md)
-- Next Chapter: [Basic concepts - Configuration and state](/v2/tutorialial/03-concepts/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Introduction - Simple plugin](/v2/tutorial/01-simple/README.md)
+- Next Chapter: [Basic concepts - Configuration and state](/v2/tutorial/03-concepts/README.md)

@@ -13,7 +13,7 @@ However, implementing all of the methods gives the following benefits:
 
 ##### Is there a template for a minimal collector?
 
-You can take a look at collector's code from [Chapter 1](/v2/tutorialial/01-simple/README.md) (see: [main.go](/v2/tutorialial/01-simple/main.go))
+You can take a look at collector's code from [Chapter 1](/v2/tutorial/01-simple/README.md) (see: [main.go](/v2/tutorial/01-simple/main.go))
 
 ----
 
@@ -39,5 +39,5 @@ There are several ways to achieve that at different levels:
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Handle configuration](/v2/tutorialial/09-config/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Handle configuration](/v2/tutorial/09-config/README.md)

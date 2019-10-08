@@ -178,6 +178,6 @@ To access pprof Web-GUI browse http://127.0.0.1:8081/debug/pprof/
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Metrics - filters, definition, tags](/v2/tutorialial/04-metrics/README.md)
-- Next Chapter: [Advanced Plugin - Introduction](/v2/tutorialial/06-overview/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Metrics - filters, definition, tags](/v2/tutorial/04-metrics/README.md)
+- Next Chapter: [Advanced Plugin - Introduction](/v2/tutorial/06-overview/README.md)

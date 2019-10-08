@@ -147,7 +147,7 @@ example.count.running 0 {map[]}
 
 ----
 
-* [Table of contents](/v2/tutorialial/README.md)
-- Previous Chapter: [Basic concepts - Configuration and state](/v2/tutorialial/03-concepts/README.md)
-- Next Chapter: [Useful tools](/v2/tutorialial/05-tools/README.md)
+* [Table of contents](/v2/tutorial/README.md)
+- Previous Chapter: [Basic concepts - Configuration and state](/v2/tutorial/03-concepts/README.md)
+- Next Chapter: [Useful tools](/v2/tutorial/05-tools/README.md)
 
