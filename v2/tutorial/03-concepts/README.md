@@ -216,7 +216,7 @@ example.count.running 10 {map[]}
 
 #### State and Configuration
 
-State may be also used to optimize processing configuration values. 
+Additionally state can be used to optimize processing configuration values. 
 In the [previous section](https://github.com/librato/snap-plugin-lib-go/blob/ao-12231-tutorial_ch89/v2/tutorial/03-concepts/README.md#configuration) "format" option was read during each collection.
 Alternatively, we could read it only once during `Load()` and store in context. 
 

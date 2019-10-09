@@ -62,7 +62,7 @@ In real application those values would vary in time (depending on the state of o
 Following code is a little more complicated.
 It gathers current date and time, producing 5 metrics associated with current day, month, hour, minute and second.
 
-> Although it's practicality doubtful, it will be sufficient to show different set of plugin-lib v2 features.
+> Although it is not practical, it will be sufficient to show different set of plugin-lib v2 features.
 > If you want to learn straightaway how to write useful collector, visit [Chapter 6](/v2/tutorial/06-overview/README.md) of this tutorial. 
 
 ```go

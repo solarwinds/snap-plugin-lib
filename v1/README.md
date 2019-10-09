@@ -5,16 +5,16 @@ This is a library for writing plugins in Go for the [Snap telemetry framework](h
 ----
 
 **Notice:**
-Due to standarization which has been made in [Logrus project](https://github.com/sirupsen/logrus), its import path has been changed from `Sirupsen` to `sirupsen`.
+Due to standarization which was made in the [Logrus project](https://github.com/sirupsen/logrus), its import path has been changed from `Sirupsen` to `sirupsen`.
 If you see [case-sensitive import collision reporting by glide](https://user-images.githubusercontent.com/11335874/31628492-232b9e0c-b2b1-11e7-8d3c-3d38914233bc.png) after updating your plugin to the latest snap-plugin-lib-go,
 please do the following steps:
- - change every import of Logrus to the lower case: `github./com/sirupsen/logrus`,
+ - change every import of Logrus to lower case: `github./com/sirupsen/logrus`,
  - delete folder `vendor/github.com/Sirupsen`,
  - rename references in glide.yaml and glide.lock
  - clear glide cache (`glide -c`),
  - update dependencies (`glide update`)
 
-More information you can find in [Logrus GitHub repo](https://github.com/sirupsen/logrus/issues/570#issuecomment-313933276).
+More information can be found in [Logrus GitHub repo](https://github.com/sirupsen/logrus/issues/570#issuecomment-313933276).
 
 ----
 
@@ -30,21 +30,20 @@ More information you can find in [Logrus GitHub repo](https://github.com/sirupse
 
 ## Writing a Plugin
 
-Snap has four different plugin types and for instructions on how to write a plugin check out the [collector](/examples/snap-plugin-collector-rand/README.md), [processor](examples/snap-plugin-processor-reverse/README.md), [publisher](examples/snap-plugin-publisher-file/README.md), and [streaming collector](examples/snap-plugin-collector-rand-streaming/README.md) plugin docs.
+Snap has four different plugin types. Instructions on how to write each type of a plugin can be found in the following locations: [collector](/examples/snap-plugin-collector-rand/README.md), [processor](examples/snap-plugin-processor-reverse/README.md), [publisher](examples/snap-plugin-publisher-file/README.md), and [streaming collector](examples/snap-plugin-collector-rand-streaming/README.md).
 
 ### Before writing a Snap plugin:
 
 * See if one already exists in the [Plugin Catalog](https://github.com/librato/snap/blob/master/docs/PLUGIN_CATALOG.md)
 * See if someone mentioned it in the [plugin wishlist](https://github.com/librato/snap/blob/master/docs/PLUGIN_CATALOG.md#wishlist)
 
-If you do decide to write a plugin check out the [plugin authoring docs](https://github.com/librato/snap/blob/master/docs/PLUGIN_AUTHORING.md#plugin-authoring) and let us know you are working on one!
+If you do decide to write a plugin reference [plugin authoring docs](https://github.com/librato/snap/blob/master/docs/PLUGIN_AUTHORING.md#plugin-authoring) and let us know you are working on one!
 
 ## Brief Overview of Snap Architecture:
 
-Snap is an open and modular telemetry framework designed to simplify the collection, processing and publishing of data through a single HTTP based API. Plugins provide the functionality of collection, processing and publishing and can be loaded/unloaded, upgraded and swapped without requiring a restart of the Snap daemon.
+Snap is an open and modular telemetry framework designed to simplify the collection, processing and publishing of data through a single HTTP based API. Plugins provide the functionality of collection, processing and publishing, and can be loaded/unloaded, upgraded and swapped without requiring a restart of the Snap daemon.
 
 A Snap plugin is a program that responds to a set of well defined [gRPC](http://www.grpc.io/) services with parameters and return types specified as protocol buffer messages (see [plugin.proto](https://github.com/librato/snap/blob/master/control/plugin/rpc/plugin.proto)). The Snap daemon handshakes with the plugin over stdout and then communicates over gRPC.
-
 
 ## Snap Plugin Go Library Examples:
 
@@ -53,7 +52,7 @@ You will find [example plugins](../examples) that cover the basics for writing c
 
 ## Plugin Flags:
 
-For specific details and to see all the options when running, run the plugin with the `-help` flag. The flag options are:
+For specific details and to see all the options available, run the plugin with the `-help` flag. The flag options are:
 ```
 GLOBAL OPTIONS:
    --config value            config to use in JSON format
@@ -75,7 +74,7 @@ Additionally, plugin authors can add custom flags as described [here](#custom-fl
 
 ### Custom Config:
 
-Users can provide their own config with the `-config` flag. If a config is required for the plugin to load, diagnostics will show a warning describing which keys are required and not provided.
+Users can provide their own config with the `-config` flag. If a config is required for the plugin to load, diagnostics will show a warning describing which keys are required but not provided.
 
 When using the `-config` flag, it expects a parameter in the form of a JSON. This is of the form `'{}'`. An example config is: `-config '{\"key\":\"kelly\", \"spirit-animal\":\"coatimundi\"}'`.
 

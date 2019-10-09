@@ -2,7 +2,7 @@
 
 ## Compile plugin
 
-To build executable file simply go to the folder containing written code (see: [Previous Chapter](/v2/tutorial/01-simple)) and execute command:
+To build an executable file simply go to the folder containing written code (see: [Previous Chapter](/v2/tutorial/01-simple)) and execute command:
 ```
 go build
 ```

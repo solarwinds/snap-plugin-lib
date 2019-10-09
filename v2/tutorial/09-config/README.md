@@ -5,18 +5,18 @@
 ### Overview
 
 A plugin written in [Chapter 8](/v2/tutorial/08-collector/README.md) already provides quite useful functionality.
-Yet, when we look at a result, there are many metrics produced, lots of them associated with no-essential information (small utilization of cpu and memory by majority of processes).
+Yet, when we look at a result, there are many metrics produced, numerous of them associated with no-essential information (small utilization of cpu and memory by the majority of processes).
 We might want to track only processes which resource utilization is above specific threshold. 
 Configuration is a perfect way to dynamically provide it.
 
 In [Overview](/v2/tutorial/06-overview/README.md) we've already mentioned that config will be given as a JSON, ie.
 ```json
 {
-    "processes": {
-        "minCpuUsage": 0.05,
-        "minMemoryUsage": 0.01
-    },
-    "totalCpuMeasureDuration": "1s"
+	"processes": {
+		"minCpuUsage": 0.05,
+		"minMemoryUsage": 0.01
+	},
+	"totalCpuMeasureDuration": "1s"
 }
 ```
 
@@ -29,7 +29,7 @@ Now, let's write code associated with configuration:
 
 Majority of the code will be put into new file (`./collector/config.go`)
 
-We will start from defining default values
+We will start by defining the default values
 ```go
 const (
 	defaultMinCpuUsage             = 0.05
@@ -41,7 +41,7 @@ const (
 ```
 First three values are associated with JSON fields. 
 Processing configuration will be done only during `Load` stage and stored in plugin `Context` using `configObjectKey`. 
-When user wants to have access to processed configuration fields in `Collect`, he can simply call `ctx.Load(configObjectKey)` instead of `ctx.RawConfig()`.
+When the user wants to have access to processed configuration fields in `Collect`, he can simply call `ctx.Load(configObjectKey)` instead of `ctx.RawConfig()`.
 
 Next step is to create structure that represents configuration.
 ```go
@@ -91,7 +91,7 @@ In case some fields are not set in JSON, the defaults will be preserved.
 	if err != nil {
 		return fmt.Errorf("invalid config: %v", err)
 	}
-    // (...)
+	// (...)
 ```
 
 > We will validate how our plugin reacts on passing different JSON configurations in unit tests.
@@ -119,7 +119,7 @@ A sample code responsible for the validation is given below:
 	// (...)
 ```
 
-If there were no errors during processing, we can store configuration structure (to access it later from `Collect`).
+If no errors are seen during the processing, we can store configuration structure (to access it later using `Collect`).
 ```go
 	// (...)
 	ctx.Store(configObjectKey, cfg)
@@ -166,7 +166,7 @@ func getConfig(ctx plugin.Context) config {
 }
 ```
 We are simply calling `ctx.Load()` with casting to appropriate type.
-If `getConfig()` is called before `handleConfig()` default configuration will be returned (other solution would be throw error or panic in such case).
+If `getConfig()` is called before `handleConfig()` default configuration will be returned (other solution would throw error or panic in such a case).
 
 ### Implementing `Collect`
 
@@ -196,7 +196,7 @@ func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 }
 ``` 
 
-Notice, that we needed to change proxy API: `TotalCpuUsage` is now takes one parameter: the duration.
+Notice, that we were required to change proxy API: `TotalCpuUsage` is now takes one parameter: the duration.
 ```go
 type Proxy interface {
 	ProcessesInfo() ([]data.ProcessInfo, error)
@@ -245,7 +245,7 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 
 After retrieving process list we are calling `getConfig(ctx)` which returns processed configuration.
 Then, in the loop, we are checking if cpu and memory values are greater than given thresholds.
-If so, metrics are created (so only the most "meaningful" resources are gathered).
+If so, metrics are created (only the most "meaningful" resources are gathered).
 
 > You can take a look at example unit test in `./collector/collector_test.go` which validates usage of limits.
 
