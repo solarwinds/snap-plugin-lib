@@ -20,6 +20,7 @@ type Options struct {
 	EnableStatsServer bool // if true, start statistics HTTP server
 	PprofPort         int  `json:",omitempty"`
 	StatsPort         int  `json:",omitempty"`
+	UseAPIv2          bool
 
 	PrintExampleTask     bool          `json:"-"`
 	DebugMode            bool          `json:"-"`
