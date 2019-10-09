@@ -77,6 +77,10 @@ func newFlagParser(name string, pType PluginType, opt *types.Options) *flag.Flag
 		"stats-port", defaultStatsPort,
 		"Port on which stats server will be available")
 
+	flagParser.BoolVar(&opt.UseAPIv2,
+		"plugin-api-v2", true,
+		"If a plugin supports multiple plugin API versions, set it to use v2")
+
 	// custom flags
 
 	if pType == PluginTypeCollector {
