@@ -79,7 +79,7 @@ func newFlagParser(name string, pType PluginType, opt *types.Options) *flag.Flag
 
 	flagParser.BoolVar(&opt.UseAPIv2,
 		"plugin-api-v2", true,
-		"If a plugin supports both plugin API versions, set it to use v2")
+		"If a plugin supports multiple plugin API versions, set it to use v2")
 
 	// custom flags
 
