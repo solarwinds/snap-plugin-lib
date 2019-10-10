@@ -13,17 +13,17 @@ In [Overview](/v2/tutorial/06-overview/README.md) we've already mentioned that c
 ```json
 {
 	"processes": {
-		"minCpuUsage": 0.05,
+		"minCPUUsage": 0.05,
 		"minMemoryUsage": 0.01
 	},
-	"totalCpuMeasureDuration": "1s"
+	"totalCPUMeasureDuration": "1s"
 }
 ```
 
 ### Implementation
 
 Now, let's write code associated with configuration:
-- basic validation (ie. `minCpuUsage` and `minMemoryUsage` should be within range <0;100>)
+- basic validation (ie. `minCPUUsage` and `minMemoryUsage` should be within range <0;100>)
 - providing default values when JSON is not completed (or empty)
 - accessing configuration values from `Collect`
 
@@ -32,9 +32,9 @@ Majority of the code will be put into new file (`./collector/config.go`)
 We will start by defining the default values
 ```go
 const (
-	defaultMinCpuUsage             = 0.05
+	defaultminCPUUsage             = 0.05
 	defaultMinMemoryUsage          = 0.01
-	defaultTotalCpuMeasureDuration = "1s"
+	defaulttotalCPUMeasureDuration = "1s"
 
 	configObjectKey = "config"
 )
@@ -47,11 +47,11 @@ Next step is to create structure that represents configuration.
 ```go
 type config struct {
 	Processes               configProcesses
-	TotalCpuMeasureDuration string
+	totalCPUMeasureDuration string
 }
 
 type configProcesses struct {
-	MinCpuUsage    float64
+	minCPUUsage    float64
 	MinMemoryUsage float64
 }
 ```
@@ -63,10 +63,10 @@ Now, we can implement first function (factory method), which will return default
 func defaultConfig() config {
 	return config{
 		Processes: configProcesses{
-			MinCpuUsage:    defaultMinCpuUsage,
+			minCPUUsage:    defaultminCPUUsage,
 			MinMemoryUsage: defaultMinMemoryUsage,
 		},
-		TotalCpuMeasureDuration: defaultTotalCpuMeasureDuration,
+		totalCPUMeasureDuration: defaulttotalCPUMeasureDuration,
 	}
 }
 ```
@@ -98,19 +98,19 @@ In case some fields are not set in JSON, the defaults will be preserved.
 > You can take a look at test code in `./collector/config_test.go`.
 
 The next thing to do is:
-- `totalCpuMeasureDuration` should represent string, based on which `time.Duration` can be created later.
-- `minCpuUsage` and `minMemoryUsage` should be in range <0;100> 
+- `totalCPUMeasureDuration` should represent string, based on which `time.Duration` can be created later.
+- `minCPUUsage` and `minMemoryUsage` should be in range <0;100> 
 
 A sample code responsible for the validation is given below:
 ```go
 	// (...)
-	_, err = time.ParseDuration(cfg.TotalCpuMeasureDuration)
+	_, err = time.ParseDuration(cfg.totalCPUMeasureDuration)
 	if err != nil {
-		return fmt.Errorf("invalid value for totalCpuMeasureDuration: %v", err)
+		return fmt.Errorf("invalid value for totalCPUMeasureDuration: %v", err)
 	}
 
-	if cfg.Processes.MinCpuUsage < 0 || cfg.Processes.MinCpuUsage > 100 {
-		return fmt.Errorf("invalid value for minCpuUsage: %v", err)
+	if cfg.Processes.minCPUUsage < 0 || cfg.Processes.minCPUUsage > 100 {
+		return fmt.Errorf("invalid value for minCPUUsage: %v", err)
 	}
 
 	if cfg.Processes.MinMemoryUsage < 0 || cfg.Processes.MinMemoryUsage > 100 {
@@ -136,13 +136,13 @@ func handleConfig(ctx plugin.Context) error {
 		return fmt.Errorf("invalid config: %v", err)
 	}
 
-	_, err = time.ParseDuration(cfg.TotalCpuMeasureDuration)
+	_, err = time.ParseDuration(cfg.totalCPUMeasureDuration)
 	if err != nil {
-		return fmt.Errorf("invalid value for totalCpuMeasureDuration: %v", err)
+		return fmt.Errorf("invalid value for totalCPUMeasureDuration: %v", err)
 	}
 
-	if cfg.Processes.MinCpuUsage < 0 || cfg.Processes.MinCpuUsage > 100 {
-		return fmt.Errorf("invalid value for minCpuUsage: %v", err)
+	if cfg.Processes.minCPUUsage < 0 || cfg.Processes.minCPUUsage > 100 {
+		return fmt.Errorf("invalid value for minCPUUsage: %v", err)
 	}
 
 	if cfg.Processes.MinMemoryUsage < 0 || cfg.Processes.MinMemoryUsage > 100 {
@@ -184,7 +184,7 @@ Having configuration object in place, we can now pass a timeout as an argument t
 ```go
 func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
-	measurementDur, _ := time.ParseDuration(cfg.TotalCpuMeasureDuration)
+	measurementDur, _ := time.ParseDuration(cfg.totalCPUMeasureDuration)
 
 	cpu, err := s.proxyCollector.TotalCpuUsage(measurementDur)
 	if err != nil {
@@ -228,7 +228,7 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 	for _, p := range procsInfo {
 		pName := s.sanitizeName(p.ProcessName)
 
-		if p.CpuUsage >= cfg.Processes.MinCpuUsage {
+		if p.CpuUsage >= cfg.Processes.minCPUUsage {
 			cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
 			_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
 		}

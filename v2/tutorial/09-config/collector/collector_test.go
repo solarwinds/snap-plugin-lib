@@ -46,7 +46,7 @@ func TestCollectProcessMetrics(t *testing.T) {
 
 	pluginConfig := &config{
 		Processes: configProcesses{
-			MinCpuUsage:    0.3,
+			MinCPUUsage:    0.3,
 			MinMemoryUsage: 0.4,
 		},
 	}

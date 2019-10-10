@@ -13,10 +13,10 @@ func TestConfig_AllFields(t *testing.T) {
 
 	expectedCfg := &config{
 		Processes: configProcesses{
-			MinCpuUsage:    0.45,
+			MinCPUUsage:    0.45,
 			MinMemoryUsage: 0.15,
 		},
-		TotalCpuMeasureDuration: "5s",
+		TotalCPUMeasureDuration: "5s",
 	}
 
 	ctx.On("RawConfig").

@@ -9,30 +9,30 @@ import (
 )
 
 const (
-	defaultMinCpuUsage             = 0.05
+	defaultMinCPUUsage             = 0.05
 	defaultMinMemoryUsage          = 0.01
-	defaultTotalCpuMeasureDuration = "1s"
+	defaultTotalCPUMeasureDuration = "1s"
 
 	configObjectKey = "config"
 )
 
 type config struct {
 	Processes               configProcesses
-	TotalCpuMeasureDuration string
+	TotalCPUMeasureDuration string
 }
 
 type configProcesses struct {
-	MinCpuUsage    float64
+	MinCPUUsage    float64
 	MinMemoryUsage float64
 }
 
 func defaultConfig() config {
 	return config{
 		Processes: configProcesses{
-			MinCpuUsage:    defaultMinCpuUsage,
+			MinCPUUsage:    defaultMinCPUUsage,
 			MinMemoryUsage: defaultMinMemoryUsage,
 		},
-		TotalCpuMeasureDuration: defaultTotalCpuMeasureDuration,
+		TotalCPUMeasureDuration: defaultTotalCPUMeasureDuration,
 	}
 }
 
@@ -44,12 +44,12 @@ func handleConfig(ctx plugin.Context) error {
 		return fmt.Errorf("invalid config: %v", err)
 	}
 
-	_, err = time.ParseDuration(cfg.TotalCpuMeasureDuration)
+	_, err = time.ParseDuration(cfg.TotalCPUMeasureDuration)
 	if err != nil {
 		return fmt.Errorf("invalid value for totalCpuMeasureDuration: %v", err)
 	}
 
-	if cfg.Processes.MinCpuUsage < 0 || cfg.Processes.MinCpuUsage > 100 {
+	if cfg.Processes.MinCPUUsage < 0 || cfg.Processes.MinCPUUsage > 100 {
 		return fmt.Errorf("invalid value for minCpuUsage: %v", err)
 	}
 

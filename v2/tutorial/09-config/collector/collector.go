@@ -62,7 +62,7 @@ func (s systemCollector) Unload(ctx plugin.Context) error {
 
 func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
-	measurementDur, _ := time.ParseDuration(cfg.TotalCpuMeasureDuration)
+	measurementDur, _ := time.ParseDuration(cfg.TotalCPUMeasureDuration)
 
 	cpu, err := s.proxyCollector.TotalCpuUsage(measurementDur)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 	for _, p := range procsInfo {
 		pName := s.sanitizeName(p.ProcessName)
 
-		if p.CpuUsage >= cfg.Processes.MinCpuUsage {
+		if p.CpuUsage >= cfg.Processes.MinCPUUsage {
 			cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
 			_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
 		}
