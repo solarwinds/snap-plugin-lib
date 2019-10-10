@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
@@ -16,10 +16,10 @@ type myPublisher struct {
 }
 
 func (m myPublisher) Publish(ctx plugin.PublishContext) error {
-	fmt.Printf("Number of metrics: %v\n", ctx.Count())
+	logrus.Infof("Number of metrics: %v\n", ctx.Count())
 
 	for _, mt := range ctx.ListAllMetrics() {
-		fmt.Printf(" - %s=%v [%v]\n", mt.Namespace(), mt.Value(), mt.Tags())
+		logrus.Infof(" - %s=%v [%v]\n", mt.Namespace(), mt.Value(), mt.Tags())
 	}
 
 	return nil
