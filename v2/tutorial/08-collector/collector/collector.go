@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	proxy2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/08-collector/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/tutorial/08-collector/collector/proxy"
 )
 
 var sanitizeRegex = regexp.MustCompile(`[()[\]{}<> ,./?;':"|^!\-_+\\]+`)
 
 type systemCollector struct {
-	proxyCollector proxy2.Proxy
+	proxyCollector proxy.Proxy
 }
 
-func New(proxy proxy2.Proxy) plugin.Collector {
+func New(proxy proxy.Proxy) plugin.Collector {
 	return systemCollector{
 		proxyCollector: proxy,
 	}

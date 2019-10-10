@@ -5,7 +5,7 @@ import (
 	"time"
 
 	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
-	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
+	"github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -16,9 +16,9 @@ type mockProxy struct {
 	mock.Mock
 }
 
-func (m *mockProxy) ProcessesInfo() ([]data2.ProcessInfo, error) {
+func (m *mockProxy) ProcessesInfo() ([]data.ProcessInfo, error) {
 	args := m.Called()
-	return args.Get(0).([]data2.ProcessInfo), args.Error(1)
+	return args.Get(0).([]data.ProcessInfo), args.Error(1)
 }
 
 func (m *mockProxy) TotalCpuUsage(d time.Duration) (float64, error) {
@@ -38,7 +38,7 @@ func TestCollectProcessMetrics(t *testing.T) {
 	proxy := &mockProxy{}
 	ctx := &pluginMock.Context{}
 
-	processList := []data2.ProcessInfo{
+	processList := []data.ProcessInfo{
 		{ProcessName: "mysql", CpuUsage: 0.3, MemoryUsage: 0.3, PID: 1232},
 		{ProcessName: "rabbit", CpuUsage: 0.1, MemoryUsage: 0.2, PID: 4514},
 		{ProcessName: "chrome", CpuUsage: 0.5, MemoryUsage: 0.4, PID: 2012},

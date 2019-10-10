@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	data2 "github.com/librato/snap-plugin-lib-go/v2/tutorial/07-proxy/collector/data"
+	"github.com/librato/snap-plugin-lib-go/v2/tutorial/07-proxy/collector/data"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
@@ -13,7 +13,7 @@ import (
 const defaultCPUMeasurementTime = 1 * time.Second
 
 type Proxy interface {
-	ProcessesInfo() ([]data2.ProcessInfo, error)
+	ProcessesInfo() ([]data.ProcessInfo, error)
 	TotalCpuUsage() (float64, error)
 	TotalMemoryUsage() (float64, error)
 }
@@ -24,8 +24,8 @@ func New() Proxy {
 	return &proxyCollector{}
 }
 
-func (p proxyCollector) ProcessesInfo() ([]data2.ProcessInfo, error) {
-	procInfo := []data2.ProcessInfo{}
+func (p proxyCollector) ProcessesInfo() ([]data.ProcessInfo, error) {
+	procInfo := []data.ProcessInfo{}
 
 	processesData, err := process.Processes()
 	if err != nil {
@@ -48,7 +48,7 @@ func (p proxyCollector) ProcessesInfo() ([]data2.ProcessInfo, error) {
 			continue
 		}
 
-		procInfo = append(procInfo, data2.ProcessInfo{
+		procInfo = append(procInfo, data.ProcessInfo{
 			ProcessName: name,
 			CpuUsage:    cpuPerc,
 			MemoryUsage: float64(memPerc),
