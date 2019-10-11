@@ -59,18 +59,12 @@ func TestStaticMetric(t *testing.T) {
 		Convey("Metric API", func() {
 			So(mt.Value(), ShouldEqual, 10)
 
-			So(mt.Tags().ContainsKey("cores"), ShouldBeTrue)
-			So(mt.Tags().ContainsKey("type"), ShouldBeTrue)
-			So(mt.Tags().ContainsKey("AMD"), ShouldBeFalse)
-			So(mt.Tags().ContainsKey(""), ShouldBeFalse)
+			So(mt.Tags(), ShouldContainKey, "cores")
+			So(mt.Tags(), ShouldContainKey, "type")
+			So(mt.Tags(), ShouldNotContainKey, "AMD")
+			So(mt.Tags(), ShouldNotContainKey, "")
 
-			So(mt.Tags().ContainsValue("8"), ShouldBeTrue)
-			So(mt.Tags().ContainsValue("AMD"), ShouldBeTrue)
-			So(mt.Tags().ContainsValue("cores"), ShouldBeFalse)
-			So(mt.Tags().ContainsValue(""), ShouldBeFalse)
-
-			So(mt.Tags().Contains("type", "AMD"), ShouldBeTrue)
-			So(mt.Tags().Contains("AMD", "type"), ShouldBeFalse)
+			So(mt.Tags()["type"], ShouldEqual, "AMD")
 		})
 	})
 }
@@ -135,16 +129,12 @@ func TestDynamicMetric(t *testing.T) {
 		Convey("Tags API", func() {
 			So(mt.Value(), ShouldEqual, 10)
 
-			So(mt.Tags().ContainsKey("cores"), ShouldBeFalse)
-			So(mt.Tags().ContainsKey("AMD"), ShouldBeFalse)
-			So(mt.Tags().ContainsKey(""), ShouldBeFalse)
+			So(mt.Tags(), ShouldNotContainKey, "cores")
+			So(mt.Tags(), ShouldNotContainKey, "AMD")
+			So(mt.Tags(), ShouldNotContainKey, "")
 
-			So(mt.Tags().ContainsValue("8"), ShouldBeFalse)
-			So(mt.Tags().ContainsValue(""), ShouldBeFalse)
-
-			So(mt.Tags().Contains("type", "AMD"), ShouldBeFalse)
-			So(mt.Tags().Contains("AMD", "type"), ShouldBeFalse)
-			So(mt.Tags().Contains("", ""), ShouldBeFalse)
+			So(mt.Tags()["type"], ShouldNotEqual, "AMD")
+			So(mt.Tags()["AMD"], ShouldNotEqual, "type")
 		})
 	})
 }
