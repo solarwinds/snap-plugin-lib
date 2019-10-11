@@ -14,7 +14,7 @@ const (
 type Metric struct {
 	Namespace_   []NamespaceElement
 	Value_       interface{}
-	Tags_        Tags
+	Tags_        map[string]string
 	Unit_        string
 	Timestamp_   time.Time
 	Description_ string
@@ -34,7 +34,7 @@ func (m Metric) Value() interface{} {
 	return m.Value_
 }
 
-func (m Metric) Tags() plugin.Tags {
+func (m Metric) Tags() map[string]string {
 	return m.Tags_
 }
 
