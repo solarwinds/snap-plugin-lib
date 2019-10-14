@@ -11,7 +11,7 @@ type Metric interface {
 	Value() interface{}
 
 	// Text-like object associated with measurement
-	Tags() Tags
+	Tags() map[string]string
 
 	// Description of measurement
 	Description() string
@@ -54,16 +54,4 @@ type NamespaceElement interface {
 
 	// True, if element is dynamic
 	IsDynamic() bool
-}
-
-// Representation of additional textual information associated with metric
-type Tags interface {
-	// True, when metric contains tag with specific key
-	ContainsKey(key string) bool
-
-	// True, when metric contains tag with specific value
-	ContainsValue(key string) bool
-
-	// True, when metric contains specific
-	Contains(key string, value string) bool
 }

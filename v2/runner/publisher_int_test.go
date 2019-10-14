@@ -14,7 +14,6 @@ import (
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -276,17 +275,9 @@ func (p *configurablePublisher) Publish(ctx plugin.PublishContext) error {
 			So(ctx.Count(), ShouldEqual, 1)
 			So(len(mts), ShouldEqual, 1)
 
-			So(mts[0].Tags().Contains("k1", "v1"), ShouldBeTrue)
-			So(mts[0].Tags().Contains("k2", "v2"), ShouldBeFalse)
-			So(mts[0].Tags().Contains("k3", "v3"), ShouldBeTrue)
-
-			So(mts[0].Tags().ContainsKey("k1"), ShouldBeTrue)
-			So(mts[0].Tags().ContainsKey("k2"), ShouldBeFalse)
-			So(mts[0].Tags().ContainsKey("k3"), ShouldBeTrue)
-
-			So(mts[0].Tags().ContainsValue("v1"), ShouldBeTrue)
-			So(mts[0].Tags().ContainsValue("v2"), ShouldBeFalse)
-			So(mts[0].Tags().ContainsValue("v3"), ShouldBeTrue)
+			So(mts[0].Tags()["k1"], ShouldEqual, "v1")
+			So(mts[0].Tags()["k2"], ShouldNotEqual, "v2")
+			So(mts[0].Tags()["k3"], ShouldEqual, "v3")
 
 			So(mts[0].Namespace().HasElementOn("example", 0), ShouldBeTrue)
 			So(mts[0].Namespace().HasElementOn("group1", 1), ShouldBeTrue)
@@ -475,55 +466,51 @@ func (p *simplePublisher) Publish(ctx plugin.PublishContext) error {
 
 		So(mts[0].Namespace().String(), ShouldEqual, "/example/group1/metric1")
 		So(mts[0].Value(), ShouldEqual, 11)
-		So(mts[0].Tags(), ShouldResemble, types.Tags{"k1": "v1"})
-		So(mts[0].Tags().Contains("k1", "v1"), ShouldBeTrue)
-		So(mts[0].Tags().ContainsKey("k1"), ShouldBeTrue)
-		So(mts[0].Tags().ContainsValue("v1"), ShouldBeTrue)
+		So(mts[0].Tags(), ShouldResemble, map[string]string{"k1": "v1"})
+		So(mts[0].Tags()["k1"], ShouldEqual, "v1")
 		So(mts[0].Description(), ShouldEqual, "description 11")
 		So(mts[0].Unit(), ShouldEqual, "b")
 
 		So(mts[1].Namespace().String(), ShouldEqual, "/example/group1/metric2")
 		So(mts[1].Value(), ShouldEqual, 12)
-		So(mts[1].Tags(), ShouldResemble, types.Tags{})
+		So(mts[1].Tags(), ShouldResemble, map[string]string{})
 		So(mts[1].Description(), ShouldEqual, "description 12")
 		So(mts[1].Unit(), ShouldEqual, "b")
 
 		So(mts[2].Namespace().String(), ShouldEqual, "/example/group1/metric3")
 		So(mts[2].Value(), ShouldEqual, 13)
-		So(mts[2].Tags(), ShouldResemble, types.Tags{})
+		So(mts[2].Tags(), ShouldResemble, map[string]string{})
 		So(mts[2].Description(), ShouldEqual, "description 13")
 		So(mts[2].Unit(), ShouldEqual, "b")
 
 		So(mts[3].Namespace().String(), ShouldEqual, "/example/group1/metric4")
 		So(mts[3].Value(), ShouldEqual, 14)
-		So(mts[3].Tags(), ShouldResemble, types.Tags{"k3": "v3", "k2": "v2"})
-		So(mts[3].Tags().Contains("k2", "v2"), ShouldBeTrue)
-		So(mts[3].Tags().ContainsKey("k3"), ShouldBeTrue)
-		So(mts[3].Tags().ContainsValue("v3"), ShouldBeTrue)
+		So(mts[3].Tags(), ShouldResemble, map[string]string{"k3": "v3", "k2": "v2"})
+		So(mts[3].Tags()["k2"], ShouldEqual, "v2")
 		So(mts[3].Description(), ShouldEqual, "description 14")
 		So(mts[3].Unit(), ShouldEqual, "b")
 
 		So(mts[4].Namespace().String(), ShouldEqual, "/example/group1/metric5")
 		So(mts[4].Value(), ShouldEqual, 15)
-		So(mts[4].Tags(), ShouldResemble, types.Tags{})
+		So(mts[4].Tags(), ShouldResemble, map[string]string{})
 		So(mts[4].Description(), ShouldEqual, "description 15")
 		So(mts[4].Unit(), ShouldEqual, "b")
 
 		So(mts[5].Namespace().String(), ShouldEqual, "/example/group2/metric1")
 		So(mts[5].Value(), ShouldEqual, 21)
-		So(mts[5].Tags(), ShouldResemble, types.Tags{})
+		So(mts[5].Tags(), ShouldResemble, map[string]string{})
 		So(mts[5].Description(), ShouldEqual, "description 21")
 		So(mts[5].Unit(), ShouldEqual, "B")
 
 		So(mts[6].Namespace().String(), ShouldEqual, "/example/group2/metric2")
 		So(mts[6].Value(), ShouldEqual, 22)
-		So(mts[6].Tags(), ShouldResemble, types.Tags{})
+		So(mts[6].Tags(), ShouldResemble, map[string]string{})
 		So(mts[6].Description(), ShouldEqual, "description 22")
 		So(mts[6].Unit(), ShouldEqual, "B")
 
 		So(mts[7].Namespace().String(), ShouldEqual, "/example/group3/[dyngroup=abc]/metric1")
 		So(mts[7].Value(), ShouldEqual, 31)
-		So(mts[7].Tags(), ShouldResemble, types.Tags{})
+		So(mts[7].Tags(), ShouldResemble, map[string]string{})
 		So(mts[7].Description(), ShouldEqual, "description 31")
 		So(mts[7].Unit(), ShouldEqual, "B")
 
