@@ -9,12 +9,12 @@ type Collector interface {
 }
 
 type LoadableCollector interface {
-	Load(Context) error
-	Unload(Context) error
+	Load(ctx Context) error
+	Unload(ctx Context) error
 }
 
 type DefinableCollector interface {
-	PluginDefinition(CollectorDefinition) error
+	PluginDefinition(def CollectorDefinition) error
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,19 +24,19 @@ type CollectContext interface {
 	Context
 
 	// Add concrete metric with calculated value
-	AddMetric(string, interface{}) error
+	AddMetric(namespace string, value interface{}) error
 
 	// Add concrete metric with calculated value and tags
-	AddMetricWithTags(string, interface{}, map[string]string) error
+	AddMetricWithTags(namespace string, value interface{}, tags map[string]string) error
 
 	// Add tags to specific metric
-	ApplyTagsByPath(string, map[string]string) error
+	ApplyTagsByPath(namespace string, tags map[string]string) error
 
 	// Add tags to all metrics matching regular expression
-	ApplyTagsByRegExp(string, map[string]string) error
+	ApplyTagsByRegExp(namespaceSelector string, tags map[string]string) error
 
 	// Provide information whether metric or metric group is reasonable to process (won't be filtered).
-	ShouldProcess(string) bool
+	ShouldProcess(namespace string) bool
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,13 +44,13 @@ type CollectContext interface {
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
 type CollectorDefinition interface {
 	// Define supported metric, its description and indication if metric is default
-	DefineMetric(string, string, bool, string)
+	DefineMetric(namespace string, unit string, isDefault bool, description string)
 
 	// Define description for dynamic element
-	DefineGroup(string, string)
+	DefineGroup(name string, description string)
 
 	// Define global tags that will be applied to all metrics
-	DefineGlobalTags(string, map[string]string)
+	DefineGlobalTags(namespaceSelector string, tags map[string]string)
 
 	// Define example config (which will be presented when example task is printed)
 	DefineExampleConfig(cfg string) error

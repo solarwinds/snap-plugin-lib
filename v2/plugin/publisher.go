@@ -5,8 +5,8 @@ type Publisher interface {
 }
 
 type LoadablePublisher interface {
-	Load(Context) error
-	Unload(Context) error
+	Load(ctx Context) error
+	Unload(ctx Context) error
 }
 
 type PublishContext interface {
