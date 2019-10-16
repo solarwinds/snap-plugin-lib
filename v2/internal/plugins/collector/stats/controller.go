@@ -243,7 +243,7 @@ func (d *EmptyController) RequestStat() chan Statistics {
 	statCh := make(chan Statistics)
 
 	go func() {
-		statCh <- Statistics{} // just return empty statistics
+		statCh <- Statistics{isEmpty: true} // just return empty statistics
 	}()
 
 	return statCh

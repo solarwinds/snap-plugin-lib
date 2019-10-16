@@ -9,6 +9,12 @@ type Statistics struct {
 	PluginInfo   pluginInfo             `json:"Plugin info"`
 	TasksSummary tasksSummary           `json:"Tasks summary"`
 	TasksDetails map[string]taskDetails `json:"Task details"`
+
+	isEmpty bool
+}
+
+func (s Statistics) IsEmpty() bool {
+	return s.isEmpty
 }
 
 /*****************************************************************************/
