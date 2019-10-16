@@ -61,6 +61,7 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 		closeCh:           make(chan struct{}),
 
 		stats: Statistics{
+			isFilled: true,
 			PluginInfo: pluginInfo{
 				Name:    pluginName,
 				Version: pluginVersion,
@@ -243,7 +244,7 @@ func (d *EmptyController) RequestStat() chan Statistics {
 	statCh := make(chan Statistics)
 
 	go func() {
-		statCh <- Statistics{isEmpty: true} // just return empty statistics
+		statCh <- Statistics{isFilled: false} // just return empty statistics
 	}()
 
 	return statCh

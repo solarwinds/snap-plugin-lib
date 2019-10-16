@@ -10,11 +10,11 @@ type Statistics struct {
 	TasksSummary tasksSummary           `json:"Tasks summary"`
 	TasksDetails map[string]taskDetails `json:"Task details"`
 
-	isEmpty bool
+	isFilled bool
 }
 
 func (s Statistics) IsEmpty() bool {
-	return s.isEmpty
+	return !s.isFilled
 }
 
 /*****************************************************************************/
