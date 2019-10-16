@@ -90,7 +90,7 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 
 	select {
 	case statistics := <-cs.statsController.RequestStat():
-		if statistics.IsEmpty() {
+		if statistics == nil {
 			return response, fmt.Errorf("can't gather statistics (statistics server is not running): %v", err)
 		}
 

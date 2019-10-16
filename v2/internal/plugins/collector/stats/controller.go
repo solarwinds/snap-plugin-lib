@@ -22,7 +22,7 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 
 type Controller interface {
 	Close()
-	RequestStat() chan Statistics
+	RequestStat() chan *Statistics
 	UpdateLoadStat(taskId string, config string, filters []string)
 	UpdateUnloadStat(taskId string)
 	UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
@@ -43,9 +43,9 @@ func NewController(pluginName string, pluginVersion string, opt *types.Options) 
 type StatisticsController struct {
 	startedSync       sync.Once
 	incomingStatsCh   chan StatCommand
-	incomingRequestCh chan chan Statistics
+	incomingRequestCh chan chan *Statistics
 	closeCh           chan struct{}
-	stats             Statistics
+	stats             *Statistics
 }
 
 func NewStatsController(pluginName string, pluginVersion string, opt *types.Options) (Controller, error) {
@@ -57,11 +57,10 @@ func NewStatsController(pluginName string, pluginVersion string, opt *types.Opti
 	sc := &StatisticsController{
 		startedSync:       sync.Once{},
 		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
-		incomingRequestCh: make(chan chan Statistics, reqChannelSize),
+		incomingRequestCh: make(chan chan *Statistics, reqChannelSize),
 		closeCh:           make(chan struct{}),
 
-		stats: Statistics{
-			isFilled: true,
+		stats: &Statistics{
 			PluginInfo: pluginInfo{
 				Name:    pluginName,
 				Version: pluginVersion,
@@ -103,8 +102,8 @@ func (sc *StatisticsController) Close() {
 	sc.closeCh <- struct{}{}
 }
 
-func (sc *StatisticsController) RequestStat() chan Statistics {
-	respCh := make(chan Statistics)
+func (sc *StatisticsController) RequestStat() chan *Statistics {
+	respCh := make(chan *Statistics)
 
 	sc.incomingRequestCh <- respCh
 
@@ -240,11 +239,11 @@ type EmptyController struct {
 func (d *EmptyController) Close() {
 }
 
-func (d *EmptyController) RequestStat() chan Statistics {
-	statCh := make(chan Statistics)
+func (d *EmptyController) RequestStat() chan *Statistics {
+	statCh := make(chan *Statistics)
 
 	go func() {
-		statCh <- Statistics{isFilled: false} // just return empty statistics
+		statCh <- nil
 	}()
 
 	return statCh
