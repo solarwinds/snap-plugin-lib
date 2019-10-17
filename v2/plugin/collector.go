@@ -43,6 +43,8 @@ type CollectContext interface {
 
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
 type CollectorDefinition interface {
+	Definition
+
 	// Define supported metric, its description and indication if metric is default
 	DefineMetric(namespace string, unit string, isDefault bool, description string)
 
@@ -54,10 +56,4 @@ type CollectorDefinition interface {
 
 	// Define example config (which will be presented when example task is printed)
 	DefineExampleConfig(cfg string) error
-
-	// Define maximum number of tasks that one instance of plugin should handle
-	DefineTasksPerInstanceLimit(limit int) error
-
-	// Define maximum number of instances
-	DefineInstancesLimit(limit int) error
 }
