@@ -29,9 +29,6 @@ type ContextManager struct {
 
 	publisher  plugin.Publisher
 	contextMap sync.Map
-
-	TasksLimit     int
-	InstancesLimit int
 }
 
 func NewContextManager(publisher plugin.Publisher) *ContextManager {
@@ -39,9 +36,6 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 		ContextManager: commonProxy.NewContextManager(),
 		publisher:      publisher,
 		contextMap:     sync.Map{},
-
-		TasksLimit:     plugin.NoLimit,
-		InstancesLimit: plugin.NoLimit,
 	}
 
 	cm.RequestPluginDefinition()
@@ -143,22 +137,4 @@ func (cm *ContextManager) RequestPluginDefinition() {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
 		}
 	}
-}
-
-func (cm *ContextManager) DefineTasksPerInstanceLimit(limit int) error {
-	if limit < -1 {
-		return fmt.Errorf("invalid tasks limit")
-	}
-
-	cm.TasksLimit = limit
-	return nil
-}
-
-func (cm *ContextManager) DefineInstancesLimit(limit int) error {
-	if limit < -1 {
-		return fmt.Errorf("invalid instances limit")
-	}
-
-	cm.InstancesLimit = limit
-	return nil
 }

@@ -49,9 +49,6 @@ type ContextManager struct {
 	statsController stats.Controller // reference to statistics controller
 
 	ExampleConfig yaml.Node // example config
-
-	TasksLimit     int
-	InstancesLimit int
 }
 
 func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
@@ -67,9 +64,6 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 		groupsDescription: map[string]string{},
 
 		statsController: statsController,
-
-		TasksLimit:     plugin.NoLimit,
-		InstancesLimit: plugin.NoLimit,
 	}
 
 	cm.RequestPluginDefinition()
@@ -201,24 +195,6 @@ func (cm *ContextManager) DefineExampleConfig(cfg string) error {
 		return fmt.Errorf("invalid YAML provided by user: %v", err)
 	}
 
-	return nil
-}
-
-func (cm *ContextManager) DefineTasksPerInstanceLimit(limit int) error {
-	if limit < -1 {
-		return fmt.Errorf("invalid tasks limit")
-	}
-
-	cm.TasksLimit = limit
-	return nil
-}
-
-func (cm *ContextManager) DefineInstancesLimit(limit int) error {
-	if limit < -1 {
-		return fmt.Errorf("invalid instances limit")
-	}
-
-	cm.InstancesLimit = limit
 	return nil
 }
 
