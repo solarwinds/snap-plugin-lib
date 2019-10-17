@@ -150,7 +150,7 @@ func fromGRPCValue(v *MetricValue) (interface{}, error) {
 	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
 }
 
-func toGRPCInfo(statistics stats.Statistics, pprofLocation string) (*Info, error) {
+func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, error) {
 	pi := &statistics.PluginInfo
 	ts := &statistics.TasksSummary
 

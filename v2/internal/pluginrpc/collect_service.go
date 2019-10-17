@@ -90,7 +90,16 @@ func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*Info
 
 	select {
 	case statistics := <-cs.statsController.RequestStat():
-		response.Info, err = toGRPCInfo(statistics, cs.pprofLn.Addr().String())
+		if statistics == nil {
+			return response, fmt.Errorf("can't gather statistics (statistics server is not running): %v", err)
+		}
+
+		pprofAddr := ""
+		if cs.pprofLn != nil {
+			pprofAddr = cs.pprofLn.Addr().String()
+		}
+
+		response.Info, err = toGRPCInfo(statistics, pprofAddr)
 		if err != nil {
 			return response, fmt.Errorf("could't convert statistics to GRPC format: %v", err)
 		}

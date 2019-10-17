@@ -7,6 +7,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
@@ -17,6 +18,8 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	contextManager := proxy.NewContextManager(publisher)
+
+	logrus.SetLevel(opt.LogLevel)
 
 	r, err := acquireResources(opt)
 	if err != nil {
