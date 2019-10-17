@@ -27,6 +27,6 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	printMetaInformation(name, version, PluginTypePublisher, opt, r)
+	printMetaInformation(name, version, PluginTypePublisher, opt, r, plugin.NoLimit, plugin.NoLimit)
 	pluginrpc.StartPublisherGRPC(contextManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }

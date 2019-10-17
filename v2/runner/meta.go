@@ -34,6 +34,11 @@ type meta struct {
 		Port int    // Port on which GRPC service is being served
 	}
 
+	Constraints struct {
+		InstancesLimit int // max number of instances of plugin executable that might be run
+		TasksLimit     int // max number of tasks that might be handed per instance
+	}
+
 	Profiling struct {
 		Enabled  bool   // true, if profiling (pprof server) is enabled (started)
 		Location string // location with profiling data (IP and Port for pprof)
@@ -46,7 +51,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, typ PluginType, opt *types.Options, r *resources) {
+func printMetaInformation(name string, version string, typ PluginType, opt *types.Options, r *resources, tasksLimit, instancesLimit int) {
 	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
 
 	m := meta{
@@ -59,6 +64,9 @@ func printMetaInformation(name string, version string, typ PluginType, opt *type
 
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
+
+	m.Constraints.TasksLimit = tasksLimit
+	m.Constraints.InstancesLimit = instancesLimit
 
 	m.Profiling.Enabled = opt.EnableProfiling
 	if opt.EnableProfiling {
