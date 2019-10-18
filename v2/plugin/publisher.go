@@ -9,9 +9,18 @@ type LoadablePublisher interface {
 	Unload(ctx Context) error
 }
 
+type DefinablePublisher interface {
+	PluginDefinition(def PublisherDefinition) error
+}
+
 type PublishContext interface {
 	Context
 
 	ListAllMetrics() []Metric
 	Count() int
+}
+
+// PublisherDefinition provides API for specifying plugin (publisher) metadata (supported metrics, descriptions etc)
+type PublisherDefinition interface {
+	Definition
 }

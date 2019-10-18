@@ -17,7 +17,7 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	contextManager := proxy.NewContextManager(publisher)
+	ctxMan := proxy.NewContextManager(publisher)
 
 	logrus.SetLevel(opt.LogLevel)
 
@@ -27,6 +27,6 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	printMetaInformation(name, version, PluginTypePublisher, opt, r)
-	pluginrpc.StartPublisherGRPC(contextManager, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	printMetaInformation(name, version, PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	pluginrpc.StartPublisherGRPC(ctxMan, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }

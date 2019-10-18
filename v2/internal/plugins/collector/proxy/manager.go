@@ -21,11 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var log *logrus.Entry
-
-func init() {
-	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
-}
+var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
 
 type Collector interface {
 	RequestCollect(id string) ([]*types.Metric, error)

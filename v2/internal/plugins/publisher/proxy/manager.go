@@ -38,6 +38,8 @@ func NewContextManager(publisher plugin.Publisher) *ContextManager {
 		contextMap:     sync.Map{},
 	}
 
+	cm.RequestPluginDefinition()
+
 	return cm
 }
 
@@ -126,4 +128,13 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
 
 	return nil
+}
+
+func (cm *ContextManager) RequestPluginDefinition() {
+	if definable, ok := cm.publisher.(plugin.DefinablePublisher); ok {
+		err := definable.PluginDefinition(cm)
+		if err != nil {
+			log.WithError(err).Errorf("Error occurred during plugin definition")
+		}
+	}
 }

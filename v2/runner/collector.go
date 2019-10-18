@@ -44,12 +44,12 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	contextManager := proxy.NewContextManager(collector, statsController)
+	ctxMan := proxy.NewContextManager(collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
 
 	if opt.PrintExampleTask {
-		printExampleTask(contextManager, name)
+		printExampleTask(ctxMan, name)
 		os.Exit(normalExitStatus)
 	}
 
@@ -61,10 +61,10 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 			os.Exit(errorExitStatus)
 		}
 
-		printMetaInformation(name, version, PluginTypeCollector, opt, r)
-		startCollectorInServerMode(contextManager, statsController, r, opt)
+		printMetaInformation(name, version, PluginTypeCollector, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		startCollectorInServerMode(ctxMan, statsController, r, opt)
 	case true:
-		startCollectorInSingleMode(contextManager, opt)
+		startCollectorInSingleMode(ctxMan, opt)
 	}
 }
 

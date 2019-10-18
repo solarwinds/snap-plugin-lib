@@ -15,6 +15,12 @@ const (
 type myPublisher struct {
 }
 
+func (m myPublisher) PluginDefinition(def plugin.PublisherDefinition) error {
+	_ = def.DefineTasksPerInstanceLimit(1)
+	_ = def.DefineInstancesLimit(4)
+	return nil
+}
+
 func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 	logrus.Infof("Number of metrics: %v\n", ctx.Count())
 

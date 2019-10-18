@@ -43,6 +43,8 @@ type CollectContext interface {
 
 // CollectorDefinition provides API for specifying plugin metadata (supported metrics, descriptions etc)
 type CollectorDefinition interface {
+	Definition
+
 	// Define supported metric, its description and indication if metric is default
 	DefineMetric(namespace string, unit string, isDefault bool, description string)
 
