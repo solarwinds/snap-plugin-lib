@@ -23,6 +23,10 @@ import (
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
 
+const (
+	RequestAllMetricsFilter = "/*"
+)
+
 type Collector interface {
 	RequestCollect(id string) ([]*types.Metric, error)
 	LoadTask(id string, config []byte, selectors []string) error
@@ -119,6 +123,11 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 	}
 
 	for _, mtFilter := range mtsFilter {
+		// If requested metrics are not provided in config, snap sends requested metric in a form of "/*"
+		if mtFilter == RequestAllMetricsFilter {
+			continue
+		}
+
 		err := newCtx.metricsFilters.AddRule(mtFilter)
 		if err != nil {
 			log.WithError(err).WithField("rule", mtFilter).Warn("can't add filtering rule, it will be ignored")
