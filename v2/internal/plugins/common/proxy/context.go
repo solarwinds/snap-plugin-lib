@@ -60,7 +60,7 @@ func (c *Context) Load(key string) (interface{}, bool) {
 	return obj, ok
 }
 
-func (c *Context) LoadTo(key string, v interface{}) bool {
+func (c *Context) LoadTo(key string, dest interface{}) bool {
 	c.storedObjectsMutex.RLock()
 	defer c.storedObjectsMutex.RUnlock()
 
@@ -69,10 +69,15 @@ func (c *Context) LoadTo(key string, v interface{}) bool {
 		return false
 	}
 
-	if reflect.TypeOf(v) != reflect.TypeOf(obj) {
-		panic("type of variable is different that type of stored object")
+	vDest := reflect.ValueOf(dest)
+	if vDest.Kind() != reflect.Ptr || vDest.IsNil() {
+		panic("passed variable should be a non-nill pointer")
 	}
-	v = obj
+	if reflect.TypeOf(dest).Elem() != reflect.TypeOf(obj) {
+		panic("type of destination variable don't match to type of stored value")
+	}
+
+	vDest.Elem().Set(reflect.ValueOf(obj))
 
 	return true
 }
