@@ -30,9 +30,9 @@ func (m *Context) Load(key string) (interface{}, bool) {
 	return args.Get(0), args.Bool(1)
 }
 
-func (m *Context) LoadTo(key string, dest interface{}) bool {
+func (m *Context) LoadTo(key string, dest interface{}) error {
 	args := m.Called(key, dest)
-	return args.Bool(0)
+	return args.Error(0)
 }
 
 func (m *Context) AddMetric(ns string, value interface{}) error {

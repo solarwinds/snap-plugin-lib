@@ -18,6 +18,6 @@ type Context interface {
 	Load(key string) (interface{}, bool)
 
 	// Load any object using key from different Collect requests (passing it to provided reference).
-	// Will panic if dest type doesn't match to type of stored value. Returns false if no object was found with a given key.
-	LoadTo(key string, dest interface{}) bool
+	// Will throw error when dest type doesn't match to type of stored value or object with a given key wasn't found.
+	LoadTo(key string, dest interface{}) error
 }

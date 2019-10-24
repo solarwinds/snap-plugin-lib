@@ -161,10 +161,10 @@ func TestContextAPI_Storage(t *testing.T) {
 			Convey("Validated that object of basic type may be read from context (1) via LoadTo method", func() {
 				// Act
 				ver := ""
-				ok := ctx.LoadTo("version", &ver)
+				err := ctx.LoadTo("version", &ver)
 
 				// Assert
-				So(ok, ShouldBeTrue)
+				So(err, ShouldBeNil)
 				So(ver, ShouldEqual, "1.0.1")
 			})
 
@@ -181,10 +181,10 @@ func TestContextAPI_Storage(t *testing.T) {
 			Convey("Validated that object of basic type may be read from context (2) via LoadTo method", func() {
 				// Act
 				v := 0
-				ok := ctx.LoadTo("apiVersion", &v)
+				err := ctx.LoadTo("apiVersion", &v)
 
 				// Assert
-				So(ok, ShouldBeTrue)
+				So(err, ShouldBeNil)
 				So(v, ShouldEqual, 12)
 			})
 
@@ -201,10 +201,10 @@ func TestContextAPI_Storage(t *testing.T) {
 			Convey("Validated that object of basic type may be read from context (3) via LoadTo method", func() {
 				// Act
 				v := false
-				ok := ctx.LoadTo("debugMode", &v)
+				err := ctx.LoadTo("debugMode", &v)
 
 				// Assert
-				So(ok, ShouldBeTrue)
+				So(err, ShouldBeNil)
 				So(v, ShouldEqual, true)
 			})
 
@@ -246,10 +246,10 @@ func TestContextAPI_Storage(t *testing.T) {
 			Convey("Validated that object of complex type may be read from context directly to complex type", func() {
 				// Act
 				cli := &storedClient{}
-				ok := ctx.LoadTo("client", &cli)
+				err := ctx.LoadTo("client", &cli)
 
 				// Assert
-				So(ok, ShouldBeTrue)
+				So(err, ShouldBeNil)
 				So(cli.Count(), ShouldEqual, 1)
 
 				// Act
