@@ -56,10 +56,6 @@ func (s systemCollector) Load(ctx plugin.Context) error {
 	return handleConfig(ctx)
 }
 
-func (s systemCollector) Unload(ctx plugin.Context) error {
-	return nil
-}
-
 func (s systemCollector) collectTotalCPU(ctx plugin.CollectContext) error {
 	cfg := getConfig(ctx)
 	measurementDur, _ := time.ParseDuration(cfg.TotalCPUMeasureDuration)
