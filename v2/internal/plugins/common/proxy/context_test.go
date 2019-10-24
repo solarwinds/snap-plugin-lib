@@ -148,7 +148,7 @@ func TestContextAPI_Storage(t *testing.T) {
 			ctx.Store("apiVersion", 12)
 			ctx.Store("debugMode", true)
 
-			Convey("Validated that object of basic type may be read from context (1)", func() {
+			Convey("Validated that object of basic type may be read from context (1) via Load method", func() {
 				// Act
 				ver, ok := ctx.Load("version")
 
@@ -158,7 +158,17 @@ func TestContextAPI_Storage(t *testing.T) {
 				So(ver, ShouldEqual, "1.0.1")
 			})
 
-			Convey("Validated that object of basic type may be read from context (2)", func() {
+			Convey("Validated that object of basic type may be read from context (1) via LoadTo method", func() {
+				// Act
+				ver := ""
+				err := ctx.LoadTo("version", &ver)
+
+				// Assert
+				So(err, ShouldBeNil)
+				So(ver, ShouldEqual, "1.0.1")
+			})
+
+			Convey("Validated that object of basic type may be read from context (2) via Load method", func() {
 				// Act
 				ver, ok := ctx.Load("apiVersion")
 
@@ -168,7 +178,17 @@ func TestContextAPI_Storage(t *testing.T) {
 				So(ver, ShouldEqual, 12)
 			})
 
-			Convey("Validated that object of basic type may be read from context (3)", func() {
+			Convey("Validated that object of basic type may be read from context (2) via LoadTo method", func() {
+				// Act
+				v := 0
+				err := ctx.LoadTo("apiVersion", &v)
+
+				// Assert
+				So(err, ShouldBeNil)
+				So(v, ShouldEqual, 12)
+			})
+
+			Convey("Validated that object of basic type may be read from context (3) via Load method", func() {
 				// Act
 				ver, ok := ctx.Load("debugMode")
 
@@ -176,6 +196,16 @@ func TestContextAPI_Storage(t *testing.T) {
 				So(ok, ShouldBeTrue)
 				So(ver, ShouldHaveSameTypeAs, false)
 				So(ver, ShouldEqual, true)
+			})
+
+			Convey("Validated that object of basic type may be read from context (3) via LoadTo method", func() {
+				// Act
+				v := false
+				err := ctx.LoadTo("debugMode", &v)
+
+				// Assert
+				So(err, ShouldBeNil)
+				So(v, ShouldEqual, true)
 			})
 
 			Convey("Validated that object of unknown key can't be read from context", func() {
@@ -211,6 +241,23 @@ func TestContextAPI_Storage(t *testing.T) {
 
 				// Assert
 				So(cli.(*storedClient).Count(), ShouldEqual, 3)
+			})
+
+			Convey("Validated that object of complex type may be read from context directly to complex type", func() {
+				// Act
+				cli := &storedClient{}
+				err := ctx.LoadTo("client", &cli)
+
+				// Assert
+				So(err, ShouldBeNil)
+				So(cli.Count(), ShouldEqual, 1)
+
+				// Act
+				cli.Inc()
+				cli.Inc()
+
+				// Assert
+				So(cli.Count(), ShouldEqual, 3)
 			})
 		})
 	})

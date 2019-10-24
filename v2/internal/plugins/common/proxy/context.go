@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
@@ -57,4 +58,26 @@ func (c *Context) Load(key string) (interface{}, bool) {
 
 	obj, ok := c.storedObjects[key]
 	return obj, ok
+}
+
+func (c *Context) LoadTo(key string, dest interface{}) error {
+	c.storedObjectsMutex.RLock()
+	defer c.storedObjectsMutex.RUnlock()
+
+	obj, ok := c.storedObjects[key]
+	if !ok {
+		return fmt.Errorf("couldn't find object with a given key (%s)", key)
+	}
+
+	vDest := reflect.ValueOf(dest)
+	if vDest.Kind() != reflect.Ptr || vDest.IsNil() {
+		return fmt.Errorf("passed variable should be a non-nill pointer")
+	}
+	if reflect.TypeOf(dest).Elem() != reflect.TypeOf(obj) {
+		return fmt.Errorf("type of destination variable don't match to type of stored value")
+	}
+
+	vDest.Elem().Set(reflect.ValueOf(obj))
+
+	return nil
 }

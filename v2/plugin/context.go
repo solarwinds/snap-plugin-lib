@@ -11,9 +11,13 @@ type Context interface {
 	// Return raw configuration (JSON string)
 	RawConfig() []byte
 
-	// Store any object between Collect requests using key
+	// Store any object using key to have access from different Collect requests
 	Store(key string, value interface{})
 
-	// Load stored object between Collect requests using key
+	// Load any object using key from different Collect requests (returns an interface{} which need to be casted to concrete type)
 	Load(key string) (interface{}, bool)
+
+	// Load any object using key from different Collect requests (passing it to provided reference).
+	// Will throw error when dest type doesn't match to type of stored value or object with a given key wasn't found.
+	LoadTo(key string, dest interface{}) error
 }
