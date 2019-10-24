@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
@@ -57,4 +58,21 @@ func (c *Context) Load(key string) (interface{}, bool) {
 
 	obj, ok := c.storedObjects[key]
 	return obj, ok
+}
+
+func (c *Context) LoadTo(key string, v interface{}) bool {
+	c.storedObjectsMutex.RLock()
+	defer c.storedObjectsMutex.RUnlock()
+
+	obj, ok := c.storedObjects[key]
+	if !ok {
+		return false
+	}
+
+	if reflect.TypeOf(v) != reflect.TypeOf(obj) {
+		panic("type of variable is different that type of stored object")
+	}
+	v = obj
+
+	return true
 }
