@@ -10,6 +10,9 @@ type Collector interface {
 
 type LoadableCollector interface {
 	Load(ctx Context) error
+}
+
+type UnloadableCollector interface {
 	Unload(ctx Context) error
 }
 

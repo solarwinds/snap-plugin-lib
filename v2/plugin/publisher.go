@@ -6,6 +6,9 @@ type Publisher interface {
 
 type LoadablePublisher interface {
 	Load(ctx Context) error
+}
+
+type UnloadablePublisher interface {
 	Unload(ctx Context) error
 }
 
