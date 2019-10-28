@@ -38,10 +38,10 @@ When task is defined for a plugin, snap will send a `Load()` request to plugin c
 - JSON-like object with configuration fields
 - list of metrics that user wants to gather - we can request only a subset of "measurements"
 
-When a task is no longer needed snap may send an `Unload()` request.
+When a task handling is no longer needed snap sends an `Unload()` request.
 As for `Load()`, we can provide some custom code which will be executed when the task is finished.
 
-> Keep in mind, however, this doesn't mean the plugin is no longer needed as there might be some other tasks still running that rely on this plugin.
+> Keep in mind, however, this doesn't necessarily mean the plugin is not needed as some other tasks that rely on this plugin may still be running.
 
 Let's introduce empty custom implementation of `Load()` method:
 ```go
@@ -56,6 +56,8 @@ func (s simpleCollector) Unload(ctx plugin.Context) error {
 	return nil
 }
 ```
+
+> Custom implementation of `Unload()` method should be provided when plugin is storing some object (ie. http client) that needs to be manually released (ie. via `obj.Close()`) to avoid memory or resource leaks.
 
 #### Configuration
 
