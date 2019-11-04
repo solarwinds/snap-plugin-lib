@@ -116,8 +116,8 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	}
 
 	context := contextI.(*pluginContext)
-	if loadable, ok := cm.publisher.(plugin.LoadablePublisher); ok {
-		err := loadable.Unload(context)
+	if unloadable, ok := cm.publisher.(plugin.UnloadablePublisher); ok {
+		err := unloadable.Unload(context)
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a publisher task (%s): %v", id, err)
 		}

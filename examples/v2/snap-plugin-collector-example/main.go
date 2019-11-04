@@ -90,12 +90,6 @@ func (*myCollector) Load(ctx plugin.Context) error {
 	return nil
 }
 
-func (*myCollector) Unload(ctx plugin.Context) error {
-	log.Trace("Unload executed")
-
-	return nil
-}
-
 func main() {
 	runner.StartCollector(&myCollector{}, pluginName, pluginVersion)
 }
