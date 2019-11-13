@@ -12,7 +12,7 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"

@@ -30,7 +30,7 @@ type Controller interface {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func NewController(pluginName string, pluginVersion string, opt *types.Options) (Controller, error) {
+func NewController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *types.Options) (Controller, error) {
 	if opt.EnableStats {
 		return NewStatsController(pluginName, pluginVersion, opt)
 	}

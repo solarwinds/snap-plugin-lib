@@ -10,7 +10,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )

@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -11,7 +12,7 @@ import (
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], PluginTypePublisher, os.Args[1:])
+	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -27,6 +28,6 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	printMetaInformation(name, version, PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 	pluginrpc.StartPublisherGRPC(ctxMan, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }

@@ -10,23 +10,14 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
-type PluginType int
-
-const (
-	PluginTypeCollector PluginType = iota
-	PluginTypeProcessor
-	PluginTypePublisher
-	PluginTypeStreamingCollector
-)
-
 // Structure contains information about running services (used by snap)
 type meta struct {
 	GRPCVersion string // Message definition version (ie. 2.0.0)
 
 	Plugin struct {
-		Name    string     // Plugin name
-		Version string     // Plugin version
-		Type    PluginType // Plugin type (collector, publisher, etc.)
+		Name    string           // Plugin name
+		Version string           // Plugin version
+		Type    types.PluginType // Plugin type (collector, publisher, etc.)
 	}
 
 	GRPC struct {
@@ -51,7 +42,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, typ PluginType, opt *types.Options, r *resources, tasksLimit, instancesLimit int) {
+func printMetaInformation(name string, version string, typ types.PluginType, opt *types.Options, r *resources, tasksLimit, instancesLimit int) {
 	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
 
 	m := meta{

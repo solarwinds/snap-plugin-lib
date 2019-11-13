@@ -12,7 +12,7 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -32,13 +32,13 @@ const (
 )
 
 func StartCollector(collector plugin.Collector, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], PluginTypeCollector, os.Args[1:])
+	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(name, version, opt)
+	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, opt)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -61,7 +61,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 			os.Exit(errorExitStatus)
 		}
 
-		printMetaInformation(name, version, PluginTypeCollector, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		printMetaInformation(name, version, types.PluginTypeCollector, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 		startCollectorInServerMode(ctxMan, statsController, r, opt)
 	case true:
 		startCollectorInSingleMode(ctxMan, opt)
