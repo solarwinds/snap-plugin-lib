@@ -208,4 +208,5 @@ message ProcessingTimes {
 message LastMeasurement {
     Time occurred = 1;
     uint64 collectedMetrics = 2;
+    int64 duration = 3;
 }

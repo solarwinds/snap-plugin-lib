@@ -227,6 +227,7 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 			LastMeasurement: &LastMeasurement{
 				Occurred:         toGRPCTime(lm.Occurred.Time),
 				CollectedMetrics: uint64(lm.CollectedMetrics),
+				Duration:         int64(lm.Duration),
 			},
 		}
 	}
