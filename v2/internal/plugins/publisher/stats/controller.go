@@ -2,13 +2,12 @@ package stats
 
 import (
 	"encoding/json"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/sirupsen/logrus"
 	"os"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -23,9 +22,9 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 type Controller interface {
 	Close()
 	RequestStat() chan *Statistics
-	UpdateLoadStat(taskId string, config string, filters []string)
+	UpdateLoadStat(taskId string, config string)
 	UpdateUnloadStat(taskId string)
-	UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
+	UpdatePublishStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,12 +109,11 @@ func (sc *StatisticsController) RequestStat() chan *Statistics {
 	return respCh
 }
 
-func (sc *StatisticsController) UpdateLoadStat(taskId string, config string, filters []string) {
+func (sc *StatisticsController) UpdateLoadStat(taskId string, config string) {
 	sc.incomingStatsCh <- &loadTaskStat{
-		sm:      sc,
-		taskId:  taskId,
-		config:  config,
-		filters: filters,
+		sm:     sc,
+		taskId: taskId,
+		config: config,
 	}
 }
 
@@ -126,7 +124,7 @@ func (sc *StatisticsController) UpdateUnloadStat(taskId string) {
 	}
 }
 
-func (sc *StatisticsController) UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
+func (sc *StatisticsController) UpdatePublishStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 	sc.incomingStatsCh <- &collectTaskStat{
 		sm:           sc,
 		taskId:       taskId,
@@ -176,10 +174,10 @@ func (sc *StatisticsController) applyUnloadStat(taskId string) {
 	delete(sc.stats.TasksDetails, taskId)
 }
 
-func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int, _ bool, startTime, completeTime time.Time) {
+func (sc *StatisticsController) applyPublishStat(taskId string, metricsCount int, _ bool, startTime, completeTime time.Time) {
 	log.WithFields(logrus.Fields{
 		"task-id":        taskId,
-		"statistic-type": "Collect",
+		"statistic-type": "Publish",
 	}).Trace("Applying statistic")
 	processingTime := completeTime.Sub(startTime)
 
@@ -187,11 +185,11 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 	{
 		ts := &sc.stats.TasksSummary
 
-		ts.Counters.TotalCollectRequests += 1
+		ts.Counters.TotalPublishRequests += 1
 		ts.ProcessingTimes.Total += processingTime
 
-		if ts.Counters.TotalCollectRequests > 0 {
-			ts.ProcessingTimes.Average = time.Duration(int(ts.ProcessingTimes.Total) / ts.Counters.TotalCollectRequests)
+		if ts.Counters.TotalPublishRequests > 0 {
+			ts.ProcessingTimes.Average = time.Duration(int(ts.ProcessingTimes.Total) / ts.Counters.TotalPublishRequests)
 		}
 
 		if processingTime > ts.ProcessingTimes.Maximum {
@@ -209,7 +207,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 
 		if td.Counters.CollectRequests > 0 {
 			td.ProcessingTimes.Average = time.Duration(int(td.ProcessingTimes.Total) / td.Counters.CollectRequests)
-			td.Counters.AvgMetricsPerCollect = td.Counters.TotalMetrics / td.Counters.CollectRequests
+			td.Counters.AvgMetricsPerPublish = td.Counters.TotalMetrics / td.Counters.CollectRequests
 		}
 
 		if processingTime > td.ProcessingTimes.Maximum {
@@ -221,7 +219,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 				Time: completeTime,
 			},
 			Duration:         processingTime,
-			CollectedMetrics: metricsCount,
+			PublishedMetrics: metricsCount,
 		}
 
 		sc.stats.TasksDetails[taskId] = td
@@ -250,11 +248,11 @@ func (d *EmptyController) RequestStat() chan *Statistics {
 	return statCh
 }
 
-func (d *EmptyController) UpdateLoadStat(_ string, _ string, _ []string) {
+func (d *EmptyController) UpdateLoadStat(taskId string, config string) {
 }
 
-func (d *EmptyController) UpdateUnloadStat(_ string) {
+func (d *EmptyController) UpdateUnloadStat(taskId string) {
 }
 
-func (d *EmptyController) UpdateCollectStat(_ string, _ int, _ bool, _, _ time.Time) {
+func (d *EmptyController) UpdatePublishStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 }
