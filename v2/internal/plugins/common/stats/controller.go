@@ -32,7 +32,7 @@ type Controller interface {
 
 func NewController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *types.Options) (Controller, error) {
 	if opt.EnableStats {
-		return NewStatsController(pluginName, pluginVersion, opt)
+		return NewStatsController(pluginName, pluginVersion, pluginType, opt)
 	}
 
 	return NewEmptyController()
@@ -41,6 +41,8 @@ func NewController(pluginName string, pluginVersion string, pluginType types.Plu
 ///////////////////////////////////////////////////////////////////////////////
 
 type StatisticsController struct {
+	pluginType types.PluginType
+
 	startedSync       sync.Once
 	incomingStatsCh   chan StatCommand
 	incomingRequestCh chan chan *Statistics
@@ -48,13 +50,15 @@ type StatisticsController struct {
 	stats             *Statistics
 }
 
-func NewStatsController(pluginName string, pluginVersion string, opt *types.Options) (Controller, error) {
+func NewStatsController(pluginName string, pluginVersion string, typ types.PluginType, opt *types.Options) (Controller, error) {
 	optJson, err := json.Marshal(opt)
 	if err != nil {
 		return nil, err
 	}
 
 	sc := &StatisticsController{
+		pluginType: typ,
+
 		startedSync:       sync.Once{},
 		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
 		incomingRequestCh: make(chan chan *Statistics, reqChannelSize),
@@ -187,11 +191,11 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 	{
 		ts := &sc.stats.TasksSummary
 
-		ts.Counters.TotalCollectRequests += 1
+		ts.Counters.TotalExecutionRequests += 1
 		ts.ProcessingTimes.Total += processingTime
 
-		if ts.Counters.TotalCollectRequests > 0 {
-			ts.ProcessingTimes.Average = time.Duration(int(ts.ProcessingTimes.Total) / ts.Counters.TotalCollectRequests)
+		if ts.Counters.TotalExecutionRequests > 0 {
+			ts.ProcessingTimes.Average = time.Duration(int(ts.ProcessingTimes.Total) / ts.Counters.TotalExecutionRequests)
 		}
 
 		if processingTime > ts.ProcessingTimes.Maximum {
@@ -209,7 +213,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 
 		if td.Counters.CollectRequests > 0 {
 			td.ProcessingTimes.Average = time.Duration(int(td.ProcessingTimes.Total) / td.Counters.CollectRequests)
-			td.Counters.AvgMetricsPerCollect = td.Counters.TotalMetrics / td.Counters.CollectRequests
+			td.Counters.AvgMetricsPerExecution = td.Counters.TotalMetrics / td.Counters.CollectRequests
 		}
 
 		if processingTime > td.ProcessingTimes.Maximum {
@@ -221,7 +225,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 				Time: completeTime,
 			},
 			Duration:         processingTime,
-			CollectedMetrics: metricsCount,
+			ProcessedMetrics: metricsCount,
 		}
 
 		sc.stats.TasksDetails[taskId] = td

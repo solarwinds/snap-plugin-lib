@@ -163,9 +163,9 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 		},
 		TaskSummary: &TaskSummary{
 			Counters: &TaskSummaryCounters{
-				CurrentlyActiveTasks: uint64(ts.Counters.CurrentlyActiveTasks),
-				TotalActiveTasks:     uint64(ts.Counters.TotalActiveTasks),
-				TotalCollectRequests: uint64(ts.Counters.TotalCollectRequests),
+				CurrentlyActiveTasks:   uint64(ts.Counters.CurrentlyActiveTasks),
+				TotalActiveTasks:       uint64(ts.Counters.TotalActiveTasks),
+				TotalExecutionRequests: uint64(ts.Counters.TotalExecutionRequests),
 			},
 			ProcessingTimes: &ProcessingTimes{
 				Total:   int64(ts.ProcessingTimes.Total),
@@ -214,9 +214,9 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
 			Filters:       taskDetails.Filters,
 			Counters: &TaskDetailCounters{
-				CollectRequests:          uint64(c.CollectRequests),
-				TotalMetrics:             uint64(c.TotalMetrics),
-				AverageMetricsPerCollect: uint64(c.AvgMetricsPerCollect),
+				CollectRequests:            uint64(c.CollectRequests),
+				TotalMetrics:               uint64(c.TotalMetrics),
+				AverageMetricsPerExecution: uint64(c.AvgMetricsPerExecution),
 			},
 			Loaded: toGRPCTime(taskDetails.Loaded.Time),
 			ProcessingTimes: &ProcessingTimes{
@@ -226,7 +226,7 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 			},
 			LastMeasurement: &LastMeasurement{
 				Occurred:         toGRPCTime(lm.Occurred.Time),
-				CollectedMetrics: uint64(lm.CollectedMetrics),
+				ProcessedMetrics: uint64(lm.ProcessedMetrics),
 				Duration:         int64(lm.Duration),
 			},
 		}

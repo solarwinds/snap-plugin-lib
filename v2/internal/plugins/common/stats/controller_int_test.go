@@ -21,7 +21,7 @@ func TestStatistics(t *testing.T) {
 	Convey("Validate that calculating statistics calculation is correct", t, func() {
 		startTime := time.Unix(100000, 0)
 
-		sci, _ := NewStatsController(pluginName, pluginVersion, &types.Options{})
+		sci, _ := NewStatsController(pluginName, pluginVersion, types.PluginTypeCollector, &types.Options{})
 		sc := sci.(*StatisticsController)
 
 		// Load task1 and perform some collections
@@ -43,13 +43,13 @@ func TestStatistics(t *testing.T) {
 			ts := sc.stats.TasksSummary
 			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 1)
 			So(ts.Counters.TotalActiveTasks, ShouldEqual, 1)
-			So(ts.Counters.TotalCollectRequests, ShouldEqual, 3)
+			So(ts.Counters.TotalExecutionRequests, ShouldEqual, 3)
 
 			td := sc.stats.TasksDetails
 			So(td, ShouldContainKey, "task-1")
 			So(td["task-1"].Counters.CollectRequests, ShouldEqual, 3)
 			So(td["task-1"].Counters.TotalMetrics, ShouldEqual, 21)
-			So(td["task-1"].LastMeasurement.CollectedMetrics, ShouldEqual, 11)
+			So(td["task-1"].LastMeasurement.ProcessedMetrics, ShouldEqual, 11)
 			So(td["task-1"].ProcessingTimes.Total, ShouldEqual, 9*time.Second)
 			So(td["task-1"].ProcessingTimes.Average, ShouldEqual, 3*time.Second)
 		}
@@ -68,14 +68,14 @@ func TestStatistics(t *testing.T) {
 			ts := sc.stats.TasksSummary
 			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 2)
 			So(ts.Counters.TotalActiveTasks, ShouldEqual, 2)
-			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
+			So(ts.Counters.TotalExecutionRequests, ShouldEqual, 6)
 
 			td := sc.stats.TasksDetails
 			So(td, ShouldContainKey, "task-1")
 			So(td, ShouldContainKey, "task-2")
 			So(td["task-2"].Counters.CollectRequests, ShouldEqual, 3)
 			So(td["task-2"].Counters.TotalMetrics, ShouldEqual, 30)
-			So(td["task-2"].LastMeasurement.CollectedMetrics, ShouldEqual, 10)
+			So(td["task-2"].LastMeasurement.ProcessedMetrics, ShouldEqual, 10)
 			So(td["task-2"].ProcessingTimes.Total, ShouldEqual, 6*time.Second)
 			So(td["task-2"].ProcessingTimes.Average, ShouldEqual, 2*time.Second)
 		}
@@ -91,7 +91,7 @@ func TestStatistics(t *testing.T) {
 			ts := sc.stats.TasksSummary
 			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 1)
 			So(ts.Counters.TotalActiveTasks, ShouldEqual, 2)
-			So(ts.Counters.TotalCollectRequests, ShouldEqual, 6)
+			So(ts.Counters.TotalExecutionRequests, ShouldEqual, 6)
 
 			td := sc.stats.TasksDetails
 			So(td, ShouldNotContainKey, "task-1")
@@ -114,7 +114,7 @@ func TestStatistics(t *testing.T) {
 			ts := sc.stats.TasksSummary
 			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 2)
 			So(ts.Counters.TotalActiveTasks, ShouldEqual, 3)
-			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
+			So(ts.Counters.TotalExecutionRequests, ShouldEqual, 9)
 
 			td := sc.stats.TasksDetails
 			So(td, ShouldContainKey, "task-2")
@@ -122,11 +122,11 @@ func TestStatistics(t *testing.T) {
 
 			So(td["task-2"].Counters.CollectRequests, ShouldEqual, 4)
 			So(td["task-2"].Counters.TotalMetrics, ShouldEqual, 33)
-			So(td["task-2"].LastMeasurement.CollectedMetrics, ShouldEqual, 3)
+			So(td["task-2"].LastMeasurement.ProcessedMetrics, ShouldEqual, 3)
 
 			So(td["task-3"].Counters.CollectRequests, ShouldEqual, 2)
 			So(td["task-3"].Counters.TotalMetrics, ShouldEqual, 1)
-			So(td["task-3"].LastMeasurement.CollectedMetrics, ShouldEqual, 0)
+			So(td["task-3"].LastMeasurement.ProcessedMetrics, ShouldEqual, 0)
 		}
 
 		// Unload task2 and task3
@@ -141,7 +141,7 @@ func TestStatistics(t *testing.T) {
 			ts := sc.stats.TasksSummary
 			So(ts.Counters.CurrentlyActiveTasks, ShouldEqual, 0)
 			So(ts.Counters.TotalActiveTasks, ShouldEqual, 3)
-			So(ts.Counters.TotalCollectRequests, ShouldEqual, 9)
+			So(ts.Counters.TotalExecutionRequests, ShouldEqual, 9)
 
 			td := sc.stats.TasksDetails
 			So(td, ShouldNotContainKey, "task-1")

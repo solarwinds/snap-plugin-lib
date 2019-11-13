@@ -190,13 +190,13 @@ message TaskDetails {
 message TaskSummaryCounters {
     uint64 currentlyActiveTasks = 1;
     uint64 totalActiveTasks = 2;
-    uint64 totalCollectRequests = 3;
+    uint64 totalExecutionRequests = 3;
 }
 
 message TaskDetailCounters {
     uint64 collectRequests = 1;
     uint64 totalMetrics = 2;
-    uint64 averageMetricsPerCollect = 3;
+    uint64 averageMetricsPerExecution = 3;
 }
 
 message ProcessingTimes {
@@ -207,6 +207,6 @@ message ProcessingTimes {
 
 message LastMeasurement {
     Time occurred = 1;
-    uint64 collectedMetrics = 2;
+    uint64 processedMetrics = 2;
     int64 duration = 3;
 }
