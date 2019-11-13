@@ -220,6 +220,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 			Occurred: eventTimes{
 				Time: completeTime,
 			},
+			Duration:         processingTime,
 			CollectedMetrics: metricsCount,
 		}
 

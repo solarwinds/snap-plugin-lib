@@ -48,7 +48,7 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 }
 
 func (cs *controlService) Ping(context.Context, *PingRequest) (*PingResponse, error) {
-	logControlService.Debug("GRPC Ping() received ")
+	logControlService.Debug("GRPC Ping() received")
 
 	cs.pingCh <- struct{}{}
 

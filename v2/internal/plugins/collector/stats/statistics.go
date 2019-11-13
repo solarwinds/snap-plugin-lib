@@ -51,8 +51,25 @@ type tasksCounters struct {
 }
 
 type measurementInfo struct {
+	Occurred         eventTimes
+	Duration         time.Duration
+	CollectedMetrics int
+}
+
+type measurementInfoJSON struct {
 	Occurred         eventTimes `json:"Occurred"`
+	Duration         string     `json:"Duration"`
 	CollectedMetrics int        `json:"Collected metrics"`
+}
+
+func (mi measurementInfo) MarshalJSON() ([]byte, error) {
+	miJSON := measurementInfoJSON{
+		Occurred:         mi.Occurred,
+		Duration:         mi.Duration.String(),
+		CollectedMetrics: mi.CollectedMetrics,
+	}
+
+	return json.Marshal(miJSON)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
