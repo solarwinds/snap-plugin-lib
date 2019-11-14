@@ -1,7 +1,6 @@
 package pluginrpc
 
 import (
-	"errors"
 	"fmt"
 	"net"
 
@@ -82,30 +81,13 @@ func (cs *collectService) Unload(ctx context.Context, request *UnloadCollectorRe
 	return &UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
-func (cs *collectService) Info(ctx context.Context, request *InfoRequest) (*InfoResponse, error) {
+func (cs *collectService) Info(ctx context.Context, _ *InfoRequest) (*InfoResponse, error) {
 	logCollectService.Debug("GRPC Info() received")
 
-	var err error
-	response := &InfoResponse{}
-
-	select {
-	case statistics := <-cs.statsController.RequestStat():
-		if statistics == nil {
-			return response, fmt.Errorf("can't gather statistics (statistics server is not running): %v", err)
-		}
-
-		pprofAddr := ""
-		if cs.pprofLn != nil {
-			pprofAddr = cs.pprofLn.Addr().String()
-		}
-
-		response.Info, err = toGRPCInfo(statistics, pprofAddr)
-		if err != nil {
-			return response, fmt.Errorf("could't convert statistics to GRPC format: %v", err)
-		}
-	case <-ctx.Done():
-		return response, errors.New("won't retrieve statistics - request canceled")
+	pprofAddr := ""
+	if cs.pprofLn != nil {
+		pprofAddr = cs.pprofLn.Addr().String()
 	}
 
-	return response, nil
+	return serveInfo(ctx, cs.statsController.RequestStat(), pprofAddr)
 }

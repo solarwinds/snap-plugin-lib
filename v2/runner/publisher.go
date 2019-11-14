@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -18,6 +19,12 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
+	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, opt)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
+		os.Exit(errorExitStatus)
+	}
+
 	ctxMan := proxy.NewContextManager(publisher)
 
 	logrus.SetLevel(opt.LogLevel)
@@ -29,5 +36,20 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
-	pluginrpc.StartPublisherGRPC(ctxMan, r.grpcListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	startPublisherInServerMode(ctxMan, statsController, r, opt)
+}
+
+func startPublisherInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *types.Options) {
+	if opt.EnableProfiling {
+		startPprofServer(r.pprofListener)
+		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
+	}
+
+	if opt.EnableStatsServer {
+		startStatsServer(r.statsListener, statsController)
+		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
+	}
+
+	// main blocking operation
+	pluginrpc.StartPublisherGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
 }

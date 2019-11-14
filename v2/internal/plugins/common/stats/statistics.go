@@ -28,12 +28,12 @@ type tasksSummary struct {
 
 type taskDetails struct {
 	Configuration json.RawMessage `json:"Configuration"`
-	Filters       []string        `json:"Requested metrics (filters)"`
+	Filters       []string        `json:"Requested metrics (filters),omitempty"`
 
 	Counters        tasksCounters   `json:"Counters"`
 	Loaded          eventTimes      `json:"Loaded"`
 	ProcessingTimes processingTimes `json:"Processing times"`
-	LastMeasurement measurementInfo `json:"Last measurement"`
+	LastMeasurement measurementInfo `json:"Last execution"` // todo: adamik
 }
 
 ///////////////////////////////////////////////////////////////////////////////

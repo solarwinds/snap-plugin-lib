@@ -3,7 +3,9 @@ package pluginrpc
 import (
 	"context"
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"io"
+	"net"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
@@ -12,12 +14,16 @@ import (
 var logPublishService = log.WithField("service", "Publish")
 
 type publishingService struct {
-	proxy proxy.Publisher
+	proxy           proxy.Publisher
+	statsController stats.Controller
+	pprofLn         net.Listener
 }
 
-func newPublishingService(proxy proxy.Publisher) PublisherServer {
+func newPublishingService(proxy proxy.Publisher, statsController stats.Controller, pprofLn net.Listener) PublisherServer {
 	return &publishingService{
-		proxy: proxy,
+		proxy:           proxy,
+		statsController: statsController,
+		pprofLn:         pprofLn,
 	}
 }
 
@@ -81,4 +87,15 @@ func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublishe
 	taskID := string(request.GetTaskId())
 
 	return &UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
+}
+
+func (ps *publishingService) Info(ctx context.Context, _ *InfoRequest) (*InfoResponse, error) {
+	logCollectService.Debug("GRPC Info() received")
+
+	pprofAddr := ""
+	if ps.pprofLn != nil {
+		pprofAddr = ps.pprofLn.Addr().String()
+	}
+
+	return serveInfo(ctx, ps.statsController.RequestStat(), pprofAddr)
 }

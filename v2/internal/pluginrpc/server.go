@@ -26,9 +26,9 @@ func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, 
 	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
-func StartPublisherGRPC(proxy PublisherProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+func StartPublisherGRPC(proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	grpcServer := grpc.NewServer()
-	RegisterPublisherServer(grpcServer, newPublishingService(proxy))
+	RegisterPublisherServer(grpcServer, newPublishingService(proxy, statsController, pprofLn))
 
 	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
 }
