@@ -22,11 +22,11 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"testing"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
-	"golang.org/x/net/context"
 )
 
 func TestProcessor(t *testing.T) {

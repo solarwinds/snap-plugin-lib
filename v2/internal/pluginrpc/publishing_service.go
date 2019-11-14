@@ -3,10 +3,10 @@ package pluginrpc
 import (
 	"context"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"io"
 	"net"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )

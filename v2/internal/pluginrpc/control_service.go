@@ -1,12 +1,12 @@
 package pluginrpc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 )
 
 const (

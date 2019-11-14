@@ -23,11 +23,11 @@ limitations under the License.
 package rpc
 
 import (
+	"context"
 	"fmt"
 	"math"
 
 	"github.com/golang/protobuf/proto"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 

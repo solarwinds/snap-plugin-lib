@@ -22,6 +22,7 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -31,11 +32,9 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"google.golang.org/grpc"
 )
 
 func init() {
