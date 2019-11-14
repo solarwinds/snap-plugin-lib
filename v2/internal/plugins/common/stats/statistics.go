@@ -34,7 +34,7 @@ type taskDetails struct {
 	Counters        tasksCounters   `json:"Counters"`
 	Loaded          eventTimes      `json:"Loaded"`
 	ProcessingTimes processingTimes `json:"Processing times"`
-	LastMeasurement measurementInfo `json:"Last execution"` // todo: adamik
+	LastMeasurement measurementInfo `json:"Last execution"`
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,25 +42,25 @@ type taskDetails struct {
 type summaryCounters struct {
 	CurrentlyActiveTasks   int `json:"Currently active tasks"`
 	TotalActiveTasks       int `json:"Total active tasks"`
-	TotalExecutionRequests int `json:"Total execution requests"` // todo: adamik
+	TotalExecutionRequests int `json:"Total execution requests"`
 }
 
 type tasksCounters struct {
 	CollectRequests        int `json:"Collect requests"`
 	TotalMetrics           int `json:"Total metrics"`
-	AvgMetricsPerExecution int `json:"Average metrics / Execution"` // todo: adamik
+	AvgMetricsPerExecution int `json:"Average metrics / Execution"`
 }
 
 type measurementInfo struct {
 	Occurred         eventTimes
 	Duration         time.Duration
-	ProcessedMetrics int // todo: adamik
+	ProcessedMetrics int
 }
 
 type measurementInfoJSON struct {
 	Occurred         eventTimes `json:"Occurred"`
 	Duration         string     `json:"Duration"`
-	ProcessesMetrics int        `json:"Processed metrics"` // todo: adamik
+	ProcessesMetrics int        `json:"Processed metrics"`
 }
 
 func (mi measurementInfo) MarshalJSON() ([]byte, error) {

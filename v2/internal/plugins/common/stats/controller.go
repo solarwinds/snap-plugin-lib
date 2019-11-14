@@ -16,7 +16,7 @@ const (
 	reqChannelSize   = 10
 )
 
-var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics", "type": "collector"})
+var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"})
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -38,7 +38,7 @@ type mockStreamServer struct {
 }
 
 func (m mockStreamServer) Context() context.Context {
-	return context.TODO()
+	return context.Background()
 }
 
 func (m mockStreamServer) Send(arg *rpc.CollectReply) error {
