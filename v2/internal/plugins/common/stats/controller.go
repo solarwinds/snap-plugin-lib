@@ -25,7 +25,7 @@ type Controller interface {
 	RequestStat() chan *Statistics
 	UpdateLoadStat(taskId string, config string, filters []string)
 	UpdateUnloadStat(taskId string)
-	UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
+	UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ func (sc *StatisticsController) UpdateUnloadStat(taskId string) {
 	}
 }
 
-func (sc *StatisticsController) UpdateCollectStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
+func (sc *StatisticsController) UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 	sc.incomingStatsCh <- &collectTaskStat{
 		sm:           sc,
 		taskId:       taskId,
@@ -255,11 +255,11 @@ func (d *EmptyController) RequestStat() chan *Statistics {
 	return statCh
 }
 
-func (d *EmptyController) UpdateLoadStat(_ string, _ string, _ []string) {
+func (d *EmptyController) UpdateLoadStat(taskId string, config string, filters []string) {
 }
 
-func (d *EmptyController) UpdateUnloadStat(_ string) {
+func (d *EmptyController) UpdateUnloadStat(taskId string) {
 }
 
-func (d *EmptyController) UpdateCollectStat(_ string, _ int, _ bool, _, _ time.Time) {
+func (d *EmptyController) UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
 }

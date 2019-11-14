@@ -69,7 +69,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	err := cm.publisher.Publish(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.statsController.UpdateCollectStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
 		return fmt.Errorf("user-defined Publish method ended with error: %v", err)

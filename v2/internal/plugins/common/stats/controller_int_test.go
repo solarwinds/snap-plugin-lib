@@ -28,9 +28,9 @@ func TestStatistics(t *testing.T) {
 		{
 			// Act
 			sc.UpdateLoadStat("task-1", "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
-			sc.UpdateCollectStat("task-1", 4, true, startTime.Add(1*time.Second), startTime.Add(3*time.Second))
-			sc.UpdateCollectStat("task-1", 6, true, startTime.Add(4*time.Second), startTime.Add(7*time.Second))
-			sc.UpdateCollectStat("task-1", 11, true, startTime.Add(8*time.Second), startTime.Add(12*time.Second))
+			sc.UpdateExecutionStat("task-1", 4, true, startTime.Add(1*time.Second), startTime.Add(3*time.Second))
+			sc.UpdateExecutionStat("task-1", 6, true, startTime.Add(4*time.Second), startTime.Add(7*time.Second))
+			sc.UpdateExecutionStat("task-1", 11, true, startTime.Add(8*time.Second), startTime.Add(12*time.Second))
 
 			// Assert
 			time.Sleep(waitForCalculation)
@@ -58,9 +58,9 @@ func TestStatistics(t *testing.T) {
 		{
 			// Act
 			sc.UpdateLoadStat("task-2", "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
-			sc.UpdateCollectStat("task-2", 5, true, startTime.Add(20*time.Second), startTime.Add(21*time.Second))
-			sc.UpdateCollectStat("task-2", 15, true, startTime.Add(25*time.Second), startTime.Add(26*time.Second))
-			sc.UpdateCollectStat("task-2", 10, true, startTime.Add(30*time.Second), startTime.Add(34*time.Second))
+			sc.UpdateExecutionStat("task-2", 5, true, startTime.Add(20*time.Second), startTime.Add(21*time.Second))
+			sc.UpdateExecutionStat("task-2", 15, true, startTime.Add(25*time.Second), startTime.Add(26*time.Second))
+			sc.UpdateExecutionStat("task-2", 10, true, startTime.Add(30*time.Second), startTime.Add(34*time.Second))
 
 			// Assert
 			time.Sleep(waitForCalculation)
@@ -103,10 +103,10 @@ func TestStatistics(t *testing.T) {
 			// Act
 			sc.UpdateLoadStat("task-3", "cfg_1", []string{"filt_1_1", "filt_1_2", "filt_1_3"})
 
-			sc.UpdateCollectStat("task-3", 1, true, startTime.Add(40*time.Second), startTime.Add(41*time.Second))
-			sc.UpdateCollectStat("task-3", 0, true, startTime.Add(45*time.Second), startTime.Add(46*time.Second))
+			sc.UpdateExecutionStat("task-3", 1, true, startTime.Add(40*time.Second), startTime.Add(41*time.Second))
+			sc.UpdateExecutionStat("task-3", 0, true, startTime.Add(45*time.Second), startTime.Add(46*time.Second))
 
-			sc.UpdateCollectStat("task-2", 3, true, startTime.Add(50*time.Second), startTime.Add(51*time.Second))
+			sc.UpdateExecutionStat("task-2", 3, true, startTime.Add(50*time.Second), startTime.Add(51*time.Second))
 
 			// Assert
 			time.Sleep(waitForCalculation)

@@ -14,7 +14,7 @@ func (pt PluginType) String() string {
 	case PluginTypeCollector:
 		return "Collector"
 	case PluginTypeProcessor:
-		return "Publisher"
+		return "Processor"
 	case PluginTypePublisher:
 		return "Publisher"
 	case PluginTypeStreamingCollector:
