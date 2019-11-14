@@ -80,8 +80,9 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 	ln, _ = net.Listen("tcp", "127.0.0.1:")
 
 	go func() {
-		contextManager := pubProxy.NewContextManager(publisher)
-		pluginrpc.StartPublisherGRPC(contextManager, ln, 0, 0)
+		statsController := &stats.EmptyController{}
+		contextManager := pubProxy.NewContextManager(publisher, statsController)
+		pluginrpc.StartPublisherGRPC(contextManager, statsController, ln, nil, 0, 0)
 		s.endPublisherCh <- true
 	}()
 
@@ -177,7 +178,7 @@ func (s *PublisherMediumSuite) requestCollect(collectTaskID string) ([]*pluginrp
 		return nil, err
 	}
 
-	mts := []*pluginrpc.Metric{}
+	var mts []*pluginrpc.Metric
 
 	for {
 		partialResponse, err := stream.Recv()
@@ -257,7 +258,7 @@ func (p *configurablePublisher) Load(ctx plugin.Context) error {
 	return nil
 }
 
-func (p *configurablePublisher) Unload(ctx plugin.Context) error {
+func (p *configurablePublisher) Unload(_ plugin.Context) error {
 	p.unloadCalls++
 
 	return nil

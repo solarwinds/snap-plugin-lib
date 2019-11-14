@@ -7,6 +7,7 @@ import (
 	"time"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -29,13 +30,17 @@ type ContextManager struct {
 
 	publisher  plugin.Publisher
 	contextMap sync.Map
+
+	statsController stats.Controller // reference to statistics controller
 }
 
-func NewContextManager(publisher plugin.Publisher) *ContextManager {
+func NewContextManager(publisher plugin.Publisher, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		ContextManager: commonProxy.NewContextManager(),
 		publisher:      publisher,
 		contextMap:     sync.Map{},
+
+		statsController: statsController,
 	}
 
 	cm.RequestPluginDefinition()
@@ -64,7 +69,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	err := cm.publisher.Publish(context) // calling to user defined code
 	endTime := time.Now()
 
-	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
+	cm.statsController.UpdateCollectStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
 		return fmt.Errorf("user-defined Publish method ended with error: %v", err)
@@ -98,8 +103,7 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 	}
 
 	cm.contextMap.Store(id, newCtx)
-
-	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
+	cm.statsController.UpdateLoadStat(id, string(config), nil)
 
 	return nil
 }
@@ -124,8 +128,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	}
 
 	cm.contextMap.Delete(id)
-
-	// todo: update statistics https://swicloud.atlassian.net/browse/AO-14142
+	cm.statsController.UpdateUnloadStat(id)
 
 	return nil
 }

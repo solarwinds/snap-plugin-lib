@@ -2,10 +2,10 @@ package runner
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -25,7 +25,7 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	ctxMan := proxy.NewContextManager(publisher)
+	ctxMan := proxy.NewContextManager(publisher, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
 

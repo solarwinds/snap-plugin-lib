@@ -16,6 +16,7 @@ type Statistics struct {
 type pluginInfo struct {
 	Name           string          `json:"Name"`
 	Version        string          `json:"Version"`
+	Type           string          `json:"Type"`
 	CmdLineOptions string          `json:"Command-line options"`
 	Options        json.RawMessage `json:"Options"`
 	Started        eventTimes      `json:"Started"`

@@ -50,14 +50,14 @@ type StatisticsController struct {
 	stats             *Statistics
 }
 
-func NewStatsController(pluginName string, pluginVersion string, typ types.PluginType, opt *types.Options) (Controller, error) {
+func NewStatsController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *types.Options) (Controller, error) {
 	optJson, err := json.Marshal(opt)
 	if err != nil {
 		return nil, err
 	}
 
 	sc := &StatisticsController{
-		pluginType: typ,
+		pluginType: pluginType,
 
 		startedSync:       sync.Once{},
 		incomingStatsCh:   make(chan StatCommand, statsChannelSize),
@@ -68,6 +68,7 @@ func NewStatsController(pluginName string, pluginVersion string, typ types.Plugi
 			PluginInfo: pluginInfo{
 				Name:    pluginName,
 				Version: pluginVersion,
+				Type:    string(pluginType),
 				Started: eventTimes{
 					Time: time.Now(),
 				},
