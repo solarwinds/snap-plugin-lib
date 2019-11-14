@@ -258,7 +258,7 @@ func (p *configurablePublisher) Load(ctx plugin.Context) error {
 	return nil
 }
 
-func (p *configurablePublisher) Unload(_ plugin.Context) error {
+func (p *configurablePublisher) Unload(ctx plugin.Context) error {
 	p.unloadCalls++
 
 	return nil
