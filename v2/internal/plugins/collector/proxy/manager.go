@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -96,7 +96,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.statsController.UpdateCollectStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
 		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)

@@ -16,6 +16,7 @@ type Statistics struct {
 type pluginInfo struct {
 	Name           string          `json:"Name"`
 	Version        string          `json:"Version"`
+	Type           string          `json:"Type"`
 	CmdLineOptions string          `json:"Command-line options"`
 	Options        json.RawMessage `json:"Options"`
 	Started        eventTimes      `json:"Started"`
@@ -28,31 +29,48 @@ type tasksSummary struct {
 
 type taskDetails struct {
 	Configuration json.RawMessage `json:"Configuration"`
-	Filters       []string        `json:"Requested metrics (filters)"`
+	Filters       []string        `json:"Requested metrics (filters),omitempty"`
 
 	Counters        tasksCounters   `json:"Counters"`
 	Loaded          eventTimes      `json:"Loaded"`
 	ProcessingTimes processingTimes `json:"Processing times"`
-	LastMeasurement measurementInfo `json:"Last measurement"`
+	LastMeasurement measurementInfo `json:"Last execution"`
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 type summaryCounters struct {
-	CurrentlyActiveTasks int `json:"Currently active tasks"`
-	TotalActiveTasks     int `json:"Total active tasks"`
-	TotalCollectRequests int `json:"Total collect requests"`
+	CurrentlyActiveTasks   int `json:"Currently active tasks"`
+	TotalActiveTasks       int `json:"Total active tasks"`
+	TotalExecutionRequests int `json:"Total execution requests"`
 }
 
 type tasksCounters struct {
-	CollectRequests      int `json:"Collect requests"`
-	TotalMetrics         int `json:"Total metrics"`
-	AvgMetricsPerCollect int `json:"Average metrics / Collect"`
+	CollectRequests        int `json:"Collect requests"`
+	TotalMetrics           int `json:"Total metrics"`
+	AvgMetricsPerExecution int `json:"Average metrics / Execution"`
 }
 
 type measurementInfo struct {
+	Occurred         eventTimes
+	Duration         time.Duration
+	ProcessedMetrics int
+}
+
+type measurementInfoJSON struct {
 	Occurred         eventTimes `json:"Occurred"`
-	CollectedMetrics int        `json:"Collected metrics"`
+	Duration         string     `json:"Duration"`
+	ProcessesMetrics int        `json:"Processed metrics"`
+}
+
+func (mi measurementInfo) MarshalJSON() ([]byte, error) {
+	miJSON := measurementInfoJSON{
+		Occurred:         mi.Occurred,
+		Duration:         mi.Duration.String(),
+		ProcessesMetrics: mi.ProcessedMetrics,
+	}
+
+	return json.Marshal(miJSON)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

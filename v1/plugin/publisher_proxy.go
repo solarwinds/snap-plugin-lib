@@ -20,12 +20,12 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"fmt"
 	"io"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 )
 
 //TODO(danielscottt): plugin panics

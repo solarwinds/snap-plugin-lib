@@ -12,7 +12,7 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -80,8 +80,9 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 	ln, _ = net.Listen("tcp", "127.0.0.1:")
 
 	go func() {
-		contextManager := pubProxy.NewContextManager(publisher)
-		pluginrpc.StartPublisherGRPC(contextManager, ln, 0, 0)
+		statsController := &stats.EmptyController{}
+		contextManager := pubProxy.NewContextManager(publisher, statsController)
+		pluginrpc.StartPublisherGRPC(contextManager, statsController, ln, nil, 0, 0)
 		s.endPublisherCh <- true
 	}()
 
@@ -177,7 +178,7 @@ func (s *PublisherMediumSuite) requestCollect(collectTaskID string) ([]*pluginrp
 		return nil, err
 	}
 
-	mts := []*pluginrpc.Metric{}
+	var mts []*pluginrpc.Metric
 
 	for {
 		partialResponse, err := stream.Recv()

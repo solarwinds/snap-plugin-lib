@@ -22,14 +22,13 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"google.golang.org/grpc"
 )
 
 type mockStreamServer struct {
@@ -39,7 +38,7 @@ type mockStreamServer struct {
 }
 
 func (m mockStreamServer) Context() context.Context {
-	return context.TODO()
+	return context.Background()
 }
 
 func (m mockStreamServer) Send(arg *rpc.CollectReply) error {

@@ -31,7 +31,7 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func newFlagParser(name string, pType PluginType, opt *types.Options) *flag.FlagSet {
+func newFlagParser(name string, pType types.PluginType, opt *types.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	// common flags
@@ -83,7 +83,7 @@ func newFlagParser(name string, pType PluginType, opt *types.Options) *flag.Flag
 
 	// custom flags
 
-	if pType == PluginTypeCollector {
+	if pType == types.PluginTypeCollector {
 		flagParser.BoolVar(&opt.PrintExampleTask,
 			"print-example-task", false,
 			"Print-out example task for a plugin")
@@ -144,7 +144,7 @@ func (l *logLevelHandler) Set(s string) error {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func ParseCmdLineOptions(pluginName string, pluginType PluginType, args []string) (*types.Options, error) {
+func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []string) (*types.Options, error) {
 	opt := &types.Options{
 		LogLevel: defaultLogLevel,
 	}

@@ -20,7 +20,7 @@ limitations under the License.
 package plugin
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )

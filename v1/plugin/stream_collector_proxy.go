@@ -1,16 +1,14 @@
 package plugin
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
-	"google.golang.org/grpc/metadata"
-
-	"golang.org/x/net/context"
-
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/metadata"
 )
 
 const (

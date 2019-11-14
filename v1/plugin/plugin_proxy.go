@@ -20,11 +20,10 @@ limitations under the License.
 package plugin
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
