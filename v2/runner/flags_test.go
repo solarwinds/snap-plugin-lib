@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -97,7 +98,7 @@ func TestParseCmdLineOptions(t *testing.T) {
 				}
 
 				// Act
-				opt, err := ParseCmdLineOptions("plugin", PluginTypeCollector, inputCmd)
+				opt, err := ParseCmdLineOptions("plugin", types.PluginTypeCollector, inputCmd)
 
 				// Assert
 				if testCase.shouldBeParsed {
