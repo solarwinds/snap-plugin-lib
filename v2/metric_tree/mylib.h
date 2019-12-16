@@ -21,13 +21,13 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #include <stdlib.h>
 
-typedef struct namespaceElement_ {
+typedef struct {
 	char * name;
 	char * value;
 	char * description;
 } namespaceElement;
 
-typedef struct namespace_ {
+typedef struct {
 	long long length;
 	namespaceElement *elements;
 } namespace;
@@ -58,9 +58,31 @@ static inline void setNamespaceElement(namespace * ns, int el, char * name, char
 	ns->elements[el].description = description;
 }
 
+enum metricValueType {
+	METRIC_VALUE_INT,
+	METRIC_VALUE_DOUBLE
+};
+
+typedef union {
+	int intValue;
+	double doubleValue;
+} metricValueData;
+
+typedef struct {
+	int type;
+	metricValueData data;
+} metricValue;
+
+static inline metricValue* withIntData(int data) {
+	metricValue *mv = malloc(sizeof(metricValue));
+	mv->type = METRIC_VALUE_INT;
+	mv->data.intValue = data;
+	return mv;
+}
+
 typedef void (*callbackFn)(namespace * ns);
 
-static inline void call_c_func(callbackFn fPtr, namespace * ns) {
+static inline void call_c_callback(callbackFn fPtr, namespace * ns) {
 	(fPtr)(ns);
 }
 
