@@ -3,11 +3,17 @@ from ctypes import *
 lib_file = "mylib.dll"
 my_fun = CDLL(lib_file)
 
-class GoNamespace(Structure):
+class GoNamespaceEl(Structure):
     _fields_ = [
         ("name", c_char_p),
         ("value", c_char_p),
-        ("description", c_char_p)
+        ("description", c_char_p),
+    ]
+
+class GoNamespace(Structure):
+    _fields_ = [
+        ("length", c_longlong),
+        ("elements", POINTER(GoNamespaceEl))
     ]
 
 class GoString(Structure):
@@ -16,9 +22,13 @@ class GoString(Structure):
         ("n", c_longlong)
     ]
 
-@CFUNCTYPE(None, GoNamespace)
+@CFUNCTYPE(None, POINTER(GoNamespace))
 def fun_callback(ns):
-    print(ns.name)
+    for i in range(4):
+        print(ns[0].length)
+        print(ns[0].elements[i].name)
+        print(ns[0].elements[i].value)
+        print(ns[0].elements[i].description)
 
 # my_fun.Clear.argtypes = [Structure]
 # my_fun.Clear(GoString(b"task-345", 8))

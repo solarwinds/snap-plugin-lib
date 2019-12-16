@@ -17,19 +17,50 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 6 "api_bridge.go"
+#line 5 "api_bridge.go"
 
 #include <stdlib.h>
 
-typedef struct namespace_ {
+typedef struct namespaceElement_ {
 	char * name;
 	char * value;
 	char * description;
+} namespaceElement;
+
+typedef struct namespace_ {
+	long long length;
+	namespaceElement *elements;
 } namespace;
 
-typedef void (*callbackFn)(namespace ns);
+static inline namespace * allocNamespace(long long len) {
+	namespace * ns = malloc(sizeof(namespace));
 
-static inline void call_c_func(callbackFn fPtr, namespace ns) {
+	namespaceElement * nsEls = malloc(sizeof(namespaceElement) * len);
+	ns->length = len;
+	ns->elements = nsEls;
+
+	return ns;
+}
+
+static inline void freeNamespace(namespace * ns) {
+	for (int i = 0; i < ns->length; ++i) {
+		free(ns->elements[i].name);
+		free(ns->elements[i].value);
+		free(ns->elements[i].description);
+	}
+	free(ns->elements);
+	free(ns);
+}
+
+static inline void setNamespaceElement(namespace * ns, int el, char * name, char * value, char * description) {
+	ns->elements[el].name = name;
+	ns->elements[el].value = value;
+	ns->elements[el].description = description;
+}
+
+typedef void (*callbackFn)(namespace * ns);
+
+static inline void call_c_func(callbackFn fPtr, namespace * ns) {
 	(fPtr)(ns);
 }
 
