@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
 )
 
 func serveInfo(ctx context.Context, statsCh chan *stats.Statistics, pprofAddr string) (*InfoResponse, error) {

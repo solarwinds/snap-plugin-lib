@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/simpleconfig"
 )
 
 type Context struct {

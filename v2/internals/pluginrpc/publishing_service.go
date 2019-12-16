@@ -6,9 +6,9 @@ import (
 	"io"
 	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
 )
 
 var logPublishService = log.WithField("service", "Publish")

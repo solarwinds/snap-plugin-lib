@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
 )
 
 const (

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 )

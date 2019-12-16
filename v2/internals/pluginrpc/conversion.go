@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
 )
 
 // convert metric to GRPC structure

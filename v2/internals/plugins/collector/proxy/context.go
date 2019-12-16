@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/metrictree"
+	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
 )
 
 const nsSeparator = metrictree.NsSeparator
