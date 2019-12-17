@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

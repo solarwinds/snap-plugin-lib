@@ -10,7 +10,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -21,21 +23,21 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"
 
 func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	grpcServer := grpc.NewServer()
-	RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
+	pluginrpc.RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
 
 	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
 func StartPublisherGRPC(proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	grpcServer := grpc.NewServer()
-	RegisterPublisherServer(grpcServer, newPublishingService(proxy, statsController, pprofLn))
+	pluginrpc.RegisterPublisherServer(grpcServer, newPublishingService(proxy, statsController, pprofLn))
 
 	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
 func startGRPC(grpcServer *grpc.Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
-	RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
+	pluginrpc.RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 
 	go func() {
 		err := grpcServer.Serve(grpcLn) // blocking

@@ -10,10 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/pluginrpc"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	pluginrpc2 "github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
@@ -36,8 +38,8 @@ type SuiteT struct {
 
 	// grpc client side (snap)
 	grpcConnection  *grpc.ClientConn
-	controlClient   pluginrpc.ControllerClient
-	collectorClient pluginrpc.CollectorClient
+	controlClient   pluginrpc2.ControllerClient
+	collectorClient pluginrpc2.CollectorClient
 }
 
 func (s *SuiteT) SetupSuite() {
@@ -72,22 +74,22 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 func (s *SuiteT) startClient(addr string) {
 	s.grpcConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
 
-	s.collectorClient = pluginrpc.NewCollectorClient(s.grpcConnection)
-	s.controlClient = pluginrpc.NewControllerClient(s.grpcConnection)
+	s.collectorClient = pluginrpc2.NewCollectorClient(s.grpcConnection)
+	s.controlClient = pluginrpc2.NewControllerClient(s.grpcConnection)
 }
 
-func (s *SuiteT) sendPing() (*pluginrpc.PingResponse, error) {
-	response, err := s.controlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
+func (s *SuiteT) sendPing() (*pluginrpc2.PingResponse, error) {
+	response, err := s.controlClient.Ping(context.Background(), &pluginrpc2.PingRequest{})
 	return response, err
 }
 
-func (s *SuiteT) sendKill() (*pluginrpc.KillResponse, error) {
-	response, err := s.controlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
+func (s *SuiteT) sendKill() (*pluginrpc2.KillResponse, error) {
+	response, err := s.controlClient.Kill(context.Background(), &pluginrpc2.KillRequest{})
 	return response, err
 }
 
-func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadCollectorResponse, error) {
-	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadCollectorRequest{
+func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc2.LoadCollectorResponse, error) {
+	response, err := s.collectorClient.Load(context.Background(), &pluginrpc2.LoadCollectorRequest{
 		TaskId:          taskID,
 		JsonConfig:      configJSON,
 		MetricSelectors: selectors,
@@ -95,23 +97,23 @@ func (s *SuiteT) sendLoad(taskID string, configJSON []byte, selectors []string) 
 	return response, err
 }
 
-func (s *SuiteT) sendUnload(taskID string) (*pluginrpc.UnloadCollectorResponse, error) {
-	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadCollectorRequest{
+func (s *SuiteT) sendUnload(taskID string) (*pluginrpc2.UnloadCollectorResponse, error) {
+	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc2.UnloadCollectorRequest{
 		TaskId: taskID,
 	})
 	return response, err
 }
 
-func (s *SuiteT) sendCollect(taskID string) (*pluginrpc.CollectResponse, error) {
-	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc.CollectRequest{
+func (s *SuiteT) sendCollect(taskID string) (*pluginrpc2.CollectResponse, error) {
+	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc2.CollectRequest{
 		TaskId: taskID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	aggregatedMts := &pluginrpc.CollectResponse{
-		MetricSet: []*pluginrpc.Metric{},
+	aggregatedMts := &pluginrpc2.CollectResponse{
+		MetricSet: []*pluginrpc2.Metric{},
 	}
 
 	for {

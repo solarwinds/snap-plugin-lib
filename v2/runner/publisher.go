@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/pluginrpc"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 )

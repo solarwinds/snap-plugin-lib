@@ -6,9 +6,10 @@ import (
 	"io"
 	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
 var logPublishService = log.WithField("service", "Publish")
@@ -19,7 +20,7 @@ type publishingService struct {
 	pprofLn         net.Listener
 }
 
-func newPublishingService(proxy proxy.Publisher, statsController stats.Controller, pprofLn net.Listener) PublisherServer {
+func newPublishingService(proxy proxy.Publisher, statsController stats.Controller, pprofLn net.Listener) pluginrpc.PublisherServer {
 	return &publishingService{
 		proxy:           proxy,
 		statsController: statsController,
@@ -27,7 +28,7 @@ func newPublishingService(proxy proxy.Publisher, statsController stats.Controlle
 	}
 }
 
-func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
+func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) error {
 	logPublishService.Debug("GRPC Publish() received")
 
 	id := ""
@@ -62,34 +63,34 @@ func (ps *publishingService) Publish(stream Publisher_PublishServer) error {
 
 		err := ps.proxy.RequestPublish(id, mts)
 		if err != nil {
-			_ = stream.SendAndClose(&PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
+			_ = stream.SendAndClose(&pluginrpc.PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
 			return err
 		}
 	} else {
 		logPublishService.Info("nothing to publish, request will be ignored")
 	}
 
-	return stream.SendAndClose(&PublishResponse{})
+	return stream.SendAndClose(&pluginrpc.PublishResponse{})
 }
 
-func (ps *publishingService) Load(ctx context.Context, request *LoadPublisherRequest) (*LoadPublisherResponse, error) {
+func (ps *publishingService) Load(ctx context.Context, request *pluginrpc.LoadPublisherRequest) (*pluginrpc.LoadPublisherResponse, error) {
 	logPublishService.Debug("GRPC Load() received")
 
 	taskID := string(request.GetTaskId())
 	jsonConfig := request.GetJsonConfig()
 
-	return &LoadPublisherResponse{}, ps.proxy.LoadTask(taskID, jsonConfig)
+	return &pluginrpc.LoadPublisherResponse{}, ps.proxy.LoadTask(taskID, jsonConfig)
 }
 
-func (ps *publishingService) Unload(ctx context.Context, request *UnloadPublisherRequest) (*UnloadPublisherResponse, error) {
+func (ps *publishingService) Unload(ctx context.Context, request *pluginrpc.UnloadPublisherRequest) (*pluginrpc.UnloadPublisherResponse, error) {
 	logPublishService.Debug("GRPC Unload() received")
 
 	taskID := string(request.GetTaskId())
 
-	return &UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
+	return &pluginrpc.UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
 }
 
-func (ps *publishingService) Info(ctx context.Context, _ *InfoRequest) (*InfoResponse, error) {
+func (ps *publishingService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	logCollectService.Debug("GRPC Info() received")
 
 	pprofAddr := ""

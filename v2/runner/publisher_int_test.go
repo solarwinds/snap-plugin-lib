@@ -10,11 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/pluginrpc"
-	collProxy "github.com/librato/snap-plugin-lib-go/v2/internals/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
-	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internals/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	pluginrpc2 "github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
@@ -34,12 +36,12 @@ type PublisherMediumSuite struct {
 
 	// grpc client side (snap)
 	publisherGRPCConnection *grpc.ClientConn
-	publisherControlClient  pluginrpc.ControllerClient
-	publisherClient         pluginrpc.PublisherClient
+	publisherControlClient  pluginrpc2.ControllerClient
+	publisherClient         pluginrpc2.PublisherClient
 
 	collectorGRPCConnection *grpc.ClientConn
-	collectorControlClient  pluginrpc.ControllerClient
-	collectorClient         pluginrpc.CollectorClient
+	collectorControlClient  pluginrpc2.ControllerClient
+	collectorClient         pluginrpc2.CollectorClient
 }
 
 func (s *PublisherMediumSuite) SetupSuite() {
@@ -92,20 +94,20 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 func (s *PublisherMediumSuite) startCollectorClient(addr string) {
 	s.collectorGRPCConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
 
-	s.collectorClient = pluginrpc.NewCollectorClient(s.collectorGRPCConnection)
-	s.collectorControlClient = pluginrpc.NewControllerClient(s.collectorGRPCConnection)
+	s.collectorClient = pluginrpc2.NewCollectorClient(s.collectorGRPCConnection)
+	s.collectorControlClient = pluginrpc2.NewControllerClient(s.collectorGRPCConnection)
 }
 
 func (s *PublisherMediumSuite) startPublisherClient(addr string) {
 	s.publisherGRPCConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
 
-	s.publisherClient = pluginrpc.NewPublisherClient(s.publisherGRPCConnection)
-	s.publisherControlClient = pluginrpc.NewControllerClient(s.publisherGRPCConnection)
+	s.publisherClient = pluginrpc2.NewPublisherClient(s.publisherGRPCConnection)
+	s.publisherControlClient = pluginrpc2.NewControllerClient(s.publisherGRPCConnection)
 }
 
 func (s *PublisherMediumSuite) sendPings() error {
-	_, errC := s.collectorControlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
-	_, errP := s.publisherControlClient.Ping(context.Background(), &pluginrpc.PingRequest{})
+	_, errC := s.collectorControlClient.Ping(context.Background(), &pluginrpc2.PingRequest{})
+	_, errP := s.publisherControlClient.Ping(context.Background(), &pluginrpc2.PingRequest{})
 
 	if errC != nil || errP != nil {
 		return fmt.Errorf("at least one ping wasn't sent properly")
@@ -115,8 +117,8 @@ func (s *PublisherMediumSuite) sendPings() error {
 }
 
 func (s *PublisherMediumSuite) sendKills() error {
-	_, errC := s.collectorControlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
-	_, errP := s.publisherControlClient.Kill(context.Background(), &pluginrpc.KillRequest{})
+	_, errC := s.collectorControlClient.Kill(context.Background(), &pluginrpc2.KillRequest{})
+	_, errP := s.publisherControlClient.Kill(context.Background(), &pluginrpc2.KillRequest{})
 
 	if errC != nil || errP != nil {
 		return fmt.Errorf("at least one kill wasn't sent properly")
@@ -125,8 +127,8 @@ func (s *PublisherMediumSuite) sendKills() error {
 	return nil
 }
 
-func (s *PublisherMediumSuite) sendCollectorLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc.LoadCollectorResponse, error) {
-	response, err := s.collectorClient.Load(context.Background(), &pluginrpc.LoadCollectorRequest{
+func (s *PublisherMediumSuite) sendCollectorLoad(taskID string, configJSON []byte, selectors []string) (*pluginrpc2.LoadCollectorResponse, error) {
+	response, err := s.collectorClient.Load(context.Background(), &pluginrpc2.LoadCollectorRequest{
 		TaskId:          taskID,
 		JsonConfig:      configJSON,
 		MetricSelectors: selectors,
@@ -134,23 +136,23 @@ func (s *PublisherMediumSuite) sendCollectorLoad(taskID string, configJSON []byt
 	return response, err
 }
 
-func (s *PublisherMediumSuite) sendPublisherLoad(taskID string, configJSON []byte) (*pluginrpc.LoadPublisherResponse, error) {
-	response, err := s.publisherClient.Load(context.Background(), &pluginrpc.LoadPublisherRequest{
+func (s *PublisherMediumSuite) sendPublisherLoad(taskID string, configJSON []byte) (*pluginrpc2.LoadPublisherResponse, error) {
+	response, err := s.publisherClient.Load(context.Background(), &pluginrpc2.LoadPublisherRequest{
 		TaskId:     taskID,
 		JsonConfig: configJSON,
 	})
 	return response, err
 }
 
-func (s *PublisherMediumSuite) sendCollectorUnload(taskID string) (*pluginrpc.UnloadCollectorResponse, error) {
-	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc.UnloadCollectorRequest{
+func (s *PublisherMediumSuite) sendCollectorUnload(taskID string) (*pluginrpc2.UnloadCollectorResponse, error) {
+	response, err := s.collectorClient.Unload(context.Background(), &pluginrpc2.UnloadCollectorRequest{
 		TaskId: taskID,
 	})
 	return response, err
 }
 
-func (s *PublisherMediumSuite) sendPublisherUnload(taskID string) (*pluginrpc.UnloadPublisherResponse, error) {
-	response, err := s.publisherClient.Unload(context.Background(), &pluginrpc.UnloadPublisherRequest{
+func (s *PublisherMediumSuite) sendPublisherUnload(taskID string) (*pluginrpc2.UnloadPublisherResponse, error) {
+	response, err := s.publisherClient.Unload(context.Background(), &pluginrpc2.UnloadPublisherRequest{
 		TaskId: taskID,
 	})
 	return response, err
@@ -170,15 +172,15 @@ func (s *PublisherMediumSuite) requestCollectPublishCycle(collectTaskID, publish
 	return nil
 }
 
-func (s *PublisherMediumSuite) requestCollect(collectTaskID string) ([]*pluginrpc.Metric, error) {
-	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc.CollectRequest{
+func (s *PublisherMediumSuite) requestCollect(collectTaskID string) ([]*pluginrpc2.Metric, error) {
+	stream, err := s.collectorClient.Collect(context.Background(), &pluginrpc2.CollectRequest{
 		TaskId: collectTaskID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	var mts []*pluginrpc.Metric
+	var mts []*pluginrpc2.Metric
 
 	for {
 		partialResponse, err := stream.Recv()
@@ -195,14 +197,14 @@ func (s *PublisherMediumSuite) requestCollect(collectTaskID string) ([]*pluginrp
 	return mts, nil
 }
 
-func (s *PublisherMediumSuite) requestPublish(publishTaskID string, mts []*pluginrpc.Metric) error {
+func (s *PublisherMediumSuite) requestPublish(publishTaskID string, mts []*pluginrpc2.Metric) error {
 	stream, err := s.publisherClient.Publish(context.Background())
 	if err != nil {
 		return nil
 	}
 
 	// simplified streaming - only one chunk is sent
-	err = stream.Send(&pluginrpc.PublishRequest{
+	err = stream.Send(&pluginrpc2.PublishRequest{
 		TaskId:    publishTaskID,
 		MetricSet: mts,
 	})

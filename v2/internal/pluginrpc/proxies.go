@@ -1,6 +1,6 @@
 package pluginrpc
 
-import "github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
+import "github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 
 type CollectorProxy interface {
 	RequestCollect(id string) ([]*types.Metric, error)

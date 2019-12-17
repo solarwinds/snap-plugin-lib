@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
-func serveInfo(ctx context.Context, statsCh chan *stats.Statistics, pprofAddr string) (*InfoResponse, error) {
+func serveInfo(ctx context.Context, statsCh chan *stats.Statistics, pprofAddr string) (*pluginrpc.InfoResponse, error) {
 	var err error
-	response := &InfoResponse{}
+	response := &pluginrpc.InfoResponse{}
 
 	select {
 	case statistics := <-statsCh:

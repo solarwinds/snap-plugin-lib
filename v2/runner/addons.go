@@ -8,7 +8,7 @@ import (
 	"net/http/pprof"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 )
 
 const (

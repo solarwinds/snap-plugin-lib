@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internals/pluginrpc"
-	"github.com/librato/snap-plugin-lib-go/v2/internals/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 // Structure contains information about running services (used by snap)
