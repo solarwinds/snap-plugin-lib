@@ -40,15 +40,15 @@ func newFlagParser(name string, pType types.PluginType, opt *types.Options) *fla
 		"plugin-ip", defaultPluginIP,
 		"IP Address on which GRPC server will be served")
 
-	flagParser.IntVar(&opt.GrpcPort,
+	flagParser.IntVar(&opt.GRPCPort,
 		"grpc-port", defaultGRPCPort,
 		"Port on which GRPC server will be served")
 
-	flagParser.DurationVar(&opt.GrpcPingTimeout,
+	flagParser.DurationVar(&opt.GRPCPingTimeout,
 		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
 		"Deadline for receiving single ping messages")
 
-	flagParser.UintVar(&opt.GrpcPingMaxMissed,
+	flagParser.UintVar(&opt.GRPCPingMaxMissed,
 		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
 		"Number of missed ping messages after which plugin should exit")
 
@@ -61,7 +61,7 @@ func newFlagParser(name string, pType types.PluginType, opt *types.Options) *fla
 		"enable-profiling", false,
 		"Enable profiling (pprof server)")
 
-	flagParser.IntVar(&opt.PprofPort,
+	flagParser.IntVar(&opt.PProfPort,
 		"pprof-port", defaultPProfPort,
 		"Port on which profiling server will be available")
 
@@ -170,7 +170,7 @@ func ValidateOptions(opt *types.Options) error {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}
 
-	if opt.PprofPort > 0 && !opt.EnableProfiling {
+	if opt.PProfPort > 0 && !opt.EnableProfiling {
 		return fmt.Errorf("-enable-pprof flag should be set when configuring pprof port")
 	}
 

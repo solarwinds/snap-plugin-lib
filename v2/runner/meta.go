@@ -3,7 +3,6 @@ package runner
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -43,7 +42,7 @@ type meta struct {
 }
 
 func printMetaInformation(name string, version string, typ types.PluginType, opt *types.Options, r *resources, tasksLimit, instancesLimit int) {
-	ip := r.grpcListener.Addr().(*net.TCPAddr).IP.String()
+	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{
 		GRPCVersion: pluginrpc.GRPCDefinitionVersion,
@@ -54,20 +53,20 @@ func printMetaInformation(name string, version string, typ types.PluginType, opt
 	m.Plugin.Type = typ
 
 	m.GRPC.IP = ip
-	m.GRPC.Port = r.grpcListener.Addr().(*net.TCPAddr).Port
+	m.GRPC.Port = r.grpcListenerAddr().Port
 
 	m.Constraints.TasksLimit = tasksLimit
 	m.Constraints.InstancesLimit = instancesLimit
 
 	m.Profiling.Enabled = opt.EnableProfiling
 	if opt.EnableProfiling {
-		m.Profiling.Location = fmt.Sprintf("%s:%d", ip, r.pprofListener.Addr().(*net.TCPAddr).Port)
+		m.Profiling.Location = fmt.Sprintf("%s:%d", ip, r.pprofListenerAddr().Port)
 	}
 
 	m.Stats.Enabled = opt.EnableStatsServer
 	if opt.EnableStatsServer {
 		m.Stats.IP = ip
-		m.Stats.Port = r.statsListener.Addr().(*net.TCPAddr).Port
+		m.Stats.Port = r.statsListenerAddr().Port
 	}
 
 	// Print

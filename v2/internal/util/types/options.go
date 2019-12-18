@@ -10,15 +10,16 @@ import (
 // Visit newFlagParser() to find descriptions associated with each option.
 type Options struct {
 	PluginIp          string
-	GrpcPort          int
-	GrpcPingTimeout   time.Duration
-	GrpcPingMaxMissed uint
+	GRPCPort          int
+	GRPCPingTimeout   time.Duration
+	GRPCPingMaxMissed uint
+	AsThread          bool
 
 	LogLevel          logrus.Level
 	EnableProfiling   bool
 	EnableStats       bool // enable calculation statistics
 	EnableStatsServer bool // if true, start statistics HTTP server
-	PprofPort         int  `json:",omitempty"`
+	PProfPort         int  `json:",omitempty"`
 	StatsPort         int  `json:",omitempty"`
 	UseAPIv2          bool
 

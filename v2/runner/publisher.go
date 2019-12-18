@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// As a regular process
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
 	if err != nil {
@@ -19,9 +20,35 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
+	startPublisher(publisher, name, version, opt)
+}
+
+// As goroutine
+func StartPublisherInProcess(publisher plugin.Publisher, name string, version string) {
+	opt := types.Options{
+		AsThread: true,
+
+		LogLevel:          logrus.TraceLevel,
+		EnableStats:       true,
+		EnableStatsServer: true,
+		UseAPIv2:          true,
+	}
+
+	startPublisher(publisher, name, version, &opt)
+}
+
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *types.Options) {
+	var err error
+
+	err = ValidateOptions(opt)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Invalid plugin options (%v)\n", err)
+		os.Exit(errorExitStatus)
+	}
+
 	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, opt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
@@ -29,17 +56,17 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 
 	logrus.SetLevel(opt.LogLevel)
 
-	r, err := acquireResources(opt)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
-		os.Exit(errorExitStatus)
+	r := &resources{}
+	if !opt.AsThread {
+		r, err = acquireResources(opt)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
 	}
 
 	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
-	startPublisherInServerMode(ctxMan, statsController, r, opt)
-}
 
-func startPublisherInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *types.Options) {
 	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
@@ -51,5 +78,5 @@ func startPublisherInServerMode(ctxManager *proxy.ContextManager, statsControlle
 	}
 
 	// main blocking operation
-	pluginrpc.StartPublisherGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	pluginrpc.StartPublisherGRPC(ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }

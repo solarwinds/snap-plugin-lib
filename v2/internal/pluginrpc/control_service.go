@@ -24,10 +24,10 @@ var (
 
 type controlService struct {
 	pingCh  chan struct{} // notification about received ping
-	closeCh chan error    // request exit to main routine
+	closeCh chan<- error  // request exit to main routine
 }
 
-func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
+func newControlService(closeCh chan<- error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
 	cs := &controlService{
 		pingCh:  make(chan struct{}),
 		closeCh: closeCh,

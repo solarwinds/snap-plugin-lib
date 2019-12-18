@@ -191,10 +191,10 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.
 
 	info.PluginInfo.Options = &pluginrpc.Options{
 		PluginIP:          options.PluginIp,
-		GrpcPort:          uint32(options.GrpcPort),
+		GrpcPort:          uint32(options.GRPCPort),
 		StatsPort:         uint32(options.StatsPort),
-		GrpcPingTimeout:   int64(options.GrpcPingTimeout),
-		GrpcPingMaxMissed: uint64(options.GrpcPingMaxMissed),
+		GrpcPingTimeout:   int64(options.GRPCPingTimeout),
+		GrpcPingMaxMissed: uint64(options.GRPCPingMaxMissed),
 		LogLevel:          uint32(options.LogLevel),
 		EnableProfiling:   options.EnableProfiling,
 		ProfilingLocation: "",

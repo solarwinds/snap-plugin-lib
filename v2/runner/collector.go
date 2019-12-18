@@ -5,26 +5,20 @@ package runner
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runner"})
-
-type resources struct {
-	grpcListener  net.Listener
-	pprofListener net.Listener
-	statsListener net.Listener
-}
 
 const (
 	normalExitStatus = 0
@@ -80,7 +74,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsControlle
 	}
 
 	// main blocking operation
-	pluginrpc.StartCollectorGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GrpcPingTimeout, opt.GrpcPingMaxMissed)
+	pluginrpc.StartCollectorGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }
 
 func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Options) {
@@ -127,30 +121,4 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Opt
 		fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
 	}
-}
-
-func acquireResources(opt *types.Options) (*resources, error) {
-	r := &resources{}
-	var err error
-
-	r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.GrpcPort))
-	if err != nil {
-		return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
-	}
-
-	if opt.EnableProfiling {
-		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.PprofPort))
-		if err != nil {
-			return nil, fmt.Errorf("can't create tcp connection for PProf server (%s)", err)
-		}
-	}
-
-	if opt.EnableStatsServer {
-		r.statsListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.StatsPort))
-		if err != nil {
-			return nil, fmt.Errorf("can't create tcp connection for Stats server (%s)", err)
-		}
-	}
-
-	return r, nil
 }
