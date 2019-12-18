@@ -155,7 +155,9 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 
 	flagParser := newFlagParser(pluginName, pluginType, opt)
 
-	err := flagParser.Parse(args)
+	fmt.Printf("args = %s", args)
+
+	err := flagParser.Parse(args[1:]) // todo: for python
 	if err != nil {
 		return opt, fmt.Errorf("can't parse command line options: %v", err)
 	}
