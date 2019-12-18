@@ -12,6 +12,7 @@ import (
 
 	"github.com/fullstorydev/grpchan"
 	"github.com/fullstorydev/grpchan/inprocgrpc"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 
@@ -23,6 +24,14 @@ const GRPCGracefulStopTimeout = 10 * time.Second
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-rpc"})
 
+func NewGRPCServer(inProc bool) grpchan.ServiceRegistry {
+	if inProc {
+		return &inprocgrpc.Channel{}
+	}
+
+	return grpc.NewServer()
+}
+
 func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	grpcServer := grpc.NewServer()
 	pluginrpc.RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
@@ -30,52 +39,39 @@ func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, 
 	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
-func StartPublisherGRPC(proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	if grpcLn != nil {
-		grpcServer := grpc.NewServer()
-		pluginrpc.RegisterPublisherServer(grpcServer, newPublishingService(proxy, statsController, pprofLn))
-
-		startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
-	} else {
-		var cc inprocgrpc.Channel
-		pluginrpc.RegisterHandlerPublisher(&cc, newPublishingService(proxy, statsController, pprofLn))
-
-		startChannelsGRPC(&cc, pingTimeout, pingMaxMissedCount)
-	}
+func StartPublisherGRPC(srv grpchan.ServiceRegistry, proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	pluginrpc.RegisterHandlerPublisher(srv, newPublishingService(proxy, statsController, pprofLn))
+	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
-func startGRPC(grpcServer *grpc.Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+func startGRPC(srv grpchan.ServiceRegistry, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	closeChan := make(chan error, 1)
-	pluginrpc.RegisterControllerServer(grpcServer, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
+	pluginrpc.RegisterHandlerController(srv, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 
-	go func() {
-		err := grpcServer.Serve(grpcLn) // blocking
-		if err != nil {
-			closeChan <- err
-		}
-	}()
+	if grpcServer, ok := srv.(*grpc.Server); ok {
+		go func() {
+			err := grpcServer.Serve(grpcLn) // blocking
+			if err != nil {
+				closeChan <- err
+			}
+		}()
+	}
 
 	exitErr := <-closeChan
 	if exitErr != nil && exitErr != RequestedKillError {
 		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
 	}
 
-	shutdownPlugin(grpcServer)
+	shutdownPlugin(srv)
 }
 
-func startChannelsGRPC(cc grpchan.ServiceRegistry, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	closeChan := make(chan error, 1)
-	pluginrpc.RegisterHandlerController(cc, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
-
-	exitErr := <-closeChan
-	if exitErr != nil && exitErr != RequestedKillError {
-		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+func shutdownPlugin(srv grpchan.ServiceRegistry) {
+	grpcServer, ok := srv.(*grpc.Server)
+	if !ok {
+		// TODO: Handle channels version
+		return
 	}
 
-	// TODO: GracefulStop
-}
-
-func shutdownPlugin(grpcServer *grpc.Server) {
 	stopped := make(chan bool, 1)
 
 	// try to complete all remaining rpc calls

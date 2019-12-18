@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fullstorydev/grpchan"
+	"github.com/fullstorydev/grpchan/inprocgrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
@@ -20,11 +22,11 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	startPublisher(publisher, name, version, opt)
+	startPublisher(publisher, name, version, opt, nil)
 }
 
 // As goroutine
-func StartPublisherInProcess(publisher plugin.Publisher, name string, version string) {
+func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, grpcChan chan<- grpchan.Channel) {
 	opt := types.Options{
 		AsThread: true,
 
@@ -34,10 +36,10 @@ func StartPublisherInProcess(publisher plugin.Publisher, name string, version st
 		UseAPIv2:          true,
 	}
 
-	startPublisher(publisher, name, version, &opt)
+	startPublisher(publisher, name, version, &opt, grpcChan)
 }
 
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *types.Options) {
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *types.Options, grpcChan chan<- grpchan.Channel) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -77,6 +79,11 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
 
+	srv := pluginrpc.NewGRPCServer(opt.AsThread)
+	if grpcChan != nil {
+		grpcChan <- srv.(*inprocgrpc.Channel)
+	}
+
 	// main blocking operation
-	pluginrpc.StartPublisherGRPC(ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+	pluginrpc.StartPublisherGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }
