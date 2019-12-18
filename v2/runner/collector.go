@@ -4,6 +4,7 @@ The package "runner" provides simple API to start plugins in different modes.
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -32,7 +33,16 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, opt)
+	var optJson []byte
+	if opt.EnableStats {
+		optJson, err = json.Marshal(opt)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error occured when preprocessing data for statistics controller (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
+	}
+
+	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, optJson)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)

@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -40,7 +41,16 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, opt)
+	var optJson []byte
+	if opt.EnableStats {
+		optJson, err = json.Marshal(opt)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error occured when preprocessing data for statistics controller (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
+	}
+
+	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, optJson)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
