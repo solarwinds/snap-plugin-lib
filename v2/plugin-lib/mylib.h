@@ -17,20 +17,18 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 12 "main.go"
+#line 10 "main.go"
 
 #include <stdlib.h>
 
-typedef char * (collectCallbackT)(void *);
+typedef void (collectCallbackT)(void *);
 
 typedef struct {
 	collectCallbackT *collectCallback;
 } cCollectorT;
 
-
 // called from Go code
 static inline void Collect(collectCallbackT collectCallback, void * ctx) { collectCallback(ctx); }
-
 
 
 #line 1 "cgo-generated-wrapper"
@@ -84,7 +82,7 @@ extern "C" {
 
 extern void ctx_add_metric(void* p0, char* p1);
 
-extern void StartCollector(cCollectorT* p0, char* p1, char* p2);
+extern void StartCollector(collectCallbackT* p0, char* p1, char* p2);
 
 #ifdef __cplusplus
 }

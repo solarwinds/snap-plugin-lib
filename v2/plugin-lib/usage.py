@@ -35,4 +35,21 @@ def fun_callback(ns):
 
 # my_fun.ListMetrics(GoString(b"task-123", 9), fun_callback)
 
-my_fun.ListMetrics(fun_callback)
+##extern void StartCollector(cCollectorT* p0, char* p1, char* p2);
+
+@CFUNCTYPE(None, c_void_p)
+def collect(rawCtx):
+    print("**PY&Here\n")
+    my_fun.ctx_add_metric(rawCtx, "/python/example/metric")
+
+class cCollector(Structure):
+    _fields_ = [
+        ("collect_callback", CFUNCTYPE(None, c_void_p))
+    ]
+
+# cc = cCollector()
+# cc.collect_callback = collect
+# 
+# my_fun.StartCollector(cc, "python-collector", "0.0.1")
+
+my_fun.StartCollector(collect, "python-collector", "0.0.1")
