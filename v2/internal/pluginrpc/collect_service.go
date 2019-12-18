@@ -57,6 +57,7 @@ func (cs *collectService) Collect(request *CollectRequest, stream Collector_Coll
 			}
 
 			logCollectService.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
+			protoMts = make([]*Metric, 0, len(pluginMts))
 		}
 	}
 
