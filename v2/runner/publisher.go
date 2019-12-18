@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -28,11 +27,11 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 }
 
 // As goroutine
-func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *Options, grpcChan chan<- grpchan.Channel) {
+func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
 	startPublisher(publisher, name, version, opt, grpcChan)
 }
 
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *Options, grpcChan chan<- grpchan.Channel) {
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -41,16 +40,7 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		os.Exit(errorExitStatus)
 	}
 
-	var optJson []byte
-	if opt.EnableStats {
-		optJson, err = json.Marshal(opt)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error occured when preprocessing data for statistics controller (%v)\n", err)
-			os.Exit(errorExitStatus)
-		}
-	}
-
-	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, optJson)
+	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)

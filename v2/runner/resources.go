@@ -3,6 +3,8 @@ package runner
 import (
 	"fmt"
 	"net"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 type resources struct {
@@ -35,7 +37,7 @@ func (r *resources) statsListenerAddr() net.TCPAddr {
 	return net.TCPAddr{}
 }
 
-func acquireResources(opt *Options) (*resources, error) {
+func acquireResources(opt *plugin.Options) (*resources, error) {
 	r := &resources{}
 	var err error
 

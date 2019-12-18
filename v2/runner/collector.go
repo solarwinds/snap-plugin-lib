@@ -4,7 +4,6 @@ The package "runner" provides simple API to start plugins in different modes.
 package runner
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -33,16 +32,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	var optJson []byte
-	if opt.EnableStats {
-		optJson, err = json.Marshal(opt)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error occured when preprocessing data for statistics controller (%v)\n", err)
-			os.Exit(errorExitStatus)
-		}
-	}
-
-	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, optJson)
+	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, opt)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -72,7 +62,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *Options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *plugin.Options) {
 	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
@@ -87,7 +77,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsControlle
 	pluginrpc.StartCollectorGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }
 
-func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *Options) {
+func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
 	const singleModeTaskID = "task-1"
 
 	// Load task based on command line options

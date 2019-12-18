@@ -7,6 +7,7 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 // Structure contains information about running services (used by snap)
@@ -41,7 +42,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, typ types.PluginType, opt *Options, r *resources, tasksLimit, instancesLimit int) {
+func printMetaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) {
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{

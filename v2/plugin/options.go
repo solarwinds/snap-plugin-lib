@@ -1,4 +1,4 @@
-package runner
+package plugin
 
 import (
 	"time"

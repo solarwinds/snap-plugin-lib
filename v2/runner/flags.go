@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -32,7 +33,7 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func newFlagParser(name string, pType types.PluginType, opt *Options) *flag.FlagSet {
+func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	// common flags
@@ -114,7 +115,7 @@ func newFlagParser(name string, pType types.PluginType, opt *Options) *flag.Flag
 }
 
 type logLevelHandler struct {
-	opt *Options
+	opt *plugin.Options
 }
 
 func (l *logLevelHandler) String() string {
@@ -145,8 +146,8 @@ func (l *logLevelHandler) Set(s string) error {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []string) (*Options, error) {
-	opt := &Options{
+func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []string) (*plugin.Options, error) {
+	opt := &plugin.Options{
 		LogLevel: defaultLogLevel,
 	}
 
@@ -165,7 +166,7 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	return opt, nil
 }
 
-func ValidateOptions(opt *Options) error {
+func ValidateOptions(opt *plugin.Options) error {
 	grpcIp := net.ParseIP(opt.PluginIP)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
@@ -190,7 +191,7 @@ func ValidateOptions(opt *Options) error {
 	return nil
 }
 
-func anyDebugFlagSet(opt *Options) bool {
+func anyDebugFlagSet(opt *plugin.Options) bool {
 	return opt.DebugCollectCounts != defaultCollectCount ||
 		opt.DebugCollectInterval != defaultCollectInterval ||
 		opt.PluginConfig != defaultConfig ||
