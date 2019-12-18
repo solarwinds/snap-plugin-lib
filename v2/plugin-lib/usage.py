@@ -24,14 +24,18 @@ class GoString(Structure):
 
 @CFUNCTYPE(None, c_char_p)
 def collect(ctxId):
+    print("** python *** Collect called\n")
+
     my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric1", 10)
     my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric2", 20)
     my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric3", 40)
 
+@CFUNCTYPE(None, c_char_p)
+def load(ctxId):
+    print("** python *** Load called\n")
 
-class cCollector(Structure):
-    _fields_ = [
-        ("collect_callback", CFUNCTYPE(None, c_char_p))
-    ]
+@CFUNCTYPE(None, c_char_p)
+def unload(ctxId):
+    print("** python *** Unload called\n")
 
-my_fun.StartCollector(collect, b"python-collector", b"0.0.1")
+my_fun.StartCollector(collect, load, unload, b"python-collector", b"0.0.1")
