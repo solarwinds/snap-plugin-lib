@@ -22,36 +22,16 @@ class GoString(Structure):
         ("n", c_longlong)
     ]
 
-@CFUNCTYPE(None, POINTER(GoNamespace))
-def fun_callback(ns):
-    for i in range(4):
-        print(ns[0].length)
-        print(ns[0].elements[i].name)
-        print(ns[0].elements[i].value)
-        print(ns[0].elements[i].description)
-
-# my_fun.Clear.argtypes = [Structure]
-# my_fun.Clear(GoString(b"task-345", 8))
-
-# my_fun.ListMetrics(GoString(b"task-123", 9), fun_callback)
-
-##extern void StartCollector(cCollectorT* p0, char* p1, char* p2);
-
 @CFUNCTYPE(None, c_char_p)
 def collect(ctxId):
-    my_fun.ctx_add_metric(ctxId, b"/python/example/metric1")
-    my_fun.ctx_add_metric(ctxId, b"/python/example/metric2")
-    my_fun.ctx_add_metric(ctxId, b"/python/example/metric3")
+    my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric1", 10)
+    my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric2", 20)
+    my_fun.ctx_add_metric_int(ctxId, b"/python/example/metric3", 40)
 
 
 class cCollector(Structure):
     _fields_ = [
         ("collect_callback", CFUNCTYPE(None, c_char_p))
     ]
-
-# cc = cCollector()
-# cc.collect_callback = collect
-# 
-# my_fun.StartCollector(cc, "python-collector", "0.0.1")
 
 my_fun.StartCollector(collect, b"python-collector", b"0.0.1")

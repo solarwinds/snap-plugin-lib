@@ -24,11 +24,11 @@ import "C"
 
 var contextMap sync.Map = sync.Map{}
 
-//export ctx_add_metric
-func ctx_add_metric(ctxId *C.char, ns *C.char) {
+//export ctx_add_metric_int
+func ctx_add_metric_int(ctxId *C.char, ns *C.char, v int) {
 	id := C.GoString(ctxId)
 	ctx, _ := contextMap.Load(id)
-	ctx.(* proxy.PluginContext).AddMetric(C.GoString(ns), 10)
+	ctx.(* proxy.PluginContext).AddMetric(C.GoString(ns), v)
 }
 
 type bridgeCollector struct {

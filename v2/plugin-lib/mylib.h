@@ -80,7 +80,7 @@ extern "C" {
 #endif
 
 
-extern void ctx_add_metric(char* p0, char* p1);
+extern void ctx_add_metric_int(char* p0, char* p1, GoInt p2);
 
 extern void StartCollector(collectCallbackT* p0, char* p1, char* p2);
 
