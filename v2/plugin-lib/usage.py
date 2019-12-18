@@ -22,6 +22,11 @@ class GoString(Structure):
         ("n", c_longlong)
     ]
 
+@CFUNCTYPE(None)
+def define():
+    print("** python *** Define plugin\n")
+
+
 @CFUNCTYPE(None, c_char_p)
 def collect(ctxId):
     print("** python *** Collect called\n")
@@ -38,4 +43,4 @@ def load(ctxId):
 def unload(ctxId):
     print("** python *** Unload called\n")
 
-my_fun.StartCollector(collect, load, unload, b"python-collector", b"0.0.1")
+my_fun.StartCollector(collect, load, unload, define, b"python-collector", b"0.0.1")

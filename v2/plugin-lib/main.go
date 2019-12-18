@@ -11,9 +11,11 @@ import (
 #include <stdlib.h>
 
 typedef void (callbackT)(char *); // used for Collect, Load and Unload
+typedef void (defineCallbackT)(); // used for DefineCallback
 
 // called from Go code
 static inline void CCallback(callbackT callback, char * ctxId) { callback(ctxId); }
+static inline void CDefineCallback(defineCallbackT callback) { callback(); }
 
 */
 import "C"
@@ -28,11 +30,12 @@ func ctx_add_metric_int(ctxId *C.char, ns *C.char, v int) {
 }
 
 //export StartCollector
-func StartCollector(collectCallback *C.callbackT, loadCallback *C.callbackT, unloadCallback *C.callbackT, name *C.char, version *C.char) {
+func StartCollector(collectCallback *C.callbackT, loadCallback *C.callbackT, unloadCallback *C.callbackT, defineCallback *C.defineCallbackT, name *C.char, version *C.char) {
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
 		loadCallback:    loadCallback,
 		unloadCallback:  unloadCallback,
+		defineCallback:  defineCallback,
 	}
 	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version)) // todo: should release?
 }
@@ -41,10 +44,12 @@ type bridgeCollector struct {
 	collectCallback *C.callbackT
 	loadCallback    *C.callbackT
 	unloadCallback  *C.callbackT
+	defineCallback  *C.defineCallbackT
 }
 
 func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	pluginDef = def
+	C.CDefineCallback(bc.defineCallback)
 
 	return nil
 }
