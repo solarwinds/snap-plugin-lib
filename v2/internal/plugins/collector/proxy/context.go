@@ -19,9 +19,10 @@ type PluginContext struct {
 	metricsFilters *metrictree.TreeValidator // metric filters defined by task (yaml)
 	sessionMts     []*types.Metric
 	ctxManager     *ContextManager // back-reference to context manager
+	taskID         string          // associated taskID
 }
 
-func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*PluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, rawConfig []byte, taskID string) (*PluginContext, error) {
 	if ctxManager == nil {
 		return nil, errors.New("can't create context without valid context manager")
 	}
@@ -36,6 +37,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*PluginCont
 		metricsFilters: metrictree.NewMetricFilter(ctxManager.metricsDefinition),
 		ctxManager:     ctxManager,
 		sessionMts:     nil,
+		taskID:         taskID,
 	}
 
 	return pc, nil
@@ -139,4 +141,8 @@ func (pc *PluginContext) extractStaticValue(s string) string {
 	}
 
 	return s
+}
+
+func (pc *PluginContext) TaskID() string {
+	return pc.taskID
 }

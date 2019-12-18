@@ -37,13 +37,16 @@ def fun_callback(ns):
 
 ##extern void StartCollector(cCollectorT* p0, char* p1, char* p2);
 
-@CFUNCTYPE(None, c_void_p)
-def collect(rawCtx):
-    my_fun.ctx_add_metric(rawCtx, b"/python/example/metric")
+@CFUNCTYPE(None, c_char_p)
+def collect(ctxId):
+    my_fun.ctx_add_metric(ctxId, b"/python/example/metric1")
+    my_fun.ctx_add_metric(ctxId, b"/python/example/metric2")
+    my_fun.ctx_add_metric(ctxId, b"/python/example/metric3")
+
 
 class cCollector(Structure):
     _fields_ = [
-        ("collect_callback", CFUNCTYPE(None, c_void_p))
+        ("collect_callback", CFUNCTYPE(None, c_char_p))
     ]
 
 # cc = cCollector()

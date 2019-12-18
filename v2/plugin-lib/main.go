@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
-	"unsafe"
+	"sync"
 )
 
 /*
@@ -17,22 +17,18 @@ typedef struct {
 } cCollectorT;
 
 // called from Go code
-static inline void Collect(collectCallbackT collectCallback, void * ctx) { collectCallback(ctx); }
+static inline void Collect(collectCallbackT collectCallback, char * ctxId) { collectCallback(ctxId); }
 
 */
 import "C"
 
-var gc plugin.CollectContext
+var contextMap sync.Map = sync.Map{}
 
 //export ctx_add_metric
-func ctx_add_metric(ctx unsafe.Pointer, ns *C.char) {
-	//ctxC := (* cproxy.PluginContext)(ctx)
-	//fmt.Printf("ctxC=%#v\n", ctxC)
-	//fmt.Printf("ns=%#v\n", C.GoString(ns))
-	//err := ctxC.AddMetric(C.GoString(ns), 10)
-	err := gc.AddMetric(C.GoString(ns), 10)
-	fmt.Printf("err=%#v\n", err)
-	fmt.Printf("*************I'm hehe***************")
+func ctx_add_metric(ctxId *C.char, ns *C.char) {
+	id := C.GoString(ctxId)
+	ctx, _ := contextMap.Load(id)
+	ctx.(* proxy.PluginContext).AddMetric(C.GoString(ns), 10)
 }
 
 type bridgeCollector struct {
@@ -44,13 +40,11 @@ func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) erro
 }
 
 func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
-	//ptr := unsafe.Pointer(reflect.ValueOf(ctx).Pointer())
-	gc = ctx
-	fmt.Printf("***GOADAMIK1\n")
-	cptr := bc.collectCallback
-	fmt.Printf("cptr=%#v\n", cptr)
-	C.Collect(cptr, nil)
-	fmt.Printf("***GOADAMIK2\n")
+	ctxAsType := ctx.(*proxy.PluginContext)
+	taskID := ctxAsType.TaskID()
+	contextMap.Store(taskID, ctxAsType)
+	C.Collect(bc.collectCallback, C.CString(taskID))
+	contextMap.Delete(taskID)
 
 	return nil
 }

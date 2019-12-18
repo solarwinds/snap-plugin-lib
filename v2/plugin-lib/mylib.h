@@ -28,7 +28,7 @@ typedef struct {
 } cCollectorT;
 
 // called from Go code
-static inline void Collect(collectCallbackT collectCallback, void * ctx) { collectCallback(ctx); }
+static inline void Collect(collectCallbackT collectCallback, char * ctxId) { collectCallback(ctxId); }
 
 
 #line 1 "cgo-generated-wrapper"
@@ -80,7 +80,7 @@ extern "C" {
 #endif
 
 
-extern void ctx_add_metric(void* p0, char* p1);
+extern void ctx_add_metric(char* p0, char* p1);
 
 extern void StartCollector(collectCallbackT* p0, char* p1, char* p2);
 
