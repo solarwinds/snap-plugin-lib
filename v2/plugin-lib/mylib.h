@@ -17,7 +17,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 10 "main.go"
+#line 11 "main.go"
 
 #include <stdlib.h>
 
@@ -79,6 +79,16 @@ extern "C" {
 
 
 extern void ctx_add_metric_int(char* p0, char* p1, GoInt p2);
+
+extern void def_define_metric(char* p0, char* p1, GoInt p2, char* p3);
+
+extern void def_define_group(char* p0, char* p1);
+
+extern void def_example_config(char* p0);
+
+extern void def_define_tasks_per_instance_limit(GoInt p0);
+
+extern void def_define_instances_limit(GoInt p0);
 
 extern void StartCollector(callbackT* p0, callbackT* p1, callbackT* p2, defineCallbackT* p3, char* p4, char* p5);
 
