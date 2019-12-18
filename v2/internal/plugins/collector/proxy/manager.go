@@ -43,7 +43,7 @@ type ContextManager struct {
 	*commonProxy.ContextManager
 
 	collector  plugin.Collector // reference to custom plugin code
-	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
+	contextMap sync.Map         // (synced map[int]*PluginContext) map of contexts associated with taskIDs
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -88,7 +88,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 	if !ok {
 		return nil, fmt.Errorf("can't find a context for a given id: %s", id)
 	}
-	context := contextIf.(*pluginContext)
+	context := contextIf.(*PluginContext)
 
 	context.sessionMts = []*types.Metric{}
 
@@ -158,7 +158,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	context := contextI.(*pluginContext)
+	context := contextI.(*PluginContext)
 	if unloadable, ok := cm.collector.(plugin.UnloadableCollector); ok {
 		err := unloadable.Unload(context)
 		if err != nil {

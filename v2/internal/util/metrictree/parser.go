@@ -29,7 +29,7 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
 	splitNs := strings.Split(s, NsSeparator)
 	if len(splitNs)-1 < minNamespaceElements {
-		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
+		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d), %s", minNamespaceElements, s)
 	}
 	if splitNs[0] != "" {
 		return nil, fmt.Errorf("namespace should start with '%s'", NsSeparator)

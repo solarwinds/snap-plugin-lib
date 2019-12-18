@@ -39,8 +39,7 @@ def fun_callback(ns):
 
 @CFUNCTYPE(None, c_void_p)
 def collect(rawCtx):
-    print("**PY&Here\n")
-    my_fun.ctx_add_metric(rawCtx, "/python/example/metric")
+    my_fun.ctx_add_metric(rawCtx, b"/python/example/metric")
 
 class cCollector(Structure):
     _fields_ = [
@@ -52,4 +51,4 @@ class cCollector(Structure):
 # 
 # my_fun.StartCollector(cc, "python-collector", "0.0.1")
 
-my_fun.StartCollector(collect, "python-collector", "0.0.1")
+my_fun.StartCollector(collect, b"python-collector", b"0.0.1")

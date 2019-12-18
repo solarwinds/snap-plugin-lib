@@ -13,7 +13,7 @@ import (
 
 const nsSeparator = metrictree.NsSeparator
 
-type pluginContext struct {
+type PluginContext struct {
 	*commonProxy.Context
 
 	metricsFilters *metrictree.TreeValidator // metric filters defined by task (yaml)
@@ -21,7 +21,7 @@ type pluginContext struct {
 	ctxManager     *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*PluginContext, error) {
 	if ctxManager == nil {
 		return nil, errors.New("can't create context without valid context manager")
 	}
@@ -31,7 +31,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 		return nil, err
 	}
 
-	pc := &pluginContext{
+	pc := &PluginContext{
 		Context:        baseContext,
 		metricsFilters: metrictree.NewMetricFilter(ctxManager.metricsDefinition),
 		ctxManager:     ctxManager,
@@ -41,11 +41,11 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 	return pc, nil
 }
 
-func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
+func (pc *PluginContext) AddMetric(ns string, v interface{}) error {
 	return pc.AddMetricWithTags(ns, v, map[string]string{})
 }
 
-func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+func (pc *PluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
@@ -96,7 +96,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	return nil
 }
 
-func (pc *pluginContext) ShouldProcess(ns string) bool {
+func (pc *PluginContext) ShouldProcess(ns string) bool {
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return false
@@ -111,7 +111,7 @@ func (pc *pluginContext) ShouldProcess(ns string) bool {
 	return shouldProcess
 }
 
-func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
+func (pc *PluginContext) metricMeta(nsKey string) metricMetadata {
 	if mtMeta, ok := pc.ctxManager.metricsMetadata[nsKey]; ok {
 		return mtMeta
 	}
@@ -120,19 +120,19 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
+func (pc *PluginContext) ApplyTagsByPath(string, map[string]string) error {
 	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
 
-func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
+func (pc *PluginContext) ApplyTagsByRegExp(string, map[string]string) error {
 	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
 
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
 // function assumes valid format
-func (pc *pluginContext) extractStaticValue(s string) string {
+func (pc *PluginContext) extractStaticValue(s string) string {
 	eqIndex := strings.Index(s, "=")
 	if eqIndex != -1 {
 		return s[eqIndex+1 : len(s)-1]

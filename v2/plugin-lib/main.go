@@ -22,15 +22,21 @@ static inline void Collect(collectCallbackT collectCallback, void * ctx) { colle
 */
 import "C"
 
+var gc plugin.CollectContext
+
 //export ctx_add_metric
 func ctx_add_metric(ctx unsafe.Pointer, ns *C.char) {
-	//ctxC := (* mock.Context)(ctx)
-	//ctxC.AddMetric(C.GoString(ns), 10)
+	//ctxC := (* cproxy.PluginContext)(ctx)
+	//fmt.Printf("ctxC=%#v\n", ctxC)
+	//fmt.Printf("ns=%#v\n", C.GoString(ns))
+	//err := ctxC.AddMetric(C.GoString(ns), 10)
+	err := gc.AddMetric(C.GoString(ns), 10)
+	fmt.Printf("err=%#v\n", err)
 	fmt.Printf("*************I'm hehe***************")
 }
 
 type bridgeCollector struct {
-	collectCallback * C.collectCallbackT
+	collectCallback *C.collectCallbackT
 }
 
 func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
@@ -39,7 +45,7 @@ func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) erro
 
 func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
 	//ptr := unsafe.Pointer(reflect.ValueOf(ctx).Pointer())
-
+	gc = ctx
 	fmt.Printf("***GOADAMIK1\n")
 	cptr := bc.collectCallback
 	fmt.Printf("cptr=%#v\n", cptr)
@@ -58,8 +64,8 @@ func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
 }
 
 //export StartCollector
-func StartCollector(callback * C.collectCallbackT, name *C.char, version *C.char) {
-	bCollector := &bridgeCollector{collectCallback:callback}
+func StartCollector(callback *C.collectCallbackT, name *C.char, version *C.char) {
+	bCollector := &bridgeCollector{collectCallback: callback}
 	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version)) // todo: should release?
 }
 
