@@ -36,7 +36,7 @@ func newFlagParser(name string, pType types.PluginType, opt *types.Options) *fla
 
 	// common flags
 
-	flagParser.StringVar(&opt.PluginIp,
+	flagParser.StringVar(&opt.PluginIP,
 		"plugin-ip", defaultPluginIP,
 		"IP Address on which GRPC server will be served")
 
@@ -165,7 +165,7 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 }
 
 func ValidateOptions(opt *types.Options) error {
-	grpcIp := net.ParseIP(opt.PluginIp)
+	grpcIp := net.ParseIP(opt.PluginIP)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}

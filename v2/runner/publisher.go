@@ -26,17 +26,8 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 }
 
 // As goroutine
-func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, grpcChan chan<- grpchan.Channel) {
-	opt := types.Options{
-		AsThread: true,
-
-		LogLevel:          logrus.TraceLevel,
-		EnableStats:       true,
-		EnableStatsServer: true,
-		UseAPIv2:          true,
-	}
-
-	startPublisher(publisher, name, version, &opt, grpcChan)
+func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *types.Options, grpcChan chan<- grpchan.Channel) {
+	startPublisher(publisher, name, version, opt, grpcChan)
 }
 
 func startPublisher(publisher plugin.Publisher, name string, version string, opt *types.Options, grpcChan chan<- grpchan.Channel) {

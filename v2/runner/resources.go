@@ -41,20 +41,20 @@ func acquireResources(opt *types.Options) (*resources, error) {
 	r := &resources{}
 	var err error
 
-	r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.GRPCPort))
+	r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.GRPCPort))
 	if err != nil {
 		return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
 	}
 
 	if opt.EnableProfiling {
-		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.PProfPort))
+		r.pprofListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.PProfPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for PProf server (%s)", err)
 		}
 	}
 
 	if opt.EnableStatsServer {
-		r.statsListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIp, opt.StatsPort))
+		r.statsListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.StatsPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for Stats server (%s)", err)
 		}

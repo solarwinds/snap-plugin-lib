@@ -190,7 +190,7 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.
 	}
 
 	info.PluginInfo.Options = &pluginrpc.Options{
-		PluginIP:          options.PluginIp,
+		PluginIP:          options.PluginIP,
 		GrpcPort:          uint32(options.GRPCPort),
 		StatsPort:         uint32(options.StatsPort),
 		GrpcPingTimeout:   int64(options.GRPCPingTimeout),

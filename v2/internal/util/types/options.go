@@ -9,7 +9,7 @@ import (
 // Structure representing plugin configuration (received by parsing command-line arguments)
 // Visit newFlagParser() to find descriptions associated with each option.
 type Options struct {
-	PluginIp          string
+	PluginIP          string
 	GRPCPort          int
 	GRPCPingTimeout   time.Duration
 	GRPCPingMaxMissed uint
