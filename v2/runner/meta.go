@@ -41,7 +41,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, typ types.PluginType, opt *types.Options, r *resources, tasksLimit, instancesLimit int) {
+func printMetaInformation(name string, version string, typ types.PluginType, opt *Options, r *resources, tasksLimit, instancesLimit int) {
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{

@@ -6,12 +6,13 @@ import (
 
 	"github.com/fullstorydev/grpchan"
 	"github.com/fullstorydev/grpchan/inprocgrpc"
+	"github.com/sirupsen/logrus"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 // As a regular process
@@ -26,11 +27,11 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 }
 
 // As goroutine
-func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *types.Options, grpcChan chan<- grpchan.Channel) {
+func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *Options, grpcChan chan<- grpchan.Channel) {
 	startPublisher(publisher, name, version, opt, grpcChan)
 }
 
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *types.Options, grpcChan chan<- grpchan.Channel) {
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *Options, grpcChan chan<- grpchan.Channel) {
 	var err error
 
 	err = ValidateOptions(opt)

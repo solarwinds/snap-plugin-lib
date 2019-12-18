@@ -8,6 +8,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )
 
 // convert metric to GRPC structure
@@ -183,7 +184,7 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.
 		return info, fmt.Errorf("could't marshal options field: %v", err)
 	}
 
-	options := &types.Options{}
+	options := &runner.Options{}
 	err = json.Unmarshal(b, options)
 	if err != nil {
 		return info, fmt.Errorf("could't unmarshal options field: %v", err)

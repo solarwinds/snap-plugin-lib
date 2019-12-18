@@ -62,7 +62,7 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	}
 }
 
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *types.Options) {
+func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *Options) {
 	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
@@ -77,7 +77,7 @@ func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsControlle
 	pluginrpc.StartCollectorGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }
 
-func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *types.Options) {
+func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *Options) {
 	const singleModeTaskID = "task-1"
 
 	// Load task based on command line options
