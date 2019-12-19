@@ -45,8 +45,6 @@ def define():
     lib_obj.define_metric(b"/python/group2/[dyn]/metric5", b"C", 0, "2nd dynamic metric")
 
 
-
-
 @CFUNCTYPE(None, c_char_p)
 def collect(ctxId):
     print("** python *** Collect called\n")
@@ -58,13 +56,12 @@ def collect(ctxId):
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn15/metric4", 11)
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn24/metric5", 34)
 
-    tags = Tags()
-    tags.key = b"tag1"
-    tags.value = b"value1"
-
-    # print(tags[0].key)
-
-    lib_obj.ctx_add_metric_with_tags(ctxId, b"/python/group1/metric1", 10, tags, 2)
+    tags = (Tags * 2)()
+    tags[0].key = b"tag1"
+    tags[0].value = b"value1"
+    tags[1].key = b"tag2"
+    tags[1].value = b"value2"
+    lib_obj.ctx_add_metric_with_tags(ctxId, b"/python/group1/metric1", 14, tags, 2)
 
 
 @CFUNCTYPE(None, c_char_p)

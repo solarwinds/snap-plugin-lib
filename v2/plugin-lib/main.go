@@ -25,8 +25,8 @@ typedef struct {
 	char * value;
 } tag;
 
-static inline char * tag_key(tag tags, int index) { return tags.key; }
-static inline char * tag_value(tag tags, int index) { return tags.value; }
+static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
+static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
 
 */
 import "C"
@@ -66,21 +66,7 @@ func boolToInt(v bool) int {
 
 func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
 	tagsMap := map[string]string{}
-	return tagsMap
-	//
-	//for i := 0; i < tagsCount; i++ {
-	//	k := C.GoString(C.tag_key(tags, C.int(i)))
-	//	v := C.GoString(C.tag_value(tags, C.int(i)))
-	//	fmt.Printf("**********TAGS&*&&&&&&&&&& k=%#v\n", k)
-	//	fmt.Printf("**********TAGS&*&&&&&&&&&& v=%#v\n", k)
-	//	tagsMap[k] = v
-	//}
-	//return tagsMap
-}
-
-func ctagsToMap1(tags C.tag, tagsCount int) map[string]string {
-	tagsMap := map[string]string{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < tagsCount; i++ {
 		k := C.GoString(C.tag_key(tags, C.int(i)))
 		v := C.GoString(C.tag_value(tags, C.int(i)))
 		fmt.Printf("**********TAGS&*&&&&&&&&&& k=%#v\n", k)
@@ -99,8 +85,8 @@ func ctx_add_metric(ctxId *C.char, ns *C.char, v int) {
 }
 
 //export ctx_add_metric_with_tags
-func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags C.tag, tagsCount int) {
-	contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap1(tags, tagsCount))
+func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag, tagsCount int) {
+	contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
 }
 
 //export ctx_apply_tags_by_path
