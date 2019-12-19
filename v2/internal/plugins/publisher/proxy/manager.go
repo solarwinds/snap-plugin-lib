@@ -75,7 +75,10 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 		return fmt.Errorf("user-defined Publish method ended with error: %v", err)
 	}
 
-	log.WithField("elapsed", endTime.Sub(startTime).String()).Debug("Publish completed")
+	log.WithFields(logrus.Fields{
+		"elapsed": endTime.Sub(startTime).String(),
+		"metrics": len(mts),
+	}).Debug("Publish completed")
 
 	return nil
 }
