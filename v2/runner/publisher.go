@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/fullstorydev/grpchan"
-	"github.com/fullstorydev/grpchan/inprocgrpc"
 	"github.com/sirupsen/logrus"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -73,7 +72,7 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 
 	srv := pluginrpc.NewGRPCServer(opt.AsThread)
 	if grpcChan != nil {
-		grpcChan <- srv.(*inprocgrpc.Channel)
+		grpcChan <- srv.(*pluginrpc.Channel)
 	}
 
 	// main blocking operation
