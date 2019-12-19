@@ -68,11 +68,14 @@ def collect(ctxId):
 def load(ctxId):
     print("** python *** Load called\n")
 
+    lib_obj.ctx_config.restype = c_char_p
+    res = lib_obj.ctx_config(ctxId, b"configip")
+    print(res)
+
 
 @CFUNCTYPE(None, c_char_p)
 def unload(ctxId):
     print("** python *** Unload called\n")
-
 
 
 lib_obj.StartCollector(collect, load, unload, define, b"python-collector", b"0.0.1")

@@ -69,8 +69,6 @@ func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
 	for i := 0; i < tagsCount; i++ {
 		k := C.GoString(C.tag_key(tags, C.int(i)))
 		v := C.GoString(C.tag_value(tags, C.int(i)))
-		fmt.Printf("**********TAGS&*&&&&&&&&&& k=%#v\n", k)
-		fmt.Printf("**********TAGS&*&&&&&&&&&& v=%#v\n", k)
 		tagsMap[k] = v
 	}
 	return tagsMap
@@ -107,6 +105,7 @@ func ctx_should_process(ctxId *C.char, ns *C.char) int {
 //export ctx_config
 func ctx_config(ctxId *C.char, key *C.char) *C.char {
 	v, _ := contextObject(ctxId).Config(C.GoString(key))
+	fmt.Printf("%v\n", v)
 	return C.CString(v)
 }
 
