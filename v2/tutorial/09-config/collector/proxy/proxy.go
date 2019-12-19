@@ -10,8 +10,6 @@ import (
 	"github.com/shirou/gopsutil/process"
 )
 
-const defaultCPUMeasurementTime = 1 * time.Second
-
 type Proxy interface {
 	ProcessesInfo() ([]data.ProcessInfo, error)
 	TotalCpuUsage(time.Duration) (float64, error)

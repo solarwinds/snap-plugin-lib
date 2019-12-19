@@ -96,7 +96,7 @@ type metaRPCType int
 
 const (
 	gRPC       metaRPCType = 2
-	gRPCStream             = 3
+	gRPCStream metaRPCType = 3
 )
 
 func (t metaRPCType) String() string {

@@ -26,7 +26,12 @@ script: make check 2>&1
 jobs:
   include:
   - stage: lint
-    env: TEST_TYPE=lint
+    env:
+      - TEST_TYPE=lint
+    script:
+      - make check 2>&1
+      - go install ./vendor/honnef.co/go/tools/cmd/staticcheck
+      - staticcheck ./...
   - stage: test
     env: TEST_TYPE=small
   - stage: test

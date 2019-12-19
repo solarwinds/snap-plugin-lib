@@ -843,8 +843,6 @@ func parseString(vals []string, name string, conf Config) (required string, mini
 			//parse val[idx] to get contents after :
 			idxOfColon := strings.Index(valueAtIndex, ":")
 			maximum = valueAtIndex[idxOfColon+1:]
-		} else {
-			//No default max value
 		}
 	}
 
