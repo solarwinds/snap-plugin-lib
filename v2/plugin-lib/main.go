@@ -5,7 +5,9 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
+	"reflect"
 	"sync"
+	"unsafe"
 )
 
 /*
@@ -17,6 +19,14 @@ typedef void (defineCallbackT)(); // used for DefineCallback
 // called from Go code
 static inline void CCallback(callbackT callback, char * ctxId) { callback(ctxId); }
 static inline void CDefineCallback(defineCallbackT callback) { callback(); }
+
+typedef struct {
+	char * key;
+	char * value;
+} tag;
+
+static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
+static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
 
 */
 import "C"
@@ -46,39 +56,100 @@ func intToBool(v int) bool {
 	return v != 0
 }
 
+func boolToInt(v bool) int {
+	if v == false {
+		return 0
+	}
+
+	return 1
+}
+
+func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
+	tagsMap := map[string]string{}
+	for i := 0; i < tagsCount; i++ {
+		//tagsMap[C.GoString(tags[i].key)] = C.GoString(tags[i].value)
+		tagsMap[C.GoString(C.tag_key(tags, C.int(i)))] = C.GoString(C.tag_value(tags, C.int(i)))
+	}
+	return tagsMap
+}
+
 /*****************************************************************************/
 // Collect related functions
 
-//export ctx_add_metric_int
-func ctx_add_metric_int(ctxId *C.char, ns *C.char, v int) {
+//export ctx_add_metric
+func ctx_add_metric(ctxId *C.char, ns *C.char, v int) {
 	contextObject(ctxId).AddMetric(C.GoString(ns), v)
+}
+
+//export ctx_add_metric_with_tags
+func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag, tagsCount int) {
+	contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
+}
+
+//export ctx_apply_tags_by_path
+func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) {
+	contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tags, tagsCount))
+}
+
+//export ctx_apply_tags_by_regexp
+func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) {
+	contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tags, tagsCount))
+}
+
+//export ctx_should_process
+func ctx_should_process(ctxId *C.char, ns *C.char) int {
+	return boolToInt(contextObject(ctxId).ShouldProcess(C.GoString(ns)))
+}
+
+//export ctx_config
+func ctx_config(ctxId *C.char, key *C.char) *C.char {
+	v, _ := contextObject(ctxId).Config(C.GoString(key))
+	return C.CString(v)
+}
+
+// todo: ctx_config_keys
+
+//export ctx_raw_config
+func ctx_raw_config(ctxId *C.char) *C.char {
+	return C.CString(string(contextObject(ctxId).RawConfig()))
+}
+
+//export ctx_store
+func ctx_store(ctxId *C.char, key *C.char, obj unsafe.Pointer) {
+	contextObject(ctxId).Store(C.GoString(key), obj)
+}
+
+//export ctx_load
+func ctx_load(ctxId *C.char, key *C.char) unsafe.Pointer {
+	v, _ := contextObject(ctxId).Load(C.GoString(key))
+	return unsafe.Pointer(reflect.ValueOf(v).Pointer())
 }
 
 /*****************************************************************************/
 // DefinePlugin related functions
 
-//export def_define_metric
-func def_define_metric(namespace *C.char, unit *C.char, isDefault int, description *C.char) {
+//export define_metric
+func define_metric(namespace *C.char, unit *C.char, isDefault int, description *C.char) {
 	pluginDef.DefineMetric(C.GoString(namespace), C.GoString(unit), intToBool(isDefault), C.GoString(description))
 }
 
-//export def_define_group
-func def_define_group(name *C.char, description *C.char) {
+//export define_group
+func define_group(name *C.char, description *C.char) {
 	pluginDef.DefineGroup(C.GoString(name), C.GoString(description))
 }
 
-//export def_example_config
-func def_example_config(cfg *C.char) {
+//export define_example_config
+func define_example_config(cfg *C.char) {
 	_ = pluginDef.DefineExampleConfig(C.GoString(cfg))
 }
 
-//export def_define_tasks_per_instance_limit
-func def_define_tasks_per_instance_limit(limit int) {
+//export define_tasks_per_instance_limit
+func define_tasks_per_instance_limit(limit int) {
 	_ = pluginDef.DefineTasksPerInstanceLimit(limit)
 }
 
-//export def_define_instances_limit
-func def_define_instances_limit(limit int) {
+//export define_instances_limit
+func define_instances_limit(limit int) {
 	_ = pluginDef.DefineInstancesLimit(limit)
 }
 

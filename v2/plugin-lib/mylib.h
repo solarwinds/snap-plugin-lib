@@ -17,7 +17,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 11 "main.go"
+#line 13 "main.go"
 
 #include <stdlib.h>
 
@@ -27,6 +27,14 @@ typedef void (defineCallbackT)(); // used for DefineCallback
 // called from Go code
 static inline void CCallback(callbackT callback, char * ctxId) { callback(ctxId); }
 static inline void CDefineCallback(defineCallbackT callback) { callback(); }
+
+typedef struct {
+	char * key;
+	char * value;
+} tag;
+
+static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
+static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
 
 
 #line 1 "cgo-generated-wrapper"
@@ -78,17 +86,33 @@ extern "C" {
 #endif
 
 
-extern void ctx_add_metric_int(char* p0, char* p1, GoInt p2);
+extern void ctx_add_metric(char* p0, char* p1, GoInt p2);
 
-extern void def_define_metric(char* p0, char* p1, GoInt p2, char* p3);
+extern void ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
 
-extern void def_define_group(char* p0, char* p1);
+extern void ctx_apply_tags_by_path(char* p0, char* p1, tag* p2, GoInt p3);
 
-extern void def_example_config(char* p0);
+extern void ctx_apply_tags_by_regexp(char* p0, char* p1, tag* p2, GoInt p3);
 
-extern void def_define_tasks_per_instance_limit(GoInt p0);
+extern GoInt ctx_should_process(char* p0, char* p1);
 
-extern void def_define_instances_limit(GoInt p0);
+extern char* ctx_config(char* p0, char* p1);
+
+extern char* ctx_raw_config(char* p0);
+
+extern void ctx_store(char* p0, char* p1, void* p2);
+
+extern void* ctx_load(char* p0, char* p1);
+
+extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
+
+extern void define_group(char* p0, char* p1);
+
+extern void define_example_config(char* p0);
+
+extern void define_tasks_per_instance_limit(GoInt p0);
+
+extern void define_instances_limit(GoInt p0);
 
 extern void StartCollector(callbackT* p0, callbackT* p1, callbackT* p2, defineCallbackT* p3, char* p4, char* p5);
 
