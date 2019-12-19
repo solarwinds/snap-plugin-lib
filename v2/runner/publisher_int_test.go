@@ -84,7 +84,7 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 	go func() {
 		statsController := &stats.EmptyController{}
 		contextManager := pubProxy.NewContextManager(publisher, statsController)
-		pluginrpc.StartPublisherGRPC(contextManager, statsController, ln, nil, 0, 0)
+		pluginrpc.StartPublisherGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
 		s.endPublisherCh <- true
 	}()
 
