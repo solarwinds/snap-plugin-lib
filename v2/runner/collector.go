@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fullstorydev/grpchan"
 	"github.com/sirupsen/logrus"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
@@ -25,6 +26,7 @@ const (
 	errorExitStatus  = 1
 )
 
+// As a regular process
 func StartCollector(collector plugin.Collector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 	if err != nil {
@@ -32,9 +34,26 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
+	startCollector(collector, name, version, opt, nil)
+}
+
+// As goroutine
+func StartCollectorInProcess(publisher plugin.Collector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+	startCollector(publisher, name, version, opt, grpcChan)
+}
+
+func startCollector(collector plugin.Collector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+	var err error
+
+	err = ValidateOptions(opt)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Invalid plugin options (%v)\n", err)
+		os.Exit(errorExitStatus)
+	}
+
 	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, opt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
@@ -49,32 +68,38 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 
 	switch opt.DebugMode {
 	case false:
-		r, err := acquireResources(opt)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
-			os.Exit(errorExitStatus)
+		r := &resources{}
+		if !opt.AsThread {
+			r, err = acquireResources(opt)
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
+				os.Exit(errorExitStatus)
+			}
 		}
 
 		printMetaInformation(name, version, types.PluginTypeCollector, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
-		startCollectorInServerMode(ctxMan, statsController, r, opt)
+
+		if opt.EnableProfiling {
+			startPprofServer(r.pprofListener)
+			defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
+		}
+
+		if opt.EnableStatsServer {
+			startStatsServer(r.statsListener, statsController)
+			defer r.statsListener.Close() // close stats service when GRPC service has been shut down
+		}
+
+		srv := pluginrpc.NewGRPCServer(opt.AsThread)
+		if grpcChan != nil {
+			grpcChan <- srv.(*pluginrpc.Channel)
+		}
+
+		// main blocking operation
+		pluginrpc.StartCollectorGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+
 	case true:
 		startCollectorInSingleMode(ctxMan, opt)
 	}
-}
-
-func startCollectorInServerMode(ctxManager *proxy.ContextManager, statsController stats.Controller, r *resources, opt *plugin.Options) {
-	if opt.EnableProfiling {
-		startPprofServer(r.pprofListener)
-		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
-	}
-
-	if opt.EnableStatsServer {
-		startStatsServer(r.statsListener, statsController)
-		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
-	}
-
-	// main blocking operation
-	pluginrpc.StartCollectorGRPC(ctxManager, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }
 
 func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {

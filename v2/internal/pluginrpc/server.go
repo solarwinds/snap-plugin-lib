@@ -40,11 +40,9 @@ func NewGRPCServer(inProc bool) Server {
 	return grpc.NewServer()
 }
 
-func StartCollectorGRPC(proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	grpcServer := grpc.NewServer()
-	pluginrpc.RegisterCollectorServer(grpcServer, newCollectService(proxy, statsController, pprofLn))
-
-	startGRPC(grpcServer, grpcLn, pingTimeout, pingMaxMissedCount)
+func StartCollectorGRPC(srv Server, proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	pluginrpc.RegisterHandlerCollector(srv, newCollectService(proxy, statsController, pprofLn))
+	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
 func StartPublisherGRPC(srv Server, proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
@@ -57,7 +55,7 @@ func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingM
 	pluginrpc.RegisterHandlerController(srv, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 
 	go func() {
-		err := srv.Serve(grpcLn) // blocking
+		err := srv.Serve(grpcLn) // may be blocking (depending on implementation)
 		if err != nil {
 			closeChan <- err
 		}
