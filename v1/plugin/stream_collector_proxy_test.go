@@ -31,6 +31,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+const defaultMaxCollectDuration = 10 * time.Second
+
 type mockStreamServer struct {
 	grpc.ServerStream
 	sendChan chan *rpc.CollectReply
