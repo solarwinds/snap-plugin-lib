@@ -33,8 +33,8 @@ typedef struct {
 	char * value;
 } tag;
 
-static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
-static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
+static inline char * tag_key(tag tags, int index) { return tags.key; }
+static inline char * tag_value(tag tags, int index) { return tags.value; }
 
 
 #line 1 "cgo-generated-wrapper"
@@ -88,7 +88,7 @@ extern "C" {
 
 extern void ctx_add_metric(char* p0, char* p1, GoInt p2);
 
-extern void ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
+extern void ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag p3, GoInt p4);
 
 extern void ctx_apply_tags_by_path(char* p0, char* p1, tag* p2, GoInt p3);
 

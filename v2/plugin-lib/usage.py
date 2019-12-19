@@ -22,6 +22,12 @@ lib_obj = CDLL(lib_file)
 #         ("n", c_longlong)
 #     ]
 
+class Tags(Structure):
+    _fields_ = [
+        ("key", c_char_p),
+        ("value", c_char_p)
+    ]
+
 @CFUNCTYPE(None)
 def define():
     print("** python *** Define plugin\n")
@@ -39,6 +45,8 @@ def define():
     lib_obj.define_metric(b"/python/group2/[dyn]/metric5", b"C", 0, "2nd dynamic metric")
 
 
+
+
 @CFUNCTYPE(None, c_char_p)
 def collect(ctxId):
     print("** python *** Collect called\n")
@@ -50,6 +58,14 @@ def collect(ctxId):
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn15/metric4", 11)
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn24/metric5", 34)
 
+    tags = Tags()
+    tags.key = b"tag1"
+    tags.value = b"value1"
+
+    # print(tags[0].key)
+
+    lib_obj.ctx_add_metric_with_tags(ctxId, b"/python/group1/metric1", 10, tags, 2)
+
 
 @CFUNCTYPE(None, c_char_p)
 def load(ctxId):
@@ -59,6 +75,7 @@ def load(ctxId):
 @CFUNCTYPE(None, c_char_p)
 def unload(ctxId):
     print("** python *** Unload called\n")
+
 
 
 lib_obj.StartCollector(collect, load, unload, define, b"python-collector", b"0.0.1")
