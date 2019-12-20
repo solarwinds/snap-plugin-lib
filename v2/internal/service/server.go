@@ -32,6 +32,10 @@ type Server interface {
 	Stop()
 }
 
+// An abstraction providing a unified interface for
+// * the native go-grpc implementation
+// * https://github.com/fullstorydev/grpchan - this one provides a way of using gRPC with a custom transport
+//   (that means sth other than the native h2 - HTTP1.1 or inprocess/channels are available out of the box)
 func NewGRPCServer(inProc bool) Server {
 	if inProc {
 		return NewChannel()

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	pluginrpc2 "github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 
 	"google.golang.org/grpc"
 )
@@ -128,7 +128,7 @@ func main() {
 
 	// Load, collect, unload routine
 	go func() {
-		collClient := pluginrpc2.NewCollectorClient(cl)
+		collClient := pluginrpc.NewCollectorClient(cl)
 
 		err := doLoadRequest(collClient, opt)
 		if err != nil {
@@ -197,11 +197,11 @@ func main() {
 	}()
 
 	// ping routine
-	contClient := pluginrpc2.NewControllerClient(cl)
+	contClient := pluginrpc.NewControllerClient(cl)
 
 	go func() {
 		for {
-			req := &pluginrpc2.PingRequest{}
+			req := &pluginrpc.PingRequest{}
 			_, err := contClient.Ping(context.Background(), req)
 			if err != nil {
 				doneCh <- fmt.Errorf("can't start ")
@@ -226,13 +226,13 @@ func main() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func doLoadRequest(cc pluginrpc2.CollectorClient, opt *Options) error {
+func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	filter := []string{}
 	if opt.PluginFilter != defaultFilter {
 		filter = strings.Split(opt.PluginFilter, filterSeparator)
 	}
 
-	reqLoad := &pluginrpc2.LoadCollectorRequest{
+	reqLoad := &pluginrpc.LoadCollectorRequest{
 		TaskId:          opt.TaskId,
 		JsonConfig:      []byte(opt.PluginConfig),
 		MetricSelectors: filter,
@@ -246,8 +246,8 @@ func doLoadRequest(cc pluginrpc2.CollectorClient, opt *Options) error {
 	return err
 }
 
-func doUnloadRequest(cc pluginrpc2.CollectorClient, opt *Options) error {
-	reqUnload := &pluginrpc2.UnloadCollectorRequest{
+func doUnloadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
+	reqUnload := &pluginrpc.UnloadCollectorRequest{
 		TaskId: opt.TaskId,
 	}
 
@@ -259,8 +259,8 @@ func doUnloadRequest(cc pluginrpc2.CollectorClient, opt *Options) error {
 	return err
 }
 
-func doKillRequest(cc pluginrpc2.ControllerClient) error {
-	reqKill := &pluginrpc2.KillRequest{}
+func doKillRequest(cc pluginrpc.ControllerClient) error {
+	reqKill := &pluginrpc.KillRequest{}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer fn()
@@ -269,8 +269,8 @@ func doKillRequest(cc pluginrpc2.ControllerClient) error {
 	return err
 }
 
-func doInfoRequest(cc pluginrpc2.CollectorClient) (*pluginrpc2.Info, error) {
-	reqInfo := &pluginrpc2.InfoRequest{}
+func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
+	reqInfo := &pluginrpc.InfoRequest{}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer fn()
@@ -282,10 +282,10 @@ func doInfoRequest(cc pluginrpc2.CollectorClient) (*pluginrpc2.Info, error) {
 	return resp.Info, nil
 }
 
-func doCollectRequest(cc pluginrpc2.CollectorClient, opt *Options) ([]string, error) {
+func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, error) {
 	var recvMts []string
 
-	reqColl := &pluginrpc2.CollectRequest{
+	reqColl := &pluginrpc.CollectRequest{
 		TaskId: opt.TaskId,
 	}
 
@@ -316,7 +316,7 @@ func doCollectRequest(cc pluginrpc2.CollectorClient, opt *Options) ([]string, er
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func grpcMetricToString(metric *pluginrpc2.Metric) string {
+func grpcMetricToString(metric *pluginrpc.Metric) string {
 	var nsStr []string
 	for _, ns := range metric.Namespace {
 		nsStr = append(nsStr, ns.Value)

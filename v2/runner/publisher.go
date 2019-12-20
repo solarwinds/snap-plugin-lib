@@ -49,13 +49,10 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 
 	logrus.SetLevel(opt.LogLevel)
 
-	r := &resources{}
-	if !opt.AsThread {
-		r, err = acquireResources(opt)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
-			os.Exit(errorExitStatus)
-		}
+	r, err := acquireResources(opt)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
+		os.Exit(errorExitStatus)
 	}
 
 	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
@@ -71,6 +68,8 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 	}
 
 	srv := service.NewGRPCServer(opt.AsThread)
+
+	// We need to bind the gRPC client on the other end to the same channel so need to return it from here
 	if grpcChan != nil {
 		grpcChan <- srv.(*service.Channel)
 	}

@@ -38,12 +38,14 @@ func (r *resources) statsListenerAddr() net.TCPAddr {
 }
 
 func acquireResources(opt *plugin.Options) (*resources, error) {
-	r := &resources{}
 	var err error
+	r := &resources{}
 
-	r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.GRPCPort))
-	if err != nil {
-		return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
+	if !opt.AsThread {
+		r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.GRPCPort))
+		if err != nil {
+			return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
+		}
 	}
 
 	if opt.EnableProfiling {
