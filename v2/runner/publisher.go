@@ -7,9 +7,9 @@ import (
 	"github.com/fullstorydev/grpchan"
 	"github.com/sirupsen/logrus"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -70,11 +70,11 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
 
-	srv := pluginrpc.NewGRPCServer(opt.AsThread)
+	srv := service.NewGRPCServer(opt.AsThread)
 	if grpcChan != nil {
-		grpcChan <- srv.(*pluginrpc.Channel)
+		grpcChan <- srv.(*service.Channel)
 	}
 
 	// main blocking operation
-	pluginrpc.StartPublisherGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+	service.StartPublisherGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }

@@ -1,4 +1,4 @@
-package pluginrpc
+package service
 
 import (
 	"context"

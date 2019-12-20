@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	collProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	pubProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	pluginrpc2 "github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 
@@ -68,7 +68,7 @@ func (s *PublisherMediumSuite) startCollector(collector plugin.Collector) net.Li
 	go func() {
 		statsController, _ := stats.NewEmptyController()
 		contextManager := collProxy.NewContextManager(collector, statsController)
-		pluginrpc.StartCollectorGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
+		service.StartCollectorGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
 		s.endControllerCh <- true
 	}()
 
@@ -84,7 +84,7 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 	go func() {
 		statsController := &stats.EmptyController{}
 		contextManager := pubProxy.NewContextManager(publisher, statsController)
-		pluginrpc.StartPublisherGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
+		service.StartPublisherGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
 		s.endPublisherCh <- true
 	}()
 

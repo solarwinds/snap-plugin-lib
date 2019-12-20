@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
@@ -47,11 +47,11 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		"Port on which GRPC server will be served")
 
 	flagParser.DurationVar(&opt.GRPCPingTimeout,
-		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
+		"grpc-ping-timeout", service.DefaultPingTimeout,
 		"Deadline for receiving single ping messages")
 
 	flagParser.UintVar(&opt.GRPCPingMaxMissed,
-		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
+		"grpc-ping-max-missed", service.DefaultMaxMissingPingCounter,
 		"Number of missed ping messages after which plugin should exit")
 
 	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)

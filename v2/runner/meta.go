@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -46,7 +46,7 @@ func printMetaInformation(name string, version string, typ types.PluginType, opt
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{
-		GRPCVersion: pluginrpc.GRPCDefinitionVersion,
+		GRPCVersion: service.GRPCDefinitionVersion,
 	}
 
 	m.Plugin.Name = name
