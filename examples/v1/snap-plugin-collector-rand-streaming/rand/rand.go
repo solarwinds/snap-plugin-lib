@@ -82,8 +82,7 @@ func (r *RandCollector) StreamMetrics(
 
 func (r *RandCollector) drainMetrics(in chan []plugin.Metric) {
 	for {
-		var mts []plugin.Metric
-		mts = <-in
+		mts := <-in
 		r.metrics = mts
 	}
 }

@@ -10,10 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +25,7 @@ import (
 /*****************************************************************************/
 
 const expectedGracefulShutdownTimeout = 2 * time.Second
-const expectedForceShutdownTimeout = 2*time.Second + pluginrpc.GRPCGracefulStopTimeout
+const expectedForceShutdownTimeout = 2*time.Second + service.GRPCGracefulStopTimeout
 
 /*****************************************************************************/
 
@@ -62,7 +64,7 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 	go func() {
 		statsController, _ := stats.NewEmptyController()
 		contextManager := proxy.NewContextManager(collector, statsController)
-		pluginrpc.StartCollectorGRPC(contextManager, statsController, ln, nil, 0, 0)
+		service.StartCollectorGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
 		s.endCh <- true
 	}()
 

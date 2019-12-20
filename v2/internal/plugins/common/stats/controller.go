@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,7 +32,7 @@ type Controller interface {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func NewController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *types.Options) (Controller, error) {
+func NewController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
 	if opt.EnableStats {
 		return NewStatsController(pluginName, pluginVersion, pluginType, opt)
 	}
@@ -50,7 +52,7 @@ type StatisticsController struct {
 	stats             *Statistics
 }
 
-func NewStatsController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *types.Options) (Controller, error) {
+func NewStatsController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
 	optJson, err := json.Marshal(opt)
 	if err != nil {
 		return nil, err

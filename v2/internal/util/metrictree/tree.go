@@ -53,7 +53,7 @@ const (
 )
 
 const ( // nodeType const
-	invalidElementLevel = iota
+	_ = iota
 	onlyStaticElementsLevel
 	onlyDynamicElementsLevel
 	mixedElementsLevel

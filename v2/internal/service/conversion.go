@@ -1,4 +1,4 @@
-package pluginrpc
+package service
 
 import (
 	"encoding/json"
@@ -7,16 +7,18 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
 // convert metric to GRPC structure
-func toGRPCMetric(mt *types.Metric) (*Metric, error) {
+func toGRPCMetric(mt *types.Metric) (*pluginrpc.Metric, error) {
 	value, err := toGRPCValue(mt.Value_)
 	if err != nil {
 		return nil, fmt.Errorf("can't convert metric to GRPC structure: %v", err)
 	}
 
-	protoMt := &Metric{
+	protoMt := &pluginrpc.Metric{
 		Namespace:   toGRPCNamespace(mt.Namespace_),
 		Tags:        mt.Tags_,
 		Value:       value,
@@ -28,7 +30,7 @@ func toGRPCMetric(mt *types.Metric) (*Metric, error) {
 	return protoMt, nil
 }
 
-func fromGRPCMetric(mt *Metric) (types.Metric, error) {
+func fromGRPCMetric(mt *pluginrpc.Metric) (types.Metric, error) {
 	data, err := fromGRPCValue(mt.Value)
 	if err != nil {
 		return types.Metric{}, fmt.Errorf("can't convert metric from GRPC structure: %v", err)
@@ -52,11 +54,11 @@ func fromGRPCMetric(mt *Metric) (types.Metric, error) {
 }
 
 // convert namespace to GRPC structure
-func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
-	grpcNs := make([]*Namespace, 0, len(ns))
+func toGRPCNamespace(ns []types.NamespaceElement) []*pluginrpc.Namespace {
+	grpcNs := make([]*pluginrpc.Namespace, 0, len(ns))
 
 	for _, nsElem := range ns {
-		grpcNs = append(grpcNs, &Namespace{
+		grpcNs = append(grpcNs, &pluginrpc.Namespace{
 			Name:        nsElem.Name_,
 			Value:       nsElem.Value_,
 			Description: nsElem.Description_,
@@ -66,7 +68,7 @@ func toGRPCNamespace(ns []types.NamespaceElement) []*Namespace {
 	return grpcNs
 }
 
-func fromGRPCNamespace(ns []*Namespace) []types.NamespaceElement {
+func fromGRPCNamespace(ns []*pluginrpc.Namespace) []types.NamespaceElement {
 	retNsElem := make([]types.NamespaceElement, 0, len(ns))
 
 	for _, nsElem := range ns {
@@ -80,42 +82,42 @@ func fromGRPCNamespace(ns []*Namespace) []types.NamespaceElement {
 	return retNsElem
 }
 
-func toGRPCTime(t time.Time) *Time {
-	return &Time{
+func toGRPCTime(t time.Time) *pluginrpc.Time {
+	return &pluginrpc.Time{
 		Sec:  t.Unix(),
 		Nsec: int64(t.Nanosecond()),
 	}
 }
 
-func fromGRPCTime(t *Time) time.Time {
+func fromGRPCTime(t *pluginrpc.Time) time.Time {
 	return time.Unix(t.Sec, t.Nsec)
 }
 
 // convert metric value to GRPC structure
-func toGRPCValue(v interface{}) (*MetricValue, error) {
-	grpcValue := &MetricValue{}
+func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
+	grpcValue := &pluginrpc.MetricValue{}
 
 	switch t := v.(type) {
 	case string:
-		grpcValue.DataVariant = &MetricValue_VString{VString: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VString{VString: t}
 	case float64:
-		grpcValue.DataVariant = &MetricValue_VDouble{VDouble: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VDouble{VDouble: t}
 	case float32:
-		grpcValue.DataVariant = &MetricValue_VFloat{VFloat: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VFloat{VFloat: t}
 	case int32:
-		grpcValue.DataVariant = &MetricValue_VInt32{VInt32: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt32{VInt32: t}
 	case int:
-		grpcValue.DataVariant = &MetricValue_VInt64{VInt64: int64(t)}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt64{VInt64: int64(t)}
 	case int64:
-		grpcValue.DataVariant = &MetricValue_VInt64{VInt64: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt64{VInt64: t}
 	case uint32:
-		grpcValue.DataVariant = &MetricValue_VUint32{VUint32: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint32{VUint32: t}
 	case uint64:
-		grpcValue.DataVariant = &MetricValue_VUint64{VUint64: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint64{VUint64: t}
 	case []byte:
-		grpcValue.DataVariant = &MetricValue_VBytes{VBytes: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VBytes{VBytes: t}
 	case bool:
-		grpcValue.DataVariant = &MetricValue_VBool{VBool: t}
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VBool{VBool: t}
 	case nil:
 		grpcValue.DataVariant = nil
 	default:
@@ -125,55 +127,55 @@ func toGRPCValue(v interface{}) (*MetricValue, error) {
 	return grpcValue, nil
 }
 
-func fromGRPCValue(v *MetricValue) (interface{}, error) {
+func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
 	switch v.DataVariant.(type) {
-	case *MetricValue_VString:
+	case *pluginrpc.MetricValue_VString:
 		return v.GetVString(), nil
-	case *MetricValue_VDouble:
+	case *pluginrpc.MetricValue_VDouble:
 		return v.GetVDouble(), nil
-	case *MetricValue_VFloat:
+	case *pluginrpc.MetricValue_VFloat:
 		return v.GetVFloat(), nil
-	case *MetricValue_VInt32:
+	case *pluginrpc.MetricValue_VInt32:
 		return v.GetVInt32(), nil
-	case *MetricValue_VInt64:
+	case *pluginrpc.MetricValue_VInt64:
 		return v.GetVInt64(), nil
-	case *MetricValue_VUint32:
+	case *pluginrpc.MetricValue_VUint32:
 		return v.GetVInt32(), nil
-	case *MetricValue_VUint64:
+	case *pluginrpc.MetricValue_VUint64:
 		return v.GetVUint64(), nil
-	case *MetricValue_VBytes:
+	case *pluginrpc.MetricValue_VBytes:
 		return v.GetVBytes(), nil
-	case *MetricValue_VBool:
+	case *pluginrpc.MetricValue_VBool:
 		return v.GetVBool(), nil
 	}
 
 	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
 }
 
-func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, error) {
+func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.Info, error) {
 	pi := &statistics.PluginInfo
 	ts := &statistics.TasksSummary
 
-	info := &Info{
-		PluginInfo: &PluginInfo{
+	info := &pluginrpc.Info{
+		PluginInfo: &pluginrpc.PluginInfo{
 			Name:           pi.Name,
 			Version:        pi.Version,
 			CmdLineOptions: pi.CmdLineOptions,
 			Started:        toGRPCTime(pi.Started.Time),
 		},
-		TaskSummary: &TaskSummary{
-			Counters: &TaskSummaryCounters{
+		TaskSummary: &pluginrpc.TaskSummary{
+			Counters: &pluginrpc.TaskSummaryCounters{
 				CurrentlyActiveTasks:   uint64(ts.Counters.CurrentlyActiveTasks),
 				TotalActiveTasks:       uint64(ts.Counters.TotalActiveTasks),
 				TotalExecutionRequests: uint64(ts.Counters.TotalExecutionRequests),
 			},
-			ProcessingTimes: &ProcessingTimes{
+			ProcessingTimes: &pluginrpc.ProcessingTimes{
 				Total:   int64(ts.ProcessingTimes.Total),
 				Average: int64(ts.ProcessingTimes.Average),
 				Maximum: int64(ts.ProcessingTimes.Maximum),
 			},
 		},
-		TaskDetails: map[string]*TaskDetails{},
+		TaskDetails: map[string]*pluginrpc.TaskDetails{},
 	}
 
 	// Handle RawMessage - marshal to Json and unmarshal to typed struct
@@ -182,18 +184,18 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 		return info, fmt.Errorf("could't marshal options field: %v", err)
 	}
 
-	options := &types.Options{}
+	options := &plugin.Options{}
 	err = json.Unmarshal(b, options)
 	if err != nil {
 		return info, fmt.Errorf("could't unmarshal options field: %v", err)
 	}
 
-	info.PluginInfo.Options = &Options{
-		PluginIP:          options.PluginIp,
-		GrpcPort:          uint32(options.GrpcPort),
+	info.PluginInfo.Options = &pluginrpc.Options{
+		PluginIP:          options.PluginIP,
+		GrpcPort:          uint32(options.GRPCPort),
 		StatsPort:         uint32(options.StatsPort),
-		GrpcPingTimeout:   int64(options.GrpcPingTimeout),
-		GrpcPingMaxMissed: uint64(options.GrpcPingMaxMissed),
+		GrpcPingTimeout:   int64(options.GRPCPingTimeout),
+		GrpcPingMaxMissed: uint64(options.GRPCPingMaxMissed),
 		LogLevel:          uint32(options.LogLevel),
 		EnableProfiling:   options.EnableProfiling,
 		ProfilingLocation: "",
@@ -210,21 +212,21 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*Info, erro
 		pt := &taskDetails.ProcessingTimes
 		lm := &taskDetails.LastMeasurement
 
-		info.TaskDetails[id] = &TaskDetails{
+		info.TaskDetails[id] = &pluginrpc.TaskDetails{
 			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
 			Filters:       taskDetails.Filters,
-			Counters: &TaskDetailCounters{
+			Counters: &pluginrpc.TaskDetailCounters{
 				CollectRequests:            uint64(c.CollectRequests),
 				TotalMetrics:               uint64(c.TotalMetrics),
 				AverageMetricsPerExecution: uint64(c.AvgMetricsPerExecution),
 			},
 			Loaded: toGRPCTime(taskDetails.Loaded.Time),
-			ProcessingTimes: &ProcessingTimes{
+			ProcessingTimes: &pluginrpc.ProcessingTimes{
 				Total:   int64(pt.Total),
 				Average: int64(pt.Average),
 				Maximum: int64(pt.Maximum),
 			},
-			LastMeasurement: &LastMeasurement{
+			LastMeasurement: &pluginrpc.LastMeasurement{
 				Occurred:         toGRPCTime(lm.Occurred.Time),
 				ProcessedMetrics: uint64(lm.ProcessedMetrics),
 				Duration:         int64(lm.Duration),
