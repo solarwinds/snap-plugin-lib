@@ -3,9 +3,11 @@
 
 package pluginrpc
 
-import "github.com/fullstorydev/grpchan"
-import "golang.org/x/net/context"
-import "google.golang.org/grpc"
+import (
+	"github.com/fullstorydev/grpchan"
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
 
 func RegisterHandlerController(reg grpchan.ServiceRegistry, srv ControllerServer) {
 	reg.RegisterService(&_Controller_serviceDesc, srv)
