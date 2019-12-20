@@ -42,6 +42,9 @@ func acquireResources(opt *plugin.Options) (*resources, error) {
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
 		}
+	} else {
+		// force disable profiling as plugin running as goroutine inside Snap will be covered by its pprof anyway
+		opt.EnableProfiling = false
 	}
 
 	if opt.EnableProfiling {
