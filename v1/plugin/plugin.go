@@ -638,7 +638,7 @@ func shutdownPlugin(grpcServer *grpc.Server) {
 		log.Debug("GRPC server stopped gracefully")
 	case <-time.After(GRPCGracefulStopTimeout):
 		grpcServer.Stop()
-		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might be lost")
+		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might have been lost")
 	}
 }
 
