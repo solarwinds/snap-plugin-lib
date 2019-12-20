@@ -36,6 +36,24 @@ typedef struct {
 static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
 static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
 
+typedef struct {
+	char * msg;
+} errorMsg;
+
+static inline char * error_msg_msg(errorMsg * emsg) {
+	if (emsg == NULL) {
+		return NULL;
+	}
+
+	return emsg->msg;
+}
+
+static inline errorMsg * alloc_error_msg(char * msg) {
+	errorMsg * errMsg = malloc(sizeof(errorMsg));
+	errMsg->msg = msg;
+	return errMsg;
+}
+
 
 #line 1 "cgo-generated-wrapper"
 
@@ -86,7 +104,7 @@ extern "C" {
 #endif
 
 
-extern void ctx_add_metric(char* p0, char* p1, GoInt p2);
+extern errorMsg* ctx_add_metric(char* p0, char* p1, GoInt p2);
 
 extern void ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
 

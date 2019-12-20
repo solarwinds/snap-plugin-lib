@@ -3,29 +3,15 @@ from ctypes import *
 lib_file = "mylib.dll"
 lib_obj = CDLL(lib_file)
 
-# class GoNamespaceEl(Structure):
-#     _fields_ = [
-#         ("name", c_char_p),
-#         ("value", c_char_p),
-#         ("description", c_char_p),
-#     ]
-
-# class GoNamespace(Structure):
-#     _fields_ = [
-#         ("length", c_longlong),
-#         ("elements", POINTER(GoNamespaceEl))
-#     ]
-
-# class GoString(Structure):
-#     _fields_ = [
-#         ("p", c_char_p),
-#         ("n", c_longlong)
-#     ]
-
 class Tags(Structure):
     _fields_ = [
         ("key", c_char_p),
         ("value", c_char_p)
+    ]
+
+class CError(Structure):
+    _fields_ = [
+        ("msg", c_char_p)
     ]
 
 @CFUNCTYPE(None)
@@ -49,12 +35,15 @@ def define():
 def collect(ctxId):
     print("** python *** Collect called\n")
 
+    lib_obj.ctx_add_metric.restype = POINTER(CError)
     lib_obj.ctx_add_metric(ctxId, b"/python/group1/metric1", 10)
     lib_obj.ctx_add_metric(ctxId, b"/python/group1/metric2", 20)
     lib_obj.ctx_add_metric(ctxId, b"/python/group1/metric3", 40)
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn1/metric4", 40)
     lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn15/metric4", 11)
-    lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn24/metric5", 34)
+    res1 = lib_obj.ctx_add_metric(ctxId, b"/python/group2/dyn24/metric5", 34)
+
+    res = lib_obj.ctx_add_metric(ctxId, b"/python/group1/metricWRONG", 10)
 
     tags = (Tags * 2)()
     tags[0].key = b"tag1"

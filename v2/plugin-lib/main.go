@@ -28,6 +28,24 @@ typedef struct {
 static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
 static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
 
+typedef struct {
+	char * msg;
+} errorMsg;
+
+static inline char * error_msg_msg(errorMsg * emsg) {
+	if (emsg == NULL) {
+		return NULL;
+	}
+
+	return emsg->msg;
+}
+
+static inline errorMsg * alloc_error_msg(char * msg) {
+	errorMsg * errMsg = malloc(sizeof(errorMsg));
+	errMsg->msg = msg;
+	return errMsg;
+}
+
 */
 import "C"
 
@@ -74,12 +92,21 @@ func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
 	return tagsMap
 }
 
+func errorToC(err error) * C.errorMsg {
+	var errMsg * C.char
+	if err != nil {
+		errMsg = (* C.char)(C.CString(err.Error()))
+	}
+	return C.alloc_error_msg((* C.char)(errMsg))
+}
+
 /*****************************************************************************/
 // Collect related functions
 
 //export ctx_add_metric
-func ctx_add_metric(ctxId *C.char, ns *C.char, v int) {
-	contextObject(ctxId).AddMetric(C.GoString(ns), v)
+func ctx_add_metric(ctxId *C.char, ns *C.char, v int) * C.errorMsg {
+	goErr := contextObject(ctxId).AddMetric(C.GoString(ns), v)
+	return errorToC(goErr)
 }
 
 //export ctx_add_metric_with_tags
@@ -105,7 +132,6 @@ func ctx_should_process(ctxId *C.char, ns *C.char) int {
 //export ctx_config
 func ctx_config(ctxId *C.char, key *C.char) *C.char {
 	v, _ := contextObject(ctxId).Config(C.GoString(key))
-	fmt.Printf("%v\n", v)
 	return C.CString(v)
 }
 
