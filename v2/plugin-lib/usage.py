@@ -3,16 +3,19 @@ from ctypes import *
 lib_file = "mylib.dll"
 lib_obj = CDLL(lib_file)
 
+
 class Tags(Structure):
     _fields_ = [
         ("key", c_char_p),
         ("value", c_char_p)
     ]
 
+
 class CError(Structure):
     _fields_ = [
         ("msg", c_char_p)
     ]
+
 
 @CFUNCTYPE(None)
 def define():
@@ -67,4 +70,46 @@ def unload(ctxId):
     print("** python *** Unload called\n")
 
 
-lib_obj.StartCollector(collect, load, unload, define, b"python-collector", b"0.0.1")
+###############################################################################
+
+plugin_lib_filename = "mylib.dll"
+
+
+class BasePlugin():
+    def __init__(self, name, version):
+        self._name = name
+        self._version = version
+        self.plugin_lib = CDLL(lib_file)
+
+    @staticmethod
+    @CFUNCTYPE(None, c_char_p)
+    def __collect_handler(ctx_id):
+        pass
+
+    @staticmethod
+    @CFUNCTYPE(None, c_char_p)
+    def __load_handler(ctx_id):
+        pass
+
+    @staticmethod
+    @CFUNCTYPE(None, c_char_p)
+    def __unload_handler(ctx_id):
+        pass
+
+    @staticmethod
+    @CFUNCTYPE(None)
+    def __define_plugin_handler():
+        pass
+
+    def start(self):
+        self.plugin_lib.start_collector(BasePlugin.__collect_handler,
+                                        BasePlugin.__load_handler,
+                                        BasePlugin.__unload_handler,
+                                        BasePlugin.__define_plugin_handler,
+                                        bytes(self._version, 'utf-8'), bytes(self._name, 'utf-8'))
+
+
+###############################################################################
+
+if __name__ == '__main__':
+    lib_obj.start_collector(collect, load, unload, define, b"python-collector", b"0.0.1")

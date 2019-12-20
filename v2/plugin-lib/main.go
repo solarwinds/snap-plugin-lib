@@ -13,37 +13,31 @@ import (
 /*
 #include <stdlib.h>
 
-typedef void (callbackT)(char *); // used for Collect, Load and Unload
-typedef void (defineCallbackT)(); // used for DefineCallback
+// c types for callbacks
+typedef void (callback_t)(char *);  // used for Collect, Load and Unload
+typedef void (define_callback_t)(); // used for DefineCallback
 
 // called from Go code
-static inline void CCallback(callbackT callback, char * ctxId) { callback(ctxId); }
-static inline void CDefineCallback(defineCallbackT callback) { callback(); }
+static inline void call_c_callback(callback_t callback, char * ctxId) { callback(ctxId); }
+static inline void call_c_define_callback(define_callback_t callback) { callback(); }
+
+// some helpers to manage C/Go memory/access interactions
+typedef struct {
+    char * key;
+    char * value;
+} tag_t;
+
+static inline char * tag_key(tag_t * tags, int index) { return tags[index].key; }
+static inline char * tag_value(tag_t * tags, int index) { return tags[index].value; }
 
 typedef struct {
-	char * key;
-	char * value;
-} tag;
+    char * msg;
+} error_t;
 
-static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
-static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
-
-typedef struct {
-	char * msg;
-} errorMsg;
-
-static inline char * error_msg_msg(errorMsg * emsg) {
-	if (emsg == NULL) {
-		return NULL;
-	}
-
-	return emsg->msg;
-}
-
-static inline errorMsg * alloc_error_msg(char * msg) {
-	errorMsg * errMsg = malloc(sizeof(errorMsg));
-	errMsg->msg = msg;
-	return errMsg;
+static inline error_t * alloc_error_msg(char * msg) {
+    error_t * errMsg = malloc(sizeof(error_t));
+    errMsg->msg = msg;
+    return errMsg;
 }
 
 */
@@ -82,17 +76,17 @@ func boolToInt(v bool) int {
 	return 1
 }
 
-func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
-	tagsMap := map[string]string{}
-	for i := 0; i < tagsCount; i++ {
-		k := C.GoString(C.tag_key(tags, C.int(i)))
-		v := C.GoString(C.tag_value(tags, C.int(i)))
-		tagsMap[k] = v
+func ctagsToMap(tag_ts *C.tag_t, tag_tsCount int) map[string]string {
+	tag_tsMap := map[string]string{}
+	for i := 0; i < tag_tsCount; i++ {
+		k := C.GoString(C.tag_key(tag_ts, C.int(i)))
+		v := C.GoString(C.tag_value(tag_ts, C.int(i)))
+		tag_tsMap[k] = v
 	}
-	return tagsMap
+	return tag_tsMap
 }
 
-func errorToC(err error) *C.errorMsg {
+func toCError(err error) *C.error_t {
 	var errMsg *C.char
 	if err != nil {
 		errMsg = (* C.char)(C.CString(err.Error()))
@@ -104,27 +98,27 @@ func errorToC(err error) *C.errorMsg {
 // Collect related functions
 
 //export ctx_add_metric
-func ctx_add_metric(ctxId *C.char, ns *C.char, v int) *C.errorMsg {
+func ctx_add_metric(ctxId *C.char, ns *C.char, v int) *C.error_t {
 	err := contextObject(ctxId).AddMetric(C.GoString(ns), v)
-	return errorToC(err)
+	return toCError(err)
 }
 
-//export ctx_add_metric_with_tags
-func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag, tagsCount int) *C.errorMsg {
-	err := contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
-	return errorToC(err)
+//export ctx_add_metric_with_tag_ts
+func ctx_add_metric_with_tag_ts(ctxId *C.char, ns *C.char, v int, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+	err := contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tag_ts, tag_tsCount))
+	return toCError(err)
 }
 
-//export ctx_apply_tags_by_path
-func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) *C.errorMsg {
-	err := contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tags, tagsCount))
-	return errorToC(err)
+//export ctx_apply_tag_ts_by_path
+func ctx_apply_tag_ts_by_path(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+	err := contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tag_ts, tag_tsCount))
+	return toCError(err)
 }
 
-//export ctx_apply_tags_by_regexp
-func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) *C.errorMsg {
-	err := contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tags, tagsCount))
-	return errorToC(err)
+//export ctx_apply_tag_ts_by_regexp
+func ctx_apply_tag_ts_by_regexp(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+	err := contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tag_ts, tag_tsCount))
+	return toCError(err)
 }
 
 //export ctx_should_process
@@ -174,9 +168,9 @@ func define_group(name *C.char, description *C.char) {
 }
 
 //export define_example_config
-func define_example_config(cfg *C.char) *C.errorMsg {
+func define_example_config(cfg *C.char) *C.error_t {
 	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
-	return errorToC(err)
+	return toCError(err)
 }
 
 //export define_tasks_per_instance_limit
@@ -191,29 +185,29 @@ func define_instances_limit(limit int) {
 
 /*****************************************************************************/
 
-//export StartCollector
-func StartCollector(collectCallback *C.callbackT, loadCallback *C.callbackT, unloadCallback *C.callbackT, defineCallback *C.defineCallbackT, name *C.char, version *C.char) {
+//export start_collector
+func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
 		loadCallback:    loadCallback,
 		unloadCallback:  unloadCallback,
 		defineCallback:  defineCallback,
 	}
-	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version)) // todo: should release?
+	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version))
 }
 
 /*****************************************************************************/
 
 type bridgeCollector struct {
-	collectCallback *C.callbackT
-	loadCallback    *C.callbackT
-	unloadCallback  *C.callbackT
-	defineCallback  *C.defineCallbackT
+	collectCallback *C.callback_t
+	loadCallback    *C.callback_t
+	unloadCallback  *C.callback_t
+	defineCallback  *C.define_callback_t
 }
 
 func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	pluginDef = def
-	C.CDefineCallback(bc.defineCallback)
+	C.call_c_define_callback(bc.defineCallback)
 
 	return nil
 }
@@ -230,14 +224,14 @@ func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
 	return bc.callC(ctx, bc.unloadCallback)
 }
 
-func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callbackT) error {
+func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) error {
 	ctxAsType := ctx.(*proxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
 
-	C.CCallback(callback, C.CString(taskID))
+	C.call_c_callback(callback, C.CString(taskID))
 	return nil
 }
 

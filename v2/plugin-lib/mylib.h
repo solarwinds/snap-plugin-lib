@@ -21,37 +21,31 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #include <stdlib.h>
 
-typedef void (callbackT)(char *); // used for Collect, Load and Unload
-typedef void (defineCallbackT)(); // used for DefineCallback
+// c types for callbacks
+typedef void (callback_t)(char *);  // used for Collect, Load and Unload
+typedef void (define_callback_t)(); // used for DefineCallback
 
 // called from Go code
-static inline void CCallback(callbackT callback, char * ctxId) { callback(ctxId); }
-static inline void CDefineCallback(defineCallbackT callback) { callback(); }
+static inline void call_c_callback(callback_t callback, char * ctxId) { callback(ctxId); }
+static inline void call_c_define_callback(define_callback_t callback) { callback(); }
+
+// some helpers to manage C/Go memory/access interactions
+typedef struct {
+    char * key;
+    char * value;
+} tag_t;
+
+static inline char * tag_key(tag_t * tags, int index) { return tags[index].key; }
+static inline char * tag_value(tag_t * tags, int index) { return tags[index].value; }
 
 typedef struct {
-	char * key;
-	char * value;
-} tag;
+    char * msg;
+} error_t;
 
-static inline char * tag_key(tag * tags, int index) { return tags[index].key; }
-static inline char * tag_value(tag * tags, int index) { return tags[index].value; }
-
-typedef struct {
-	char * msg;
-} errorMsg;
-
-static inline char * error_msg_msg(errorMsg * emsg) {
-	if (emsg == NULL) {
-		return NULL;
-	}
-
-	return emsg->msg;
-}
-
-static inline errorMsg * alloc_error_msg(char * msg) {
-	errorMsg * errMsg = malloc(sizeof(errorMsg));
-	errMsg->msg = msg;
-	return errMsg;
+static inline error_t * alloc_error_msg(char * msg) {
+    error_t * errMsg = malloc(sizeof(error_t));
+    errMsg->msg = msg;
+    return errMsg;
 }
 
 
@@ -104,13 +98,13 @@ extern "C" {
 #endif
 
 
-extern errorMsg* ctx_add_metric(char* p0, char* p1, GoInt p2);
+extern error_t* ctx_add_metric(char* p0, char* p1, GoInt p2);
 
-extern errorMsg* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
+extern error_t* ctx_add_metric_with_tag_ts(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
 
-extern errorMsg* ctx_apply_tags_by_path(char* p0, char* p1, tag* p2, GoInt p3);
+extern error_t* ctx_apply_tag_ts_by_path(char* p0, char* p1, tag_t* p2, GoInt p3);
 
-extern errorMsg* ctx_apply_tags_by_regexp(char* p0, char* p1, tag* p2, GoInt p3);
+extern error_t* ctx_apply_tag_ts_by_regexp(char* p0, char* p1, tag_t* p2, GoInt p3);
 
 extern GoInt ctx_should_process(char* p0, char* p1);
 
@@ -126,13 +120,13 @@ extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 
 extern void define_group(char* p0, char* p1);
 
-extern errorMsg* define_example_config(char* p0);
+extern error_t* define_example_config(char* p0);
 
 extern void define_tasks_per_instance_limit(GoInt p0);
 
 extern void define_instances_limit(GoInt p0);
 
-extern void StartCollector(callbackT* p0, callbackT* p1, callbackT* p2, defineCallbackT* p3, char* p4, char* p5);
+extern void start_collector(callback_t* p0, callback_t* p1, callback_t* p2, define_callback_t* p3, char* p4, char* p5);
 
 #ifdef __cplusplus
 }
