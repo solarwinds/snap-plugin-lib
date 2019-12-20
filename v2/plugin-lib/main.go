@@ -92,8 +92,8 @@ func ctagsToMap(tags *C.tag, tagsCount int) map[string]string {
 	return tagsMap
 }
 
-func errorToC(err error) * C.errorMsg {
-	var errMsg * C.char
+func errorToC(err error) *C.errorMsg {
+	var errMsg *C.char
 	if err != nil {
 		errMsg = (* C.char)(C.CString(err.Error()))
 	}
@@ -104,24 +104,27 @@ func errorToC(err error) * C.errorMsg {
 // Collect related functions
 
 //export ctx_add_metric
-func ctx_add_metric(ctxId *C.char, ns *C.char, v int) * C.errorMsg {
-	goErr := contextObject(ctxId).AddMetric(C.GoString(ns), v)
-	return errorToC(goErr)
+func ctx_add_metric(ctxId *C.char, ns *C.char, v int) *C.errorMsg {
+	err := contextObject(ctxId).AddMetric(C.GoString(ns), v)
+	return errorToC(err)
 }
 
 //export ctx_add_metric_with_tags
-func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag, tagsCount int) {
-	contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
+func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag, tagsCount int) *C.errorMsg {
+	err := contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
+	return errorToC(err)
 }
 
 //export ctx_apply_tags_by_path
-func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) {
-	contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tags, tagsCount))
+func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) *C.errorMsg {
+	err := contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tags, tagsCount))
+	return errorToC(err)
 }
 
 //export ctx_apply_tags_by_regexp
-func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) {
-	contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tags, tagsCount))
+func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tags *C.tag, tagsCount int) *C.errorMsg {
+	err := contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tags, tagsCount))
+	return errorToC(err)
 }
 
 //export ctx_should_process
@@ -131,7 +134,11 @@ func ctx_should_process(ctxId *C.char, ns *C.char) int {
 
 //export ctx_config
 func ctx_config(ctxId *C.char, key *C.char) *C.char {
-	v, _ := contextObject(ctxId).Config(C.GoString(key))
+	v, ok := contextObject(ctxId).Config(C.GoString(key))
+	if !ok {
+		return (* C.char)(C.NULL)
+	}
+
 	return C.CString(v)
 }
 
@@ -167,18 +174,19 @@ func define_group(name *C.char, description *C.char) {
 }
 
 //export define_example_config
-func define_example_config(cfg *C.char) {
-	_ = pluginDef.DefineExampleConfig(C.GoString(cfg))
+func define_example_config(cfg *C.char) *C.errorMsg {
+	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
+	return errorToC(err)
 }
 
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {
-	_ = pluginDef.DefineTasksPerInstanceLimit(limit)
+	pluginDef.DefineTasksPerInstanceLimit(limit)
 }
 
 //export define_instances_limit
 func define_instances_limit(limit int) {
-	_ = pluginDef.DefineInstancesLimit(limit)
+	pluginDef.DefineInstancesLimit(limit)
 }
 
 /*****************************************************************************/

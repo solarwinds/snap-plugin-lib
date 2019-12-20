@@ -106,11 +106,11 @@ extern "C" {
 
 extern errorMsg* ctx_add_metric(char* p0, char* p1, GoInt p2);
 
-extern void ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
+extern errorMsg* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag* p3, GoInt p4);
 
-extern void ctx_apply_tags_by_path(char* p0, char* p1, tag* p2, GoInt p3);
+extern errorMsg* ctx_apply_tags_by_path(char* p0, char* p1, tag* p2, GoInt p3);
 
-extern void ctx_apply_tags_by_regexp(char* p0, char* p1, tag* p2, GoInt p3);
+extern errorMsg* ctx_apply_tags_by_regexp(char* p0, char* p1, tag* p2, GoInt p3);
 
 extern GoInt ctx_should_process(char* p0, char* p1);
 
@@ -126,7 +126,7 @@ extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 
 extern void define_group(char* p0, char* p1);
 
-extern void define_example_config(char* p0);
+extern errorMsg* define_example_config(char* p0);
 
 extern void define_tasks_per_instance_limit(GoInt p0);
 

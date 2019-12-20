@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -42,20 +41,18 @@ func (cm *ContextManager) MarkTaskAsCompleted(id string) {
 	delete(cm.activeTasks, id)
 }
 
-func (cm *ContextManager) DefineTasksPerInstanceLimit(limit int) error {
+func (cm *ContextManager) DefineTasksPerInstanceLimit(limit int) {
 	if limit < -1 {
-		return fmt.Errorf("invalid tasks limit")
+		panic("invalid tasks limit")
 	}
 
 	cm.TasksLimit = limit
-	return nil
 }
 
-func (cm *ContextManager) DefineInstancesLimit(limit int) error {
+func (cm *ContextManager) DefineInstancesLimit(limit int) {
 	if limit < -1 {
-		return fmt.Errorf("invalid instances limit")
+		panic("invalid instances limit")
 	}
 
 	cm.InstancesLimit = limit
-	return nil
 }
