@@ -13,28 +13,24 @@ type resources struct {
 	statsListener net.Listener
 }
 
-func (r *resources) grpcListenerAddr() net.TCPAddr {
-	if r.grpcListener != nil {
-		return *r.grpcListener.Addr().(*net.TCPAddr)
+func safeListenerAddr(ln net.Listener) net.TCPAddr {
+	if ln != nil {
+		return *ln.Addr().(*net.TCPAddr)
 	}
 
 	return net.TCPAddr{}
+}
+
+func (r *resources) grpcListenerAddr() net.TCPAddr {
+	return safeListenerAddr(r.grpcListener)
 }
 
 func (r *resources) pprofListenerAddr() net.TCPAddr {
-	if r.pprofListener != nil {
-		return *r.pprofListener.Addr().(*net.TCPAddr)
-	}
-
-	return net.TCPAddr{}
+	return safeListenerAddr(r.pprofListener)
 }
 
 func (r *resources) statsListenerAddr() net.TCPAddr {
-	if r.statsListener != nil {
-		return *r.statsListener.Addr().(*net.TCPAddr)
-	}
-
-	return net.TCPAddr{}
+	return safeListenerAddr(r.statsListener)
 }
 
 func acquireResources(opt *plugin.Options) (*resources, error) {
