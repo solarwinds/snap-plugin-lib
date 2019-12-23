@@ -1,5 +1,6 @@
 from ctypes import *
 import os.path
+from .exceptions import PluginLibException, throw_exception_if_error
 
 plugin_lib_file = "snap-plugin-lib.dll"
 plugin_lib_obj = CDLL(os.path.join(os.path.dirname(__file__), plugin_lib_file))
@@ -22,6 +23,17 @@ class CError(Structure):
     ]
 
 
+###############################################################################
+# C function metadata
+
+plugin_lib_obj.ctx_add_metric.restype = POINTER(CError)
+plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
+plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
+plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
+
+
+###############################################################################
+
 class DefineContext:
     def define_tasks_per_instance_limit(self, limit):
         pass
@@ -43,6 +55,9 @@ class DefineContext:
 
 
 class Context:
+    def __init__(self, ctx_id):
+        self._ctx_id = ctx_id
+
     def config(self, key):
         pass
 
@@ -58,36 +73,56 @@ class Context:
     def load(self, obj):
         pass
 
+    def ctx_id(self):
+        return self._ctx_id
 
-class CollectContext:
+
+class CollectContext(Context):
+    @throw_exception_if_error
     def add_metric(self, namespace, value):
-        pass
+        return plugin_lib_obj.ctx_add_metric(self.ctx_id(),
+                                             string_to_bytes(namespace),
+                                             c_longlong(value))
 
+    @throw_exception_if_error
     def add_metric_with_tags(self, namespace, value, tags):
-        pass
+        return plugin_lib_obj.ctx_add_metric_with_tags(self.ctx_id(),
+                                                       string_to_bytes(namespace),
+                                                       c_longlong(value),
+                                                       dict_to_tags(tags),
+                                                       len(tags))
 
+    @throw_exception_if_error
     def apply_tags_by_path(self, namespace, tags):
-        pass
+        return plugin_lib_obj.ctx_apply_tags_by_path(self.ctx_id(),
+                                                     string_to_bytes(namespace),
+                                                     dict_to_tags(tags),
+                                                     len(tags))
 
+    @throw_exception_if_error
     def apply_tags_by_regexp(self, selector, tags):
-        pass
+        return plugin_lib_obj.ctx_apply_tags_by_regexp(self.ctx_id(),
+                                                       string_to_bytes(selector),
+                                                       dict_to_tags(tags),
+                                                       len(tags))
 
     def should_process(self, namespace):
-        pass
+        return bool(plugin_lib_obj.ctx_should_process(self.ctx_id(),
+                                                      string_to_bytes(namespace)))
 
 
 ###############################################################################
+# Callback related functions (called from C library)
 
 @CFUNCTYPE(None)
 def define_handler():
-    global collector_py
-
     print("** cpython *** Define plugin\n")
     collector_py.define_plugin(DefineContext())
 
 
 @CFUNCTYPE(None, c_char_p)
 def collect_handler(ctxId):
+    collector_py.collect(CollectContext(ctxId))
     print("** cpython *** Collect called\n")
 
 
@@ -128,3 +163,13 @@ def string_to_bytes(s):
         return s
     else:
         raise Exception("Invalid type, expected string or bytes")
+
+
+def dict_to_tags(d):
+    tags = (Tags * len(d))()
+
+    for i, (k, v) in enumerate(d.items()):
+        tags[i].key = string_to_bytes(k)
+        tags[i].value = string_to_bytes(v)
+
+    return tags

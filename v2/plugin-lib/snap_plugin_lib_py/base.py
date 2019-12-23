@@ -1,18 +1,21 @@
+from .cbridge import CollectContext, DefineContext, Context
+
+
 class BasePlugin:
     def __init__(self, name, version):
         self._name = name
         self._version = version
 
-    def define_plugin(self, ctx):
+    def define_plugin(self, ctx: DefineContext):
         pass
 
-    def collect(self, ctx):
+    def collect(self, ctx: CollectContext):
         pass
 
-    def load(self, ctx):
+    def load(self, ctx: Context):
         pass
 
-    def unload(self, ctx):
+    def unload(self, ctx: Context):
         pass
 
     def name(self):

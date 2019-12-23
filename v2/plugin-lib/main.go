@@ -103,20 +103,20 @@ func ctx_add_metric(ctxId *C.char, ns *C.char, v int) *C.error_t {
 	return toCError(err)
 }
 
-//export ctx_add_metric_with_tag_ts
-func ctx_add_metric_with_tag_ts(ctxId *C.char, ns *C.char, v int, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+//export ctx_add_metric_with_tags
+func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
 	err := contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tag_ts, tag_tsCount))
 	return toCError(err)
 }
 
-//export ctx_apply_tag_ts_by_path
-func ctx_apply_tag_ts_by_path(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+//export ctx_apply_tags_by_path
+func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
 	err := contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tag_ts, tag_tsCount))
 	return toCError(err)
 }
 
-//export ctx_apply_tag_ts_by_regexp
-func ctx_apply_tag_ts_by_regexp(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
+//export ctx_apply_tags_by_regexp
+func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tag_ts *C.tag_t, tag_tsCount int) *C.error_t {
 	err := contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tag_ts, tag_tsCount))
 	return toCError(err)
 }

@@ -100,11 +100,11 @@ extern "C" {
 
 extern error_t* ctx_add_metric(char* p0, char* p1, GoInt p2);
 
-extern error_t* ctx_add_metric_with_tag_ts(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
+extern error_t* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
 
-extern error_t* ctx_apply_tag_ts_by_path(char* p0, char* p1, tag_t* p2, GoInt p3);
+extern error_t* ctx_apply_tags_by_path(char* p0, char* p1, tag_t* p2, GoInt p3);
 
-extern error_t* ctx_apply_tag_ts_by_regexp(char* p0, char* p1, tag_t* p2, GoInt p3);
+extern error_t* ctx_apply_tags_by_regexp(char* p0, char* p1, tag_t* p2, GoInt p3);
 
 extern GoInt ctx_should_process(char* p0, char* p1);
 
