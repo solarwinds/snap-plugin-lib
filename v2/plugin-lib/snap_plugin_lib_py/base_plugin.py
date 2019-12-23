@@ -1,4 +1,4 @@
-from .cbridge import CollectContext, DefineContext, Context
+from .c_bridge import CollectContext, DefineContext, Context
 
 
 class BasePlugin:

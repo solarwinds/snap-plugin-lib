@@ -1,6 +1,6 @@
 from ctypes import *
 import os.path
-from .exceptions import PluginLibException, throw_exception_if_error
+from .exceptions import throw_exception_if_error
 
 plugin_lib_file = "snap-plugin-lib.dll"
 plugin_lib_obj = CDLL(os.path.join(os.path.dirname(__file__), plugin_lib_file))
@@ -36,28 +36,34 @@ plugin_lib_obj.ctx_apply_tags_by_regexp.restype = c_longlong
 ###############################################################################
 
 class DefineContext:
-    def define_tasks_per_instance_limit(self, limit):
+    @staticmethod
+    def define_tasks_per_instance_limit(limit):
         plugin_lib_obj.define_tasks_per_instance_limit(limit)
 
-    def define_instances_limit(self, limit):
+    @staticmethod
+    def define_instances_limit(limit):
         plugin_lib_obj.define_instances_limit(limit)
 
-    def define_metric(self, namespace, unit, is_default, description):
+    @staticmethod
+    def define_metric(namespace, unit, is_default, description):
         plugin_lib_obj.define_metric(string_to_bytes(namespace),
                                      string_to_bytes(unit),
                                      int(is_default),
                                      string_to_bytes(description))
 
-    def define_group(self, name, description):
+    @staticmethod
+    def define_group(name, description):
         plugin_lib_obj.define_group(string_to_bytes(name),
                                     string_to_bytes(description))
 
-    def define_global_tags(self, selector, tags):
+    @staticmethod
+    def define_global_tags(selector, tags):
         plugin_lib_obj.define_global_tags(string_to_bytes(selector),
                                           dict_to_tags(tags),
                                           len(tags))
 
-    def define_example_config(self, config):
+    @staticmethod
+    def define_example_config(config):
         pass
 
 
@@ -123,24 +129,22 @@ class CollectContext(Context):
 
 @CFUNCTYPE(None)
 def define_handler():
-    print("** cpython *** Define plugin\n")
     collector_py.define_plugin(DefineContext())
 
 
 @CFUNCTYPE(None, c_char_p)
-def collect_handler(ctxId):
-    collector_py.collect(CollectContext(ctxId))
-    print("** cpython *** Collect called\n")
+def collect_handler(ctx_id):
+    collector_py.collect(CollectContext(ctx_id))
 
 
 @CFUNCTYPE(None, c_char_p)
-def load_handler(ctxId):
-    print("** cpython *** Load called\n")
+def load_handler(ctx_id):
+    pass
 
 
 @CFUNCTYPE(None, c_char_p)
-def unload_handler(ctxId):
-    print("** cpython *** Unload called\n")
+def unload_handler(ctx_id):
+    pass
 
 
 ###############################################################################

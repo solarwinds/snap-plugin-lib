@@ -1,4 +1,4 @@
-from . cbridge import start_c_collector
+from .c_bridge import start_c_collector
 
 
 def start_collector(collector):
