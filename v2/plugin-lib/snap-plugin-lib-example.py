@@ -1,8 +1,8 @@
-from usage import BasePlugin
+from snap_plugin_lib_py import *
 
 
 class ExamplePlugin(BasePlugin):
-    def define_plugin(self):
+    def define_plugin(self, ctx):
         pass
 
     def collect(self, ctx):
@@ -16,5 +16,5 @@ class ExamplePlugin(BasePlugin):
 
 
 if __name__ == '__main__':
-    plugin = ExamplePlugin("example-plugin", "0.0.1")
-    plugin.start()
+    collector = ExamplePlugin("example", "0.0.1")
+    start_collector(collector)
