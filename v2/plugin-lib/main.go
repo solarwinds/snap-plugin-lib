@@ -140,7 +140,9 @@ func ctx_config(ctxId *C.char, key *C.char) *C.char {
 
 //export ctx_raw_config
 func ctx_raw_config(ctxId *C.char) *C.char {
-	return C.CString(string(contextObject(ctxId).RawConfig()))
+	rc := string(contextObject(ctxId).RawConfig())
+	fmt.Printf("rc=%#v\n", rc)
+	return C.CString(rc)
 }
 
 //export ctx_store

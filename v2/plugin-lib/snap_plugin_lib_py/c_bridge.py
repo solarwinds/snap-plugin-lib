@@ -1,6 +1,6 @@
 from ctypes import *
 import os.path
-from .exceptions import throw_exception_if_error
+from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 plugin_lib_file = "snap-plugin-lib.dll"
 plugin_lib_obj = CDLL(os.path.join(os.path.dirname(__file__), plugin_lib_file))
@@ -31,6 +31,8 @@ plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = c_longlong
+plugin_lib_obj.ctx_config.restype = c_char_p
+plugin_lib_obj.ctx_raw_config.restype = c_char_p
 
 
 ###############################################################################
@@ -71,14 +73,13 @@ class Context:
     def __init__(self, ctx_id):
         self._ctx_id = ctx_id
 
-    def config(self, key):
-        pass
-
-    def config_keys(self):
-        pass
+    @throw_exception_if_null("object with given key doesn't exists")
+    def config(self, key: str):
+        return plugin_lib_obj.ctx_config(self.ctx_id(),
+                                         string_to_bytes(key)).decode(encoding='utf-8')
 
     def raw_config(self):
-        pass
+        return plugin_lib_obj.ctx_raw_config(self.ctx_id()).decode(encoding='utf-8')
 
     def store(self, obj):
         pass
@@ -139,12 +140,12 @@ def collect_handler(ctx_id):
 
 @CFUNCTYPE(None, c_char_p)
 def load_handler(ctx_id):
-    pass
+    collector_py.load(Context(ctx_id))
 
 
 @CFUNCTYPE(None, c_char_p)
 def unload_handler(ctx_id):
-    pass
+    collector_py.unload(Context(ctx_id))
 
 
 ###############################################################################

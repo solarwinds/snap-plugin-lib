@@ -23,7 +23,8 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric_with_tags("/python/group2/dyn21/metric5", 35, {"tag1": "v1", "tags56": "v2"})
 
     def load(self, ctx):
-        pass
+        res = ctx.raw_config()
+        print("Config: __%s__" % res)
 
     def unload(self, ctx):
         pass
