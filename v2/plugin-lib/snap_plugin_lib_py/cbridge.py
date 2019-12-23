@@ -30,25 +30,32 @@ plugin_lib_obj.ctx_add_metric.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
+plugin_lib_obj.ctx_apply_tags_by_regexp.restype = c_longlong
 
 
 ###############################################################################
 
 class DefineContext:
     def define_tasks_per_instance_limit(self, limit):
-        pass
+        plugin_lib_obj.define_tasks_per_instance_limit(limit)
 
     def define_instances_limit(self, limit):
-        pass
+        plugin_lib_obj.define_instances_limit(limit)
 
     def define_metric(self, namespace, unit, is_default, description):
-        pass
+        plugin_lib_obj.define_metric(string_to_bytes(namespace),
+                                     string_to_bytes(unit),
+                                     int(is_default),
+                                     string_to_bytes(description))
 
     def define_group(self, name, description):
-        pass
+        plugin_lib_obj.define_group(string_to_bytes(name),
+                                    string_to_bytes(description))
 
     def define_global_tags(self, selector, tags):
-        pass
+        plugin_lib_obj.define_global_tags(string_to_bytes(selector),
+                                          dict_to_tags(tags),
+                                          len(tags))
 
     def define_example_config(self, config):
         pass

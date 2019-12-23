@@ -3,7 +3,7 @@ class PluginLibException(Exception):
 
 
 def throw_exception_if_error(func):
-    def wrapper(*args, **kwargs):
+    def func_wrapper(*args, **kwargs):
         err = func(*args, **kwargs)
         if err.contents.msg is None:
             return None
@@ -12,4 +12,4 @@ def throw_exception_if_error(func):
         if err_msg is not None:
             raise PluginLibException(err_msg)
 
-    return wrapper
+    return func_wrapper

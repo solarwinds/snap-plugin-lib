@@ -120,6 +120,8 @@ extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 
 extern void define_group(char* p0, char* p1);
 
+extern void define_global_tags(char* p0, tag_t* p1, GoInt p2);
+
 extern error_t* define_example_config(char* p0);
 
 extern void define_tasks_per_instance_limit(GoInt p0);

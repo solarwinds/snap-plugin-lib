@@ -8,11 +8,11 @@ class ExamplePlugin(BasePlugin):
         ctx.define_instances_limit(3)
 
         ctx.define_group("dyn", "Dynamic element from python")
-        ctx.define_metric("/python/group1/metric1", "C", 1, "1st metric")
-        ctx.define_metric("/python/group1/metric2", "C", 1, "2nd metric")
-        ctx.define_metric("/python/group1/metric3", "C", 0, "3rd metric")
-        ctx.define_metric("/python/group2/[dyn]/metric4", "C", 0, "1st dynamic metric")
-        ctx.define_metric("/python/group2/[dyn]/metric5", "C", 0, "2nd dynamic metric")
+        ctx.define_metric("/python/group1/metric1", "C", True, "1st metric")
+        ctx.define_metric("/python/group1/metric2", "C", True, "2nd metric")
+        ctx.define_metric("/python/group1/metric3", "C", False, "3rd metric")
+        ctx.define_metric("/python/group2/[dyn]/metric4", "C", False, "1st dynamic metric")
+        ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
         ctx.add_metric("/python/group1/metric1", 10)
@@ -20,11 +20,7 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group1/metric3", 40)
         ctx.add_metric("/python/group2/dyn1/metric4", 40)
         ctx.add_metric("/python/group2/dyn15/metric4", 11)
-        ctx.add_metric_with_tags("/python/group2/dyn21/metric6", 35, {"tag1": "v1", "tags56": "v2"})
-
-        print(ctx.should_process("/python/group2/dyn15/metric4"))
-        print(ctx.should_process("/python/group2/dyn15/metric7"))
-        print(ctx.should_process("/python/group2/dyn15/metric7"))
+        ctx.add_metric_with_tags("/python/group2/dyn21/metric5", 35, {"tag1": "v1", "tags56": "v2"})
 
     def load(self, ctx):
         pass
