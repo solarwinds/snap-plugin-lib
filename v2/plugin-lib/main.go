@@ -136,16 +136,20 @@ func toCError(err error) *C.error_t {
 func toGoValue(v *C.value_t) interface{} {
 	switch (*v).vtype {
 	case C.TYPE_INT64:
+		fmt.Printf("****1 %v \n", v)
 		return int(C.value_t_long_long(v))
 	case C.TYPE_UINT64:
+		fmt.Printf("****2 %v \n", v)
 		return uint(C.value_t_ulong_long(v))
 	case C.TYPE_DOUBLE:
+		fmt.Printf("****3 %v \n", v)
 		return float64(C.value_t_double(v))
 	case C.TYPE_BOOL:
+		fmt.Printf("****4 %v \n", v)
 		return intToBool(int(C.value_t_bool(v)))
 	}
 
-	panic("Invalid type")
+	panic(fmt.Sprintf("Invalid type %v", (*v).vtype))
 }
 
 /*****************************************************************************/

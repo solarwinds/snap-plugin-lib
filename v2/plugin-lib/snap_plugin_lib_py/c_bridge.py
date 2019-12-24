@@ -3,7 +3,7 @@ from collections import defaultdict
 from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
 import platform
 
-from .convertions import string_to_bytes, dict_to_tags, CError
+from .convertions import string_to_bytes, dict_to_tags, CError, to_value_t
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -22,6 +22,7 @@ global collector_py
 
 plugin_lib_obj.define_example_config.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric.restype = POINTER(CError)
+plugin_lib_obj.ctx_add_metric_ex.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
@@ -96,6 +97,12 @@ class CollectContext(Context):
         return plugin_lib_obj.ctx_add_metric(self.ctx_id(),
                                              string_to_bytes(namespace),
                                              c_longlong(value))
+
+    @throw_exception_if_error
+    def add_metric_ex(self, namespace, value):
+        return plugin_lib_obj.ctx_add_metric_ex(self.ctx_id(),
+                                                string_to_bytes(namespace),
+                                                to_value_t(value))
 
     @throw_exception_if_error
     def add_metric_with_tags(self, namespace, value, tags):
