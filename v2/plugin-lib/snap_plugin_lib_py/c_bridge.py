@@ -1,9 +1,12 @@
 from ctypes import *
 import os.path
 from .exceptions import throw_exception_if_error, throw_exception_if_null
+from collections import defaultdict
 
 plugin_lib_file = "snap-plugin-lib.dll"
 plugin_lib_obj = CDLL(os.path.join(os.path.dirname(__file__), plugin_lib_file))
+
+storedObjectMap = defaultdict(dict)
 
 global collector_py
 
@@ -33,9 +36,11 @@ plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = c_longlong
 plugin_lib_obj.ctx_config.restype = c_char_p
 plugin_lib_obj.ctx_raw_config.restype = c_char_p
+plugin_lib_obj.ctx_load.restype = c_void_p
 
 
 ###############################################################################
+
 
 class DefineContext:
     @staticmethod
@@ -81,11 +86,11 @@ class Context:
     def raw_config(self):
         return plugin_lib_obj.ctx_raw_config(self.ctx_id()).decode(encoding='utf-8')
 
-    def store(self, obj):
-        pass
+    def store(self, key, obj):
+        storedObjectMap[self.ctx_id()][key] = obj
 
-    def load(self, obj):
-        pass
+    def load(self, key):
+        return storedObjectMap[self.ctx_id()][key]
 
     def ctx_id(self):
         return self._ctx_id
