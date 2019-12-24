@@ -22,6 +22,29 @@ static inline void call_c_callback(callback_t callback, char * ctxId) { callback
 static inline void call_c_define_callback(define_callback_t callback) { callback(); }
 
 // some helpers to manage C/Go memory/access interactions
+enum value_type_t {
+	TYPE_INVALID,
+	TYPE_INT64,
+	TYPE_UINT64,
+	TYPE_DOUBLE,
+	TYPE_BOOL,
+};
+
+typedef struct {
+	union  {
+		long long v_int64;
+		unsigned long long v_uint64;
+		double v_double;
+		int v_bool;
+	} value;
+	int vtype; // value_type_t;
+} value_t;
+
+static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
+static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
+static inline double value_t_double(value_t * v) { return v->value.v_double; }
+static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
+
 typedef struct {
     char * key;
     char * value;
@@ -38,6 +61,22 @@ static inline error_t * alloc_error_msg(char * msg) {
     error_t * errMsg = malloc(sizeof(error_t));
     errMsg->msg = msg;
     return errMsg;
+}
+
+static inline void free_error_msg(error_t * err) {
+	if (err == NULL) {
+		return;
+	}
+
+	if (err->msg != NULL) {
+		free(err->msg);
+	}
+
+	free(err);
+}
+
+static inline void free_memory(void * p) {
+	free(p);
 }
 
 */
@@ -76,14 +115,14 @@ func boolToInt(v bool) int {
 	return 1
 }
 
-func ctagsToMap(tag_ts *C.tag_t, tag_tsCount int) map[string]string {
-	tag_tsMap := map[string]string{}
-	for i := 0; i < tag_tsCount; i++ {
-		k := C.GoString(C.tag_key(tag_ts, C.int(i)))
-		v := C.GoString(C.tag_value(tag_ts, C.int(i)))
-		tag_tsMap[k] = v
+func ctagsToMap(tags *C.tag_t, tagsCount int) map[string]string {
+	tagsMap := map[string]string{}
+	for i := 0; i < tagsCount; i++ {
+		k := C.GoString(C.tag_key(tags, C.int(i)))
+		v := C.GoString(C.tag_value(tags, C.int(i)))
+		tagsMap[k] = v
 	}
-	return tag_tsMap
+	return tagsMap
 }
 
 func toCError(err error) *C.error_t {
@@ -94,12 +133,33 @@ func toCError(err error) *C.error_t {
 	return C.alloc_error_msg((* C.char)(errMsg))
 }
 
+func toGoValue(v *C.value_t) interface{} {
+	switch (*v).vtype {
+	case C.TYPE_INT64:
+		return int(C.value_t_long_long(v))
+	case C.TYPE_UINT64:
+		return uint(C.value_t_ulong_long(v))
+	case C.TYPE_DOUBLE:
+		return float64(C.value_t_double(v))
+	case C.TYPE_BOOL:
+		return intToBool(int(C.value_t_bool(v)))
+	}
+
+	panic("Invalid type")
+}
+
 /*****************************************************************************/
 // Collect related functions
 
 //export ctx_add_metric
-func ctx_add_metric(ctxId *C.char, ns *C.char, v int) *C.error_t {
-	err := contextObject(ctxId).AddMetric(C.GoString(ns), v)
+func ctx_add_metric(ctx_id *C.char, ns *C.char, v int) *C.error_t {
+	err := contextObject(ctx_id).AddMetric(C.GoString(ns), v)
+	return toCError(err)
+}
+
+//export ctx_add_metric_ex
+func ctx_add_metric_ex(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
+	err := contextObject(ctx_id).AddMetric(C.GoString(ns), toGoValue(v))
 	return toCError(err)
 }
 

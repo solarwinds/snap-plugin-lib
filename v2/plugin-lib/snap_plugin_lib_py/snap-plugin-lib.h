@@ -30,6 +30,29 @@ static inline void call_c_callback(callback_t callback, char * ctxId) { callback
 static inline void call_c_define_callback(define_callback_t callback) { callback(); }
 
 // some helpers to manage C/Go memory/access interactions
+enum value_type_t {
+	TYPE_INVALID,
+	TYPE_INT64,
+	TYPE_UINT64,
+	TYPE_DOUBLE,
+	TYPE_BOOL,
+};
+
+typedef struct {
+	union  {
+		long long v_int64;
+		unsigned long long v_uint64;
+		double v_double;
+		int v_bool;
+	} value;
+	int vtype; // value_type_t;
+} value_t;
+
+static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
+static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
+static inline double value_t_double(value_t * v) { return v->value.v_double; }
+static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
+
 typedef struct {
     char * key;
     char * value;
@@ -46,6 +69,22 @@ static inline error_t * alloc_error_msg(char * msg) {
     error_t * errMsg = malloc(sizeof(error_t));
     errMsg->msg = msg;
     return errMsg;
+}
+
+static inline void free_error_msg(error_t * err) {
+	if (err == NULL) {
+		return;
+	}
+
+	if (err->msg != NULL) {
+		free(err->msg);
+	}
+
+	free(err);
+}
+
+static inline void free_memory(void * p) {
+	free(p);
 }
 
 
@@ -99,6 +138,8 @@ extern "C" {
 
 
 extern error_t* ctx_add_metric(char* p0, char* p1, GoInt p2);
+
+extern error_t* ctx_add_metric_ex(char* p0, char* p1, value_t* p2);
 
 extern error_t* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
 
