@@ -1,34 +1,26 @@
-from ctypes import *
 import os.path
-from .exceptions import throw_exception_if_error, throw_exception_if_null
 from collections import defaultdict
+from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
+import platform
 
-plugin_lib_file = "snap-plugin-lib.dll"
+from .convertions import string_to_bytes, dict_to_tags, CError
+from .exceptions import throw_exception_if_error, throw_exception_if_null
+
+# Dependent library
+plugin_lib_extension = ".dll" if (platform.system() == "Windows") else ".so"
+plugin_lib_file = "snap-plugin-lib%s" % plugin_lib_extension
 plugin_lib_obj = CDLL(os.path.join(os.path.dirname(__file__), plugin_lib_file))
 
+# Used to store object for a given context. Access example: storedObjectMap[ctx_id][key]
 storedObjectMap = defaultdict(dict)
 
+# Reference to user-defined collector
 global collector_py
 
-
 ###############################################################################
+# C functions metadata
 
-class Tags(Structure):
-    _fields_ = [
-        ("key", c_char_p),
-        ("value", c_char_p)
-    ]
-
-
-class CError(Structure):
-    _fields_ = [
-        ("msg", c_char_p)
-    ]
-
-
-###############################################################################
-# C function metadata
-
+plugin_lib_obj.define_example_config.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
@@ -40,7 +32,8 @@ plugin_lib_obj.ctx_load.restype = c_void_p
 
 
 ###############################################################################
-
+# Python wrappers to context object - will call C functions and performing some conversions.
+# Load, store are exceptions since it's safer to keep Python references on Python side
 
 class DefineContext:
     @staticmethod
@@ -70,8 +63,9 @@ class DefineContext:
                                           len(tags))
 
     @staticmethod
+    @throw_exception_if_error
     def define_example_config(config):
-        pass
+        return plugin_lib_obj.define_example_config(string_to_bytes(config))
 
 
 class Context:
@@ -154,8 +148,8 @@ def unload_handler(ctx_id):
 
 
 ###############################################################################
+# Collector setup
 
-# todo: only 1 instance should be run # check this
 def start_c_collector(collector):
     global collector_py
 
@@ -168,25 +162,3 @@ def start_c_collector(collector):
                                    unload_handler,
                                    define_handler,
                                    string_to_bytes(name), string_to_bytes(version))
-
-
-###############################################################################
-
-
-def string_to_bytes(s):
-    if isinstance(s, type("")):
-        return bytes(s, 'utf-8')
-    elif isinstance(s, type(b"")):
-        return s
-    else:
-        raise Exception("Invalid type, expected string or bytes")
-
-
-def dict_to_tags(d):
-    tags = (Tags * len(d))()
-
-    for i, (k, v) in enumerate(d.items()):
-        tags[i].key = string_to_bytes(k)
-        tags[i].value = string_to_bytes(v)
-
-    return tags

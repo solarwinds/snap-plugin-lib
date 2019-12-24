@@ -2,6 +2,7 @@ class PluginLibException(Exception):
     pass
 
 
+# Decorator - used to throw exception when function return not-null string
 def throw_exception_if_error(func):
     def func_wrapper(*args, **kwargs):
         err = func(*args, **kwargs)
@@ -15,6 +16,7 @@ def throw_exception_if_error(func):
     return func_wrapper
 
 
+# Decorator - used to throw exception when function return NULL
 def throw_exception_if_null(exception_msg):
     def func_wrapper(func):
         def inner_wrapper(*args, **kwargs):

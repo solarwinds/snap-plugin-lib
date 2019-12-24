@@ -15,8 +15,6 @@ class ExamplePlugin(BasePlugin):
         ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
-        print(ctx.load("p"))
-
         ctx.add_metric("/python/group1/metric1", 10)
         ctx.add_metric("/python/group1/metric2", 20)
         ctx.add_metric("/python/group1/metric3", 40)
@@ -25,8 +23,7 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric_with_tags("/python/group2/dyn21/metric5", 35, {"tag1": "v1", "tags56": "v2"})
 
     def load(self, ctx):
-        p = ["Hello", {"lll": 34}]
-        ctx.store("p", p)
+        pass
 
     def unload(self, ctx):
         pass
