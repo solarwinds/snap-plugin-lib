@@ -23,7 +23,7 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric_with_tags("/python/group2/dyn21/metric5", 35, {"tag1": "v1", "tags56": "v2"})
         ctx.add_metric_ex("/python/group2/dyn55/metric4", 5.34)
         ctx.add_metric_ex("/python/group2/dyn56/metric4", -21)
-        ctx.add_metric_ex("/python/group2/dyn57/metric4", 43)
+        ctx.add_metric_ex("/python/group2/dyn57/metric4", 9223372036854775999)
         ctx.add_metric_ex("/python/group2/dyn58/metric4", True)
 
     def load(self, ctx):
