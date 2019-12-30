@@ -167,6 +167,22 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 }
 
 func ValidateOptions(opt *plugin.Options) error {
+	if opt.DebugCollectCounts == 0 {
+		opt.DebugCollectCounts = defaultCollectCount
+	}
+
+	if opt.DebugCollectInterval == 0 {
+		opt.DebugCollectInterval = defaultCollectInterval
+	}
+
+	if opt.PluginConfig == "" {
+		opt.PluginConfig = defaultConfig
+	}
+
+	if opt.PluginFilter == "" {
+		opt.PluginFilter = defaultFilter
+	}
+
 	grpcIp := net.ParseIP(opt.PluginIP)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
