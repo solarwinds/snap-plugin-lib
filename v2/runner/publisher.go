@@ -71,7 +71,7 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 
 	// We need to bind the gRPC client on the other end to the same channel so need to return it from here
 	if grpcChan != nil {
-		grpcChan <- srv.(*service.Channel)
+		grpcChan <- srv.(*service.Channel).Channel
 	}
 
 	// main blocking operation
