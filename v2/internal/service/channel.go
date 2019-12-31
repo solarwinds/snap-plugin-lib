@@ -20,10 +20,10 @@ func (*Channel) Serve(_ net.Listener) error {
 	return nil
 }
 
-func (*Channel) GracefulStop() {
-	panic("Implement me")
+func (c *Channel) GracefulStop() {
+	c.Stop()
 }
 
-func (*Channel) Stop() {
-	panic("Implement me")
+func (c *Channel) Stop() {
+	c.Channel = nil
 }
