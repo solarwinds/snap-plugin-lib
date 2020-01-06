@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"reflect"
 	"sync"
 	"unsafe"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/librato/snap-plugin-lib-go/v2/runner"
 )
 
 /*
@@ -108,7 +109,7 @@ func intToBool(v int) bool {
 }
 
 func boolToInt(v bool) int {
-	if v == false {
+	if !v {
 		return 0
 	}
 
@@ -128,9 +129,9 @@ func ctagsToMap(tags *C.tag_t, tagsCount int) map[string]string {
 func toCError(err error) *C.error_t {
 	var errMsg *C.char
 	if err != nil {
-		errMsg = (* C.char)(C.CString(err.Error()))
+		errMsg = (*C.char)(C.CString(err.Error()))
 	}
-	return C.alloc_error_msg((* C.char)(errMsg))
+	return C.alloc_error_msg((*C.char)(errMsg))
 }
 
 func toGoValue(v *C.value_t) interface{} {
@@ -184,7 +185,7 @@ func ctx_should_process(ctxId *C.char, ns *C.char) int {
 func ctx_config(ctxId *C.char, key *C.char) *C.char {
 	v, ok := contextObject(ctxId).Config(C.GoString(key))
 	if !ok {
-		return (* C.char)(C.NULL)
+		return (*C.char)(C.NULL)
 	}
 
 	return C.CString(v)

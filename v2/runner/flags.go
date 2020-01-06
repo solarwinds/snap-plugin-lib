@@ -83,10 +83,6 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		"plugin-api-v2", true,
 		"If a plugin supports multiple plugin API versions, set it to use v2")
 
-	// todo: adamik remove later or add and ignore
-	a := false
-	flagParser.BoolVar(&a, "u", false, "dfsdfsdfsdf")
-
 	// custom flags
 
 	if pType == types.PluginTypeCollector {
@@ -158,7 +154,7 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	flagParser := newFlagParser(pluginName, pluginType, opt)
 	argsToParse := args[0:]
 
-	if strings.HasSuffix(args[0], ".py") { // ignore first parameter if plugin is an interpreted code
+	if len(args) > 0 && strings.HasSuffix(args[0], ".py") { // ignore first parameter if plugin is an interpreted code
 		argsToParse = args[1:]
 	}
 
