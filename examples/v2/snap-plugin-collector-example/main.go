@@ -38,8 +38,8 @@ credentials:
 `
 
 func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
-	_ = def.DefineTasksPerInstanceLimit(5)
-	_ = def.DefineInstancesLimit(plugin.NoLimit)
+	def.DefineTasksPerInstanceLimit(5)
+	def.DefineInstancesLimit(plugin.NoLimit)
 
 	def.DefineMetric("/example/static/random1", "", true, "Random value (0-10)")
 	def.DefineMetric("/example/static/random2", "", true, "Random value (0-20)")
