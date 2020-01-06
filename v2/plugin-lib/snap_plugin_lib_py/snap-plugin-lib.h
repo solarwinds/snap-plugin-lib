@@ -137,9 +137,7 @@ extern "C" {
 #endif
 
 
-extern error_t* ctx_add_metric(char* p0, char* p1, GoInt p2);
-
-extern error_t* ctx_add_metric_ex(char* p0, char* p1, value_t* p2);
+extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2);
 
 extern error_t* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
 

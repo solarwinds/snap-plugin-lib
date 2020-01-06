@@ -22,7 +22,6 @@ global collector_py
 
 plugin_lib_obj.define_example_config.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric.restype = POINTER(CError)
-plugin_lib_obj.ctx_add_metric_ex.restype = POINTER(CError)
 plugin_lib_obj.ctx_add_metric_with_tags.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_path.restype = POINTER(CError)
 plugin_lib_obj.ctx_apply_tags_by_regexp.restype = POINTER(CError)
@@ -96,13 +95,7 @@ class CollectContext(Context):
     def add_metric(self, namespace, value):
         return plugin_lib_obj.ctx_add_metric(self.ctx_id(),
                                              string_to_bytes(namespace),
-                                             c_longlong(value))
-
-    @throw_exception_if_error
-    def add_metric_ex(self, namespace, value):
-        return plugin_lib_obj.ctx_add_metric_ex(self.ctx_id(),
-                                                string_to_bytes(namespace),
-                                                to_value_t(value))
+                                             to_value_t(value))
 
     @throw_exception_if_error
     def add_metric_with_tags(self, namespace, value, tags):

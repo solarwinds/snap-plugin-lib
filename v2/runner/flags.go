@@ -162,8 +162,7 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 
 	v := flagParser.Args()
 	if len(v) > 0 {
-		// todo: remove
-		//return opt, fmt.Errorf("unexpected option(s) provided: %v %v", v, len(v))
+		return opt, fmt.Errorf("unexpected option(s) provided: %v %v", v, len(v))
 	}
 
 	return opt, nil

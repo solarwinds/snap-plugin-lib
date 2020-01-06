@@ -136,16 +136,12 @@ func toCError(err error) *C.error_t {
 func toGoValue(v *C.value_t) interface{} {
 	switch (*v).vtype {
 	case C.TYPE_INT64:
-		fmt.Printf("****1 %v \n", v)
 		return int(C.value_t_long_long(v))
 	case C.TYPE_UINT64:
-		fmt.Printf("****2 %v \n", v)
 		return uint(C.value_t_ulong_long(v))
 	case C.TYPE_DOUBLE:
-		fmt.Printf("****3 %v \n", v)
 		return float64(C.value_t_double(v))
 	case C.TYPE_BOOL:
-		fmt.Printf("****4 %v \n", v)
 		return intToBool(int(C.value_t_bool(v)))
 	}
 
@@ -156,13 +152,7 @@ func toGoValue(v *C.value_t) interface{} {
 // Collect related functions
 
 //export ctx_add_metric
-func ctx_add_metric(ctx_id *C.char, ns *C.char, v int) *C.error_t {
-	err := contextObject(ctx_id).AddMetric(C.GoString(ns), v)
-	return toCError(err)
-}
-
-//export ctx_add_metric_ex
-func ctx_add_metric_ex(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
+func ctx_add_metric(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
 	err := contextObject(ctx_id).AddMetric(C.GoString(ns), toGoValue(v))
 	return toCError(err)
 }
