@@ -1,29 +1,13 @@
-# Gopkg.toml example
-#
-# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
-# for detailed Gopkg.toml documentation.
-#
-# required = ["github.com/user/thing/cmd/thing"]
-# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
-#
-# [[constraint]]
-#   name = "github.com/user/project"
-#   version = "1.0.0"
-#
-# [[constraint]]
-#   name = "github.com/user/project2"
-#   branch = "dev"
-#   source = "github.com/myfork/project2"
-#
-# [[override]]
-#   name = "github.com/x/y"
-#   version = "2.4.0"
-#
-# [prune]
-#   non-go = false
-#   go-tests = true
-#   unused-packages = true
+# Needed for Travis lint stage
+required = [
+  "honnef.co/go/tools/cmd/staticcheck"
+]
 
+[[override]]
+  name="honnef.co/go/tools"
+  revision="d36bf90409063c0fe4fecdc07cc71e25b59a4050"
+
+# Actual code dependencies
 [[constraint]]
   name = "github.com/julienschmidt/httprouter"
   version = "1.1.0"
@@ -35,6 +19,10 @@
 [[constraint]]
   name = "google.golang.org/grpc"
   version = "1.4.0"
+
+[[override]]
+  name = "github.com/cpuguy83/go-md2man"
+  version = "=v1.0.9"
 
 [prune]
   go-tests = true

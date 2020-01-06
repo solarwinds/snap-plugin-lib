@@ -32,5 +32,5 @@ const (
 )
 
 func main() {
-	plugin.StartCollector(rand.RandCollector{}, pluginName, pluginVersion, plugin.GRPCServerOptions(grpc.MaxMsgSize(maxGRPCMesgSize)))
+	plugin.StartCollector(rand.RandCollector{}, pluginName, pluginVersion, plugin.GRPCServerOptions(grpc.MaxRecvMsgSize(maxGRPCMesgSize)))
 }

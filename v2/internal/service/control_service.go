@@ -1,4 +1,4 @@
-package pluginrpc
+package service
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
 const (
@@ -22,10 +24,10 @@ var (
 
 type controlService struct {
 	pingCh  chan struct{} // notification about received ping
-	closeCh chan error    // request exit to main routine
+	closeCh chan<- error  // request exit to main routine
 }
 
-func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
+func newControlService(closeCh chan<- error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
 	cs := &controlService{
 		pingCh:  make(chan struct{}),
 		closeCh: closeCh,
@@ -47,20 +49,20 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 	return cs
 }
 
-func (cs *controlService) Ping(context.Context, *PingRequest) (*PingResponse, error) {
+func (cs *controlService) Ping(context.Context, *pluginrpc.PingRequest) (*pluginrpc.PingResponse, error) {
 	logControlService.Debug("GRPC Ping() received")
 
 	cs.pingCh <- struct{}{}
 
-	return &PingResponse{}, nil
+	return &pluginrpc.PingResponse{}, nil
 }
 
-func (cs *controlService) Kill(context.Context, *KillRequest) (*KillResponse, error) {
+func (cs *controlService) Kill(context.Context, *pluginrpc.KillRequest) (*pluginrpc.KillResponse, error) {
 	logControlService.Debug("GRPC Kill() received")
 
 	cs.closeCh <- RequestedKillError
 
-	return &KillResponse{}, nil
+	return &pluginrpc.KillResponse{}, nil
 }
 
 func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {

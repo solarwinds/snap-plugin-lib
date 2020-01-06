@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	defaultMaxCollectDuration = 10 * time.Second
-	defaultMaxMetricsBuffer   = 0
+	defaultMaxMetricsBuffer = 0
 )
 
 type StreamProxy struct {

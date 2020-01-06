@@ -59,7 +59,7 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 
 	// Count metrics
 	startTime, _ := ctx.Load("startTime")
-	runningDuration := int(time.Now().Sub(startTime.(time.Time)).Seconds())
+	runningDuration := int(time.Since(startTime.(time.Time)).Seconds())
 	_ = ctx.AddMetric("/example/count/running", runningDuration)
 
 	return nil

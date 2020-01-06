@@ -136,7 +136,7 @@ func (ns *Namespace) IsUsableForFiltering(metricDefinitionPresent bool) bool {
 
 	if !metricDefinitionPresent {
 		for _, nsElem := range ns.elements[1:len(ns.elements)] {
-			if nsElem.IsDynamic() == true {
+			if nsElem.IsDynamic() {
 				return false
 			}
 		}
@@ -502,11 +502,11 @@ func (sre *staticRegexpAcceptingGroupElement) Match(s string) bool {
 		return false
 	}
 
-	switch parsedEl.(type) {
+	switch pEl := parsedEl.(type) {
 	case *staticSpecificElement:
 		return sre.regExp.MatchString(s)
 	case *dynamicSpecificElement:
-		return sre.regExp.MatchString(parsedEl.(*dynamicSpecificElement).value)
+		return sre.regExp.MatchString(pEl.value)
 	}
 
 	return false

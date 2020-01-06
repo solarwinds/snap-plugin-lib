@@ -8,8 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/pluginrpc"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,25 +33,25 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func newFlagParser(name string, pType types.PluginType, opt *types.Options) *flag.FlagSet {
+func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *flag.FlagSet {
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	// common flags
 
-	flagParser.StringVar(&opt.PluginIp,
+	flagParser.StringVar(&opt.PluginIP,
 		"plugin-ip", defaultPluginIP,
 		"IP Address on which GRPC server will be served")
 
-	flagParser.IntVar(&opt.GrpcPort,
+	flagParser.IntVar(&opt.GRPCPort,
 		"grpc-port", defaultGRPCPort,
 		"Port on which GRPC server will be served")
 
-	flagParser.DurationVar(&opt.GrpcPingTimeout,
-		"grpc-ping-timeout", pluginrpc.DefaultPingTimeout,
+	flagParser.DurationVar(&opt.GRPCPingTimeout,
+		"grpc-ping-timeout", service.DefaultPingTimeout,
 		"Deadline for receiving single ping messages")
 
-	flagParser.UintVar(&opt.GrpcPingMaxMissed,
-		"grpc-ping-max-missed", pluginrpc.DefaultMaxMissingPingCounter,
+	flagParser.UintVar(&opt.GRPCPingMaxMissed,
+		"grpc-ping-max-missed", service.DefaultMaxMissingPingCounter,
 		"Number of missed ping messages after which plugin should exit")
 
 	allLogLevels := strings.Replace(fmt.Sprintf("%v", logrus.AllLevels), " ", ", ", -1)
@@ -61,7 +63,7 @@ func newFlagParser(name string, pType types.PluginType, opt *types.Options) *fla
 		"enable-profiling", false,
 		"Enable profiling (pprof server)")
 
-	flagParser.IntVar(&opt.PprofPort,
+	flagParser.IntVar(&opt.PProfPort,
 		"pprof-port", defaultPProfPort,
 		"Port on which profiling server will be available")
 
@@ -117,7 +119,7 @@ func newFlagParser(name string, pType types.PluginType, opt *types.Options) *fla
 }
 
 type logLevelHandler struct {
-	opt *types.Options
+	opt *plugin.Options
 }
 
 func (l *logLevelHandler) String() string {
@@ -148,8 +150,8 @@ func (l *logLevelHandler) Set(s string) error {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []string) (*types.Options, error) {
-	opt := &types.Options{
+func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []string) (*plugin.Options, error) {
+	opt := &plugin.Options{
 		LogLevel: defaultLogLevel,
 	}
 
@@ -173,13 +175,29 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	return opt, nil
 }
 
-func ValidateOptions(opt *types.Options) error {
-	grpcIp := net.ParseIP(opt.PluginIp)
+func ValidateOptions(opt *plugin.Options) error {
+	if opt.DebugCollectCounts == 0 {
+		opt.DebugCollectCounts = defaultCollectCount
+	}
+
+	if opt.DebugCollectInterval == 0 {
+		opt.DebugCollectInterval = defaultCollectInterval
+	}
+
+	if opt.PluginConfig == "" {
+		opt.PluginConfig = defaultConfig
+	}
+
+	if opt.PluginFilter == "" {
+		opt.PluginFilter = defaultFilter
+	}
+
+	grpcIp := net.ParseIP(opt.PluginIP)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
 	}
 
-	if opt.PprofPort > 0 && !opt.EnableProfiling {
+	if opt.PProfPort > 0 && !opt.EnableProfiling {
 		return fmt.Errorf("-enable-pprof flag should be set when configuring pprof port")
 	}
 
@@ -198,7 +216,7 @@ func ValidateOptions(opt *types.Options) error {
 	return nil
 }
 
-func anyDebugFlagSet(opt *types.Options) bool {
+func anyDebugFlagSet(opt *plugin.Options) bool {
 	return opt.DebugCollectCounts != defaultCollectCount ||
 		opt.DebugCollectInterval != defaultCollectInterval ||
 		opt.PluginConfig != defaultConfig ||

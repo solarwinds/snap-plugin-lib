@@ -638,7 +638,7 @@ func shutdownPlugin(grpcServer *grpc.Server) {
 		log.Debug("GRPC server stopped gracefully")
 	case <-time.After(GRPCGracefulStopTimeout):
 		grpcServer.Stop()
-		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might be lost")
+		log.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might have been lost")
 	}
 }
 
@@ -843,8 +843,6 @@ func parseString(vals []string, name string, conf Config) (required string, mini
 			//parse val[idx] to get contents after :
 			idxOfColon := strings.Index(valueAtIndex, ":")
 			maximum = valueAtIndex[idxOfColon+1:]
-		} else {
-			//No default max value
 		}
 	}
 

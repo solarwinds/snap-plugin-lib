@@ -1,6 +1,6 @@
 // +build medium
 
-package pluginrpc
+package service
 
 import (
 	"testing"

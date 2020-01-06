@@ -359,8 +359,5 @@ func NewNamespaceElement(e string) NamespaceElement {
 // IsDynamic returns true if the namespace element contains data.  A namespace
 // element that has a nonempty Name field is considered dynamic.
 func (n *NamespaceElement) IsDynamic() bool {
-	if n.Name != "" {
-		return true
-	}
-	return false
+	return n.Name != ""
 }
