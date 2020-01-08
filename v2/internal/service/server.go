@@ -65,7 +65,8 @@ func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingM
 		}
 	}()
 
-	exitErr := <-closeChan
+	exitErr := <-closeChan // may be blocking (depending on implementation)
+
 	if exitErr != nil && exitErr != RequestedKillError {
 		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	pluginName    = "collector-example"
+	pluginName    = "example"
 	pluginVersion = "0.0.1"
 
 	maxCollectDuration = 5 * time.Second
