@@ -10,13 +10,12 @@ import (
 	"time"
 
 	"github.com/fullstorydev/grpchan"
-	"github.com/sirupsen/logrus"
-
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
 )
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runner"})
@@ -116,7 +115,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		os.Exit(errorExitStatus)
 	}
 
-	for runCount := uint(0); ; {
+	for runCount := 0; ; {
 		// Request metrics collection
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
 		if errColl != nil {

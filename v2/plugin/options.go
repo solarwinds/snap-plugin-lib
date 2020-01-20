@@ -27,6 +27,6 @@ type Options struct {
 	DebugMode            bool          `json:"-"`
 	PluginConfig         string        `json:"-"`
 	PluginFilter         string        `json:"-"`
-	DebugCollectCounts   uint          `json:"-"`
+	DebugCollectCounts   int           `json:"-"`
 	DebugCollectInterval time.Duration `json:"-"`
 }
