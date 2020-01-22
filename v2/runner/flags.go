@@ -11,7 +11,6 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -94,9 +93,9 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 			"debug-mode", false,
 			"Run plugin in debug mode (standalone)")
 
-		flagParser.UintVar(&opt.DebugCollectCounts,
+		flagParser.IntVar(&opt.DebugCollectCounts,
 			"debug-collect-counts", defaultCollectCount,
-			"Number of collect requests executed in debug mode (0 - infinitely)")
+			"Number of collect requests executed in debug mode (-1 for infinitely)")
 
 		flagParser.DurationVar(&opt.DebugCollectInterval,
 			"debug-collect-interval", defaultCollectInterval,
