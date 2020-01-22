@@ -23,6 +23,8 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runn
 const (
 	normalExitStatus = 0
 	errorExitStatus  = 1
+
+	infiniteDebugCollectCount = -1
 )
 
 // As a regular process
@@ -131,9 +133,11 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		fmt.Printf("\n")
 
 		// wait to request new collection or exit
-		runCount++
-		if runCount == opt.DebugCollectCounts {
-			break
+		if opt.DebugCollectCounts != infiniteDebugCollectCount {
+			runCount++
+			if runCount == opt.DebugCollectCounts {
+				break
+			}
 		}
 
 		time.Sleep(opt.DebugCollectInterval)
