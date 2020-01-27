@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 )
@@ -13,6 +14,12 @@ type Context struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
+	sessionWarnings    []Warning
+}
+
+type Warning struct {
+	Message   string
+	Timestamp time.Time
 }
 
 func NewContext(rawConfig []byte) (*Context, error) {
@@ -80,4 +87,15 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 	vDest.Elem().Set(reflect.ValueOf(obj))
 
 	return nil
+}
+
+func (c *Context) AddWarning(msg string) {
+	c.sessionWarnings = append(c.sessionWarnings, Warning{
+		Message:   msg,
+		Timestamp: time.Now(),
+	})
+}
+
+func (c *Context) ClearWarnings() {
+	c.sessionWarnings = []Warning{}
 }

@@ -35,6 +35,10 @@ func (m *Context) LoadTo(key string, dest interface{}) error {
 	return args.Error(0)
 }
 
+func (m *Context) AddWarning(msg string) {
+	m.Called(msg)
+}
+
 func (m *Context) AddMetric(ns string, value interface{}) error {
 	args := m.Called(ns, value)
 	return args.Error(0)
