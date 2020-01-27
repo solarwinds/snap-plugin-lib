@@ -20,7 +20,7 @@ func init() {
 }
 
 type Publisher interface {
-	RequestPublish(id string, mts []*types.Metric) error
+	RequestPublish(id string, mts []*types.Metric) types.ProcessingError
 	LoadTask(id string, config []byte) error
 	UnloadTask(id string) error
 }
@@ -51,19 +51,24 @@ func NewContextManager(publisher plugin.Publisher, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Publisher related methods
 
-func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
+func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.ProcessingError {
 	if !cm.ActivateTask(id) {
-		return fmt.Errorf("can't process publish request, other request for the same id (%s) is in progress", id)
+		return types.ProcessingError{
+			Error: fmt.Errorf("can't process publish request, other request for the same id (%s) is in progress", id),
+		}
 	}
 	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return fmt.Errorf("can't find a context for a given id: %s", id)
+		return types.ProcessingError{
+			Error: fmt.Errorf("can't find a context for a given id: %s", id),
+		}
 	}
 	context := contextIf.(*pluginContext)
 
-	context.sessionMts = mts // metrics to publish are set withing context
+	context.sessionMts = mts // metrics to publish are set within context
+	context.ClearWarnings()
 
 	startTime := time.Now()
 	err := cm.publisher.Publish(context) // calling to user defined code
@@ -72,7 +77,10 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
-		return fmt.Errorf("user-defined Publish method ended with error: %v", err)
+		return types.ProcessingError{
+			Error:    fmt.Errorf("user-defined Publish method ended with error: %v", err),
+			Warnings: context.Warnings(),
+		}
 	}
 
 	log.WithFields(logrus.Fields{
@@ -80,7 +88,9 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) error {
 		"metrics": len(mts),
 	}).Debug("Publish completed")
 
-	return nil
+	return types.ProcessingError{
+		Warnings: context.Warnings(),
+	}
 }
 
 func (cm *ContextManager) LoadTask(id string, config []byte) error {

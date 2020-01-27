@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"reflect"
 	"sync"
 	"time"
@@ -14,7 +15,7 @@ type Context struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
-	sessionWarnings    []Warning
+	sessionWarnings    []types.Warning
 }
 
 type Warning struct {
@@ -90,12 +91,16 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
-	c.sessionWarnings = append(c.sessionWarnings, Warning{
+	c.sessionWarnings = append(c.sessionWarnings, types.Warning{
 		Message:   msg,
 		Timestamp: time.Now(),
 	})
 }
 
+func (c *Context) Warnings() []types.Warning {
+	return c.sessionWarnings
+}
+
 func (c *Context) ClearWarnings() {
-	c.sessionWarnings = []Warning{}
+	c.sessionWarnings = []types.Warning{}
 }

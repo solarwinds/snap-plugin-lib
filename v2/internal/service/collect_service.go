@@ -32,10 +32,10 @@ func newCollectService(proxy CollectorProxy, statsController stats.Controller, p
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	logCollectService.Debug("GRPC Collect() received")
 
-	taskID := string(request.GetTaskId())
+	taskID := request.GetTaskId()
 
 	pluginMts, err := cs.proxy.RequestCollect(taskID)
-	if err != nil {
+	if err.Error != nil {
 		return fmt.Errorf("plugin is not able to collect metrics: %s", err)
 	}
 

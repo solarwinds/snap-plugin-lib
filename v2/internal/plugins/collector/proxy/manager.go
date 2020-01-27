@@ -28,7 +28,7 @@ const (
 )
 
 type Collector interface {
-	RequestCollect(id string) ([]*types.Metric, error)
+	RequestCollect(id string) ([]*types.Metric, types.ProcessingError)
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
 }
@@ -78,19 +78,24 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
+func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.ProcessingError) {
 	if !cm.ActivateTask(id) {
-		return nil, fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id)
+		return nil, types.ProcessingError{
+			Error: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
+		}
 	}
 	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return nil, fmt.Errorf("can't find a context for a given id: %s", id)
+		return nil, types.ProcessingError{
+			Error: fmt.Errorf("can't find a context for a given id: %s", id),
+		}
 	}
 	context := contextIf.(*pluginContext)
 
 	context.sessionMts = []*types.Metric{}
+	context.ClearWarnings()
 
 	startTime := time.Now()
 	err := cm.collector.Collect(context) // calling to user defined code
@@ -99,7 +104,10 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
-		return nil, fmt.Errorf("user-defined Collect method ended with error: %v", err)
+		return nil, types.ProcessingError{
+			Error:    fmt.Errorf("user-defined Collect method ended with error: %v", err),
+			Warnings: context.Warnings(),
+		}
 	}
 
 	log.WithFields(logrus.Fields{
@@ -107,7 +115,9 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, error) {
 		"metrics": len(context.sessionMts),
 	}).Debug("Collect completed")
 
-	return context.sessionMts, nil
+	return context.sessionMts, types. ProcessingError{
+		Warnings: context.Warnings(),
+	}
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {

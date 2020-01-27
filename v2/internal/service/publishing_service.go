@@ -62,9 +62,9 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
 		err := ps.proxy.RequestPublish(id, mts)
-		if err != nil {
+		if err.Error != nil {
 			_ = stream.SendAndClose(&pluginrpc.PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
-			return err
+			return err.Error
 		}
 	} else {
 		logPublishService.Info("nothing to publish, request will be ignored")
