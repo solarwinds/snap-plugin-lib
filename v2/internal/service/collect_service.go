@@ -90,7 +90,7 @@ func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServ
 		protoWarning := toGRPCWarn(warn)
 		protoWarnings = append(protoWarnings, protoWarning)
 
-		if len(protoWarnings) == maxWarningsInChunk || i == len(warnings) {
+		if len(protoWarnings) == maxWarningsInChunk || i == len(warnings)-1 {
 			err := stream.Send(&pluginrpc.CollectResponse{
 				Warnings: protoWarnings,
 			})
