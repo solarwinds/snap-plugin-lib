@@ -43,13 +43,13 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 		return fmt.Errorf("can't send all warnings to snap: %v", err)
 	}
 
+	if status.Error != nil {
+		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
+	}
+
 	err = cs.collectMetrics(stream, pluginMts)
 	if err != nil {
 		return fmt.Errorf("can't send all metrics to snap: %v", err)
-	}
-
-	if status.Error != nil {
-		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
 	}
 
 	return nil

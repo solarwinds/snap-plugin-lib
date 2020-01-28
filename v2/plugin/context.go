@@ -21,6 +21,6 @@ type Context interface {
 	// Will throw error when dest type doesn't match to type of stored value or object with a given key wasn't found.
 	LoadTo(key string, dest interface{}) error
 
-	// todo: adamik: comment
+	// Add warning information to current collect / process operation.
 	AddWarning(msg string)
 }

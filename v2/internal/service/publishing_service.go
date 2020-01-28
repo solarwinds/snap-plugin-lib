@@ -33,6 +33,7 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 
 	id := ""
 	mts := []*types.Metric{}
+	response := &pluginrpc.PublishResponse{}
 
 	for {
 		publishPartialReq, err := stream.Recv()
@@ -62,26 +63,26 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
 		status := ps.proxy.RequestPublish(id, mts)
-		if status.Error != nil {
-			protoWarnings := make([]*pluginrpc.Warning, 0, len(status.Warnings))
-			for _, w := range status.Warnings {
-				protoWarnings = append(protoWarnings, toGRPCWarning(w))
-			}
 
-			// Ignore potential error from stream, since publish error is of higher importance.
-			_ = stream.SendAndClose(&pluginrpc.PublishResponse{
-				// Warnings are not chunked as in the case of collector. That means it's possible
-				// to overflow allowed GRPC Message size (~4MB) for a large number of warnings raised in Publish.
-				// Fix would require to change Publish rpc method type to in-out-stream (from in-stream).
-				Warnings: protoWarnings,
-			})
+		protoWarnings := make([]*pluginrpc.Warning, 0, len(status.Warnings))
+		for _, w := range status.Warnings {
+			protoWarnings = append(protoWarnings, toGRPCWarning(w))
+		}
+
+		// Warnings are not chunked as in the case of collector. That means it's possible
+		// to overflow allowed GRPC Message size (~4MB) for a large number of warnings raised in Publish.
+		// Fix would require to change Publish rpc method type to in-out-stream.
+		response.Warnings = protoWarnings
+
+		if status.Error != nil {
+			_ = stream.SendAndClose(response) // Ignore potential error from stream, since publish error is of higher importance.
 			return status.Error
 		}
 	} else {
 		logPublishService.Info("nothing to publish, request will be ignored")
 	}
 
-	return stream.SendAndClose(&pluginrpc.PublishResponse{})
+	return stream.SendAndClose(response)
 }
 
 func (ps *publishingService) Load(ctx context.Context, request *pluginrpc.LoadPublisherRequest) (*pluginrpc.LoadPublisherResponse, error) {

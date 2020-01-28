@@ -88,7 +88,7 @@ message PublishRequest {
 }
 
 message PublishResponse {
-    repeated Warning warnings = 2;
+    repeated Warning warnings = 1;
 }
 
 message LoadPublisherRequest {
