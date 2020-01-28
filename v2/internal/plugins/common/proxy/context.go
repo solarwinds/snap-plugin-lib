@@ -2,12 +2,12 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 type Context struct {

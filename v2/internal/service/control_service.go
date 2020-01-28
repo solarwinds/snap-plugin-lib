@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/sirupsen/logrus"
 )
 
 const (
