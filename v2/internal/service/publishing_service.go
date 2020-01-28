@@ -61,10 +61,21 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 	if len(mts) != 0 {
 		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
-		err := ps.proxy.RequestPublish(id, mts)
-		if err.Error != nil {
-			_ = stream.SendAndClose(&pluginrpc.PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
-			return err.Error
+		status := ps.proxy.RequestPublish(id, mts)
+		if status.Error != nil {
+			protoWarnings := make([]*pluginrpc.Warning, 0, len(status.Warnings))
+			for _, w := range status.Warnings {
+				protoWarnings = append(protoWarnings, toGRPCWarning(w))
+			}
+
+			// Ignore potential error from stream, since publish error is of higher importance.
+			_ = stream.SendAndClose(&pluginrpc.PublishResponse{
+				// Warnings are not chunked as in the case of collector. That means it's possible
+				// to overflow allowed GRPC Message size (~4MB) for a large number of warnings raised in Publish.
+				// Fix would require to change Publish rpc method type to in-out-stream (from in-stream).
+				Warnings: protoWarnings,
+			})
+			return status.Error
 		}
 	} else {
 		logPublishService.Info("nothing to publish, request will be ignored")

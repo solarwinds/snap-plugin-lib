@@ -87,7 +87,7 @@ func (cs *collectService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*
 func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
 	protoWarnings := make([]*pluginrpc.Warning, 0, maxWarningsInChunk)
 	for i, warn := range warnings {
-		protoWarning := toGRPCWarn(warn)
+		protoWarning := toGRPCWarning(warn)
 		protoWarnings = append(protoWarnings, protoWarning)
 
 		if len(protoWarnings) == maxWarningsInChunk || i == len(warnings)-1 {
