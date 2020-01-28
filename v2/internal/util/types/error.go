@@ -3,7 +3,7 @@ package types
 import "time"
 
 // Contains additional information about warnings raised during collect / publish processes
-type ProcessingError struct {
+type ProcessingStatus struct {
 	Error    error
 	Warnings []Warning
 }

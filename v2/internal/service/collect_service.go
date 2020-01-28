@@ -11,6 +11,7 @@ import (
 
 const (
 	maxCollectChunkSize = 100
+	maxWarningsInChunk  = 100
 )
 
 var logCollectService = log.WithField("service", "Collect")
@@ -34,26 +35,48 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 
 	taskID := request.GetTaskId()
 
-	pluginMts, err := cs.proxy.RequestCollect(taskID)
-	if err.Error != nil {
-		return fmt.Errorf("plugin is not able to collect metrics: %s", err)
+	pluginMts, status := cs.proxy.RequestCollect(taskID)
+
+	// send warnings
+	protoWarnings := make([]*pluginrpc.Warning, 0, maxWarningsInChunk)
+	for i, warn := range status.Warnings {
+		protoWarning := toGRPCWarn(warn)
+		protoWarnings = append(protoWarnings, protoWarning)
+
+		if len(protoWarnings) == maxWarningsInChunk || i == len(status.Warnings) {
+			err := stream.Send(&pluginrpc.CollectResponse{
+				Warnings: protoWarnings,
+			})
+			if err != nil {
+				logControlService.WithError(err).Error("can't send warnings chunk over GRPC")
+				return err
+			}
+
+			logControlService.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
+			protoWarnings = make([]*pluginrpc.Warning, 0, maxWarningsInChunk)
+		}
 	}
 
-	protoMts := make([]*pluginrpc.Metric, 0, len(pluginMts))
+	if status.Error != nil {
+		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
+	}
+
+	// send metrics
+	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
 		if err != nil {
 			logCollectService.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
+		} else {
+			protoMts = append(protoMts, protoMt)
 		}
-
-		protoMts = append(protoMts, protoMt)
 
 		if len(protoMts) == maxCollectChunkSize || i == len(pluginMts)-1 {
 			err = stream.Send(&pluginrpc.CollectResponse{
 				MetricSet: protoMts,
 			})
 			if err != nil {
-				logCollectService.WithError(err).Error("can't send metric chunk over GRPC")
+				logCollectService.WithError(err).Error("can't send metrics chunk over GRPC")
 				return err
 			}
 
@@ -62,6 +85,14 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 		}
 	}
 
+	return nil
+}
+
+func (cs *collectService) collectWarnings() error {
+	return nil
+}
+
+func (cs *collectService) collectMetrics() error {
 	return nil
 }
 

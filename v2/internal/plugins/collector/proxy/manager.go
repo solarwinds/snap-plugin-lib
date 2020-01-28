@@ -28,7 +28,7 @@ const (
 )
 
 type Collector interface {
-	RequestCollect(id string) ([]*types.Metric, types.ProcessingError)
+	RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus)
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
 }
@@ -78,9 +78,9 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.ProcessingError) {
+func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus) {
 	if !cm.ActivateTask(id) {
-		return nil, types.ProcessingError{
+		return nil, types.ProcessingStatus{
 			Error: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
 		}
 	}
@@ -88,7 +88,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return nil, types.ProcessingError{
+		return nil, types.ProcessingStatus{
 			Error: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
 	}
@@ -104,7 +104,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
-		return nil, types.ProcessingError{
+		return nil, types.ProcessingStatus{
 			Error:    fmt.Errorf("user-defined Collect method ended with error: %v", err),
 			Warnings: context.Warnings(),
 		}
@@ -115,7 +115,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 		"metrics": len(context.sessionMts),
 	}).Debug("Collect completed")
 
-	return context.sessionMts, types. ProcessingError{
+	return context.sessionMts, types.ProcessingStatus{
 		Warnings: context.Warnings(),
 	}
 }

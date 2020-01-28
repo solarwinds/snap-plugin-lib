@@ -51,6 +51,7 @@ message CollectRequest {
 
 message CollectResponse {
     repeated Metric metric_set = 1;
+    repeated Warning warnings = 2;
 }
 
 message LoadCollectorRequest {
@@ -87,7 +88,7 @@ message PublishRequest {
 }
 
 message PublishResponse {
-    // empty
+    repeated Warning warnings = 2;
 }
 
 message LoadPublisherRequest {
@@ -142,6 +143,11 @@ message MetricValue {
 message Time {
     int64 sec = 1;
     int64 nsec = 2;
+}
+
+message Warning {
+    string message = 1;
+    Time timestamp = 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

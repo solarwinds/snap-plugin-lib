@@ -20,7 +20,7 @@ func init() {
 }
 
 type Publisher interface {
-	RequestPublish(id string, mts []*types.Metric) types.ProcessingError
+	RequestPublish(id string, mts []*types.Metric) types.ProcessingStatus
 	LoadTask(id string, config []byte) error
 	UnloadTask(id string) error
 }
@@ -51,9 +51,9 @@ func NewContextManager(publisher plugin.Publisher, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Publisher related methods
 
-func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.ProcessingError {
+func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.ProcessingStatus {
 	if !cm.ActivateTask(id) {
-		return types.ProcessingError{
+		return types.ProcessingStatus{
 			Error: fmt.Errorf("can't process publish request, other request for the same id (%s) is in progress", id),
 		}
 	}
@@ -61,7 +61,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return types.ProcessingError{
+		return types.ProcessingStatus{
 			Error: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
 	}
@@ -77,7 +77,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
 	if err != nil {
-		return types.ProcessingError{
+		return types.ProcessingStatus{
 			Error:    fmt.Errorf("user-defined Publish method ended with error: %v", err),
 			Warnings: context.Warnings(),
 		}
@@ -88,7 +88,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 		"metrics": len(mts),
 	}).Debug("Publish completed")
 
-	return types.ProcessingError{
+	return types.ProcessingStatus{
 		Warnings: context.Warnings(),
 	}
 }
