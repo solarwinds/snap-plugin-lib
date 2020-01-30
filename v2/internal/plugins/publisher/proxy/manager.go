@@ -84,8 +84,9 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 	}
 
 	log.WithFields(logrus.Fields{
-		"elapsed": endTime.Sub(startTime).String(),
-		"metrics": len(mts),
+		"elapsed":      endTime.Sub(startTime).String(),
+		"metrics-num":  len(mts),
+		"warnings-num": len(context.Warnings()),
 	}).Debug("Publish completed")
 
 	return types.ProcessingStatus{

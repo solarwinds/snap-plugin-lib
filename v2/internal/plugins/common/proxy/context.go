@@ -2,12 +2,22 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+)
+
+const (
+	maxWarningMsgSize = 1024 // maximum length of a single warning message
+	maxNoOfWarnings   = 1024 // maximum number of warnings added during one collect/publish operation
+)
+
+var (
+	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "common-proxy"})
 )
 
 type Context struct {
@@ -91,6 +101,15 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	if len(c.sessionWarnings) >= maxNoOfWarnings {
+		log.Warning("Maximum number of warnings logged. New warnings has been ignored")
+	}
+
+	if len(msg) > maxWarningMsgSize {
+		log.Info("Warning message size exceeds maximum allowed value and will be cut off")
+		msg = msg[:maxWarningMsgSize]
+	}
+
 	c.sessionWarnings = append(c.sessionWarnings, types.Warning{
 		Message:   msg,
 		Timestamp: time.Now(),

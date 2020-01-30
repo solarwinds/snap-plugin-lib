@@ -111,8 +111,9 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 	}
 
 	log.WithFields(logrus.Fields{
-		"elapsed": endTime.Sub(startTime).String(),
-		"metrics": len(context.sessionMts),
+		"elapsed":      endTime.Sub(startTime).String(),
+		"metrics-num":  len(context.sessionMts),
+		"warnings-num": len(context.Warnings()),
 	}).Debug("Collect completed")
 
 	return context.sessionMts, types.ProcessingStatus{

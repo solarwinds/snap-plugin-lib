@@ -12,7 +12,6 @@ import (
 
 const (
 	maxCollectChunkSize = 100
-	maxWarningsInChunk  = 1000
 )
 
 var logCollectService = log.WithField("service", "Collect")
@@ -85,23 +84,22 @@ func (cs *collectService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*
 }
 
 func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
-	protoWarnings := make([]*pluginrpc.Warning, 0, maxWarningsInChunk)
-	for i, warn := range warnings {
-		protoWarning := toGRPCWarning(warn)
-		protoWarnings = append(protoWarnings, protoWarning)
+	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
 
-		if len(protoWarnings) == maxWarningsInChunk || i == len(warnings)-1 {
-			err := stream.Send(&pluginrpc.CollectResponse{
-				Warnings: protoWarnings,
-			})
-			if err != nil {
-				logControlService.WithError(err).Error("can't send warnings chunk over GRPC")
-				return err
-			}
+	for _, warn := range warnings {
+		protoWarnings = append(protoWarnings, toGRPCWarning(warn))
+	}
 
-			logControlService.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
-			protoWarnings = make([]*pluginrpc.Warning, 0, maxWarningsInChunk)
+	if len(warnings) != 0 {
+		err := stream.Send(&pluginrpc.CollectResponse{
+			Warnings: protoWarnings,
+		})
+		if err != nil {
+			logControlService.WithError(err).Error("can't send warnings chunk over GRPC")
+			return err
 		}
+
+		logControlService.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
 	}
 
 	return nil
