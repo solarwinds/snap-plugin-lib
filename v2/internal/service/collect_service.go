@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
@@ -32,34 +33,22 @@ func newCollectService(proxy CollectorProxy, statsController stats.Controller, p
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	logCollectService.Debug("GRPC Collect() received")
 
-	taskID := string(request.GetTaskId())
+	taskID := request.GetTaskId()
 
-	pluginMts, err := cs.proxy.RequestCollect(taskID)
+	pluginMts, status := cs.proxy.RequestCollect(taskID)
+
+	err := cs.collectWarnings(stream, status.Warnings)
 	if err != nil {
-		return fmt.Errorf("plugin is not able to collect metrics: %s", err)
+		return fmt.Errorf("can't send all warnings to snap: %v", err)
 	}
 
-	protoMts := make([]*pluginrpc.Metric, 0, len(pluginMts))
-	for i, pluginMt := range pluginMts {
-		protoMt, err := toGRPCMetric(pluginMt)
-		if err != nil {
-			logCollectService.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
-		}
+	if status.Error != nil {
+		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
+	}
 
-		protoMts = append(protoMts, protoMt)
-
-		if len(protoMts) == maxCollectChunkSize || i == len(pluginMts)-1 {
-			err = stream.Send(&pluginrpc.CollectResponse{
-				MetricSet: protoMts,
-			})
-			if err != nil {
-				logCollectService.WithError(err).Error("can't send metric chunk over GRPC")
-				return err
-			}
-
-			logCollectService.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
-			protoMts = make([]*pluginrpc.Metric, 0, len(pluginMts))
-		}
+	err = cs.collectMetrics(stream, pluginMts)
+	if err != nil {
+		return fmt.Errorf("can't send all metrics to snap: %v", err)
 	}
 
 	return nil
@@ -92,4 +81,53 @@ func (cs *collectService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*
 	}
 
 	return serveInfo(ctx, cs.statsController.RequestStat(), pprofAddr)
+}
+
+func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
+	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
+
+	for _, warn := range warnings {
+		protoWarnings = append(protoWarnings, toGRPCWarning(warn))
+	}
+
+	if len(warnings) != 0 {
+		err := stream.Send(&pluginrpc.CollectResponse{
+			Warnings: protoWarnings,
+		})
+		if err != nil {
+			logControlService.WithError(err).Error("can't send warnings chunk over GRPC")
+			return err
+		}
+
+		logControlService.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
+	}
+
+	return nil
+}
+
+func (cs *collectService) collectMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
+	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
+	for i, pluginMt := range pluginMts {
+		protoMt, err := toGRPCMetric(pluginMt)
+		if err != nil {
+			logCollectService.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
+		} else {
+			protoMts = append(protoMts, protoMt)
+		}
+
+		if len(protoMts) == maxCollectChunkSize || i == len(pluginMts)-1 {
+			err = stream.Send(&pluginrpc.CollectResponse{
+				MetricSet: protoMts,
+			})
+			if err != nil {
+				logCollectService.WithError(err).Error("can't send metrics chunk over GRPC")
+				return err
+			}
+
+			logCollectService.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
+			protoMts = make([]*pluginrpc.Metric, 0, len(pluginMts))
+		}
+	}
+
+	return nil
 }

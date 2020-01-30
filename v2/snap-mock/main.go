@@ -161,9 +161,14 @@ func main() {
 		reqCounter := 0
 		for {
 			reqCounter++
-			recvMts, err := doCollectRequest(collClient, opt)
+			recvMts, recvWarns, err := doCollectRequest(collClient, opt)
 			if err != nil {
 				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
+			}
+
+			fmt.Printf("\nReceived %d warning(s)\n", len(recvWarns))
+			for _, warn := range recvWarns {
+				fmt.Printf(" %s\n", warn)
 			}
 
 			fmt.Printf("\nReceived %d metric(s)\n", len(recvMts))
@@ -282,8 +287,9 @@ func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
 	return resp.Info, nil
 }
 
-func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, error) {
+func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, []string, error) {
 	var recvMts []string
+	var recvWarns []string
 
 	reqColl := &pluginrpc.CollectRequest{
 		TaskId: opt.TaskId,
@@ -294,7 +300,7 @@ func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, err
 
 	stream, err := cc.Collect(ctx, reqColl)
 	if err != nil {
-		return recvMts, fmt.Errorf("can't send collect request to plugin: %v", err)
+		return recvMts, recvWarns, fmt.Errorf("can't send collect request to plugin: %v", err)
 	}
 
 	for {
@@ -303,15 +309,19 @@ func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, err
 			break
 		}
 		if err != nil {
-			return recvMts, fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
+			return recvMts, recvWarns, fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
 		}
 
 		for _, mt := range resp.MetricSet {
 			recvMts = append(recvMts, grpcMetricToString(mt))
 		}
+
+		for _, warns := range resp.Warnings {
+			recvWarns = append(recvWarns, grpcWarningToString(warns))
+		}
 	}
 
-	return recvMts, nil
+	return recvMts, recvWarns, nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -323,4 +333,8 @@ func grpcMetricToString(metric *pluginrpc.Metric) string {
 	}
 
 	return fmt.Sprintf("%s %v [%v]", strings.Join(nsStr, "."), metric.Value, metric.Tags)
+}
+
+func grpcWarningToString(warning *pluginrpc.Warning) string {
+	return fmt.Sprintf("[%s] %s", time.Unix(warning.Timestamp.Sec, warning.Timestamp.Nsec), warning.Message)
 }

@@ -20,4 +20,7 @@ type Context interface {
 	// Load any object using key from different Collect requests (passing it to provided reference).
 	// Will throw error when dest type doesn't match to type of stored value or object with a given key wasn't found.
 	LoadTo(key string, dest interface{}) error
+
+	// Add warning information to current collect / process operation.
+	AddWarning(msg string)
 }

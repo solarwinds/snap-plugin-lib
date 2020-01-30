@@ -120,7 +120,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 	for runCount := 0; ; {
 		// Request metrics collection
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
-		if errColl != nil {
+		if errColl.Error != nil {
 			fmt.Fprintf(os.Stderr, "Error occurred during metrics collection in a standalone mode (reason: %v)\n", errColl)
 			os.Exit(errorExitStatus)
 		}

@@ -4,8 +4,20 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/sirupsen/logrus"
+)
+
+const (
+	maxWarningMsgSize = 256 // maximum length of a single warning message
+	maxNoOfWarnings   = 40  // maximum number of warnings added during one collect/publish operation
+)
+
+var (
+	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "common-proxy"})
 )
 
 type Context struct {
@@ -13,6 +25,12 @@ type Context struct {
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
+	sessionWarnings    []types.Warning
+}
+
+type Warning struct {
+	Message   string
+	Timestamp time.Time
 }
 
 func NewContext(rawConfig []byte) (*Context, error) {
@@ -80,4 +98,29 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 	vDest.Elem().Set(reflect.ValueOf(obj))
 
 	return nil
+}
+
+func (c *Context) AddWarning(msg string) {
+	if len(c.sessionWarnings) >= maxNoOfWarnings {
+		log.Warning("Maximum number of warnings logged. New warning has been ignored")
+		return
+	}
+
+	if len(msg) > maxWarningMsgSize {
+		log.Info("Warning message size exceeds maximum allowed value and will be cut off")
+		msg = msg[:maxWarningMsgSize]
+	}
+
+	c.sessionWarnings = append(c.sessionWarnings, types.Warning{
+		Message:   msg,
+		Timestamp: time.Now(),
+	})
+}
+
+func (c *Context) Warnings() []types.Warning {
+	return c.sessionWarnings
+}
+
+func (c *Context) ResetWarnings() {
+	c.sessionWarnings = []types.Warning{}
 }

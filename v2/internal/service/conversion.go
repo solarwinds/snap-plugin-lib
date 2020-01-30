@@ -236,3 +236,10 @@ func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.
 
 	return info, nil
 }
+
+func toGRPCWarning(warning types.Warning) *pluginrpc.Warning {
+	return &pluginrpc.Warning{
+		Message:   warning.Message,
+		Timestamp: toGRPCTime(warning.Timestamp),
+	}
+}

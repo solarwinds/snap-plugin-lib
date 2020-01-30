@@ -33,6 +33,7 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 
 	id := ""
 	mts := []*types.Metric{}
+	response := &pluginrpc.PublishResponse{}
 
 	for {
 		publishPartialReq, err := stream.Recv()
@@ -61,16 +62,24 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 	if len(mts) != 0 {
 		logPublishService.WithField("length", len(mts)).Debug("metric will be published")
 
-		err := ps.proxy.RequestPublish(id, mts)
-		if err != nil {
-			_ = stream.SendAndClose(&pluginrpc.PublishResponse{}) // ignore potential error from stream, since publish error is of higher importance
-			return err
+		status := ps.proxy.RequestPublish(id, mts)
+
+		protoWarnings := make([]*pluginrpc.Warning, 0, len(status.Warnings))
+		for _, w := range status.Warnings {
+			protoWarnings = append(protoWarnings, toGRPCWarning(w))
+		}
+
+		response.Warnings = protoWarnings
+
+		if status.Error != nil {
+			_ = stream.SendAndClose(response) // Ignore potential error from stream, since publish error is of higher importance.
+			return status.Error
 		}
 	} else {
 		logPublishService.Info("nothing to publish, request will be ignored")
 	}
 
-	return stream.SendAndClose(&pluginrpc.PublishResponse{})
+	return stream.SendAndClose(response)
 }
 
 func (ps *publishingService) Load(ctx context.Context, request *pluginrpc.LoadPublisherRequest) (*pluginrpc.LoadPublisherResponse, error) {
