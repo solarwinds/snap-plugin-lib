@@ -68,7 +68,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 	context := contextIf.(*pluginContext)
 
 	context.sessionMts = mts // metrics to publish are set within context
-	context.ClearWarnings()
+	context.ResetWarnings()
 
 	startTime := time.Now()
 	err := cm.publisher.Publish(context) // calling to user defined code

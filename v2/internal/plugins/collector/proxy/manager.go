@@ -95,7 +95,7 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 	context := contextIf.(*pluginContext)
 
 	context.sessionMts = []*types.Metric{}
-	context.ClearWarnings()
+	context.ResetWarnings()
 
 	startTime := time.Now()
 	err := cm.collector.Collect(context) // calling to user defined code

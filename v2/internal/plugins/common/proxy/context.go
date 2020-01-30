@@ -101,6 +101,6 @@ func (c *Context) Warnings() []types.Warning {
 	return c.sessionWarnings
 }
 
-func (c *Context) ClearWarnings() {
+func (c *Context) ResetWarnings() {
 	c.sessionWarnings = []types.Warning{}
 }
