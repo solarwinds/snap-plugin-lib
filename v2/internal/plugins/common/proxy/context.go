@@ -2,13 +2,13 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -103,6 +103,7 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 func (c *Context) AddWarning(msg string) {
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
 		log.Warning("Maximum number of warnings logged. New warnings has been ignored")
+		return
 	}
 
 	if len(msg) > maxWarningMsgSize {
