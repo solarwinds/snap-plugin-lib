@@ -102,7 +102,7 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 
 func (c *Context) AddWarning(msg string) {
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
-		log.Warning("Maximum number of warnings logged. New warnings has been ignored")
+		log.Warning("Maximum number of warnings logged. New warning has been ignored")
 		return
 	}
 
