@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	maxWarningMsgSize = 1024 // maximum length of a single warning message
-	maxNoOfWarnings   = 1024 // maximum number of warnings added during one collect/publish operation
+	maxWarningMsgSize = 256 // maximum length of a single warning message
+	maxNoOfWarnings   = 40  // maximum number of warnings added during one collect/publish operation
 )
 
 var (

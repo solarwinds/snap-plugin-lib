@@ -69,9 +69,6 @@ func (ps *publishingService) Publish(stream pluginrpc.Publisher_PublishServer) e
 			protoWarnings = append(protoWarnings, toGRPCWarning(w))
 		}
 
-		// Warnings are not chunked as in the case of collector. That means it's possible
-		// to overflow allowed GRPC Message size (~4MB) for a large number of warnings raised in Publish.
-		// Fix would require to change Publish rpc method type to in-out-stream.
 		response.Warnings = protoWarnings
 
 		if status.Error != nil {
