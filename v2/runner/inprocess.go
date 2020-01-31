@@ -6,10 +6,10 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-func StartCollectorInProcess(collector plugin.InProcessCollector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
-	startCollector(collector, name, version, opt, grpcChan)
+func StartCollectorInProcess(collector plugin.InProcessCollector, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+	startCollector(collector, collector.Name(), collector.Version(), opt, grpcChan)
 }
 
-func StartPublisherInProcess(publisher plugin.InProcessPublisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
-	startPublisher(publisher, name, version, opt, grpcChan)
+func StartPublisherInProcess(publisher plugin.InProcessPublisher, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+	startPublisher(publisher, publisher.Name(), publisher.Version(), opt, grpcChan)
 }

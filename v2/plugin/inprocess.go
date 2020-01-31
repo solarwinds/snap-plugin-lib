@@ -1,13 +1,16 @@
 package plugin
 
-type InProcessCollector interface {
-	Collector
+type inProcessPlugin interface {
 	Name() string
 	Version() string
 }
 
+type InProcessCollector interface {
+	Collector
+	inProcessPlugin
+}
+
 type InProcessPublisher interface {
 	Publisher
-	Name() string
-	Version() string
+	inProcessPlugin
 }
