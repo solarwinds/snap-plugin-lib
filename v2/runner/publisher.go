@@ -14,7 +14,6 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-// As a regular process
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
 	if err != nil {
@@ -23,11 +22,6 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	startPublisher(publisher, name, version, opt, nil)
-}
-
-// As goroutine
-func StartPublisherInProcess(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
-	startPublisher(publisher, name, version, opt, grpcChan)
 }
 
 func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {

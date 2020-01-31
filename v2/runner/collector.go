@@ -27,7 +27,6 @@ const (
 	infiniteDebugCollectCount = -1
 )
 
-// As a regular process
 func StartCollector(collector plugin.Collector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 	if err != nil {
@@ -36,11 +35,6 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 	}
 
 	startCollector(collector, name, version, opt, nil)
-}
-
-// As goroutine
-func StartCollectorInProcess(publisher plugin.Collector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
-	startCollector(publisher, name, version, opt, grpcChan)
 }
 
 func startCollector(collector plugin.Collector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
