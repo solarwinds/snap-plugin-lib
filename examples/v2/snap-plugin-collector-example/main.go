@@ -23,9 +23,6 @@ var log = logrus.WithFields(logrus.Fields{
 	"name":  pluginName,
 })
 
-type myCollector struct {
-}
-
 var exampleConfig = `
 # Random value used to calculate metric4
 crand: 40
@@ -36,6 +33,18 @@ credentials:
   password: secure1
   token: abcd-1234
 `
+
+type myCollector struct {
+	random1History map[int]int
+	random2History map[int]int
+}
+
+func newMyCollector() myCollector {
+	return myCollector{
+		random1History: map[int]int{},
+		random2History: map[int]int{},
+	}
+}
 
 func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	_ = def.DefineTasksPerInstanceLimit(5)
@@ -53,14 +62,20 @@ func (*myCollector) PluginDefinition(def plugin.CollectorDefinition) error {
 	return nil
 }
 
-func (*myCollector) Collect(ctx plugin.CollectContext) error {
+func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 	log.Trace("Collect executed")
 
 	// Simulate collector processing
 	time.Sleep(time.Duration(rand.Intn(int(maxCollectDuration))))
 
-	_ = ctx.AddMetric("/example/static/random1", rand.Intn(10))
-	_ = ctx.AddMetric("/example/static/random2", rand.Intn(20))
+	random1 := rand.Intn(10)
+	random2 := rand.Intn(20)
+
+	c.random1History[random1]++
+	c.random2History[random1]++
+
+	_ = ctx.AddMetric("/example/static/random1", random1)
+	_ = ctx.AddMetric("/example/static/random2", random2)
 
 	globalRandom, _ := ctx.Load("random")
 	_ = ctx.AddMetric("/example/global/random3", globalRandom)
@@ -72,6 +87,13 @@ func (*myCollector) Collect(ctx plugin.CollectContext) error {
 	}
 
 	return nil
+}
+
+func (c *myCollector) CustomInfo(ctx plugin.Context) interface{} {
+	return map[string]interface{}{
+		"random1Hist": c.random1History,
+		"random2Hist": c.random2History,
+	}
 }
 
 func (*myCollector) Load(ctx plugin.Context) error {
