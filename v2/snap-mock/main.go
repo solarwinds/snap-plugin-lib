@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
-
 	"google.golang.org/grpc"
 )
 
@@ -274,7 +273,7 @@ func doKillRequest(cc pluginrpc.ControllerClient) error {
 	return err
 }
 
-func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
+func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.XLegacyInfo, error) {
 	reqInfo := &pluginrpc.InfoRequest{}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
@@ -284,7 +283,7 @@ func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	return resp.Info, nil
+	return resp.XLegacyInfo, nil
 }
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, []string, error) {

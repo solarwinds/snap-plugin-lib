@@ -39,8 +39,8 @@ type myCollector struct {
 	random2History map[int]int
 }
 
-func newMyCollector() myCollector {
-	return myCollector{
+func newMyCollector() *myCollector {
+	return &myCollector{
 		random1History: map[int]int{},
 		random2History: map[int]int{},
 	}
@@ -113,5 +113,5 @@ func (*myCollector) Load(ctx plugin.Context) error {
 }
 
 func main() {
-	runner.StartCollector(&myCollector{}, pluginName, pluginVersion)
+	runner.StartCollector(newMyCollector(), pluginName, pluginVersion)
 }

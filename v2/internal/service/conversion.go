@@ -1,13 +1,10 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
 
@@ -150,91 +147,6 @@ func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
-}
-
-func toGRPCInfo(statistics *stats.Statistics, pprofLocation string) (*pluginrpc.Info, error) {
-	pi := &statistics.PluginInfo
-	ts := &statistics.TasksSummary
-
-	info := &pluginrpc.Info{
-		PluginInfo: &pluginrpc.PluginInfo{
-			Name:           pi.Name,
-			Version:        pi.Version,
-			CmdLineOptions: pi.CmdLineOptions,
-			Started:        toGRPCTime(pi.Started.Time),
-		},
-		TaskSummary: &pluginrpc.TaskSummary{
-			Counters: &pluginrpc.TaskSummaryCounters{
-				CurrentlyActiveTasks:   uint64(ts.Counters.CurrentlyActiveTasks),
-				TotalActiveTasks:       uint64(ts.Counters.TotalActiveTasks),
-				TotalExecutionRequests: uint64(ts.Counters.TotalExecutionRequests),
-			},
-			ProcessingTimes: &pluginrpc.ProcessingTimes{
-				Total:   int64(ts.ProcessingTimes.Total),
-				Average: int64(ts.ProcessingTimes.Average),
-				Maximum: int64(ts.ProcessingTimes.Maximum),
-			},
-		},
-		TaskDetails: map[string]*pluginrpc.TaskDetails{},
-	}
-
-	// Handle RawMessage - marshal to Json and unmarshal to typed struct
-	b, err := pi.Options.MarshalJSON()
-	if err != nil {
-		return info, fmt.Errorf("could't marshal options field: %v", err)
-	}
-
-	options := &plugin.Options{}
-	err = json.Unmarshal(b, options)
-	if err != nil {
-		return info, fmt.Errorf("could't unmarshal options field: %v", err)
-	}
-
-	info.PluginInfo.Options = &pluginrpc.Options{
-		PluginIP:          options.PluginIP,
-		GrpcPort:          uint32(options.GRPCPort),
-		StatsPort:         uint32(options.StatsPort),
-		GrpcPingTimeout:   int64(options.GRPCPingTimeout),
-		GrpcPingMaxMissed: uint64(options.GRPCPingMaxMissed),
-		LogLevel:          uint32(options.LogLevel),
-		EnableProfiling:   options.EnableProfiling,
-		ProfilingLocation: "",
-		EnableStats:       options.EnableStats,
-		EnableStatsServer: options.EnableStatsServer,
-	}
-
-	if options.EnableProfiling {
-		info.PluginInfo.Options.ProfilingLocation = pprofLocation
-	}
-
-	for id, taskDetails := range statistics.TasksDetails {
-		c := &taskDetails.Counters
-		pt := &taskDetails.ProcessingTimes
-		lm := &taskDetails.LastMeasurement
-
-		info.TaskDetails[id] = &pluginrpc.TaskDetails{
-			Configuration: fmt.Sprintf("%s", taskDetails.Configuration),
-			Filters:       taskDetails.Filters,
-			Counters: &pluginrpc.TaskDetailCounters{
-				CollectRequests:            uint64(c.CollectRequests),
-				TotalMetrics:               uint64(c.TotalMetrics),
-				AverageMetricsPerExecution: uint64(c.AvgMetricsPerExecution),
-			},
-			Loaded: toGRPCTime(taskDetails.Loaded.Time),
-			ProcessingTimes: &pluginrpc.ProcessingTimes{
-				Total:   int64(pt.Total),
-				Average: int64(pt.Average),
-				Maximum: int64(pt.Maximum),
-			},
-			LastMeasurement: &pluginrpc.LastMeasurement{
-				Occurred:         toGRPCTime(lm.Occurred.Time),
-				ProcessedMetrics: uint64(lm.ProcessedMetrics),
-				Duration:         int64(lm.Duration),
-			},
-		}
-	}
-
-	return info, nil
 }
 
 func toGRPCWarning(warning types.Warning) *pluginrpc.Warning {

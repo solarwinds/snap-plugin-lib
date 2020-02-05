@@ -102,10 +102,7 @@ func (ps *publishingService) Unload(ctx context.Context, request *pluginrpc.Unlo
 func (ps *publishingService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	logCollectService.Debug("GRPC Info() received")
 
-	pprofAddr := ""
-	if ps.pprofLn != nil {
-		pprofAddr = ps.pprofLn.Addr().String()
-	}
+	resp := &pluginrpc.InfoResponse{}
 
-	return serveInfo(ctx, ps.statsController.RequestStat(), pprofAddr)
+	return resp, nil
 }
