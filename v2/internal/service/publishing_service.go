@@ -99,10 +99,15 @@ func (ps *publishingService) Unload(ctx context.Context, request *pluginrpc.Unlo
 	return &pluginrpc.UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
 }
 
-func (ps *publishingService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
-	logCollectService.Debug("GRPC Info() received")
+func (ps *publishingService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
+	logPublishService.Debug("GRPC Info() received")
 
-	resp := &pluginrpc.InfoResponse{}
+	taskID := request.GetTaskId()
 
-	return resp, nil
+	cInfo, err := ps.proxy.CustomInfo(taskID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pluginrpc.InfoResponse{Info: cInfo}, nil
 }
