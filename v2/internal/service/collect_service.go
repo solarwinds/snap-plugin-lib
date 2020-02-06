@@ -72,12 +72,17 @@ func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadC
 	return &pluginrpc.UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
-func (cs *collectService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
+func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	logCollectService.Debug("GRPC Info() received")
 
-	resp := &pluginrpc.InfoResponse{}
+	taskID := request.GetTaskId()
 
-	return resp, nil
+	cInfo, err := cs.proxy.CustomInfo(taskID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pluginrpc.InfoResponse{Info: cInfo}, nil
 }
 
 func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {

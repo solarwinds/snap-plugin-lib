@@ -6,6 +6,7 @@ Package proxy:
 package proxy
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -31,6 +32,7 @@ type Collector interface {
 	RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus)
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
+	CustomInfo(id string) ([]byte, error)
 }
 
 type metricMetadata struct {
@@ -184,6 +186,29 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	cm.statsController.UpdateUnloadStat(id)
 
 	return nil
+}
+
+func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
+	// Do not call cm.ActivateTask as above methods. CustomInfo is read-only
+
+	contextI, ok := cm.contextMap.Load(id)
+	if !ok {
+		return nil, errors.New("context with given id is not defined")
+	}
+	context := contextI.(*pluginContext)
+
+	if collectorWithCustomInfo, ok := cm.collector.(plugin.CustomizableInfoCollector); ok {
+		infoObj := collectorWithCustomInfo.CustomInfo(context)
+
+		infoJSON, err := json.Marshal(infoObj)
+		if err != nil {
+			return nil, fmt.Errorf("can't unmarshal custom info to JSON: %v", err)
+		}
+
+		return infoJSON, nil
+	}
+
+	return []byte{}, nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////

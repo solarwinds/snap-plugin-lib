@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -23,6 +24,7 @@ type Publisher interface {
 	RequestPublish(id string, mts []*types.Metric) types.ProcessingStatus
 	LoadTask(id string, config []byte) error
 	UnloadTask(id string) error
+	CustomInfo(id string) ([]byte, error)
 }
 
 type ContextManager struct {
@@ -145,6 +147,29 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	cm.statsController.UpdateUnloadStat(id)
 
 	return nil
+}
+
+func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
+	// Do not call cm.ActivateTask as above methods. CustomInfo is read-only
+
+	contextI, ok := cm.contextMap.Load(id)
+	if !ok {
+		return nil, errors.New("context with given id is not defined")
+	}
+	context := contextI.(*pluginContext)
+
+	if publisherWithCustomInfo, ok := cm.publisher.(plugin.CustomizableInfoPublisher); ok {
+		infoObj := publisherWithCustomInfo.CustomInfo(context)
+
+		infoJSON, err := json.Marshal(infoObj)
+		if err != nil {
+			return nil, fmt.Errorf("can't unmarshal custom info to JSON: %v", err)
+		}
+
+		return infoJSON, nil
+	}
+
+	return []byte{}, nil
 }
 
 func (cm *ContextManager) RequestPluginDefinition() {
