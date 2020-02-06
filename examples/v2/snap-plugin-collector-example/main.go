@@ -72,7 +72,7 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 	random2 := rand.Intn(20)
 
 	c.random1History[random1]++
-	c.random2History[random1]++
+	c.random2History[random2]++
 
 	_ = ctx.AddMetric("/example/static/random1", random1)
 	_ = ctx.AddMetric("/example/static/random2", random2)
