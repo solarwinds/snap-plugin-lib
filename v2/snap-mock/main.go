@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
-
 	"google.golang.org/grpc"
 )
 
@@ -177,12 +176,12 @@ func main() {
 			}
 
 			if opt.RequestInfo {
-				info, err := doInfoRequest(collClient)
+				info, err := doInfoRequest(collClient, opt)
 				if err != nil {
 					doneCh <- fmt.Errorf("can't send info request to plugin: %v", err)
 				}
 
-				fmt.Printf("\nReceived info:\n %v\n", info)
+				fmt.Printf("\nReceived info:\n %v\n", string(info))
 			}
 
 			if reqCounter == opt.MaxCollectRequests {
@@ -274,8 +273,10 @@ func doKillRequest(cc pluginrpc.ControllerClient) error {
 	return err
 }
 
-func doInfoRequest(cc pluginrpc.CollectorClient) (*pluginrpc.Info, error) {
-	reqInfo := &pluginrpc.InfoRequest{}
+func doInfoRequest(cc pluginrpc.CollectorClient, opt *Options) ([]byte, error) {
+	reqInfo := &pluginrpc.InfoRequest{
+		TaskId: opt.TaskId,
+	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer fn()

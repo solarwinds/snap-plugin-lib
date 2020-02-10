@@ -5,15 +5,23 @@ type Publisher interface {
 }
 
 type LoadablePublisher interface {
+	Publisher
 	Load(ctx Context) error
 }
 
 type UnloadablePublisher interface {
+	Publisher
 	Unload(ctx Context) error
 }
 
 type DefinablePublisher interface {
+	Publisher
 	PluginDefinition(def PublisherDefinition) error
+}
+
+type CustomizableInfoPublisher interface {
+	Publisher
+	CustomInfo(ctx Context) interface{}
 }
 
 type PublishContext interface {

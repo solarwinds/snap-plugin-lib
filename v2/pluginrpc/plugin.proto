@@ -73,10 +73,12 @@ message UnloadCollectorResponse {
 }
 
 message InfoRequest {
+    string task_id = 1;
 }
 
 message InfoResponse {
-    Info info = 1;
+    _legacy_info _legacy_info = 1;
+    bytes info = 2;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -153,67 +155,5 @@ message Warning {
 ///////////////////////////////////////////////////////////////////////////////
 // Info messages definition
 
-message Info {
-    PluginInfo pluginInfo = 1;
-    TaskSummary taskSummary = 2;
-    map<string, TaskDetails> taskDetails = 3;
-}
-
-message PluginInfo {
-    string name = 1;
-    string version = 2;
-    string cmdLineOptions = 3;
-    Options options = 4;
-    Time started = 5;
-}
-
-message Options {
-    string pluginIP = 1;
-    uint32 grpcPort = 2;
-    uint32 statsPort = 3;
-    int64 grpcPingTimeout = 4;
-    uint64 grpcPingMaxMissed = 5;
-    uint32 logLevel = 6;
-    bool enableProfiling = 7;
-    string profilingLocation = 8;
-    bool enableStats = 9;
-    bool enableStatsServer = 10;
-}
-
-message TaskSummary {
-    TaskSummaryCounters counters = 1;
-    ProcessingTimes processingTimes = 2;
-}
-
-message TaskDetails {
-    string configuration = 1;
-    repeated string filters = 2;
-    TaskDetailCounters counters = 3;
-    Time loaded = 4;
-    ProcessingTimes processingTimes = 5;
-    LastMeasurement lastMeasurement = 6;
-}
-
-message TaskSummaryCounters {
-    uint64 currentlyActiveTasks = 1;
-    uint64 totalActiveTasks = 2;
-    uint64 totalExecutionRequests = 3;
-}
-
-message TaskDetailCounters {
-    uint64 collectRequests = 1;
-    uint64 totalMetrics = 2;
-    uint64 averageMetricsPerExecution = 3;
-}
-
-message ProcessingTimes {
-    int64 total = 1;
-    int64 average = 2;
-    int64 maximum = 3;
-}
-
-message LastMeasurement {
-    Time occurred = 1;
-    uint64 processedMetrics = 2;
-    int64 duration = 3;
+message _legacy_info {
 }

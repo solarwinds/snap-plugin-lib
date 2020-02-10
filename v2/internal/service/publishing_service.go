@@ -99,13 +99,15 @@ func (ps *publishingService) Unload(ctx context.Context, request *pluginrpc.Unlo
 	return &pluginrpc.UnloadPublisherResponse{}, ps.proxy.UnloadTask(taskID)
 }
 
-func (ps *publishingService) Info(ctx context.Context, _ *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
-	logCollectService.Debug("GRPC Info() received")
+func (ps *publishingService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
+	logPublishService.Debug("GRPC Info() received")
 
-	pprofAddr := ""
-	if ps.pprofLn != nil {
-		pprofAddr = ps.pprofLn.Addr().String()
+	taskID := request.GetTaskId()
+
+	cInfo, err := ps.proxy.CustomInfo(taskID)
+	if err != nil {
+		return nil, err
 	}
 
-	return serveInfo(ctx, ps.statsController.RequestStat(), pprofAddr)
+	return &pluginrpc.InfoResponse{Info: cInfo}, nil
 }
