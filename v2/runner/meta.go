@@ -12,7 +12,9 @@ import (
 
 // Structure contains information about running services (used by snap)
 type meta struct {
-	GRPCVersion string // Message definition version (ie. 2.0.0)
+	Meta struct {
+		RPCVersion string // Message definition version (ie. 2.0.0)
+	}
 
 	Plugin struct {
 		Name    string           // Plugin name
@@ -45,9 +47,9 @@ type meta struct {
 func printMetaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) {
 	ip := r.grpcListenerAddr().IP.String()
 
-	m := meta{
-		GRPCVersion: service.GRPCDefinitionVersion,
-	}
+	m := meta{}
+
+	m.Meta.RPCVersion = service.GRPCDefinitionVersion
 
 	m.Plugin.Name = name
 	m.Plugin.Version = version
