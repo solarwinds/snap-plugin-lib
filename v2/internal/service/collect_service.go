@@ -3,9 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"net"
-
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
@@ -17,16 +14,12 @@ const (
 var logCollectService = log.WithField("service", "Collect")
 
 type collectService struct {
-	proxy           CollectorProxy
-	statsController stats.Controller
-	pprofLn         net.Listener
+	proxy CollectorProxy
 }
 
-func newCollectService(proxy CollectorProxy, statsController stats.Controller, pprofLn net.Listener) pluginrpc.CollectorServer {
+func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
 	return &collectService{
-		proxy:           proxy,
-		statsController: statsController,
-		pprofLn:         pprofLn,
+		proxy: proxy,
 	}
 }
 

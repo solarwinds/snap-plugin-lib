@@ -99,7 +99,7 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 		}
 
 		// main blocking operation
-		service.StartCollectorGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+		service.StartCollectorGRPC(srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 
 	case true:
 		startCollectorInSingleMode(ctxMan, opt) // todo: adamik: new option for streaming plugin
