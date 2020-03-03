@@ -27,17 +27,27 @@ const (
 	infiniteDebugCollectCount = -1
 )
 
-func StartCollector(collector plugin.Collector, name string, version string) {
+func StartStreamingCollector(collector plugin.StreamingCollector, name string, version string) {
 	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
-	startCollector(collector, name, version, opt, nil)
+	startCollector(types.NewStreamingCollector(name, version, collector), opt, nil)
 }
 
-func startCollector(collector plugin.Collector, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+func StartCollector(collector plugin.Collector, name string, version string) {
+	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+		os.Exit(errorExitStatus)
+	}
+
+	startCollector(types.NewCollector(name, version, collector), opt, nil)
+}
+
+func startCollector(collector types.Collector, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -46,7 +56,7 @@ func startCollector(collector plugin.Collector, name string, version string, opt
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(name, version, types.PluginTypeCollector, opt)
+	statsController, err := stats.NewController(collector.Name(), collector.Version(), collector.Type(), opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -57,7 +67,7 @@ func startCollector(collector plugin.Collector, name string, version string, opt
 	logrus.SetLevel(opt.LogLevel)
 
 	if opt.PrintExampleTask {
-		printExampleTask(ctxMan, name)
+		printExampleTask(ctxMan, collector.Name())
 		os.Exit(normalExitStatus)
 	}
 
@@ -69,7 +79,7 @@ func startCollector(collector plugin.Collector, name string, version string, opt
 			os.Exit(errorExitStatus)
 		}
 
-		printMetaInformation(name, version, types.PluginTypeCollector, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		printMetaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 
 		if opt.EnableProfiling {
 			startPprofServer(r.pprofListener)
@@ -92,7 +102,7 @@ func startCollector(collector plugin.Collector, name string, version string, opt
 		service.StartCollectorGRPC(srv, ctxMan, statsController, r.grpcListener, r.pprofListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 
 	case true:
-		startCollectorInSingleMode(ctxMan, opt)
+		startCollectorInSingleMode(ctxMan, opt) // todo: adamik: new option for streaming plugin
 	}
 }
 
@@ -100,14 +110,14 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 	const singleModeTaskID = "task-1"
 
 	// Load task based on command line options
-	filter := []string{}
+	var filter []string
 	if opt.PluginFilter != defaultFilter {
 		filter = strings.Split(opt.PluginFilter, filterSeparator)
 	}
 
 	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
+		_, _ = fmt.Fprintf(os.Stderr, "Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
 		os.Exit(errorExitStatus)
 	}
 
@@ -115,7 +125,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		// Request metrics collection
 		mts, errColl := ctxManager.RequestCollect(singleModeTaskID)
 		if errColl.Error != nil {
-			fmt.Fprintf(os.Stderr, "Error occurred during metrics collection in a standalone mode (reason: %v)\n", errColl)
+			_, _ = fmt.Fprintf(os.Stderr, "Error occurred during metrics collection in a standalone mode (reason: %v)\n", errColl)
 			os.Exit(errorExitStatus)
 		}
 
@@ -139,7 +149,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 
 	errUnload := ctxManager.UnloadTask(singleModeTaskID)
 	if errUnload != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
+		_, _ = fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
 	}
 }

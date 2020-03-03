@@ -8,23 +8,23 @@ type Collector interface {
 	Collect(ctx CollectContext) error
 }
 
+type StreamingCollector interface {
+	StreamingCollect(ctx CollectContext)
+}
+
 type LoadableCollector interface {
-	Collector
 	Load(ctx Context) error
 }
 
 type UnloadableCollector interface {
-	Collector
 	Unload(ctx Context) error
 }
 
 type DefinableCollector interface {
-	Collector
 	PluginDefinition(def CollectorDefinition) error
 }
 
 type CustomizableInfoCollector interface {
-	Collector
 	CustomInfo(ctx Context) interface{}
 }
 
