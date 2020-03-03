@@ -29,7 +29,7 @@ const (
 )
 
 type Collector interface {
-	RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus)
+	RequestCollect(id string) chan types.CollectChunk
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
 	CustomInfo(id string) ([]byte, error)
@@ -80,18 +80,25 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus) {
+func (cm *ContextManager) RequestCollect(id string) chan types.CollectChunk {
+	chunkCh := make(chan types.CollectChunk) // todo: adamik: buffered?
+
+	go cm.requestCollect(id, chunkCh)
+	return chunkCh
+}
+
+func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectChunk) {
 	if !cm.ActivateTask(id) {
-		return nil, types.ProcessingStatus{
-			Error: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
+		chunkCh <- types.CollectChunk{
+			Err: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
 		}
 	}
 	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return nil, types.ProcessingStatus{
-			Error: fmt.Errorf("can't find a context for a given id: %s", id),
+		chunkCh <- types.CollectChunk{
+			Err: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
 	}
 	context := contextIf.(*pluginContext)
@@ -99,28 +106,29 @@ func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.Proc
 	context.sessionMts = []*types.Metric{}
 	context.ResetWarnings()
 
-	startTime := time.Now()
-	err := cm.collector.Collect(context) // calling to user defined code
-	endTime := time.Now()
+	go func() {
+		startTime := time.Now()
+		err := cm.collector.Collect(context) // calling to user defined code
+		endTime := time.Now()
 
-	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+		cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
 
-	if err != nil {
-		return nil, types.ProcessingStatus{
-			Error:    fmt.Errorf("user-defined Collect method ended with error: %v", err),
-			Warnings: context.Warnings(),
+		if err != nil {
+			err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
 		}
-	}
 
-	log.WithFields(logrus.Fields{
-		"elapsed":      endTime.Sub(startTime).String(),
-		"metrics-num":  len(context.sessionMts),
-		"warnings-num": len(context.Warnings()),
-	}).Debug("Collect completed")
+		chunkCh <- types.CollectChunk{
+			Metrics:  context.sessionMts,
+			Warnings: context.Warnings(),
+			Err:      err,
+		}
 
-	return context.sessionMts, types.ProcessingStatus{
-		Warnings: context.Warnings(),
-	}
+		log.WithFields(logrus.Fields{
+			"elapsed":      endTime.Sub(startTime).String(),
+			"metrics-num":  len(context.sessionMts),
+			"warnings-num": len(context.Warnings()),
+		}).Debug("Collect completed")
+	}()
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {

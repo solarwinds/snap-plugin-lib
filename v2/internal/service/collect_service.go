@@ -27,21 +27,22 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 	logCollectService.Debug("GRPC Collect() received")
 
 	taskID := request.GetTaskId()
+	chunksCh := cs.proxy.RequestCollect(taskID)
 
-	pluginMts, status := cs.proxy.RequestCollect(taskID)
+	for chunk := range chunksCh {
+		err := cs.sendWarnings(stream, chunk.Warnings)
+		if err != nil {
+			return fmt.Errorf("can't send all warnings to snap: %v", err)
+		}
 
-	err := cs.collectWarnings(stream, status.Warnings)
-	if err != nil {
-		return fmt.Errorf("can't send all warnings to snap: %v", err)
-	}
+		if chunk.Err != nil {
+			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
+		}
 
-	if status.Error != nil {
-		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
-	}
-
-	err = cs.collectMetrics(stream, pluginMts)
-	if err != nil {
-		return fmt.Errorf("can't send all metrics to snap: %v", err)
+		err = cs.sendMetrics(stream, chunk.Metrics)
+		if err != nil {
+			return fmt.Errorf("can't send all metrics to snap: %v", err)
+		}
 	}
 
 	return nil
@@ -78,7 +79,7 @@ func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoReque
 	return &pluginrpc.InfoResponse{Info: cInfo}, nil
 }
 
-func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
+func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
 	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
 
 	for _, warn := range warnings {
@@ -100,7 +101,7 @@ func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServ
 	return nil
 }
 
-func (cs *collectService) collectMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
+func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
 	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
