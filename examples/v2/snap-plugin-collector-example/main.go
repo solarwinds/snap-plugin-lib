@@ -96,7 +96,7 @@ func (c *myCollector) CustomInfo(ctx plugin.Context) interface{} {
 	}
 }
 
-func (*myCollector) Load(ctx plugin.Context) error {
+func (c *myCollector) Load(ctx plugin.Context) error {
 	log.Tracef("Load executed, configs=%s", ctx.ConfigKeys())
 
 	ctx.Store("random", rand.Intn(50))

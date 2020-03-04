@@ -1,6 +1,8 @@
 package types
 
-import "github.com/librato/snap-plugin-lib-go/v2/plugin"
+import (
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+)
 
 type Collector interface {
 	plugin.Collector
@@ -9,6 +11,8 @@ type Collector interface {
 	Name() string
 	Version() string
 	Type() PluginType
+
+	Unwrap() interface{}
 }
 
 func NewCollector(name string, version string, collector plugin.Collector) Collector {
@@ -44,6 +48,17 @@ func (c *collectorWrapper) Collect(ctx plugin.CollectContext) error {
 
 func (c *collectorWrapper) StreamingCollect(ctx plugin.CollectContext) {
 	c.streamingCollector.StreamingCollect(ctx)
+}
+
+func (c *collectorWrapper) Unwrap() interface{} {
+	switch c.Type() {
+	case PluginTypeCollector:
+		return c.collector
+	case PluginTypeStreamingCollector:
+		return c.streamingCollector
+	default:
+		panic("invalid collector type")
+	}
 }
 
 func (c *collectorWrapper) Type() PluginType {

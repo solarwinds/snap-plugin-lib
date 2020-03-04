@@ -44,8 +44,8 @@ type metricMetadata struct {
 type ContextManager struct {
 	*commonProxy.ContextManager
 
-	collector  plugin.Collector // reference to custom plugin code
-	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
+	collector  types.Collector // reference to custom plugin code
+	contextMap sync.Map        // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -57,7 +57,7 @@ type ContextManager struct {
 	ExampleConfig yaml.Node // example config
 }
 
-func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
+func NewContextManager(collector types.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		ContextManager: commonProxy.NewContextManager(),
 
@@ -158,7 +158,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 		}
 	}
 
-	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
+	if loadable, ok := cm.collector.Unwrap().(plugin.LoadableCollector); ok {
 		err := loadable.Load(newCtx)
 		if err != nil {
 			return fmt.Errorf("can't load task due to errors returned from user-defined function: %s", err)
@@ -183,7 +183,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	}
 
 	context := contextI.(*pluginContext)
-	if unloadable, ok := cm.collector.(plugin.UnloadableCollector); ok {
+	if unloadable, ok := cm.collector.Unwrap().(plugin.UnloadableCollector); ok {
 		err := unloadable.Unload(context)
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%s): %v", id, err)
@@ -205,7 +205,7 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 	}
 	context := contextI.(*pluginContext)
 
-	if collectorWithCustomInfo, ok := cm.collector.(plugin.CustomizableInfoCollector); ok {
+	if collectorWithCustomInfo, ok := cm.collector.Unwrap().(plugin.CustomizableInfoCollector); ok {
 		infoObj := collectorWithCustomInfo.CustomInfo(context)
 
 		infoJSON, err := json.Marshal(infoObj)
@@ -257,7 +257,7 @@ func (cm *ContextManager) DefineExampleConfig(cfg string) error {
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {
-	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
+	if definable, ok := cm.collector.Unwrap().(plugin.DefinableCollector); ok {
 		err := definable.PluginDefinition(cm)
 		if err != nil {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
@@ -268,7 +268,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) ListDefaultMetrics() []string {
-	result := []string{}
+	var result []string
 	for mt, meta := range cm.metricsMetadata {
 		if meta.isDefault {
 			result = append(result, mt)
