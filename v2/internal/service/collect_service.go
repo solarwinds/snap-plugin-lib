@@ -25,6 +25,7 @@ func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	logCollectService.Debug("GRPC Collect() received")
+	defer logCollectService.Debug("GRPC Collect() completed")
 
 	taskID := request.GetTaskId()
 	chunksCh := cs.proxy.RequestCollect(taskID)

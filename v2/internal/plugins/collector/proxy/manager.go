@@ -9,10 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
-	"sync"
-	"time"
-
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
@@ -20,6 +16,9 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	"sort"
+	"sync"
+	"time"
 )
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
@@ -81,8 +80,7 @@ func NewContextManager(collector types.Collector, statsController stats.Controll
 // proxy.Collector related methods
 
 func (cm *ContextManager) RequestCollect(id string) chan types.CollectChunk {
-	chunkCh := make(chan types.CollectChunk) // todo: adamik: buffered?
-
+	chunkCh := make(chan types.CollectChunk)
 	go cm.requestCollect(id, chunkCh)
 	return chunkCh
 }
@@ -106,28 +104,74 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	context.sessionMts = []*types.Metric{}
 	context.ResetWarnings()
 
+	switch cm.collector.Type() {
+	case types.PluginTypeCollector:
+		go cm.collect(id, context, chunkCh)
+	case types.PluginTypeStreamingCollector:
+		go cm.streamingCollect(id, context, chunkCh)
+	}
+}
+
+func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
+	startTime := time.Now()
+	err := cm.collector.Collect(context) // calling to user defined code
+	endTime := time.Now()
+
+	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+
+	if err != nil {
+		err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
+	}
+
+	chunkCh <- types.CollectChunk{
+		Metrics:  context.sessionMts,
+		Warnings: context.Warnings(),
+		Err:      err,
+	}
+
+	close(chunkCh)
+
+	log.WithFields(logrus.Fields{
+		"elapsed":      endTime.Sub(startTime).String(),
+		"metrics-num":  len(context.sessionMts),
+		"warnings-num": len(context.Warnings()),
+	}).Debug("Collect completed")
+}
+
+func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
+	closeCh := make(chan bool)
+
 	go func() {
-		startTime := time.Now()
-		err := cm.collector.Collect(context) // calling to user defined code
-		endTime := time.Now()
-
-		cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
-
-		if err != nil {
-			err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
+		for {
+			select {
+			case <-closeCh:
+				return
+			default:
+				cm.collector.StreamingCollect(context)
+			}
 		}
+	}()
 
-		chunkCh <- types.CollectChunk{
-			Metrics:  context.sessionMts,
-			Warnings: context.Warnings(),
-			Err:      err,
+	go func() {
+		for {
+			select {
+			case <-closeCh:
+				close(chunkCh)
+				return
+			case <- time.After(1 * time.Second):
+				chunkCh <- types.CollectChunk{
+					Metrics:  context.sessionMts,
+					Warnings: context.Warnings(),
+					Err:      nil,
+				}
+
+				context.sessionMts = nil
+				context.ResetWarnings()
+
+				// synchro
+				// update stats
+			}
 		}
-
-		log.WithFields(logrus.Fields{
-			"elapsed":      endTime.Sub(startTime).String(),
-			"metrics-num":  len(context.sessionMts),
-			"warnings-num": len(context.Warnings()),
-		}).Debug("Collect completed")
 	}()
 }
 
