@@ -91,6 +91,8 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 		chunkCh <- types.CollectChunk{
 			Err: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
 		}
+		close(chunkCh)
+		return
 	}
 	defer cm.MarkTaskAsCompleted(id)
 
@@ -99,6 +101,8 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 		chunkCh <- types.CollectChunk{
 			Err: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
+		close(chunkCh)
+		return
 	}
 	context := contextIf.(*pluginContext)
 
