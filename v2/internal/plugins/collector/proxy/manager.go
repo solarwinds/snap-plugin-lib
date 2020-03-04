@@ -141,6 +141,8 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
 	closeCh := make(chan bool)
 
+	startTime := time.Now()
+
 	go func() {
 		for {
 			select {
@@ -163,17 +165,22 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				warnings := context.Warnings()
 
 				if len(mts) > 0 || len(warnings) > 0 {
+					lastUpdate := time.Now()
+
 					chunkCh <- types.CollectChunk{
 						Metrics:  context.sessionMts,
 						Warnings: context.Warnings(),
 					}
+
+					cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), true, startTime, lastUpdate)
 				}
 
 				context.sessionMts = nil
 				context.ResetWarnings()
 
 				// synchro
-				// update stats
+
+
 			}
 		}
 	}()

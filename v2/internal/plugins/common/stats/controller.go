@@ -117,26 +117,26 @@ func (sc *StatisticsController) RequestStat() chan *Statistics {
 	return respCh
 }
 
-func (sc *StatisticsController) UpdateLoadStat(taskId string, config string, filters []string) {
+func (sc *StatisticsController) UpdateLoadStat(taskID string, config string, filters []string) {
 	sc.incomingStatsCh <- &loadTaskStat{
 		sm:      sc,
-		taskId:  taskId,
+		taskID:  taskID,
 		config:  config,
 		filters: filters,
 	}
 }
 
-func (sc *StatisticsController) UpdateUnloadStat(taskId string) {
+func (sc *StatisticsController) UpdateUnloadStat(taskID string) {
 	sc.incomingStatsCh <- &unloadTaskStat{
 		sm:     sc,
-		taskId: taskId,
+		taskID: taskID,
 	}
 }
 
-func (sc *StatisticsController) UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
+func (sc *StatisticsController) UpdateExecutionStat(taskID string, metricsCount int, success bool, startTime, endTime time.Time) {
 	sc.incomingStatsCh <- &collectTaskStat{
 		sm:           sc,
-		taskId:       taskId,
+		taskID:       taskID,
 		metricsCount: metricsCount,
 		success:      success,
 		startTime:    startTime,
@@ -144,11 +144,21 @@ func (sc *StatisticsController) UpdateExecutionStat(taskId string, metricsCount 
 	}
 }
 
+func (sc *StatisticsController) UpdateStreamingStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
+	sc.incomingStatsCh <- &streamTaskStat{
+		sm:           sc,
+		taskID:       taskID,
+		metricsCount: metricsCount,
+		startTime:    startTime,
+		lastUpdate:   lastUpdate,
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-func (sc *StatisticsController) applyLoadStat(taskId string, config string, filters []string) {
+func (sc *StatisticsController) applyLoadStat(taskID string, config string, filters []string) {
 	log.WithFields(logrus.Fields{
-		"task-id":        taskId,
+		"task-id":        taskID,
 		"statistic-type": "Load",
 	}).Trace("Applying statistic")
 
@@ -161,7 +171,7 @@ func (sc *StatisticsController) applyLoadStat(taskId string, config string, filt
 	}
 
 	// Update task-specific stats
-	sc.stats.TasksDetails[taskId] = taskDetails{
+	sc.stats.TasksDetails[taskID] = taskDetails{
 		Configuration: json.RawMessage(config),
 		Filters:       filters,
 		Loaded: eventTimes{
@@ -170,9 +180,9 @@ func (sc *StatisticsController) applyLoadStat(taskId string, config string, filt
 	}
 }
 
-func (sc *StatisticsController) applyUnloadStat(taskId string) {
+func (sc *StatisticsController) applyUnloadStat(taskID string) {
 	log.WithFields(logrus.Fields{
-		"task-id":        taskId,
+		"task-id":        taskID,
 		"statistic-type": "Unload",
 	}).Trace("Applying statistic")
 
@@ -180,12 +190,12 @@ func (sc *StatisticsController) applyUnloadStat(taskId string) {
 	sc.stats.TasksSummary.Counters.CurrentlyActiveTasks -= 1
 
 	// Update task-specific stats
-	delete(sc.stats.TasksDetails, taskId)
+	delete(sc.stats.TasksDetails, taskID)
 }
 
-func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int, _ bool, startTime, completeTime time.Time) {
+func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int, _ bool, startTime, completeTime time.Time) {
 	log.WithFields(logrus.Fields{
-		"task-id":        taskId,
+		"task-id":        taskID,
 		"statistic-type": "Collect",
 	}).Trace("Applying statistic")
 	processingTime := completeTime.Sub(startTime)
@@ -208,7 +218,7 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 
 	// Update task-specific state
 	{
-		td := sc.stats.TasksDetails[taskId]
+		td := sc.stats.TasksDetails[taskID]
 
 		td.Counters.CollectRequests += 1
 		td.Counters.TotalMetrics += metricsCount
@@ -231,8 +241,21 @@ func (sc *StatisticsController) applyCollectStat(taskId string, metricsCount int
 			ProcessedMetrics: metricsCount,
 		}
 
-		sc.stats.TasksDetails[taskId] = td
+		sc.stats.TasksDetails[taskID] = td
 	}
+}
+
+func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
+	log.WithFields(logrus.Fields{
+		"task-id":        taskID,
+		"statistic-type": "Streaming",
+	}).Trace("Applying statistic")
+	processingTime := lastUpdate.Sub(startTime)
+
+	td := sc.stats.TasksDetails[taskID]
+	td.ProcessingTimes.Total = processingTime
+	td.Counters.CollectRequests = 1
+	td.Counters.TotalMetrics += metricsCount
 }
 
 ///////////////////////////////////////////////////////////////////////////////

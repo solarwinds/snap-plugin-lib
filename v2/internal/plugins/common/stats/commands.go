@@ -14,31 +14,31 @@ type StatCommand interface {
 
 type loadTaskStat struct {
 	sm      *StatisticsController
-	taskId  string
+	taskID  string
 	config  string
 	filters []string
 }
 
 func (ts *loadTaskStat) ApplyStat() {
-	ts.sm.applyLoadStat(ts.taskId, ts.config, ts.filters)
+	ts.sm.applyLoadStat(ts.taskID, ts.config, ts.filters)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 type unloadTaskStat struct {
 	sm     *StatisticsController
-	taskId string
+	taskID string
 }
 
 func (ts *unloadTaskStat) ApplyStat() {
-	ts.sm.applyUnloadStat(ts.taskId)
+	ts.sm.applyUnloadStat(ts.taskID)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 type collectTaskStat struct {
 	sm           *StatisticsController
-	taskId       string
+	taskID       string
 	metricsCount int
 	success      bool
 	startTime    time.Time
@@ -46,5 +46,19 @@ type collectTaskStat struct {
 }
 
 func (ts *collectTaskStat) ApplyStat() {
-	ts.sm.applyCollectStat(ts.taskId, ts.metricsCount, ts.success, ts.startTime, ts.processTime)
+	ts.sm.applyCollectStat(ts.taskID, ts.metricsCount, ts.success, ts.startTime, ts.processTime)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type streamTaskStat struct {
+	sm           *StatisticsController
+	taskID       string
+	metricsCount int
+	startTime    time.Time
+	lastUpdate   time.Time
+}
+
+func (ts *streamTaskStat) ApplyStat() {
+	ts.sm.applyStreamStat(ts.taskID, ts.metricsCount, ts.startTime, ts.lastUpdate)
 }
