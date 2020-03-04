@@ -159,10 +159,14 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				close(chunkCh)
 				return
 			case <- time.After(1 * time.Second):
-				chunkCh <- types.CollectChunk{
-					Metrics:  context.sessionMts,
-					Warnings: context.Warnings(),
-					Err:      nil,
+				mts := context.sessionMts
+				warnings := context.Warnings()
+
+				if len(mts) > 0 || len(warnings) > 0 {
+					chunkCh <- types.CollectChunk{
+						Metrics:  context.sessionMts,
+						Warnings: context.Warnings(),
+					}
 				}
 
 				context.sessionMts = nil

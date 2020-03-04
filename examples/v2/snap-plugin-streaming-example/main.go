@@ -12,7 +12,7 @@ const (
 	pluginName    = "example-streaming"
 	pluginVersion = "0.0.1"
 
-	maxProbeDuration = 10 * time.Second
+	maxProbeDuration = 1 * time.Second
 )
 
 var log = logrus.WithFields(logrus.Fields{
