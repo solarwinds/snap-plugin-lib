@@ -9,6 +9,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"sync"
+	"time"
+
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
@@ -16,9 +20,6 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"sort"
-	"sync"
-	"time"
 )
 
 var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
@@ -160,7 +161,7 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 			case <-closeCh:
 				close(chunkCh)
 				return
-			case <- time.After(1 * time.Second):
+			case <-time.After(1 * time.Second):
 				mts := context.sessionMts
 				warnings := context.Warnings()
 
@@ -179,7 +180,6 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				context.ResetWarnings()
 
 				// synchro
-
 
 			}
 		}

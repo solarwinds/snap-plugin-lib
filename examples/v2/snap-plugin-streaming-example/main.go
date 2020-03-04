@@ -1,11 +1,12 @@
 package main
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
-	"math/rand"
-	"time"
 )
 
 const (
@@ -25,8 +26,6 @@ type streamCollector struct {
 }
 
 func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) {
-	log.Trace("StreamingCollect start")
-
 	c.probeID++
 	_ = ctx.AddMetric("/stream/probes/id", c.probeID)
 
