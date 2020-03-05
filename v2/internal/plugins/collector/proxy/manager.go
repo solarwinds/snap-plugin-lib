@@ -94,7 +94,6 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 		close(chunkCh)
 		return
 	}
-	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -111,9 +110,15 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 
 	switch cm.collector.Type() {
 	case types.PluginTypeCollector:
-		go cm.collect(id, context, chunkCh)
+		go func() {
+			cm.collect(id, context, chunkCh)
+			cm.MarkTaskAsCompleted(id)
+		}()
 	case types.PluginTypeStreamingCollector:
-		go cm.streamingCollect(id, context, chunkCh)
+		go func() {
+			cm.streamingCollect(id, context, chunkCh)
+			cm.MarkTaskAsCompleted(id)
+		}()
 	}
 }
 

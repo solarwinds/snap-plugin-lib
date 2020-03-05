@@ -284,8 +284,6 @@ func (s *SuiteT) TestKillLongRunningCollector() {
 }
 
 func (s *SuiteT) TestRunningCollectorAtTheSameTime() {
-	s.T().Skip() // todo: adamik: fix
-
 	// Arrange
 	jsonConfig := []byte(`{}`)
 	var mtsSelector []string
