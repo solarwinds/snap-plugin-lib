@@ -1,15 +1,21 @@
 package proxy
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
+type contextHolder struct {
+	ctx      context.Context
+	cancelFn context.CancelFunc
+}
+
 type ContextManager struct {
-	activeTasksMutex sync.RWMutex        // mutex associated with activeTasks
-	activeTasks      map[string]struct{} // map of active tasks (tasks for which Collect RPC request is progressing)
+	activeTasksMutex sync.RWMutex             // mutex associated with activeTasks
+	activeTasks      map[string]contextHolder // map of active tasks (tasks for which Collect RPC request is progressing)
 
 	TasksLimit     int
 	InstancesLimit int
@@ -17,7 +23,7 @@ type ContextManager struct {
 
 func NewContextManager() *ContextManager {
 	return &ContextManager{
-		activeTasks:    map[string]struct{}{},
+		activeTasks:    map[string]contextHolder{},
 		TasksLimit:     plugin.NoLimit,
 		InstancesLimit: plugin.NoLimit,
 	}
@@ -31,7 +37,12 @@ func (cm *ContextManager) ActivateTask(id string) bool {
 		return false
 	}
 
-	cm.activeTasks[id] = struct{}{}
+	ctx, cancelFn := context.WithCancel(context.Background())
+
+	cm.activeTasks[id] = contextHolder{
+		ctx:      ctx,
+		cancelFn: cancelFn,
+	}
 	return true
 }
 
@@ -39,7 +50,22 @@ func (cm *ContextManager) MarkTaskAsCompleted(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
+	cm.activeTasks[id].cancelFn()
 	delete(cm.activeTasks, id)
+}
+
+func (cm *ContextManager) CancelTask(id string) {
+	cm.activeTasksMutex.Lock()
+	defer cm.activeTasksMutex.Unlock()
+
+	cm.activeTasks[id].cancelFn()
+}
+
+func (cm *ContextManager) TaskContext(id string) context.Context {
+	cm.activeTasksMutex.Lock()
+	defer cm.activeTasksMutex.Unlock()
+
+	return cm.activeTasks[id].ctx
 }
 
 func (cm *ContextManager) DefineTasksPerInstanceLimit(limit int) error {

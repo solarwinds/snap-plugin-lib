@@ -149,14 +149,16 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
-	closeCh := make(chan bool)
-
 	startTime := time.Now()
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 
 	go func() {
 		for {
 			select {
-			case <-closeCh:
+			case <-cm.TaskContext(id).Done():
+				wg.Done()
 				return
 			default:
 				cm.collector.StreamingCollect(context)
@@ -167,7 +169,7 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 	go func() {
 		for {
 			select {
-			case <-closeCh:
+			case <-cm.TaskContext(id).Done():
 				close(chunkCh)
 				return
 			case <-time.After(1 * time.Second):
@@ -188,11 +190,12 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				context.sessionMts = nil
 				context.ResetWarnings()
 
-				// synchro
-
+				// todo: adamik: synchro
 			}
 		}
 	}()
+
+	wg.Wait()
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
@@ -236,10 +239,19 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	if !cm.ActivateTask(id) {
-		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
+	for {
+		ok := cm.ActivateTask(id)
+		if !ok {
+			log.WithField("taskID", id).Trace("other action is active, requesting stop")
+			cm.CancelTask(id)
+			time.Sleep(1 * time.Second)
+		}
+
+		defer cm.MarkTaskAsCompleted(id)
+		break
 	}
-	defer cm.MarkTaskAsCompleted(id)
+
+	//return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
