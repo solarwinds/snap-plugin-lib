@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -20,11 +21,14 @@ type streamCollector struct {
 }
 
 func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) {
-	c.probeID++
-	_ = ctx.AddMetric("/stream/probes/id", c.probeID)
+	for {
+		c.probeID++
+		_ = ctx.AddMetric("/stream/probes/id", c.probeID)
 
-	waitDuration := time.Duration(rand.Intn(int(maxProbeDuration)))
-	time.Sleep(waitDuration)
+		fmt.Print("*** adamik *** metric\n")
+		waitDur := rand.Intn(int(maxProbeDuration))
+		time.Sleep(time.Duration(waitDur))
+	}
 }
 
 func main() {

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"sort"
 	"sync"
 	"time"
@@ -26,6 +27,9 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-p
 
 const (
 	RequestAllMetricsFilter = "/*"
+
+	unloadMaxRetries    = 3
+	unloadRetryInterval = 1 * time.Second
 )
 
 type Collector interface {
@@ -152,13 +156,25 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 	startTime := time.Now()
 
 	wg := sync.WaitGroup{}
-	wg.Add(2)
 
+	taskCtx := cm.TaskContext(id)
+
+	wg.Add(1)
 	go func() {
+		defer func() {
+			wg.Done()
+
+			// panic may be caused by two reasons:
+			// - user-defined function performed invalid operation
+			// - user-defined function called context API after it had been marked as dead
+			if r := recover(); r != nil {
+				log.WithError(fmt.Errorf("%v", r)).Warn("user-defined function has been ended")
+				log.Trace(string(debug.Stack()))
+			}
+		}()
 		for {
 			select {
-			case <-cm.TaskContext(id).Done():
-				wg.Done()
+			case <-taskCtx.Done():
 				return
 			default:
 				cm.collector.StreamingCollect(context)
@@ -166,11 +182,14 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for {
 			select {
-			case <-cm.TaskContext(id).Done():
+			case <-taskCtx.Done():
 				close(chunkCh)
+				context.MarkContextDead()
 				return
 			case <-time.After(1 * time.Second):
 				mts := context.sessionMts
@@ -239,19 +258,24 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	for {
+	// Unload may be called when Collect (especially stream) is in progress. If so, try to cancel it.
+	for retry := 1; retry <= unloadMaxRetries; retry++ {
 		ok := cm.ActivateTask(id)
 		if !ok {
+			if retry == unloadMaxRetries {
+				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
+			}
+
 			log.WithField("taskID", id).Trace("other action is active, requesting stop")
 			cm.CancelTask(id)
-			time.Sleep(1 * time.Second)
+			time.Sleep(unloadRetryInterval)
+
+			continue
 		}
 
 		defer cm.MarkTaskAsCompleted(id)
 		break
 	}
-
-	//return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {

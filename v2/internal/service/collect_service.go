@@ -25,10 +25,12 @@ func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
 }
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
-	logCollectService.Debug("GRPC Collect() received")
-	defer logCollectService.Debug("GRPC Collect() completed")
-
 	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("taskID", taskID)
+
+	logF.Debug("GRPC Collect() received")
+	defer logF.Debug("GRPC Collect() completed")
+
 	chunksCh := cs.proxy.RequestCollect(taskID)
 
 	for chunk := range chunksCh {
@@ -51,9 +53,12 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 }
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
-	logCollectService.Debug("GRPC Load() received")
+	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("taskID", taskID)
 
-	taskID := string(request.GetTaskId())
+	logF.Debug("GRPC Load() received")
+	defer logF.Debug("GRPC Load() completed")
+
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
@@ -61,17 +66,21 @@ func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadColle
 }
 
 func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadCollectorRequest) (*pluginrpc.UnloadCollectorResponse, error) {
-	logCollectService.Debug("GRPC Unload() received")
+	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("taskID", taskID)
 
-	taskID := string(request.GetTaskId())
+	logF.Debug("GRPC Unoad() received")
+	defer logF.Debug("GRPC Unoad() completed")
 
 	return &pluginrpc.UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
-	logCollectService.Debug("GRPC Info() received")
-
 	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("taskID", taskID)
+
+	logF.Debug("GRPC Info() received")
+	defer logF.Debug("GRPC Info() completed")
 
 	cInfo, err := cs.proxy.CustomInfo(taskID)
 	if err != nil {
