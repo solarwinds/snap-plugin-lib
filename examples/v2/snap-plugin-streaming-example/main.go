@@ -6,7 +6,6 @@ import (
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,11 +14,6 @@ const (
 
 	maxProbeDuration = 1 * time.Second
 )
-
-var log = logrus.WithFields(logrus.Fields{
-	"layer": "plugin",
-	"name":  pluginName,
-})
 
 type streamCollector struct {
 	probeID int
