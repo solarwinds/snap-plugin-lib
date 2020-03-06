@@ -48,15 +48,11 @@ func NewContext(rawConfig []byte) (*Context, error) {
 }
 
 func (c *Context) Config(key string) (string, bool) {
-	c.HandleDeadContext()
-
 	v, ok := c.flattenedConfig[key]
 	return v, ok
 }
 
 func (c *Context) ConfigKeys() []string {
-	c.HandleDeadContext()
-
 	var keysList []string
 	for k := range c.flattenedConfig {
 		keysList = append(keysList, k)
@@ -65,14 +61,10 @@ func (c *Context) ConfigKeys() []string {
 }
 
 func (c *Context) RawConfig() []byte {
-	c.HandleDeadContext()
-
 	return c.rawConfig
 }
 
 func (c *Context) Store(key string, obj interface{}) {
-	c.HandleDeadContext()
-
 	c.storedObjectsMutex.Lock()
 	defer c.storedObjectsMutex.Unlock()
 
@@ -80,8 +72,6 @@ func (c *Context) Store(key string, obj interface{}) {
 }
 
 func (c *Context) Load(key string) (interface{}, bool) {
-	c.HandleDeadContext()
-
 	c.storedObjectsMutex.RLock()
 	defer c.storedObjectsMutex.RUnlock()
 
@@ -90,8 +80,6 @@ func (c *Context) Load(key string) (interface{}, bool) {
 }
 
 func (c *Context) LoadTo(key string, dest interface{}) error {
-	c.HandleDeadContext()
-
 	c.storedObjectsMutex.RLock()
 	defer c.storedObjectsMutex.RUnlock()
 
@@ -114,8 +102,6 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
-	c.HandleDeadContext()
-
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
 		log.Warning("Maximum number of warnings logged. New warning has been ignored")
 		return
@@ -138,12 +124,6 @@ func (c *Context) Warnings() []types.Warning {
 
 func (c *Context) ResetWarnings() {
 	c.sessionWarnings = []types.Warning{}
-}
-
-func (c *Context) HandleDeadContext() {
-	if c.dead {
-		panic("Context is not associated with active task")
-	}
 }
 
 func (c *Context) MarkContextDead() {

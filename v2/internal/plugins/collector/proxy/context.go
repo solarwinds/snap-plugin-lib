@@ -42,14 +42,10 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 }
 
 func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
-	pc.HandleDeadContext()
-
 	return pc.AddMetricWithTags(ns, v, map[string]string{})
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
-	pc.HandleDeadContext()
-
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
@@ -101,8 +97,6 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 }
 
 func (pc *pluginContext) ShouldProcess(ns string) bool {
-	pc.HandleDeadContext()
-
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return false
@@ -118,8 +112,6 @@ func (pc *pluginContext) ShouldProcess(ns string) bool {
 }
 
 func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
-	pc.HandleDeadContext()
-
 	if mtMeta, ok := pc.ctxManager.metricsMetadata[nsKey]; ok {
 		return mtMeta
 	}
@@ -129,15 +121,11 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 }
 
 func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
-	pc.HandleDeadContext()
-
 	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
 
 func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
-	pc.HandleDeadContext()
-
 	// TODO: https://swicloud.atlassian.net/browse/AO-12232
 	panic("implement me")
 }
@@ -145,8 +133,6 @@ func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
 // function assumes valid format
 func (pc *pluginContext) extractStaticValue(s string) string {
-	pc.HandleDeadContext()
-
 	eqIndex := strings.Index(s, "=")
 	if eqIndex != -1 {
 		return s[eqIndex+1 : len(s)-1]
