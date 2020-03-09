@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
@@ -16,9 +17,10 @@ const nsSeparator = metrictree.NsSeparator
 type pluginContext struct {
 	*commonProxy.Context
 
-	metricsFilters *metrictree.TreeValidator // metric filters defined by task (yaml)
-	sessionMts     []*types.Metric
-	ctxManager     *ContextManager // back-reference to context manager
+	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
+	sessionMts      []*types.Metric
+	sessionMtsMutex sync.RWMutex
+	ctxManager      *ContextManager // back-reference to context manager
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
@@ -84,6 +86,9 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	nsDescKey := nsSeparator + strings.Join(nsDefFormat, nsSeparator)
 	mtMeta := pc.metricMeta(nsDescKey)
 
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.RUnlock()
+
 	pc.sessionMts = append(pc.sessionMts, &types.Metric{
 		Namespace_:   mtNamespace,
 		Value_:       v,
@@ -139,4 +144,15 @@ func (pc *pluginContext) extractStaticValue(s string) string {
 	}
 
 	return s
+}
+
+func (pc *pluginContext) ClearMetricList() {
+	pc.sessionMts = []*types.Metric{}
+}
+
+func (pc *pluginContext) Metrics() []*types.Metric {
+	pc.sessionMtsMutex.RLock()
+	defer pc.sessionMtsMutex.RUnlock()
+
+	return pc.sessionMts
 }

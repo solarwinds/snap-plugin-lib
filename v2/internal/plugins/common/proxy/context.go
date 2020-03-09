@@ -27,6 +27,7 @@ type Context struct {
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
 	sessionWarnings    []types.Warning
+	warningsMutex      sync.RWMutex
 
 	ctx context.Context
 }
@@ -105,6 +106,9 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	c.warningsMutex.Lock()
+	defer c.warningsMutex.Unlock()
+
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
 		log.Warning("Maximum number of warnings logged. New warning has been ignored")
 		return
@@ -122,6 +126,9 @@ func (c *Context) AddWarning(msg string) {
 }
 
 func (c *Context) Warnings() []types.Warning {
+	c.warningsMutex.RLock()
+	defer c.warningsMutex.RUnlock()
+
 	return c.sessionWarnings
 }
 

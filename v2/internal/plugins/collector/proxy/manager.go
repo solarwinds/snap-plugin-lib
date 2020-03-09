@@ -113,7 +113,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	pContext := contextIf.(*pluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
-	pContext.sessionMts = []*types.Metric{}
+	pContext.ClearMetricList()
 	pContext.ResetWarnings()
 
 	switch cm.collector.Type() {
@@ -135,14 +135,14 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+	cm.statsController.UpdateExecutionStat(id, len(context.Metrics()), err != nil, startTime, endTime)
 
 	if err != nil {
 		err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
 
 	chunkCh <- types.CollectChunk{
-		Metrics:  context.sessionMts,
+		Metrics:  context.Metrics(),
 		Warnings: context.Warnings(),
 		Err:      err,
 	}
@@ -151,7 +151,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 
 	log.WithFields(logrus.Fields{
 		"elapsed":      endTime.Sub(startTime).String(),
-		"metrics-num":  len(context.sessionMts),
+		"metrics-num":  len(context.Metrics()),
 		"warnings-num": len(context.Warnings()),
 	}).Debug("Collect completed")
 }
@@ -195,24 +195,22 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				close(chunkCh)
 				return
 			case <-time.After(streamingCheckInterval):
-				mts := context.sessionMts
+				mts := context.Metrics()
 				warnings := context.Warnings()
 
 				if len(mts) > 0 || len(warnings) > 0 {
 					lastUpdate := time.Now()
 
 					chunkCh <- types.CollectChunk{
-						Metrics:  context.sessionMts,
+						Metrics:  context.Metrics(),
 						Warnings: context.Warnings(),
 					}
 
-					cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), true, startTime, lastUpdate)
+					cm.statsController.UpdateExecutionStat(id, len(context.Metrics()), true, startTime, lastUpdate)
 				}
 
-				context.sessionMts = nil
+				context.ClearMetricList()
 				context.ResetWarnings()
-
-				// todo: adamik: synchro
 			}
 		}
 	}()
