@@ -113,7 +113,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	pContext := contextIf.(*pluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
-	pContext.ClearMetricList()
+	pContext.ClearMetrics()
 	pContext.ResetWarnings()
 
 	switch cm.collector.Type() {
@@ -135,15 +135,18 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 	err := cm.collector.Collect(context) // calling to user defined code
 	endTime := time.Now()
 
-	cm.statsController.UpdateExecutionStat(id, len(context.Metrics()), err != nil, startTime, endTime)
+	mts := context.Metrics(false)
+	warnings := context.Warnings(false)
+
+	cm.statsController.UpdateExecutionStat(id, len(mts), err != nil, startTime, endTime)
 
 	if err != nil {
 		err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
 	}
 
 	chunkCh <- types.CollectChunk{
-		Metrics:  context.Metrics(),
-		Warnings: context.Warnings(),
+		Metrics:  mts,
+		Warnings: warnings,
 		Err:      err,
 	}
 
@@ -151,8 +154,8 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 
 	log.WithFields(logrus.Fields{
 		"elapsed":      endTime.Sub(startTime).String(),
-		"metrics-num":  len(context.Metrics()),
-		"warnings-num": len(context.Warnings()),
+		"metrics-num":  len(mts),
+		"warnings-num": len(warnings),
 	}).Debug("Collect completed")
 }
 
@@ -167,22 +170,20 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 	go func() {
 		defer func() {
 			wg.Done()
+			cm.CancelTask(id)
 
-			// panic may be caused by two reasons:
-			// - user-defined function performed invalid operation
-			// - user-defined function called context API after it had been marked as dead
+			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
-				log.WithError(fmt.Errorf("%v", r)).Warn("user-defined function has been ended")
+				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
 				log.Trace(string(debug.Stack()))
 			}
 		}()
-		for {
-			select {
-			case <-taskCtx.Done():
-				return
-			default:
-				cm.collector.StreamingCollect(context)
-			}
+		select {
+		case <-taskCtx.Done():
+			return
+		default:
+			cm.collector.StreamingCollect(context)
+
 		}
 	}()
 
@@ -192,30 +193,32 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 		for {
 			select {
 			case <-taskCtx.Done():
+				cm.handleChunk(id, context, chunkCh, startTime)
 				close(chunkCh)
 				return
 			case <-time.After(streamingCheckInterval):
-				mts := context.Metrics()
-				warnings := context.Warnings()
-
-				if len(mts) > 0 || len(warnings) > 0 {
-					lastUpdate := time.Now()
-
-					chunkCh <- types.CollectChunk{
-						Metrics:  context.Metrics(),
-						Warnings: context.Warnings(),
-					}
-
-					cm.statsController.UpdateExecutionStat(id, len(context.Metrics()), true, startTime, lastUpdate)
-				}
-
-				context.ClearMetricList()
-				context.ResetWarnings()
+				cm.handleChunk(id, context, chunkCh, startTime)
 			}
 		}
 	}()
 
 	wg.Wait()
+}
+
+func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh chan types.CollectChunk, startTime time.Time) {
+	mts := context.Metrics(true)
+	warnings := context.Warnings(true)
+
+	if len(mts) > 0 || len(warnings) > 0 {
+		lastUpdate := time.Now()
+
+		chunkCh <- types.CollectChunk{
+			Metrics:  mts,
+			Warnings: warnings,
+		}
+
+		cm.statsController.UpdateExecutionStat(id, len(mts), true, startTime, lastUpdate)
+	}
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {

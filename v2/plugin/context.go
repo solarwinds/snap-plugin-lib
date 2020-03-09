@@ -33,5 +33,5 @@ type Context interface {
 	IsDone() bool
 
 	// Check if task is completed (via listening on a channel)
-	Done() <- chan struct{}
+	Done() <-chan struct{}
 }

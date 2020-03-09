@@ -74,6 +74,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 
 	startTime := time.Now()
 	err := cm.publisher.Publish(context) // calling to user defined code
+	warnings := context.Warnings(false)
 	endTime := time.Now()
 
 	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
@@ -81,18 +82,18 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 	if err != nil {
 		return types.ProcessingStatus{
 			Error:    fmt.Errorf("user-defined Publish method ended with error: %v", err),
-			Warnings: context.Warnings(),
+			Warnings: warnings,
 		}
 	}
 
 	log.WithFields(logrus.Fields{
 		"elapsed":      endTime.Sub(startTime).String(),
 		"metrics-num":  len(mts),
-		"warnings-num": len(context.Warnings()),
+		"warnings-num": len(warnings),
 	}).Debug("Publish completed")
 
 	return types.ProcessingStatus{
-		Warnings: context.Warnings(),
+		Warnings: warnings,
 	}
 }
 

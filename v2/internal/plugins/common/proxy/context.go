@@ -125,14 +125,21 @@ func (c *Context) AddWarning(msg string) {
 	})
 }
 
-func (c *Context) Warnings() []types.Warning {
+func (c *Context) Warnings(clear bool) []types.Warning {
 	c.warningsMutex.RLock()
 	defer c.warningsMutex.RUnlock()
 
-	return c.sessionWarnings
+	warnings := c.sessionWarnings
+	if clear {
+		warnings = []types.Warning{}
+	}
+	return warnings
 }
 
 func (c *Context) ResetWarnings() {
+	c.warningsMutex.RLock()
+	defer c.warningsMutex.RUnlock()
+
 	c.sessionWarnings = []types.Warning{}
 }
 

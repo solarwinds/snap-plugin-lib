@@ -87,7 +87,7 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	mtMeta := pc.metricMeta(nsDescKey)
 
 	pc.sessionMtsMutex.Lock()
-	defer pc.sessionMtsMutex.RUnlock()
+	defer pc.sessionMtsMutex.Unlock()
 
 	pc.sessionMts = append(pc.sessionMts, &types.Metric{
 		Namespace_:   mtNamespace,
@@ -146,13 +146,20 @@ func (pc *pluginContext) extractStaticValue(s string) string {
 	return s
 }
 
-func (pc *pluginContext) ClearMetricList() {
-	pc.sessionMts = []*types.Metric{}
+func (pc *pluginContext) ClearMetrics() {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
+
+	pc.sessionMts = nil
 }
 
-func (pc *pluginContext) Metrics() []*types.Metric {
-	pc.sessionMtsMutex.RLock()
-	defer pc.sessionMtsMutex.RUnlock()
+func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
 
-	return pc.sessionMts
+	mts := pc.sessionMts
+	if clear {
+		pc.sessionMts = nil
+	}
+	return mts
 }
