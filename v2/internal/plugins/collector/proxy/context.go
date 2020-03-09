@@ -48,6 +48,10 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+	if pc.IsDone() {
+		return fmt.Errorf("task has been canceled")
+	}
+
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)

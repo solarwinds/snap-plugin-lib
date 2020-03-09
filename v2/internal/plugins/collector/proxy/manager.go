@@ -28,7 +28,7 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-p
 const (
 	RequestAllMetricsFilter = "/*"
 
-	unloadMaxRetries    = 3
+	unloadMaxRetries    = 5
 	unloadRetryInterval = 1 * time.Second
 
 	streamingCheckInterval = 1 * time.Second
@@ -113,6 +113,8 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	pContext := contextIf.(*pluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
+	defer pContext.ReleaseContext()
+
 	pContext.ClearMetrics()
 	pContext.ResetWarnings()
 
@@ -131,32 +133,60 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 }
 
 func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
-	startTime := time.Now()
-	err := cm.collector.Collect(context) // calling to user defined code
-	endTime := time.Now()
+	taskCtx := cm.TaskContext(id)
 
-	mts := context.Metrics(false)
-	warnings := context.Warnings(false)
+	var mts []*types.Metric
+	var warnings []types.Warning
+	var err error
 
-	cm.statsController.UpdateExecutionStat(id, len(mts), err != nil, startTime, endTime)
+	go func() {
+		defer func() {
+			cm.CancelTask(id)
 
-	if err != nil {
-		err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
+			// catch panics (since it's running in it's own goroutine)
+			if r := recover(); r != nil {
+				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				log.Trace(string(debug.Stack()))
+				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
+			}
+		}()
+
+		startTime := time.Now()
+		err = cm.collector.Collect(context) // calling to user defined code
+		endTime := time.Now()
+
+		if !context.Context.IsDone() {
+			mts = context.Metrics(false)
+			warnings = context.Warnings(false)
+
+			cm.statsController.UpdateExecutionStat(id, len(mts), err != nil, startTime, endTime)
+
+			if err != nil {
+				err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
+			}
+
+			log.WithFields(logrus.Fields{
+				"elapsed":      endTime.Sub(startTime).String(),
+				"metrics-num":  len(mts),
+				"warnings-num": len(warnings),
+			}).Debug("Collect completed")
+		} else {
+			log.WithFields(logrus.Fields{
+				"elapsed": endTime.Sub(startTime).String(),
+			}).Info("Collect completed after task had been canceled")
+		}
+	}()
+
+	select {
+	case <-taskCtx.Done():
+		chunkCh <- types.CollectChunk{
+			Metrics:  mts,
+			Warnings: warnings,
+			Err:      err,
+		}
+
+		close(chunkCh)
 	}
-
-	chunkCh <- types.CollectChunk{
-		Metrics:  mts,
-		Warnings: warnings,
-		Err:      err,
-	}
-
-	close(chunkCh)
-
-	log.WithFields(logrus.Fields{
-		"elapsed":      endTime.Sub(startTime).String(),
-		"metrics-num":  len(mts),
-		"warnings-num": len(warnings),
-	}).Debug("Collect completed")
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
@@ -166,10 +196,8 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 
 	taskCtx := cm.TaskContext(id)
 
-	wg.Add(1)
 	go func() {
 		defer func() {
-			wg.Done()
 			cm.CancelTask(id)
 
 			// catch panics (since it's running in it's own goroutine)
@@ -178,18 +206,14 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 				log.Trace(string(debug.Stack()))
 			}
 		}()
-		select {
-		case <-taskCtx.Done():
-			return
-		default:
-			cm.collector.StreamingCollect(context)
 
-		}
+		cm.collector.StreamingCollect(context)
 	}()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+
 		for {
 			select {
 			case <-taskCtx.Done():

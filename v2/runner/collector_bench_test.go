@@ -10,11 +10,12 @@ Benchmark test mainly measures:
 package runner
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
 const collectTimeout = 10 * time.Second

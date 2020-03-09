@@ -58,7 +58,9 @@ func (cm *ContextManager) CancelTask(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
-	cm.activeTasks[id].cancelFn()
+	if aTask, ok := cm.activeTasks[id]; ok {
+		aTask.cancelFn()
+	}
 }
 
 func (cm *ContextManager) TaskContext(id string) context.Context {

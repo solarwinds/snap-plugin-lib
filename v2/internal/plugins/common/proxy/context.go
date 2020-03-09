@@ -30,6 +30,7 @@ type Context struct {
 	warningsMutex      sync.RWMutex
 
 	ctx context.Context
+	ctxFn context.CancelFunc
 }
 
 type Warning struct {
@@ -106,6 +107,10 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	if c.IsDone() {
+		log.Warning("task has been canceled")
+	}
+
 	c.warningsMutex.Lock()
 	defer c.warningsMutex.Unlock()
 
@@ -143,10 +148,6 @@ func (c *Context) ResetWarnings() {
 	c.sessionWarnings = []types.Warning{}
 }
 
-func (c *Context) AttachContext(parentCtx context.Context) {
-	c.ctx, _ = context.WithCancel(parentCtx)
-}
-
 func (c *Context) IsDone() bool {
 	return c.ctx.Err() != nil
 }
@@ -154,3 +155,13 @@ func (c *Context) IsDone() bool {
 func (c *Context) Done() <-chan struct{} {
 	return c.ctx.Done()
 }
+
+
+func (c *Context) AttachContext(parentCtx context.Context) {
+	c.ctx, c.ctxFn = context.WithCancel(parentCtx)
+}
+
+func (c *Context) ReleaseContext() {
+	c.ctxFn()
+}
+
