@@ -30,6 +30,8 @@ const (
 
 	unloadMaxRetries    = 3
 	unloadRetryInterval = 1 * time.Second
+
+	streamingCheckInterval = 1 * time.Second
 )
 
 type Collector interface {
@@ -107,20 +109,22 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 		close(chunkCh)
 		return
 	}
-	context := contextIf.(*pluginContext)
 
-	context.sessionMts = []*types.Metric{}
-	context.ResetWarnings()
+	pContext := contextIf.(*pluginContext)
+
+	pContext.AttachContext(cm.TaskContext(id))
+	pContext.sessionMts = []*types.Metric{}
+	pContext.ResetWarnings()
 
 	switch cm.collector.Type() {
 	case types.PluginTypeCollector:
 		go func() {
-			cm.collect(id, context, chunkCh)
+			cm.collect(id, pContext, chunkCh)
 			cm.MarkTaskAsCompleted(id)
 		}()
 	case types.PluginTypeStreamingCollector:
 		go func() {
-			cm.streamingCollect(id, context, chunkCh)
+			cm.streamingCollect(id, pContext, chunkCh)
 			cm.MarkTaskAsCompleted(id)
 		}()
 	}
@@ -189,9 +193,8 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 			select {
 			case <-taskCtx.Done():
 				close(chunkCh)
-				context.MarkContextDead()
 				return
-			case <-time.After(1 * time.Second):
+			case <-time.After(streamingCheckInterval):
 				mts := context.sessionMts
 				warnings := context.Warnings()
 

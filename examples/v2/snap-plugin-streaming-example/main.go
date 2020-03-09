@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
 
@@ -16,18 +16,27 @@ const (
 	maxProbeDuration = 1 * time.Second
 )
 
+var log = logrus.WithFields(logrus.Fields{
+	"layer": "plugin",
+	"name":  pluginName,
+})
+
 type streamCollector struct {
 	probeID int
 }
 
 func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) {
 	for {
-		c.probeID++
-		_ = ctx.AddMetric("/stream/probes/id", c.probeID)
+		select {
+		case <-ctx.Done():
+			log.Info("Handling end of stream")
+			return
+		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))):
+			log.Debug("Gathering metric")
 
-		fmt.Print("*** adamik *** metric\n")
-		waitDur := rand.Intn(int(maxProbeDuration))
-		time.Sleep(time.Duration(waitDur))
+			c.probeID++
+			_ = ctx.AddMetric("/stream/probes/id", c.probeID)
+		}
 	}
 }
 

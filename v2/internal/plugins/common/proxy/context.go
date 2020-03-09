@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
@@ -21,12 +22,13 @@ var (
 )
 
 type Context struct {
-	dead               bool
 	rawConfig          []byte
 	flattenedConfig    map[string]string
 	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
 	sessionWarnings    []types.Warning
+
+	ctx context.Context
 }
 
 type Warning struct {
@@ -44,6 +46,7 @@ func NewContext(rawConfig []byte) (*Context, error) {
 		rawConfig:       rawConfig,
 		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
+		ctx:             context.Background(),
 	}, nil
 }
 
@@ -126,6 +129,14 @@ func (c *Context) ResetWarnings() {
 	c.sessionWarnings = []types.Warning{}
 }
 
-func (c *Context) MarkContextDead() {
-	c.dead = true
+func (c *Context) AttachContext(parentCtx context.Context) {
+	c.ctx, _ = context.WithCancel(parentCtx)
+}
+
+func (c *Context) IsDone() bool {
+	return c.ctx.Err() != nil
+}
+
+func (c *Context) Done() <-chan struct{} {
+	return c.ctx.Done()
 }

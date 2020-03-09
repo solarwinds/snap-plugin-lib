@@ -1,5 +1,7 @@
 package plugin
 
+import "context"
+
 // CollectContext provides state and configuration API to be used by custom code.
 type Context interface {
 	// Returns configuration value by providing path (representing its position in JSON tree)
@@ -23,4 +25,13 @@ type Context interface {
 
 	// Add warning information to current collect / process operation.
 	AddWarning(msg string)
+
+	// Attach parent context which may trigger cancellation
+	AttachContext(parentCtx context.Context)
+
+	// Check if task is completed
+	IsDone() bool
+
+	// Check if task is completed (via listening on a channel)
+	Done() <- chan struct{}
 }
