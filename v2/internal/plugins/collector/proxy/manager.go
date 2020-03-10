@@ -177,16 +177,15 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 		}
 	}()
 
-	select {
-	case <-taskCtx.Done():
-		chunkCh <- types.CollectChunk{
-			Metrics:  mts,
-			Warnings: warnings,
-			Err:      err,
-		}
+	<-taskCtx.Done()
 
-		close(chunkCh)
+	chunkCh <- types.CollectChunk{
+		Metrics:  mts,
+		Warnings: warnings,
+		Err:      err,
 	}
+
+	close(chunkCh)
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
