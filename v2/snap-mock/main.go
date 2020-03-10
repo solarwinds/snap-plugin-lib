@@ -23,7 +23,7 @@ const (
 	defaultTaskID          = ""
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
-	defaultStreamDuration  = 10 * time.Second
+	defaultStreamDuration  = 60 * time.Second
 
 	grpcLoadDelay      = 500 * time.Millisecond
 	grpcRequestTimeout = 10 * time.Second

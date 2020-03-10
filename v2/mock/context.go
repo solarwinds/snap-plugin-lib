@@ -1,8 +1,6 @@
 package mock
 
 import (
-	"context"
-
 	"github.com/stretchr/testify/mock"
 )
 
@@ -66,11 +64,6 @@ func (m *Context) ApplyTagsByRegExp(ns string, tags map[string]string) error {
 func (m *Context) ShouldProcess(ns string) bool {
 	args := m.Called(ns)
 	return args.Bool(0)
-}
-
-func (m *Context) AttachContext(parentCtx context.Context) {
-	m.Called(parentCtx)
-	return
 }
 
 func (m *Context) IsDone() bool {

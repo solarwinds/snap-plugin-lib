@@ -26,6 +26,7 @@ import (
 
 const expectedGracefulShutdownTimeout = 2 * time.Second
 const expectedForceShutdownTimeout = 2*time.Second + service.GRPCGracefulStopTimeout
+const expectedUnloadTimeout = 3 * time.Second
 
 /*****************************************************************************/
 
@@ -725,7 +726,7 @@ func (s *SuiteT) TestUnloadingRunningCollector() {
 
 	Convey("Validate ability to kill collector in case processing takes too much time", s.T(), func() {
 
-		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
+		// Act - collect is processing for 30 seconds, but unload comes right after request. Should unblock after 10s with error.
 		go func() {
 			_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
 			_, err := s.sendCollect("task-1")
@@ -745,7 +746,7 @@ func (s *SuiteT) TestUnloadingRunningCollector() {
 			select {
 			case <-errCollectCh:
 				// ok
-			case <-time.After(expectedForceShutdownTimeout):
+			case <-time.After(expectedUnloadTimeout):
 				s.T().Fatal("plugin should have been ended")
 			}
 
@@ -788,7 +789,7 @@ func (s *SuiteT) TestUnloadingRunningStreaming() {
 
 	Convey("Validate ability to kill collector in case processing takes too much time", s.T(), func() {
 
-		// Act - collect is processing for 1 minute, but kill comes right after request. Should unblock after 10s with error.
+		// Act - streaming is processing, but unload comes right after request. Should unblock after 10s with error.
 		go func() {
 			_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
 			_, err := s.sendCollect("task-1")
@@ -808,7 +809,7 @@ func (s *SuiteT) TestUnloadingRunningStreaming() {
 			select {
 			case <-errCollectCh:
 				// ok
-			case <-time.After(expectedForceShutdownTimeout):
+			case <-time.After(expectedUnloadTimeout):
 				s.T().Fatal("plugin should have been ended")
 			}
 

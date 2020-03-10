@@ -28,7 +28,7 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-p
 const (
 	RequestAllMetricsFilter = "/*"
 
-	unloadMaxRetries    = 5
+	unloadMaxRetries    = 3
 	unloadRetryInterval = 1 * time.Second
 
 	streamingCheckInterval = 1 * time.Second
@@ -113,8 +113,6 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	pContext := contextIf.(*pluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
-	defer pContext.ReleaseContext()
-
 	pContext.ClearMetrics()
 	pContext.ResetWarnings()
 
@@ -123,11 +121,13 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 		go func() {
 			cm.collect(id, pContext, chunkCh)
 			cm.MarkTaskAsCompleted(id)
+			pContext.ReleaseContext()
 		}()
 	case types.PluginTypeStreamingCollector:
 		go func() {
 			cm.streamingCollect(id, pContext, chunkCh)
 			cm.MarkTaskAsCompleted(id)
+			pContext.ReleaseContext()
 		}()
 	}
 }
@@ -240,7 +240,7 @@ func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh
 			Metrics:  mts,
 			Warnings: warnings,
 		}
-
+		
 		cm.statsController.UpdateExecutionStat(id, len(mts), true, startTime, lastUpdate)
 	}
 }

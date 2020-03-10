@@ -29,7 +29,7 @@ type Context struct {
 	sessionWarnings    []types.Warning
 	warningsMutex      sync.RWMutex
 
-	ctx context.Context
+	ctx   context.Context
 	ctxFn context.CancelFunc
 }
 
@@ -156,7 +156,6 @@ func (c *Context) Done() <-chan struct{} {
 	return c.ctx.Done()
 }
 
-
 func (c *Context) AttachContext(parentCtx context.Context) {
 	c.ctx, c.ctxFn = context.WithCancel(parentCtx)
 }
@@ -164,4 +163,3 @@ func (c *Context) AttachContext(parentCtx context.Context) {
 func (c *Context) ReleaseContext() {
 	c.ctxFn()
 }
-
