@@ -28,6 +28,7 @@ type Controller interface {
 	UpdateLoadStat(taskId string, config string, filters []string)
 	UpdateUnloadStat(taskId string)
 	UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
+	UpdateStreamingStat(taskID string, metricsCount int, startTime, lastUpdate time.Time)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -256,6 +257,8 @@ func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int,
 	td.ProcessingTimes.Total = processingTime
 	td.Counters.CollectRequests = 1
 	td.Counters.TotalMetrics += metricsCount
+
+	sc.stats.TasksDetails[taskID] = td
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,4 +290,7 @@ func (d *EmptyController) UpdateUnloadStat(taskId string) {
 }
 
 func (d *EmptyController) UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
+}
+
+func (d *EmptyController) UpdateStreamingStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
 }

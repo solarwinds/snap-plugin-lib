@@ -240,8 +240,8 @@ func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh
 			Metrics:  mts,
 			Warnings: warnings,
 		}
-		
-		cm.statsController.UpdateExecutionStat(id, len(mts), true, startTime, lastUpdate)
+
+		cm.statsController.UpdateStreamingStat(id, len(mts), startTime, lastUpdate)
 	}
 }
 
