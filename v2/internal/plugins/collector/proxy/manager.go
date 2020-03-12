@@ -86,13 +86,13 @@ func NewContextManager(collector types.Collector, statsController stats.Controll
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id string) chan types.CollectChunk {
+func (cm *ContextManager) RequestCollect(id string) <-chan types.CollectChunk {
 	chunkCh := make(chan types.CollectChunk)
 	go cm.requestCollect(id, chunkCh)
 	return chunkCh
 }
 
-func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectChunk) {
+func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.CollectChunk) {
 	if !cm.ActivateTask(id) {
 		chunkCh <- types.CollectChunk{
 			Err: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
@@ -132,7 +132,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan types.CollectCh
 	}
 }
 
-func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
+func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
 	taskCtx := cm.TaskContext(id)
 
 	var mts []*types.Metric
@@ -188,7 +188,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 	close(chunkCh)
 }
 
-func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan types.CollectChunk) {
+func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
 	startTime := time.Now()
 
 	wg := sync.WaitGroup{}
@@ -228,7 +228,7 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 	wg.Wait()
 }
 
-func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh chan types.CollectChunk, startTime time.Time) {
+func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
 	mts := context.Metrics(true)
 	warnings := context.Warnings(true)
 
