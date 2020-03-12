@@ -69,8 +69,8 @@ func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadC
 	taskID := request.GetTaskId()
 	logF := logCollectService.WithField("task-id", taskID)
 
-	logF.Debug("GRPC Unoad() received")
-	defer logF.Debug("GRPC Unoad() completed")
+	logF.Debug("GRPC Unload() received")
+	defer logF.Debug("GRPC Unload() completed")
 
 	return &pluginrpc.UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
