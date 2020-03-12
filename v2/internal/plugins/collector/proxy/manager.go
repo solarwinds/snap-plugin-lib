@@ -186,8 +186,6 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
 	startTime := time.Now()
 
-	wg := sync.WaitGroup{}
-
 	taskCtx := cm.TaskContext(id)
 
 	go func() {
@@ -204,23 +202,16 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 		cm.collector.StreamingCollect(context)
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		for {
-			select {
-			case <-taskCtx.Done():
-				cm.handleChunk(id, context, chunkCh, startTime)
-				close(chunkCh)
-				return
-			case <-time.After(streamingCheckInterval):
-				cm.handleChunk(id, context, chunkCh, startTime)
-			}
+	for {
+		select {
+		case <-taskCtx.Done():
+			cm.handleChunk(id, context, chunkCh, startTime)
+			close(chunkCh)
+			return
+		case <-time.After(streamingCheckInterval):
+			cm.handleChunk(id, context, chunkCh, startTime)
 		}
-	}()
-
-	wg.Wait()
+	}
 }
 
 func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
