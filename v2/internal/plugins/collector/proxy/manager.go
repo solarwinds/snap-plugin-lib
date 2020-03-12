@@ -136,7 +136,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 
 	go func() {
 		defer func() {
-			cm.CancelTask(id)
+			cm.ReleaseTask(id)
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
@@ -192,7 +192,7 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 
 	go func() {
 		defer func() {
-			cm.CancelTask(id)
+			cm.ReleaseTask(id)
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
@@ -289,7 +289,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 			}
 
 			log.WithField("taskID", id).Trace("other action is active, requesting stop")
-			cm.CancelTask(id)
+			cm.ReleaseTask(id)
 			time.Sleep(unloadRetryInterval)
 
 			continue

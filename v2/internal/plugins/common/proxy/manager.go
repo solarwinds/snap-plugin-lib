@@ -54,7 +54,7 @@ func (cm *ContextManager) MarkTaskAsCompleted(id string) {
 	delete(cm.activeTasks, id)
 }
 
-func (cm *ContextManager) CancelTask(id string) {
+func (cm *ContextManager) ReleaseTask(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
