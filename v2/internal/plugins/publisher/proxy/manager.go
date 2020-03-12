@@ -54,7 +54,7 @@ func NewContextManager(publisher plugin.Publisher, statsController stats.Control
 // proxy.Publisher related methods
 
 func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.ProcessingStatus {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		return types.ProcessingStatus{
 			Error: fmt.Errorf("can't process publish request, other request for the same id (%s) is in progress", id),
 		}
@@ -98,7 +98,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 }
 
 func (cm *ContextManager) LoadTask(id string, config []byte) error {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.MarkTaskAsCompleted(id)
@@ -126,7 +126,7 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.MarkTaskAsCompleted(id)
@@ -151,7 +151,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 }
 
 func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
-	// Do not call cm.ActivateTask as above methods. CustomInfo is read-only
+	// Do not call cm.AcquireTask as above methods. CustomInfo is read-only
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {

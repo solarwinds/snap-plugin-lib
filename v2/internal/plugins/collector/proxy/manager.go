@@ -93,7 +93,7 @@ func (cm *ContextManager) RequestCollect(id string) <-chan types.CollectChunk {
 }
 
 func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.CollectChunk) {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		chunkCh <- types.CollectChunk{
 			Err: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
 		}
@@ -245,7 +245,7 @@ func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.MarkTaskAsCompleted(id)
@@ -287,7 +287,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 func (cm *ContextManager) UnloadTask(id string) error {
 	// Unload may be called when Collect (especially stream) is in progress. If so, try to cancel it.
 	for retry := 1; retry <= unloadMaxRetries; retry++ {
-		ok := cm.ActivateTask(id)
+		ok := cm.AcquireTask(id)
 		if !ok {
 			if retry == unloadMaxRetries {
 				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
@@ -324,7 +324,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 }
 
 func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
-	// Do not call cm.ActivateTask as above methods. CustomInfo is read-only
+	// Do not call cm.AcquireTask as above methods. CustomInfo is read-only
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {

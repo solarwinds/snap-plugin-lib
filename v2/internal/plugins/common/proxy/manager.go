@@ -29,7 +29,7 @@ func NewContextManager() *ContextManager {
 	}
 }
 
-func (cm *ContextManager) ActivateTask(id string) bool {
+func (cm *ContextManager) AcquireTask(id string) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
