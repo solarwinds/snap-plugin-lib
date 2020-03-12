@@ -35,7 +35,7 @@ const (
 )
 
 type Collector interface {
-	RequestCollect(id string) chan types.CollectChunk
+	RequestCollect(id string) <-chan types.CollectChunk
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
 	CustomInfo(id string) ([]byte, error)
