@@ -279,7 +279,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
 			}
 
-			log.WithField("taskID", id).Trace("other action is active, requesting stop")
+			log.WithField("task-id", id).Trace("other action is active, requesting stop")
 			cm.ReleaseTask(id)
 			time.Sleep(unloadRetryInterval)
 

@@ -26,7 +26,7 @@ func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("taskID", taskID)
+	logF := logCollectService.WithField("task-id", taskID)
 
 	logF.Debug("GRPC Collect() received")
 	defer logF.Debug("GRPC Collect() completed")
@@ -54,7 +54,7 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("taskID", taskID)
+	logF := logCollectService.WithField("task-id", taskID)
 
 	logF.Debug("GRPC Load() received")
 	defer logF.Debug("GRPC Load() completed")
@@ -67,7 +67,7 @@ func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadColle
 
 func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadCollectorRequest) (*pluginrpc.UnloadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("taskID", taskID)
+	logF := logCollectService.WithField("task-id", taskID)
 
 	logF.Debug("GRPC Unoad() received")
 	defer logF.Debug("GRPC Unoad() completed")
@@ -77,7 +77,7 @@ func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadC
 
 func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("taskID", taskID)
+	logF := logCollectService.WithField("task-id", taskID)
 
 	logF.Debug("GRPC Info() received")
 	defer logF.Debug("GRPC Info() completed")
