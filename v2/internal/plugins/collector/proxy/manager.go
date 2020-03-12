@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"runtime/debug"
 	"sort"
 	"sync"
 	"time"
@@ -26,10 +27,15 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-p
 
 const (
 	RequestAllMetricsFilter = "/*"
+
+	unloadMaxRetries    = 3
+	unloadRetryInterval = 1 * time.Second
+
+	streamingCheckInterval = 1 * time.Second
 )
 
 type Collector interface {
-	RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus)
+	RequestCollect(id string) <-chan types.CollectChunk
 	LoadTask(id string, config []byte, selectors []string) error
 	UnloadTask(id string) error
 	CustomInfo(id string) ([]byte, error)
@@ -44,8 +50,8 @@ type metricMetadata struct {
 type ContextManager struct {
 	*commonProxy.ContextManager
 
-	collector  plugin.Collector // reference to custom plugin code
-	contextMap sync.Map         // (synced map[int]*pluginContext) map of contexts associated with taskIDs
+	collector  types.Collector // reference to custom plugin code
+	contextMap sync.Map        // (synced map[int]*pluginContext) map of contexts associated with taskIDs
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -57,7 +63,7 @@ type ContextManager struct {
 	ExampleConfig yaml.Node // example config
 }
 
-func NewContextManager(collector plugin.Collector, statsController stats.Controller) *ContextManager {
+func NewContextManager(collector types.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		ContextManager: commonProxy.NewContextManager(),
 
@@ -80,51 +86,156 @@ func NewContextManager(collector plugin.Collector, statsController stats.Control
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
-func (cm *ContextManager) RequestCollect(id string) ([]*types.Metric, types.ProcessingStatus) {
-	if !cm.ActivateTask(id) {
-		return nil, types.ProcessingStatus{
-			Error: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
+func (cm *ContextManager) RequestCollect(id string) <-chan types.CollectChunk {
+	chunkCh := make(chan types.CollectChunk)
+	go cm.requestCollect(id, chunkCh)
+	return chunkCh
+}
+
+func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.CollectChunk) {
+	if !cm.AcquireTask(id) {
+		chunkCh <- types.CollectChunk{
+			Err: fmt.Errorf("can't process collect request, other request for the same id (%s) is in progress", id),
 		}
+		close(chunkCh)
+		return
 	}
-	defer cm.MarkTaskAsCompleted(id)
 
 	contextIf, ok := cm.contextMap.Load(id)
 	if !ok {
-		return nil, types.ProcessingStatus{
-			Error: fmt.Errorf("can't find a context for a given id: %s", id),
+		chunkCh <- types.CollectChunk{
+			Err: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
+		close(chunkCh)
+		return
 	}
-	context := contextIf.(*pluginContext)
 
-	context.sessionMts = []*types.Metric{}
-	context.ResetWarnings()
+	pContext := contextIf.(*pluginContext)
+
+	pContext.AttachContext(cm.TaskContext(id))
+	pContext.ClearMetrics()
+	pContext.ResetWarnings()
+
+	switch cm.collector.Type() {
+	case types.PluginTypeCollector:
+		cm.collect(id, pContext, chunkCh)
+	case types.PluginTypeStreamingCollector:
+		cm.streamingCollect(id, pContext, chunkCh)
+	}
+
+	cm.MarkTaskAsCompleted(id)
+	pContext.ReleaseContext()
+}
+
+func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+	taskCtx := cm.TaskContext(id)
+
+	var mts []*types.Metric
+	var warnings []types.Warning
+	var err error
+
+	go func() {
+		defer func() {
+			cm.ReleaseTask(id)
+
+			// catch panics (since it's running in it's own goroutine)
+			if r := recover(); r != nil {
+				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				log.Trace(string(debug.Stack()))
+				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
+			}
+		}()
+
+		startTime := time.Now()
+		err = cm.collector.Collect(context) // calling to user defined code
+		endTime := time.Now()
+
+		if !context.Context.IsDone() {
+			mts = context.Metrics(false)
+			warnings = context.Warnings(false)
+
+			cm.statsController.UpdateExecutionStat(id, len(mts), err != nil, startTime, endTime)
+
+			if err != nil {
+				err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
+			}
+
+			log.WithFields(logrus.Fields{
+				"elapsed":      endTime.Sub(startTime).String(),
+				"metrics-num":  len(mts),
+				"warnings-num": len(warnings),
+			}).Debug("Collect completed")
+		} else {
+			log.WithFields(logrus.Fields{
+				"elapsed": endTime.Sub(startTime).String(),
+			}).Info("Collect completed after task had been canceled")
+		}
+	}()
+
+	<-taskCtx.Done()
+
+	chunkCh <- types.CollectChunk{
+		Metrics:  mts,
+		Warnings: warnings,
+		Err:      err,
+	}
+
+	close(chunkCh)
+}
+
+func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+	var err error
 
 	startTime := time.Now()
-	err := cm.collector.Collect(context) // calling to user defined code
-	endTime := time.Now()
 
-	cm.statsController.UpdateExecutionStat(id, len(context.sessionMts), err != nil, startTime, endTime)
+	taskCtx := cm.TaskContext(id)
 
-	if err != nil {
-		return nil, types.ProcessingStatus{
-			Error:    fmt.Errorf("user-defined Collect method ended with error: %v", err),
-			Warnings: context.Warnings(),
+	go func() {
+		defer func() {
+			cm.ReleaseTask(id)
+
+			// catch panics (since it's running in it's own goroutine)
+			if r := recover(); r != nil {
+				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
+				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				log.Trace(string(debug.Stack()))
+			}
+		}()
+
+		err = cm.collector.StreamingCollect(context)
+	}()
+
+	for {
+		select {
+		case <-taskCtx.Done():
+			cm.handleChunk(id, err, context, chunkCh, startTime)
+			close(chunkCh)
+			return
+		case <-time.After(streamingCheckInterval):
+			cm.handleChunk(id, err, context, chunkCh, startTime)
 		}
 	}
+}
 
-	log.WithFields(logrus.Fields{
-		"elapsed":      endTime.Sub(startTime).String(),
-		"metrics-num":  len(context.sessionMts),
-		"warnings-num": len(context.Warnings()),
-	}).Debug("Collect completed")
+func (cm *ContextManager) handleChunk(id string, err error, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
+	mts := context.Metrics(true)
+	warnings := context.Warnings(true)
 
-	return context.sessionMts, types.ProcessingStatus{
-		Warnings: context.Warnings(),
+	if len(mts) > 0 || len(warnings) > 0 {
+		lastUpdate := time.Now()
+
+		chunkCh <- types.CollectChunk{
+			Metrics:  mts,
+			Warnings: warnings,
+			Err:      err,
+		}
+
+		cm.statsController.UpdateStreamingStat(id, len(mts), startTime, lastUpdate)
 	}
 }
 
 func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []string) error {
-	if !cm.ActivateTask(id) {
+	if !cm.AcquireTask(id) {
 		return fmt.Errorf("can't process load request, other request for the same id (%s) is in progress", id)
 	}
 	defer cm.MarkTaskAsCompleted(id)
@@ -150,7 +261,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 		}
 	}
 
-	if loadable, ok := cm.collector.(plugin.LoadableCollector); ok {
+	if loadable, ok := cm.collector.Unwrap().(plugin.LoadableCollector); ok {
 		err := loadable.Load(newCtx)
 		if err != nil {
 			return fmt.Errorf("can't load task due to errors returned from user-defined function: %s", err)
@@ -164,10 +275,24 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 }
 
 func (cm *ContextManager) UnloadTask(id string) error {
-	if !cm.ActivateTask(id) {
-		return fmt.Errorf("can't process unload request, other request for the same id (%s) is in progress", id)
+	// Unload may be called when Collect (especially stream) is in progress. If so, try to cancel it.
+	for retry := 1; retry <= unloadMaxRetries; retry++ {
+		ok := cm.AcquireTask(id)
+		if !ok {
+			if retry == unloadMaxRetries {
+				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
+			}
+
+			log.WithField("task-id", id).Trace("other action is active, requesting stop")
+			cm.ReleaseTask(id)
+			time.Sleep(unloadRetryInterval)
+
+			continue
+		}
+
+		defer cm.MarkTaskAsCompleted(id)
+		break
 	}
-	defer cm.MarkTaskAsCompleted(id)
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -175,7 +300,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 	}
 
 	context := contextI.(*pluginContext)
-	if unloadable, ok := cm.collector.(plugin.UnloadableCollector); ok {
+	if unloadable, ok := cm.collector.Unwrap().(plugin.UnloadableCollector); ok {
 		err := unloadable.Unload(context)
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%s): %v", id, err)
@@ -189,7 +314,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 }
 
 func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
-	// Do not call cm.ActivateTask as above methods. CustomInfo is read-only
+	// Do not call cm.AcquireTask as above methods. CustomInfo is read-only
 
 	contextI, ok := cm.contextMap.Load(id)
 	if !ok {
@@ -197,7 +322,7 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 	}
 	context := contextI.(*pluginContext)
 
-	if collectorWithCustomInfo, ok := cm.collector.(plugin.CustomizableInfoCollector); ok {
+	if collectorWithCustomInfo, ok := cm.collector.Unwrap().(plugin.CustomizableInfoCollector); ok {
 		infoObj := collectorWithCustomInfo.CustomInfo(context)
 
 		infoJSON, err := json.Marshal(infoObj)
@@ -249,7 +374,7 @@ func (cm *ContextManager) DefineExampleConfig(cfg string) error {
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {
-	if definable, ok := cm.collector.(plugin.DefinableCollector); ok {
+	if definable, ok := cm.collector.Unwrap().(plugin.DefinableCollector); ok {
 		err := definable.PluginDefinition(cm)
 		if err != nil {
 			log.WithError(err).Errorf("Error occurred during plugin definition")
@@ -260,7 +385,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) ListDefaultMetrics() []string {
-	result := []string{}
+	var result []string
 	for mt, meta := range cm.metricsMetadata {
 		if meta.isDefault {
 			result = append(result, mt)

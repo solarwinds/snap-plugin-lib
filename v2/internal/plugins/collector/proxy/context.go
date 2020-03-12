@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
@@ -16,9 +17,10 @@ const nsSeparator = metrictree.NsSeparator
 type pluginContext struct {
 	*commonProxy.Context
 
-	metricsFilters *metrictree.TreeValidator // metric filters defined by task (yaml)
-	sessionMts     []*types.Metric
-	ctxManager     *ContextManager // back-reference to context manager
+	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
+	sessionMtsMutex sync.RWMutex
+	sessionMts      []*types.Metric
+	ctxManager      *ContextManager // back-reference to context manager
 }
 
 func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
@@ -46,6 +48,10 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
 }
 
 func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+	if pc.IsDone() {
+		return fmt.Errorf("task has been canceled")
+	}
+
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
@@ -83,6 +89,12 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 
 	nsDescKey := nsSeparator + strings.Join(nsDefFormat, nsSeparator)
 	mtMeta := pc.metricMeta(nsDescKey)
+
+	// if performance would suffer at some point in future proposed solution (indefinite chan) may be introduced
+	// https://github.com/librato/snap-plugin-lib-go/pull/49/files#r390325795
+	// https://medium.com/capital-one-tech/building-an-unbounded-channel-in-go-789e175cd2cd
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
 
 	pc.sessionMts = append(pc.sessionMts, &types.Metric{
 		Namespace_:   mtNamespace,
@@ -139,4 +151,22 @@ func (pc *pluginContext) extractStaticValue(s string) string {
 	}
 
 	return s
+}
+
+func (pc *pluginContext) ClearMetrics() {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
+
+	pc.sessionMts = nil
+}
+
+func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
+
+	mts := pc.sessionMts
+	if clear {
+		pc.sessionMts = nil
+	}
+	return mts
 }

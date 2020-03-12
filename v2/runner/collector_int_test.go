@@ -13,9 +13,9 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
-
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
@@ -26,6 +26,7 @@ import (
 
 const expectedGracefulShutdownTimeout = 2 * time.Second
 const expectedForceShutdownTimeout = 2*time.Second + service.GRPCGracefulStopTimeout
+const expectedUnloadTimeout = 3 * time.Second
 
 /*****************************************************************************/
 
@@ -33,8 +34,9 @@ type SuiteT struct {
 	suite.Suite
 
 	// grpc server side (plugin)
-	startedCollector plugin.Collector
-	endCh            chan bool
+	startedCollector          plugin.Collector
+	startedStreamingCollector plugin.StreamingCollector
+	endCh                     chan bool
 
 	// grpc client side (snap)
 	grpcConnection  *grpc.ClientConn
@@ -63,8 +65,24 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 
 	go func() {
 		statsController, _ := stats.NewEmptyController()
-		contextManager := proxy.NewContextManager(collector, statsController)
-		service.StartCollectorGRPC(grpc.NewServer(), contextManager, statsController, ln, nil, 0, 0)
+		contextManager := proxy.NewContextManager(types.NewCollector("test-collector", "1.0.0", collector), statsController)
+		service.StartCollectorGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
+		s.endCh <- true
+	}()
+
+	return ln
+}
+
+func (s *SuiteT) startStreamingCollector(collector plugin.StreamingCollector) net.Listener {
+	var ln net.Listener
+
+	s.startedStreamingCollector = collector
+	ln, _ = net.Listen("tcp", "127.0.0.1:")
+
+	go func() {
+		statsController, _ := stats.NewEmptyController()
+		contextManager := proxy.NewContextManager(types.NewStreamingCollector("test-collector", "1.0.0", collector), statsController)
+		service.StartCollectorGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
 
@@ -690,5 +708,113 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 		time.Sleep(2 * time.Second)
 		_, err = s.sendKill()
 		So(err, ShouldBeNil)
+	})
+}
+
+/*****************************************************************************/
+
+func (s *SuiteT) TestUnloadingRunningCollector() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	longRunningCollector := &longRunningCollector{collectDuration: 30 * time.Second}
+	ln := s.startCollector(longRunningCollector)
+	s.startClient(ln.Addr().String())
+
+	errCollectCh := make(chan error, 1)
+
+	Convey("Validate ability to kill collector in case processing takes too much time", s.T(), func() {
+
+		// Act - collect is processing for 30 seconds, but unload comes right after request. Should unblock after 10s with error.
+		go func() {
+			_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+			_, err := s.sendCollect("task-1")
+			errCollectCh <- err
+		}()
+
+		Convey("Client is able to send unload request and receive no-error response", func() {
+			// Act
+			time.Sleep(5 * time.Second) // Delay needed to be sure that sendLoad() and sendCollect() in goroutine above were requested
+			unloadResp, unloadErr := s.sendUnload("task-1")
+
+			// Assert (kill response)
+			So(unloadErr, ShouldBeNil)
+			So(unloadResp, ShouldNotBeNil)
+
+			// Assert (plugin has stopped working)
+			select {
+			case <-errCollectCh:
+				// ok
+			case <-time.After(expectedUnloadTimeout):
+				s.T().Fatal("plugin should have been ended")
+			}
+
+			// Assert that Collect was called
+			So(longRunningCollector.collectCalls, ShouldEqual, 1)
+		})
+	})
+}
+
+/*****************************************************************************/
+
+type streamingCollector struct {
+	collectCalls int
+	completed    bool
+}
+
+func (c *streamingCollector) StreamingCollect(ctx plugin.CollectContext) error {
+	c.collectCalls++
+	for {
+		select {
+		case <-ctx.Done():
+			c.completed = true
+			return nil
+		default:
+			time.Sleep(1 * time.Second)
+		}
+	}
+}
+
+func (s *SuiteT) TestUnloadingRunningStreaming() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	streamingCollector := &streamingCollector{}
+	ln := s.startStreamingCollector(streamingCollector)
+	s.startClient(ln.Addr().String())
+
+	errCollectCh := make(chan error, 1)
+
+	Convey("Validate ability to kill collector in case processing takes too much time", s.T(), func() {
+
+		// Act - streaming is processing, but unload comes right after request. Should unblock after 10s with error.
+		go func() {
+			_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+			_, err := s.sendCollect("task-1")
+			errCollectCh <- err
+		}()
+
+		Convey("Client is able to send unload request and receive no-error response", func() {
+			// Act
+			time.Sleep(5 * time.Second) // Delay needed to be sure that sendLoad() and sendCollect() in goroutine above were requested
+			unloadResp, unloadErr := s.sendUnload("task-1")
+
+			// Assert (kill response)
+			So(unloadErr, ShouldBeNil)
+			So(unloadResp, ShouldNotBeNil)
+
+			// Assert (plugin has stopped working)
+			select {
+			case <-errCollectCh:
+				// ok
+			case <-time.After(expectedUnloadTimeout):
+				s.T().Fatal("plugin should have been ended")
+			}
+
+			// Assert that Collect was called
+			So(streamingCollector.collectCalls, ShouldEqual, 1)
+		})
 	})
 }

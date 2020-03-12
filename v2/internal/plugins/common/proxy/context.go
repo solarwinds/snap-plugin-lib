@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
@@ -23,9 +24,13 @@ var (
 type Context struct {
 	rawConfig          []byte
 	flattenedConfig    map[string]string
-	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
+	storedObjects      map[string]interface{}
+	warningsMutex      sync.RWMutex
 	sessionWarnings    []types.Warning
+
+	ctx      context.Context
+	cancelFn context.CancelFunc
 }
 
 type Warning struct {
@@ -43,6 +48,7 @@ func NewContext(rawConfig []byte) (*Context, error) {
 		rawConfig:       rawConfig,
 		flattenedConfig: flattenedConfig,
 		storedObjects:   map[string]interface{}{},
+		ctx:             context.Background(),
 	}, nil
 }
 
@@ -101,6 +107,14 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	if c.IsDone() {
+		log.Warning("task has been canceled")
+		return
+	}
+
+	c.warningsMutex.Lock()
+	defer c.warningsMutex.Unlock()
+
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
 		log.Warning("Maximum number of warnings logged. New warning has been ignored")
 		return
@@ -117,10 +131,36 @@ func (c *Context) AddWarning(msg string) {
 	})
 }
 
-func (c *Context) Warnings() []types.Warning {
-	return c.sessionWarnings
+func (c *Context) Warnings(clear bool) []types.Warning {
+	c.warningsMutex.RLock()
+	defer c.warningsMutex.RUnlock()
+
+	warnings := c.sessionWarnings
+	if clear {
+		warnings = []types.Warning{}
+	}
+	return warnings
 }
 
 func (c *Context) ResetWarnings() {
+	c.warningsMutex.RLock()
+	defer c.warningsMutex.RUnlock()
+
 	c.sessionWarnings = []types.Warning{}
+}
+
+func (c *Context) IsDone() bool {
+	return c.ctx.Err() != nil
+}
+
+func (c *Context) Done() <-chan struct{} {
+	return c.ctx.Done()
+}
+
+func (c *Context) AttachContext(parentCtx context.Context) {
+	c.ctx, c.cancelFn = context.WithCancel(parentCtx)
+}
+
+func (c *Context) ReleaseContext() {
+	c.cancelFn()
 }

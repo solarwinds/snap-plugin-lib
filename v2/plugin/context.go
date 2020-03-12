@@ -23,4 +23,10 @@ type Context interface {
 
 	// Add warning information to current collect / process operation.
 	AddWarning(msg string)
+
+	// Check if task is completed
+	IsDone() bool
+
+	// Check if task is completed (via listening on a channel)
+	Done() <-chan struct{}
 }

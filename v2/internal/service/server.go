@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/fullstorydev/grpchan"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -42,13 +41,13 @@ func NewGRPCServer(inProc bool) Server {
 	return grpc.NewServer()
 }
 
-func StartCollectorGRPC(srv Server, proxy CollectorProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	pluginrpc.RegisterHandlerCollector(srv, newCollectService(proxy, statsController, pprofLn))
+func StartCollectorGRPC(srv Server, proxy CollectorProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	pluginrpc.RegisterHandlerCollector(srv, newCollectService(proxy))
 	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
-func StartPublisherGRPC(srv Server, proxy PublisherProxy, statsController stats.Controller, grpcLn net.Listener, pprofLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	pluginrpc.RegisterHandlerPublisher(srv, newPublishingService(proxy, statsController, pprofLn))
+func StartPublisherGRPC(srv Server, proxy PublisherProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	pluginrpc.RegisterHandlerPublisher(srv, newPublishingService(proxy))
 	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 

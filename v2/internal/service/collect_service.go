@@ -3,9 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 )
@@ -17,47 +15,50 @@ const (
 var logCollectService = log.WithField("service", "Collect")
 
 type collectService struct {
-	proxy           CollectorProxy
-	statsController stats.Controller
-	pprofLn         net.Listener
+	proxy CollectorProxy
 }
 
-func newCollectService(proxy CollectorProxy, statsController stats.Controller, pprofLn net.Listener) pluginrpc.CollectorServer {
+func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
 	return &collectService{
-		proxy:           proxy,
-		statsController: statsController,
-		pprofLn:         pprofLn,
+		proxy: proxy,
 	}
 }
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
-	logCollectService.Debug("GRPC Collect() received")
-
 	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("task-id", taskID)
 
-	pluginMts, status := cs.proxy.RequestCollect(taskID)
+	logF.Debug("GRPC Collect() received")
+	defer logF.Debug("GRPC Collect() completed")
 
-	err := cs.collectWarnings(stream, status.Warnings)
-	if err != nil {
-		return fmt.Errorf("can't send all warnings to snap: %v", err)
-	}
+	chunksCh := cs.proxy.RequestCollect(taskID)
 
-	if status.Error != nil {
-		return fmt.Errorf("plugin is not able to collect metrics: %s", status)
-	}
+	for chunk := range chunksCh {
+		err := cs.sendWarnings(stream, chunk.Warnings)
+		if err != nil {
+			return fmt.Errorf("can't send all warnings to snap: %v", err)
+		}
 
-	err = cs.collectMetrics(stream, pluginMts)
-	if err != nil {
-		return fmt.Errorf("can't send all metrics to snap: %v", err)
+		if chunk.Err != nil {
+			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
+		}
+
+		err = cs.sendMetrics(stream, chunk.Metrics)
+		if err != nil {
+			return fmt.Errorf("can't send all metrics to snap: %v", err)
+		}
 	}
 
 	return nil
 }
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
-	logCollectService.Debug("GRPC Load() received")
+	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("task-id", taskID)
 
-	taskID := string(request.GetTaskId())
+	logF.Debug("GRPC Load() received")
+	defer logF.Debug("GRPC Load() completed")
+
 	jsonConfig := request.GetJsonConfig()
 	metrics := request.GetMetricSelectors()
 
@@ -65,17 +66,21 @@ func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadColle
 }
 
 func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadCollectorRequest) (*pluginrpc.UnloadCollectorResponse, error) {
-	logCollectService.Debug("GRPC Unload() received")
+	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("task-id", taskID)
 
-	taskID := string(request.GetTaskId())
+	logF.Debug("GRPC Unload() received")
+	defer logF.Debug("GRPC Unload() completed")
 
 	return &pluginrpc.UnloadCollectorResponse{}, cs.proxy.UnloadTask(taskID)
 }
 
 func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
-	logCollectService.Debug("GRPC Info() received")
-
 	taskID := request.GetTaskId()
+	logF := logCollectService.WithField("task-id", taskID)
+
+	logF.Debug("GRPC Info() received")
+	defer logF.Debug("GRPC Info() completed")
 
 	cInfo, err := cs.proxy.CustomInfo(taskID)
 	if err != nil {
@@ -85,7 +90,7 @@ func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoReque
 	return &pluginrpc.InfoResponse{Info: cInfo}, nil
 }
 
-func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
+func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
 	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
 
 	for _, warn := range warnings {
@@ -107,7 +112,7 @@ func (cs *collectService) collectWarnings(stream pluginrpc.Collector_CollectServ
 	return nil
 }
 
-func (cs *collectService) collectMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
+func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
 	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)

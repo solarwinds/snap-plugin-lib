@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
@@ -15,16 +13,12 @@ import (
 var logPublishService = log.WithField("service", "Publish")
 
 type publishingService struct {
-	proxy           proxy.Publisher
-	statsController stats.Controller
-	pprofLn         net.Listener
+	proxy proxy.Publisher
 }
 
-func newPublishingService(proxy proxy.Publisher, statsController stats.Controller, pprofLn net.Listener) pluginrpc.PublisherServer {
+func newPublishingService(proxy proxy.Publisher) pluginrpc.PublisherServer {
 	return &publishingService{
-		proxy:           proxy,
-		statsController: statsController,
-		pprofLn:         pprofLn,
+		proxy: proxy,
 	}
 }
 

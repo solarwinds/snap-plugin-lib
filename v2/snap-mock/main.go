@@ -23,9 +23,11 @@ const (
 	defaultTaskID          = ""
 	defaultCollectInterval = 5 * time.Second
 	defaultPingInterval    = 2 * time.Second
+	defaultStreamDuration  = 60 * time.Second
 
 	grpcLoadDelay      = 500 * time.Millisecond
 	grpcRequestTimeout = 10 * time.Second
+	closeDelay         = 1 * time.Second // wait until Unload() causes end of StreamCollect() to avoid GRPC errors
 
 	filterSeparator = ";"
 
@@ -41,6 +43,9 @@ type Options struct {
 	SendKill           bool
 	RequestInfo        bool
 
+	IsStream       bool
+	StreamDuration time.Duration
+
 	PluginConfig string
 	PluginFilter string
 	TaskId       string
@@ -52,6 +57,12 @@ const (
 
 	stoppedByUser = 1
 )
+
+type collectChunk struct {
+	mts      []string
+	warnings []string
+	err      error
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -97,6 +108,14 @@ func parseCmdLine() *Options {
 	flag.BoolVar(&opt.RequestInfo,
 		"request-info", false,
 		"When set, Info request will be sent after each collect")
+
+	flag.BoolVar(&opt.IsStream,
+		"stream", false,
+		"When set, expects connecting to streaming plugin")
+
+	flag.DurationVar(&opt.StreamDuration,
+		"stream-duration", defaultStreamDuration,
+		"Duration of debugging streaming collector, after this time Unload request will be send")
 
 	flag.Parse()
 
@@ -160,19 +179,35 @@ func main() {
 		reqCounter := 0
 		for {
 			reqCounter++
-			recvMts, recvWarns, err := doCollectRequest(collClient, opt)
-			if err != nil {
-				doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
+
+			if opt.IsStream {
+				go func() {
+					time.Sleep(opt.StreamDuration)
+
+					err = doUnloadRequest(collClient, opt)
+					if err != nil {
+						doneCh <- fmt.Errorf("can't send unload request to plugin: %v", err)
+					}
+
+					doneCh <- nil
+				}()
 			}
 
-			fmt.Printf("\nReceived %d warning(s)\n", len(recvWarns))
-			for _, warn := range recvWarns {
-				fmt.Printf(" %s\n", warn)
-			}
+			chunkCh := doCollectRequest(collClient, opt)
+			for chunk := range chunkCh {
+				if err != nil {
+					doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
+				}
 
-			fmt.Printf("\nReceived %d metric(s)\n", len(recvMts))
-			for _, mt := range recvMts {
-				fmt.Printf(" %s\n", mt)
+				fmt.Printf("\nReceived %d warning(s)\n", len(chunk.warnings))
+				for _, warn := range chunk.warnings {
+					fmt.Printf(" %s\n", warn)
+				}
+
+				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
+				for _, mt := range chunk.mts {
+					fmt.Printf(" %s\n", mt)
+				}
 			}
 
 			if opt.RequestInfo {
@@ -184,7 +219,7 @@ func main() {
 				fmt.Printf("\nReceived info:\n %v\n", string(info))
 			}
 
-			if reqCounter == opt.MaxCollectRequests {
+			if reqCounter == opt.MaxCollectRequests || opt.IsStream {
 				break
 			}
 			time.Sleep(opt.CollectInterval)
@@ -192,12 +227,14 @@ func main() {
 
 		time.Sleep(grpcLoadDelay)
 
-		err = doUnloadRequest(collClient, opt)
-		if err != nil {
-			doneCh <- fmt.Errorf("can't send unload request to plugin: %v", err)
-		}
+		if !opt.IsStream {
+			err = doUnloadRequest(collClient, opt)
+			if err != nil {
+				doneCh <- fmt.Errorf("can't send unload request to plugin: %v", err)
+			}
 
-		doneCh <- nil
+			doneCh <- nil
+		}
 	}()
 
 	// ping routine
@@ -215,6 +252,7 @@ func main() {
 	}()
 
 	doneErr := <-doneCh
+	time.Sleep(closeDelay)
 
 	if opt.SendKill {
 		err := doKillRequest(contClient)
@@ -288,41 +326,79 @@ func doInfoRequest(cc pluginrpc.CollectorClient, opt *Options) ([]byte, error) {
 	return resp.Info, nil
 }
 
-func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) ([]string, []string, error) {
+func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectChunk {
 	var recvMts []string
 	var recvWarns []string
+
+	chunkCh := make(chan collectChunk)
 
 	reqColl := &pluginrpc.CollectRequest{
 		TaskId: opt.TaskId,
 	}
 
-	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
-	defer fn()
+	go func() {
+		ctx := context.Background()
 
-	stream, err := cc.Collect(ctx, reqColl)
-	if err != nil {
-		return recvMts, recvWarns, fmt.Errorf("can't send collect request to plugin: %v", err)
-	}
-
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
+		if !opt.IsStream {
+			var fn context.CancelFunc
+			ctx, fn = context.WithTimeout(context.Background(), grpcRequestTimeout)
+			defer fn()
 		}
+
+		defer func() { close(chunkCh) }()
+
+		stream, err := cc.Collect(ctx, reqColl)
 		if err != nil {
-			return recvMts, recvWarns, fmt.Errorf("error when receiving collect reply from plugin (%v)", err)
+			chunkCh <- collectChunk{
+				mts:      recvMts,
+				warnings: recvWarns,
+				err:      fmt.Errorf("can't send collect request to plugin: %v", err),
+			}
+			return
 		}
 
-		for _, mt := range resp.MetricSet {
-			recvMts = append(recvMts, grpcMetricToString(mt))
+		for {
+			resp, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				chunkCh <- collectChunk{
+					mts:      recvMts,
+					warnings: recvWarns,
+					err:      fmt.Errorf("error when receiving collect reply from plugin (%v)", err),
+				}
+				return
+			}
+
+			for _, mt := range resp.MetricSet {
+				recvMts = append(recvMts, grpcMetricToString(mt))
+			}
+
+			for _, warns := range resp.Warnings {
+				recvWarns = append(recvWarns, grpcWarningToString(warns))
+			}
+
+			if opt.IsStream {
+				chunkCh <- collectChunk{
+					mts:      recvMts,
+					warnings: recvWarns,
+					err:      nil,
+				}
+
+				recvMts = nil
+				recvWarns = nil
+			}
 		}
 
-		for _, warns := range resp.Warnings {
-			recvWarns = append(recvWarns, grpcWarningToString(warns))
+		chunkCh <- collectChunk{
+			mts:      recvMts,
+			warnings: recvWarns,
+			err:      nil,
 		}
-	}
+	}()
 
-	return recvMts, recvWarns, nil
+	return chunkCh
 }
 
 ///////////////////////////////////////////////////////////////////////////////

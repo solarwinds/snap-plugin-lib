@@ -12,10 +12,13 @@ package runner
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
+
+const collectTimeout = 10 * time.Second
 
 var metricDefinition = []string{
 	"/kubernetes/pod/[node]/[namespace]/[pod]/status/phase/Pending",
@@ -102,8 +105,6 @@ func init() {
 	metricsToValidateAll = generateCombination(metricsToValidateAll, "[namespace]", nsDef)
 	metricsToValidateAll = generateCombination(metricsToValidateAll, "[pod]", podDef)
 	metricsToValidateAll = generateCombination(metricsToValidateAll, "[container]", contDef)
-
-	//fmt.Printf("Init=%#v\n", len(metricsToValidateAll))
 }
 
 func generateCombination(mts []string, s string, choices []string) []string {
@@ -179,11 +180,18 @@ func genMetricAddition(addRatio int, b *testing.B) {
 		}
 
 		b.ResetTimer()
-		_, err = ctxMan.RequestCollect(taskId)
+		chunkCh = ctxMan.RequestCollect(taskId)
+
+		select {
+		case chunk := <-chunkCh:
+		// ok
+		case <-time.After(collectTimeout):
+			panic("timeout occurred")
+		}
+
 		if err != nil {
 			panic(err)
 		}
-		//fmt.Printf("res=%#v\n", len(res))
 	}
 }
 

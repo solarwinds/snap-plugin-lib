@@ -1,6 +1,8 @@
 package mock
 
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/stretchr/testify/mock"
+)
 
 type Context struct {
 	mock.Mock
@@ -62,4 +64,14 @@ func (m *Context) ApplyTagsByRegExp(ns string, tags map[string]string) error {
 func (m *Context) ShouldProcess(ns string) bool {
 	args := m.Called(ns)
 	return args.Bool(0)
+}
+
+func (m *Context) IsDone() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+func (m *Context) Done() <-chan struct{} {
+	args := m.Called()
+	return args.Get(0).(<-chan struct{})
 }

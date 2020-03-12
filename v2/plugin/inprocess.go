@@ -10,6 +10,11 @@ type InProcessCollector interface {
 	inProcessPlugin
 }
 
+type InProcessStreamingCollector interface {
+	StreamingCollector
+	inProcessPlugin
+}
+
 type InProcessPublisher interface {
 	Publisher
 	inProcessPlugin
