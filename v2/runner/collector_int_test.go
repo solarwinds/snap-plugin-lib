@@ -763,13 +763,13 @@ type streamingCollector struct {
 	completed    bool
 }
 
-func (c *streamingCollector) StreamingCollect(ctx plugin.CollectContext) {
+func (c *streamingCollector) StreamingCollect(ctx plugin.CollectContext) error {
 	c.collectCalls++
 	for {
 		select {
 		case <-ctx.Done():
 			c.completed = true
-			return
+			return nil
 		default:
 			time.Sleep(1 * time.Second)
 		}
