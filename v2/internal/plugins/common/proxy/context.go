@@ -24,10 +24,10 @@ var (
 type Context struct {
 	rawConfig          []byte
 	flattenedConfig    map[string]string
-	storedObjects      map[string]interface{}
 	storedObjectsMutex sync.RWMutex
-	sessionWarnings    []types.Warning
+	storedObjects      map[string]interface{}
 	warningsMutex      sync.RWMutex
+	sessionWarnings    []types.Warning
 
 	ctx   context.Context
 	ctxFn context.CancelFunc
