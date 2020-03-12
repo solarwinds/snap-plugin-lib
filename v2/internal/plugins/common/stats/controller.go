@@ -25,9 +25,9 @@ var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"
 type Controller interface {
 	Close()
 	RequestStat() chan *Statistics
-	UpdateLoadStat(taskId string, config string, filters []string)
-	UpdateUnloadStat(taskId string)
-	UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time)
+	UpdateLoadStat(taskID string, config string, filters []string)
+	UpdateUnloadStat(taskID string)
+	UpdateExecutionStat(taskID string, metricsCount int, success bool, startTime, endTime time.Time)
 	UpdateStreamingStat(taskID string, metricsCount int, startTime, lastUpdate time.Time)
 }
 
@@ -283,13 +283,13 @@ func (d *EmptyController) RequestStat() chan *Statistics {
 	return statCh
 }
 
-func (d *EmptyController) UpdateLoadStat(taskId string, config string, filters []string) {
+func (d *EmptyController) UpdateLoadStat(taskID string, config string, filters []string) {
 }
 
-func (d *EmptyController) UpdateUnloadStat(taskId string) {
+func (d *EmptyController) UpdateUnloadStat(taskID string) {
 }
 
-func (d *EmptyController) UpdateExecutionStat(taskId string, metricsCount int, success bool, startTime, endTime time.Time) {
+func (d *EmptyController) UpdateExecutionStat(taskID string, metricsCount int, success bool, startTime, endTime time.Time) {
 }
 
 func (d *EmptyController) UpdateStreamingStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
