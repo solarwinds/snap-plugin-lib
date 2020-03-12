@@ -118,18 +118,13 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 
 	switch cm.collector.Type() {
 	case types.PluginTypeCollector:
-		go func() {
-			cm.collect(id, pContext, chunkCh)
-			cm.MarkTaskAsCompleted(id)
-			pContext.ReleaseContext()
-		}()
+		cm.collect(id, pContext, chunkCh)
 	case types.PluginTypeStreamingCollector:
-		go func() {
-			cm.streamingCollect(id, pContext, chunkCh)
-			cm.MarkTaskAsCompleted(id)
-			pContext.ReleaseContext()
-		}()
+		cm.streamingCollect(id, pContext, chunkCh)
 	}
+
+	cm.MarkTaskAsCompleted(id)
+	pContext.ReleaseContext()
 }
 
 func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
