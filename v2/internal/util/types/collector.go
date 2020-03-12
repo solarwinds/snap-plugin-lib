@@ -4,6 +4,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
+// Simple wrapper which enables using common code for collector and streaming collector.
 type Collector interface {
 	plugin.Collector
 	plugin.StreamingCollector
@@ -12,7 +13,7 @@ type Collector interface {
 	Version() string
 	Type() PluginType
 
-	Unwrap() interface{}
+	Unwrap() interface{} // Returns wrapped user-defined collector or streaming collector (with access to Load(), Unload() etc.)
 }
 
 func NewCollector(name string, version string, collector plugin.Collector) Collector {
