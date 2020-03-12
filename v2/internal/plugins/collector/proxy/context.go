@@ -18,8 +18,8 @@ type pluginContext struct {
 	*commonProxy.Context
 
 	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
-	sessionMts      []*types.Metric
 	sessionMtsMutex sync.RWMutex
+	sessionMts      []*types.Metric
 	ctxManager      *ContextManager // back-reference to context manager
 }
 
@@ -90,6 +90,9 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	nsDescKey := nsSeparator + strings.Join(nsDefFormat, nsSeparator)
 	mtMeta := pc.metricMeta(nsDescKey)
 
+	// if performance would suffer at some point in future proposed solution (indefinite chan) may be introduced
+	// https://github.com/librato/snap-plugin-lib-go/pull/49/files#r390325795
+	// https://medium.com/capital-one-tech/building-an-unbounded-channel-in-go-789e175cd2cd
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
