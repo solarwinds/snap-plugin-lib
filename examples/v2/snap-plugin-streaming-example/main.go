@@ -25,12 +25,12 @@ type streamCollector struct {
 	probeID int
 }
 
-func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) {
+func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) error {
 	for {
 		select {
 		case <-ctx.Done():
 			log.Info("Handling end of stream")
-			return
+			return nil
 		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))):
 			log.Debug("Gathering metric")
 

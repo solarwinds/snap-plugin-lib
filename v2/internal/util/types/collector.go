@@ -47,8 +47,8 @@ func (c *collectorWrapper) Collect(ctx plugin.CollectContext) error {
 	return c.collector.Collect(ctx)
 }
 
-func (c *collectorWrapper) StreamingCollect(ctx plugin.CollectContext) {
-	c.streamingCollector.StreamingCollect(ctx)
+func (c *collectorWrapper) StreamingCollect(ctx plugin.CollectContext) error {
+	return c.streamingCollector.StreamingCollect(ctx)
 }
 
 func (c *collectorWrapper) Unwrap() interface{} {

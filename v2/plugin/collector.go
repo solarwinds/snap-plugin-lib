@@ -9,7 +9,7 @@ type Collector interface {
 }
 
 type StreamingCollector interface {
-	StreamingCollect(ctx CollectContext)
+	StreamingCollect(ctx CollectContext) error
 }
 
 type LoadableCollector interface {

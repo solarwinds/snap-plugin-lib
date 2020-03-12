@@ -184,6 +184,8 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+	var err error
+
 	startTime := time.Now()
 
 	taskCtx := cm.TaskContext(id)
@@ -194,27 +196,28 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
+				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
 				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
 				log.Trace(string(debug.Stack()))
 			}
 		}()
 
-		cm.collector.StreamingCollect(context)
+		err = cm.collector.StreamingCollect(context)
 	}()
 
 	for {
 		select {
 		case <-taskCtx.Done():
-			cm.handleChunk(id, context, chunkCh, startTime)
+			cm.handleChunk(id, err, context, chunkCh, startTime)
 			close(chunkCh)
 			return
 		case <-time.After(streamingCheckInterval):
-			cm.handleChunk(id, context, chunkCh, startTime)
+			cm.handleChunk(id, err, context, chunkCh, startTime)
 		}
 	}
 }
 
-func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
+func (cm *ContextManager) handleChunk(id string, err error, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
 	mts := context.Metrics(true)
 	warnings := context.Warnings(true)
 
@@ -224,6 +227,7 @@ func (cm *ContextManager) handleChunk(id string, context *pluginContext, chunkCh
 		chunkCh <- types.CollectChunk{
 			Metrics:  mts,
 			Warnings: warnings,
+			Err:      err,
 		}
 
 		cm.statsController.UpdateStreamingStat(id, len(mts), startTime, lastUpdate)
