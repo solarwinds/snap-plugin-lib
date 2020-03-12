@@ -109,6 +109,7 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 func (c *Context) AddWarning(msg string) {
 	if c.IsDone() {
 		log.Warning("task has been canceled")
+		return
 	}
 
 	c.warningsMutex.Lock()
