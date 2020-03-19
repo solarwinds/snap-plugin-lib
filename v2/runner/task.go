@@ -23,9 +23,12 @@ schedule:
     interval: "0 * * * * *"
 plugins:
   - plugin_name: %s
-    # plugin_binary: 
-    # config:
-    # metrics:
+	# plugin_binary:
+ 
+	# config:
+
+	# metrics:
+
     publish:
       - plugin_name: publisher-appoptics
         binary_name: snap-plugin-publisher-appoptics
