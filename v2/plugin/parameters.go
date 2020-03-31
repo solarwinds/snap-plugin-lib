@@ -6,6 +6,12 @@ type MetricModifier interface {
 	UpdateMetric(mt SettableMetric)
 }
 
+func MetricTag(key string, value string) MetricModifier {
+	return &metricTags{
+		tags: map[string]string{key: value},
+	}
+}
+
 func MetricTags(tags map[string]string) MetricModifier {
 	return &metricTags{
 		tags: tags,

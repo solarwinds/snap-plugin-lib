@@ -3,6 +3,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"strings"
 	"sync"
 	"time"
@@ -43,11 +44,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 	return pc, nil
 }
 
-func (pc *pluginContext) AddMetric(ns string, v interface{}) error {
-	return pc.AddMetricWithTags(ns, v, map[string]string{})
-}
-
-func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[string]string) error {
+func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
 	if pc.IsDone() {
 		return fmt.Errorf("task has been canceled")
 	}
@@ -96,14 +93,19 @@ func (pc *pluginContext) AddMetricWithTags(ns string, v interface{}, tags map[st
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
-	pc.sessionMts = append(pc.sessionMts, &types.Metric{
+	mt := &types.Metric{
 		Namespace_:   mtNamespace,
 		Value_:       v,
-		Tags_:        tags,
 		Unit_:        mtMeta.unit,
 		Timestamp_:   time.Now(),
 		Description_: mtMeta.description,
-	})
+	}
+
+	for _, m := range modifiers {
+		m.UpdateMetric(mt)
+	}
+
+	pc.sessionMts = append(pc.sessionMts, mt)
 
 	return nil
 }

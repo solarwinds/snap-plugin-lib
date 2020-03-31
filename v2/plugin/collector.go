@@ -35,10 +35,7 @@ type CollectContext interface {
 	Context
 
 	// Add concrete metric with calculated value
-	AddMetric(namespace string, value interface{}) error
-
-	// Add concrete metric with calculated value and tags
-	AddMetricWithTags(namespace string, value interface{}, tags map[string]string) error
+	AddMetric(namespace string, value interface{}, modifier ...MetricModifier) error
 
 	// Add tags to specific metric
 	ApplyTagsByPath(namespace string, tags map[string]string) error
