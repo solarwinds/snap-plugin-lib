@@ -3,10 +3,11 @@ package proxy
 import (
 	"errors"
 	"fmt"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"

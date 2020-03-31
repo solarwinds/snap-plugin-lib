@@ -143,9 +143,27 @@ example.time.second 2 {map[]}
 example.count.running 0 {map[]}
 ```
 
+## Custom metric metadata
+
+Each metric contains also a metadata automatically set when metric is added:
+- timestamp - time when metric was gathered,
+- description - descriptive information about metric (based on provided `PluginDefinition()`)
+- unit - unit related to the measurement (based on provided `PluginDefinition()`)
+
+In rare cases plugin creator may want to set custom values for this metadata. To do so `AddMetric()` should be called
+with additional modifiers:
+
+```go
+	ctx.AddMetric("/example/date/day", t.Day(),
+		plugin.MetricTimestamp(time.Now().Add(2 * time.Hour)))
+
+	ctx.AddMetric("/example/time/hour", hour,
+		plugin.MetricDescription("custom description for an hour metric"),
+		plugin.MetricUnit("HH"))
+```
+
 ----
 
 * [Table of contents](/v2/README.md)
 - Previous Chapter: [Basic concepts - Configuration and state](/v2/tutorial/03-concepts/README.md)
 - Next Chapter: [Useful tools](/v2/tutorial/05-tools/README.md)
-
