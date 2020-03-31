@@ -93,12 +93,12 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 
 		if p.CpuUsage >= cfg.Processes.MinCPUUsage {
 			cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-			_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+			_ = ctx.AddMetric(cpuMetricNs, p.CpuUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
 		}
 
 		if p.MemoryUsage >= cfg.Processes.MinMemoryUsage {
 			memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-			_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+			_ = ctx.AddMetric(memMetricNs, p.MemoryUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
 		}
 	}
 

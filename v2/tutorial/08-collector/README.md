@@ -83,22 +83,22 @@ func (s systemCollector) collectTotalMemory(ctx plugin.CollectContext) error {
 The last helper method will be a little bit more complicated:
 ```go
 func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
-	procsInfo, err := s.proxyCollector.ProcessesInfo()
-	if err != nil {
-		return fmt.Errorf("can't create metrics associated with processes")
-	}
+    procsInfo, err := s.proxyCollector.ProcessesInfo()
+    if err != nil {
+        return fmt.Errorf("can't create metrics associated with processes")
+    }
 
-	for _, p := range procsInfo {
-		pName := s.sanitizeName(p.ProcessName)
+    for _, p := range procsInfo {
+        pName := s.sanitizeName(p.ProcessName)
 
-		cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-		_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+        cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
+        _ = ctx.AddMetric(cpuMetricNs, p.CpuUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
+        
+        memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
+        _ = ctx.AddMetric(memMetricNs, p.MemoryUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
+    }
 
-		memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-		_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
-	}
-
-	return nil
+    return nil
 }
 ```
 At the begging we are getting list of processes by calling `ProcessesInfo()` on `Proxy` interface.

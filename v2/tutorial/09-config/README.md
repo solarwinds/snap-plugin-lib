@@ -218,28 +218,28 @@ Other function which we will modify is `collectProcessesInfo`.
 When processes uses cpu or memory below given limit, metric shouldn't be created.
 ```go
 func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
-	procsInfo, err := s.proxyCollector.ProcessesInfo()
-	if err != nil {
-		return fmt.Errorf("can't create metrics associated with processes")
-	}
+    procsInfo, err := s.proxyCollector.ProcessesInfo()
+    if err != nil {
+        return fmt.Errorf("can't create metrics associated with processes")
+    }
 
-	cfg := getConfig(ctx)
+    cfg := getConfig(ctx)
 
-	for _, p := range procsInfo {
-		pName := s.sanitizeName(p.ProcessName)
+    for _, p := range procsInfo {
+        pName := s.sanitizeName(p.ProcessName)
 
-		if p.CpuUsage >= cfg.Processes.minCPUUsage {
-			cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-			_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
-		}
+        if p.CpuUsage >= cfg.Processes.MinCPUUsage {
+            cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
+            _ = ctx.AddMetric(cpuMetricNs, p.CpuUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
+        }
 
-		if p.MemoryUsage >= cfg.Processes.MinMemoryUsage {
-			memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-			_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
-		}
-	}
+        if p.MemoryUsage >= cfg.Processes.MinMemoryUsage {
+            memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
+            _ = ctx.AddMetric(memMetricNs, p.MemoryUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
+        }
+    }
 
-	return nil
+    return nil
 }
 ```
 

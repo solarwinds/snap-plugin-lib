@@ -120,13 +120,11 @@ example.count.running 0 {map[]}
 Metric can hold additional information apart from its name and value. 
 Tags are pairs of strings associated with metric.
 
-We can add information about weekday (ie. Monday) to existing metric `/example/date/day` by calling:
+We can add information about weekday (ie. Monday) to existing metric `/example/date/day` by calling
+`AddMetric()` with additional parameter.
+
 ```go
-_ = ctx.AddMetricWithTags("/example/date/day", t.Day(), map[string]string{"weekday": t.Weekday().String()})
-```
-instead of:
-```go
-_ = ctx.AddMetric("/example/date/day", t.Day()
+	ctx.AddMetric("/example/date/day", t.Day(), plugin.MetricTag("weekday", t.Weekday().String()))
 ```
 
 After requesting metrics:

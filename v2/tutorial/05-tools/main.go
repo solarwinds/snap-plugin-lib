@@ -51,7 +51,7 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	}
 
 	// Convert data to metric form
-	_ = ctx.AddMetricWithTags("/example/date/day", t.Day(), map[string]string{"weekday": t.Weekday().String()})
+	_ = ctx.AddMetric("/example/date/day", t.Day(), plugin.MetricTag("weekday", t.Weekday().String()))
 	_ = ctx.AddMetric("/example/date/month", int(t.Month()))
 	_ = ctx.AddMetric("/example/time/hour", hour)
 	_ = ctx.AddMetric("/example/time/minute", t.Minute())
