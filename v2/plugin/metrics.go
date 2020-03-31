@@ -23,6 +23,21 @@ type Metric interface {
 	Timestamp() time.Time
 }
 
+// Interface for setting custom metric metadata
+type SettableMetric interface {
+	// Add custom text-like object associated with measurement
+	AddTags(map[string]string)
+
+	// Set custom Description of measurement
+	SetDescription(string)
+
+	// Set custom unit of measurement value
+	SetUnit(string)
+
+	// Set custom timestamp
+	SetTimestamp(time.Time)
+}
+
 // Representation of AppOptics measurement name
 type Namespace interface {
 	// Return namespace element at the given position
