@@ -7,6 +7,9 @@ Package rpc:
 package service
 
 import (
+	"fmt"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"google.golang.org/grpc/credentials"
 	"net"
 	"time"
 
@@ -33,12 +36,21 @@ type Server interface {
 // * the native go-grpc implementation
 // * https://github.com/fullstorydev/grpchan - this one provides a way of using gRPC with a custom transport
 //   (that means sth other than the native h2 - HTTP1.1 or inprocess/channels are available out of the box)
-func NewGRPCServer(inProc bool) Server {
-	if inProc {
-		return NewChannel()
+func NewGRPCServer(opt *plugin.Options) (Server, error) {
+	if opt.AsThread {
+		return NewChannel(), nil
 	}
 
-	return grpc.NewServer()
+	if !opt.EnableTLS {
+		return grpc.NewServer(), nil
+	}
+
+	creds, err := credentials.NewServerTLSFromFile(opt.TLSCertPath, opt.TLSKeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid TLS credentials: %v", err)
+	}
+
+	return grpc.NewServer(grpc.Creds(creds)), nil
 }
 
 func StartCollectorGRPC(srv Server, proxy CollectorProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
