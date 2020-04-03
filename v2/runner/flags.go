@@ -86,13 +86,17 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		"enable-tls", false,
 		"Enable secure GRPC communication")
 
-	flagParser.StringVar(&opt.TLSCertPath,
-		"tls-cert-path", "",
+	flagParser.StringVar(&opt.TLSServerCertPath,
+		"tls-server-cert-path", "",
 		"Certificate path used by GRPC Server")
 
-	flagParser.StringVar(&opt.TLSKeyPath,
-		"tls-key-path", "",
+	flagParser.StringVar(&opt.TLSServerKeyPath,
+		"tls-server-key-path", "",
 		"Path to private key associated with server certificate")
+
+	flagParser.StringVar(&opt.TLSClientCARootPath,
+		"tls-client-ca-path", "",
+		"Path to ca root path certificate(s)")
 
 	// custom flags
 
@@ -200,7 +204,7 @@ func ValidateOptions(opt *plugin.Options) error {
 	}
 
 	if opt.EnableTLS {
-		if opt.TLSCertPath == "" || opt.TLSKeyPath == "" {
+		if opt.TLSServerCertPath == "" || opt.TLSServerKeyPath == "" {
 			return fmt.Errorf("Certificate and key path have to be provided when TLS is enabled")
 		}
 	}

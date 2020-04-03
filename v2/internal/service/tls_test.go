@@ -5,6 +5,7 @@ package service
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"path/filepath"
@@ -48,10 +49,11 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 	Convey("Validate that client can connect to secure GRPC Server", t, func() {
 		// Arrange
 		opt := &plugin.Options{
-			GRPCPort:    grpcPort,
-			EnableTLS:   true,
-			TLSKeyPath:  filepath.Join(certificateFolderName, "serv.key"),
-			TLSCertPath: filepath.Join(certificateFolderName, "serv.crt"),
+			GRPCPort:            grpcPort,
+			EnableTLS:           true,
+			TLSServerKeyPath:    filepath.Join(certificateFolderName, "serv.key"),
+			TLSServerCertPath:   filepath.Join(certificateFolderName, "serv.crt"),
+			TLSClientCARootPath: filepath.Join(certificateFolderName, "ca.crt"),
 		}
 
 		ln, _ := net.Listen("tcp", grpcServerAddr)
@@ -77,9 +79,15 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 		certPool := x509.NewCertPool()
 		certPool.AppendCertsFromPEM(caCert)
 
+		cliCertPath := filepath.Join(certificateFolderName, "cli.crt")
+		cliKeyPath := filepath.Join(certificateFolderName, "cli.key")
+		cert, err := tls.LoadX509KeyPair(cliCertPath, cliKeyPath)
+		fmt.Printf("err %v\n", err)
+
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: false,
 			RootCAs:            certPool,
+			Certificates:       []tls.Certificate{cert},
 		})
 
 		// Act
