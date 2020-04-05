@@ -7,17 +7,11 @@ Package rpc:
 package service
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"io/ioutil"
 	"net"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"google.golang.org/grpc/credentials"
-
 	"github.com/fullstorydev/grpchan"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -49,24 +43,10 @@ func NewGRPCServer(opt *plugin.Options) (Server, error) {
 		return grpc.NewServer(), nil
 	}
 
-	cert, err := tls.LoadX509KeyPair(opt.TLSServerCertPath, opt.TLSServerKeyPath)
+	tlsCreds, err := tlsCredentials(opt)
 	if err != nil {
-		return nil, fmt.Errorf("invalid TLS certificate: %v", err)
+		return nil, err
 	}
-
-	clientCA := x509.NewCertPool()
-	caCert, err := ioutil.ReadFile(opt.TLSClientCARootPath)
-	if err != nil {
-		return nil, fmt.Errorf("can't read client CA Root certificate: %v", err)
-	}
-	clientCA.AppendCertsFromPEM(caCert)
-
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    clientCA,
-	}
-	tlsCreds := credentials.NewTLS(tlsConfig)
 
 	return grpc.NewServer(grpc.Creds(tlsCreds)), nil
 }
