@@ -5,7 +5,6 @@ package service
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"path/filepath"
@@ -67,7 +66,7 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 
 			go func() {
 				<-controlService.closeCh
-				srv.Stop()
+				srv.GracefulStop()
 			}()
 
 			_ = srv.Serve(ln)
@@ -81,8 +80,7 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 
 		cliCertPath := filepath.Join(certificateFolderName, "cli.crt")
 		cliKeyPath := filepath.Join(certificateFolderName, "cli.key")
-		cert, err := tls.LoadX509KeyPair(cliCertPath, cliKeyPath)
-		fmt.Printf("err %v\n", err)
+		cert, _ := tls.LoadX509KeyPair(cliCertPath, cliKeyPath)
 
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: false,
