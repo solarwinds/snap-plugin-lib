@@ -43,7 +43,7 @@ func (m *Context) AddWarning(msg string) {
 }
 
 func (m *Context) AddMetric(ns string, value interface{}, modifiers ...plugin.MetricModifier) error {
-	args := m.Called(ns, value)
+	args := m.Called(ns, value, modifiers)
 	return args.Error(0)
 }
 
