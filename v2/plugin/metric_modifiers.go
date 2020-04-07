@@ -3,7 +3,7 @@ package plugin
 import "time"
 
 type MetricModifier interface {
-	UpdateMetric(mt SettableMetric)
+	UpdateMetric(mt MetricSetter)
 }
 
 func MetricTag(key string, value string) MetricModifier {
@@ -42,7 +42,7 @@ type metricTags struct {
 	tags map[string]string
 }
 
-func (m metricTags) UpdateMetric(mt SettableMetric) {
+func (m metricTags) UpdateMetric(mt MetricSetter) {
 	mt.AddTags(m.tags)
 }
 
@@ -50,7 +50,7 @@ type metricTimestamp struct {
 	timestamp time.Time
 }
 
-func (m metricTimestamp) UpdateMetric(mt SettableMetric) {
+func (m metricTimestamp) UpdateMetric(mt MetricSetter) {
 	mt.SetTimestamp(m.timestamp)
 }
 
@@ -58,7 +58,7 @@ type metricDescription struct {
 	description string
 }
 
-func (m metricDescription) UpdateMetric(mt SettableMetric) {
+func (m metricDescription) UpdateMetric(mt MetricSetter) {
 	mt.SetDescription(m.description)
 }
 
@@ -66,6 +66,6 @@ type metricUnit struct {
 	unit string
 }
 
-func (m metricUnit) UpdateMetric(mt SettableMetric) {
+func (m metricUnit) UpdateMetric(mt MetricSetter) {
 	mt.SetUnit(m.unit)
 }

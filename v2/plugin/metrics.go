@@ -24,7 +24,7 @@ type Metric interface {
 }
 
 // Interface for setting custom metric metadata
-type SettableMetric interface {
+type MetricSetter interface {
 	// Add custom text-like object associated with measurement
 	AddTags(map[string]string)
 
