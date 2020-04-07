@@ -665,9 +665,16 @@ func (ndc *noDefinitionCollector) Collect(ctx plugin.CollectContext) error {
 	})
 
 	Convey("Validate that metrics are filtered according to filtering", ndc.t, func() {
-		So(ctx.AddMetric("/plugin/group1/subgroup1/metric1", 10), ShouldBeNil)          // added
-		So(ctx.AddMetric("/plugin/group2/id12/metric1", 20), ShouldBeNil)               // added
-		So(ctx.AddMetric("/plugin/group3/subgroup3/metric4", 15), ShouldBeNil)          // added
+		So(ctx.AddMetric("/plugin/group1/subgroup1/metric1", 10,
+			plugin.MetricDescription("metric1 custom description")), ShouldBeNil) // added
+
+		So(ctx.AddMetric("/plugin/group2/id12/metric1", 20,
+			plugin.MetricUnit("MU"),
+			plugin.MetricTimestamp(time.Date(2020, 10, 13, 12, 13, 14, 0, time.UTC))), ShouldBeNil) // added
+
+		So(ctx.AddMetric("/plugin/group3/subgroup3/metric4", 15,
+			plugin.MetricTags(map[string]string{"a": "b", "c": "d"})), ShouldBeNil) // added
+
 		So(ctx.AddMetric("/plugin/group3/subgroup3/metric$4", 12), ShouldBeError)       // invalid char used in element
 		So(ctx.AddMetric("/plugin/group3/subgroup4/metric4", 15), ShouldBeNil)          // added
 		So(ctx.AddMetric("/plugin/group3/subgroup4/sub5/metric6", 13), ShouldBeNil)     // added
@@ -704,6 +711,14 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 		collMts, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
 		So(len(collMts.MetricSet), ShouldEqual, 5)
+
+		// Validate modifiers
+		expectedCustomTimestamp := time.Date(2020, 10, 13, 12, 13, 14, 0, time.UTC)
+		So(collMts.MetricSet[0].Description, ShouldEqual, "metric1 custom description")
+		So(collMts.MetricSet[1].Unit, ShouldEqual, "MU")
+		So(collMts.MetricSet[1].Timestamp.Sec, ShouldEqual, expectedCustomTimestamp.Unix())
+		So(collMts.MetricSet[1].Timestamp.Nsec, ShouldEqual, int64(expectedCustomTimestamp.Nanosecond()))
+		So(collMts.MetricSet[2].Tags, ShouldResemble, map[string]string{"a": "b", "c": "d"})
 
 		time.Sleep(2 * time.Second)
 		_, err = s.sendKill()
