@@ -48,11 +48,11 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 	Convey("Validate that client can connect to secure GRPC Server", t, func() {
 		// Arrange
 		opt := &plugin.Options{
-			GRPCPort:            grpcPort,
-			EnableTLS:           true,
-			TLSServerKeyPath:    filepath.Join(certificateFolderName, "serv.key"),
-			TLSServerCertPath:   filepath.Join(certificateFolderName, "serv.crt"),
-			TLSClientCARootPath: filepath.Join(certificateFolderName, "ca.crt"),
+			GRPCPort:          grpcPort,
+			EnableTLS:         true,
+			TLSServerKeyPath:  filepath.Join(certificateFolderName, "serv.key"),
+			TLSServerCertPath: filepath.Join(certificateFolderName, "serv.crt"),
+			TLSClientCAPath:   filepath.Join(certificateFolderName, "ca.crt"),
 		}
 
 		ln, _ := net.Listen("tcp", grpcServerAddr)

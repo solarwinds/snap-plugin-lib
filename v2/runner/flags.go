@@ -94,7 +94,7 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		"tls-server-key-path", "",
 		"Path to private key associated with server certificate")
 
-	flagParser.StringVar(&opt.TLSClientCARootPath,
+	flagParser.StringVar(&opt.TLSClientCAPath,
 		"tls-client-ca-path", "",
 		"Path to ca root path certificate(s)")
 
@@ -205,7 +205,7 @@ func ValidateOptions(opt *plugin.Options) error {
 
 	if opt.EnableTLS {
 		if opt.TLSServerCertPath == "" || opt.TLSServerKeyPath == "" {
-			return fmt.Errorf("Certificate and key path have to be provided when TLS is enabled")
+			return fmt.Errorf("certificate and key path have to be provided when TLS is enabled")
 		}
 	}
 

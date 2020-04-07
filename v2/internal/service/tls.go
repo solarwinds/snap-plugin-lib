@@ -18,7 +18,7 @@ func tlsCredentials(opt *plugin.Options) (credentials.TransportCredentials, erro
 		return nil, fmt.Errorf("invalid TLS certificate: %v", err)
 	}
 
-	clientCA, err := loadCACerts(opt.TLSClientCARootPath)
+	clientCA, err := loadCACerts(opt.TLSClientCAPath)
 	if err != nil {
 		return nil, fmt.Errorf("can't read client CA Cert(s)")
 	}
