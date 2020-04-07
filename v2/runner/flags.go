@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -83,20 +84,20 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		"If a plugin supports multiple plugin API versions, set it to use v2")
 
 	flagParser.BoolVar(&opt.EnableTLS,
-		"enable-tls", false,
+		"tls", false,
 		"Enable secure GRPC communication")
 
 	flagParser.StringVar(&opt.TLSServerCertPath,
-		"tls-server-cert-path", "",
+		"cert-path", "",
 		"Certificate path used by GRPC Server")
 
 	flagParser.StringVar(&opt.TLSServerKeyPath,
-		"tls-server-key-path", "",
+		"key-path", "",
 		"Path to private key associated with server certificate")
 
 	flagParser.StringVar(&opt.TLSClientCAPath,
-		"tls-client-ca-path", "",
-		"Path to ca root path certificate(s)")
+		"root-cert-paths", "",
+		fmt.Sprintf("Path to ca root path certificate(s). Might also be provided as files or/and dirs separated by '%c'.", filepath.Separator))
 
 	// custom flags
 
