@@ -53,3 +53,25 @@ func (m Metric) Timestamp() time.Time {
 func (m Metric) String() string {
 	return fmt.Sprintf("%s %v {%v}", m.Namespace().String(), m.Value_, m.Tags_)
 }
+
+func (m *Metric) AddTags(tags map[string]string) {
+	if m.Tags_ == nil { // lazy initialization
+		m.Tags_ = map[string]string{}
+	}
+
+	for k, v := range tags {
+		m.Tags_[k] = v
+	}
+}
+
+func (m *Metric) SetDescription(description string) {
+	m.Description_ = description
+}
+
+func (m *Metric) SetUnit(unit string) {
+	m.Unit_ = unit
+}
+
+func (m *Metric) SetTimestamp(timestamp time.Time) {
+	m.Timestamp_ = timestamp
+}

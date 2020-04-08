@@ -82,8 +82,8 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 
 	configRandom, ok := ctx.Load("random-config")
 	if ok {
-		_ = ctx.AddMetricWithTags("/example/config/random4", rand.Intn(configRandom.(int)),
-			map[string]string{"random": fmt.Sprintf("%v", configRandom)})
+		_ = ctx.AddMetric("/example/config/random4", rand.Intn(configRandom.(int)),
+			plugin.MetricTag("random", fmt.Sprintf("%v", configRandom)))
 	}
 
 	return nil

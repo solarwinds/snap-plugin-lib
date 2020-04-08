@@ -17,7 +17,7 @@ You can take a look at collector's code from [Chapter 1](/v2/tutorial/01-simple/
 
 ----
 
-##### Should I handle error value from `ctx.AddMetric()` and `ctx.AddMetricWithTag()`?
+##### Should I handle error value from `ctx.AddMetric()`?
 
 Generally, no. 
 Notice that error may be returned in the following situations:

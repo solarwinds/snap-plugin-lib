@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+
 	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
 	"github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
 	"github.com/stretchr/testify/mock"
@@ -57,13 +59,13 @@ func TestCollectProcessMetrics(t *testing.T) {
 	proxy.On("ProcessesInfo").
 		Once().Return(processList, nil)
 
-	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=mysql]/cpu", 0.3, map[string]string{"PID": "1232"}).
+	ctx.On("AddMetric", "/minisystem/processes/[processName=mysql]/cpu", 0.3, []plugin.MetricModifier{plugin.MetricTag("PID", "1232")}).
 		Once().Return(nil)
 
-	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=chrome]/cpu", 0.5, map[string]string{"PID": "2012"}).
+	ctx.On("AddMetric", "/minisystem/processes/[processName=chrome]/cpu", 0.5, []plugin.MetricModifier{plugin.MetricTag("PID", "2012")}).
 		Once().Return(nil)
 
-	ctx.On("AddMetricWithTags", "/minisystem/processes/[processName=chrome]/memory", 0.4, map[string]string{"PID": "2012"}).
+	ctx.On("AddMetric", "/minisystem/processes/[processName=chrome]/memory", 0.4, []plugin.MetricModifier{plugin.MetricTag("PID", "2012")}).
 		Once().Return(nil)
 
 	c := systemCollector{

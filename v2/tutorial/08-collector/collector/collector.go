@@ -82,10 +82,10 @@ func (s systemCollector) collectProcessesInfo(ctx plugin.CollectContext) error {
 		pName := s.sanitizeName(p.ProcessName)
 
 		cpuMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/cpu", pName)
-		_ = ctx.AddMetricWithTags(cpuMetricNs, p.CpuUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		_ = ctx.AddMetric(cpuMetricNs, p.CpuUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
 
 		memMetricNs := fmt.Sprintf("/minisystem/processes/[processName=%s]/memory", pName)
-		_ = ctx.AddMetricWithTags(memMetricNs, p.MemoryUsage, map[string]string{"PID": fmt.Sprintf("%d", p.PID)})
+		_ = ctx.AddMetric(memMetricNs, p.MemoryUsage, plugin.MetricTag("PID", fmt.Sprintf("%d", p.PID)))
 	}
 
 	return nil

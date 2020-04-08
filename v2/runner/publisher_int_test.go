@@ -227,7 +227,7 @@ type oneMetricCollector struct {
 
 func (s *oneMetricCollector) Collect(ctx plugin.CollectContext) error {
 	s.collectCalls++
-	_ = ctx.AddMetricWithTags("/example/group1/metric1", 1, map[string]string{"k1": "v1", "k3": "v3"})
+	_ = ctx.AddMetric("/example/group1/metric1", 1, plugin.MetricTags(map[string]string{"k1": "v1", "k3": "v3"}))
 	return nil
 }
 
@@ -437,10 +437,10 @@ func (c *noConfigCollector) PluginDefinition(def plugin.CollectorDefinition) err
 func (c *noConfigCollector) Collect(ctx plugin.CollectContext) error {
 	c.collectCalls++
 
-	_ = ctx.AddMetricWithTags("/example/group1/metric1", 11, map[string]string{"k1": "v1"})
+	_ = ctx.AddMetric("/example/group1/metric1", 11, plugin.MetricTags(map[string]string{"k1": "v1"}))
 	_ = ctx.AddMetric("/example/group1/metric2", 12)
 	_ = ctx.AddMetric("/example/group1/metric3", 13)
-	_ = ctx.AddMetricWithTags("/example/group1/metric4", 14, map[string]string{"k2": "v2", "k3": "v3"})
+	_ = ctx.AddMetric("/example/group1/metric4", 14, plugin.MetricTags(map[string]string{"k2": "v2", "k3": "v3"}))
 	_ = ctx.AddMetric("/example/group1/metric5", 15)
 
 	_ = ctx.AddMetric("/example/group2/metric1", 21)

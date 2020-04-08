@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -41,13 +42,8 @@ func (m *Context) AddWarning(msg string) {
 	m.Called(msg)
 }
 
-func (m *Context) AddMetric(ns string, value interface{}) error {
-	args := m.Called(ns, value)
-	return args.Error(0)
-}
-
-func (m *Context) AddMetricWithTags(ns string, value interface{}, tags map[string]string) error {
-	args := m.Called(ns, value, tags)
+func (m *Context) AddMetric(ns string, value interface{}, modifiers ...plugin.MetricModifier) error {
+	args := m.Called(ns, value, modifiers)
 	return args.Error(0)
 }
 
