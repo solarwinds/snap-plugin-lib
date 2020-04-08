@@ -91,7 +91,11 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 			defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 		}
 
-		srv := service.NewGRPCServer(opt.AsThread)
+		srv, err := service.NewGRPCServer(opt)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Can't initialize GRPC Server (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
 
 		// We need to bind the gRPC client on the other end to the same channel so need to return it from here
 		if grpcChan != nil {

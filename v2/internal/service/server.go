@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/fullstorydev/grpchan"
+	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -33,12 +34,21 @@ type Server interface {
 // * the native go-grpc implementation
 // * https://github.com/fullstorydev/grpchan - this one provides a way of using gRPC with a custom transport
 //   (that means sth other than the native h2 - HTTP1.1 or inprocess/channels are available out of the box)
-func NewGRPCServer(inProc bool) Server {
-	if inProc {
-		return NewChannel()
+func NewGRPCServer(opt *plugin.Options) (Server, error) {
+	if opt.AsThread {
+		return NewChannel(), nil
 	}
 
-	return grpc.NewServer()
+	if !opt.EnableTLS {
+		return grpc.NewServer(), nil
+	}
+
+	tlsCreds, err := tlsCredentials(opt)
+	if err != nil {
+		return nil, err
+	}
+
+	return grpc.NewServer(grpc.Creds(tlsCreds)), nil
 }
 
 func StartCollectorGRPC(srv Server, proxy CollectorProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {

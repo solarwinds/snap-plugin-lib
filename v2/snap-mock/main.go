@@ -139,7 +139,7 @@ func main() {
 	grpcServerAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PluginPort)
 	cl, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
 	if err != nil {
-		fmt.Printf("Can't to GRPC Server on %s", grpcServerAddr)
+		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerAddr, err)
 		os.Exit(1)
 	}
 	defer func() { _ = cl.Close() }()
@@ -245,7 +245,7 @@ func main() {
 			req := &pluginrpc.PingRequest{}
 			_, err := contClient.Ping(context.Background(), req)
 			if err != nil {
-				doneCh <- fmt.Errorf("can't start ")
+				doneCh <- fmt.Errorf("can't start: %v", err)
 			}
 			time.Sleep(opt.PingInterval)
 		}

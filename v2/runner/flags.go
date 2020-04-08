@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -81,6 +82,22 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 	flagParser.BoolVar(&opt.UseAPIv2,
 		"plugin-api-v2", true,
 		"If a plugin supports multiple plugin API versions, set it to use v2")
+
+	flagParser.BoolVar(&opt.EnableTLS,
+		"tls", false,
+		"Enable secure GRPC communication")
+
+	flagParser.StringVar(&opt.TLSServerCertPath,
+		"cert-path", "",
+		"Certificate path used by GRPC Server")
+
+	flagParser.StringVar(&opt.TLSServerKeyPath,
+		"key-path", "",
+		"Path to private key associated with server certificate")
+
+	flagParser.StringVar(&opt.TLSClientCAPath,
+		"root-cert-paths", "",
+		fmt.Sprintf("Path to CA root path certificate(s). Might also be provided as files or/and dirs separated with '%c'.", filepath.Separator))
 
 	// custom flags
 
@@ -185,6 +202,12 @@ func ValidateOptions(opt *plugin.Options) error {
 	grpcIp := net.ParseIP(opt.PluginIP)
 	if grpcIp == nil {
 		return fmt.Errorf("GRPC IP contains invalid address")
+	}
+
+	if opt.EnableTLS {
+		if opt.TLSServerCertPath == "" || opt.TLSServerKeyPath == "" {
+			return fmt.Errorf("certificate and key path have to be provided when TLS is enabled")
+		}
 	}
 
 	if opt.PProfPort > 0 && !opt.EnableProfiling {

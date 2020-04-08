@@ -15,6 +15,11 @@ type Options struct {
 	GRPCPingMaxMissed uint
 	AsThread          bool
 
+	EnableTLS         bool // GRPC Server
+	TLSServerCertPath string
+	TLSServerKeyPath  string
+	TLSClientCAPath   string
+
 	LogLevel          logrus.Level
 	EnableProfiling   bool
 	EnableStats       bool // enable calculation statistics
