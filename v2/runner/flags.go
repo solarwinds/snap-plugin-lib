@@ -97,7 +97,7 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 
 	flagParser.StringVar(&opt.TLSClientCAPath,
 		"root-cert-paths", "",
-		fmt.Sprintf("Path to ca root path certificate(s). Might also be provided as files or/and dirs separated by '%c'.", filepath.Separator))
+		fmt.Sprintf("Path to CA root path certificate(s). Might also be provided as files or/and dirs separated with '%c'.", filepath.Separator))
 
 	// custom flags
 
