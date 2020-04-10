@@ -965,7 +965,10 @@ func printRuntimeDetails(m meta) {
 }
 
 func printContactUs() {
-	fmt.Print("Thank you for using this Snap plugin. If you have questions or are running \ninto errors, please contact us on Github (github.com/librato/snap) or \nour Slack channel (intelsdi-x.herokuapp.com). \nThe repo for this plugin can be found: github.com/librato/<plugin-name>. \nWhen submitting a new issue on Github, please include this diagnostic \nprint out so that we have a starting point for addressing your question. \nThank you. \n\n")
+	fmt.Print(
+		`Thank you for using this SWISnap plugin. If you have questions or are running
+into errors, please contact us on support@appoptics.com.
+Thank you.`)
 }
 
 func timeTrack(start time.Time, name string) {
