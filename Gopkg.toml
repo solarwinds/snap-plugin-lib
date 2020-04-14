@@ -27,3 +27,8 @@ required = [
 [prune]
   go-tests = true
   unused-packages = true
+
+# To be removed AO-16152
+[[constraint]]
+  name= "github.com/golang/protobuf"
+  version = "=v1.3.5"

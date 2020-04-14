@@ -71,3 +71,14 @@ func (m *Context) Done() <-chan struct{} {
 	args := m.Called()
 	return args.Get(0).(<-chan struct{})
 }
+
+// publisher context
+func (m *Context) ListAllMetrics() []plugin.Metric {
+	args := m.Called()
+	return args.Get(0).([]plugin.Metric)
+}
+
+func (m *Context) Count() int {
+	args := m.Called()
+	return args.Int(0)
+}
