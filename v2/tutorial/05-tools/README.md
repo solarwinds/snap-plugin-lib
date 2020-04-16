@@ -131,7 +131,7 @@ Example output:
                 "Maximum": "1.0125ms"
             },
             "Last measurement": {
-                "Occurred": {
+                "Timestamp": {
                     "Time": "Sep  9 09:33:34.650584",
                     "Ago": "1.8311868s"
                 },
@@ -156,7 +156,7 @@ Example output:
                 "Maximum": "815.2µs"
             },
             "Last measurement": {
-                "Occurred": {
+                "Timestamp": {
                     "Time": "Sep  9 09:33:33.433020",
                     "Ago": "3.0487507s"
                 },

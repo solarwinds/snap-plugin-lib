@@ -235,7 +235,7 @@ func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int
 		}
 
 		td.LastMeasurement = measurementInfo{
-			Occurred: eventTimes{
+			Timestamp: eventTimes{
 				Time: completeTime,
 			},
 			Duration:         processingTime,
