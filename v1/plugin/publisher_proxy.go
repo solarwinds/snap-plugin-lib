@@ -66,7 +66,7 @@ func (p *publisherProxy) PublishAsStream(stream rpc.Publisher_PublishAsStreamSer
 			return fmt.Errorf("failure when reading from stream: %s", err.Error())
 		}
 
-		logF.WithFields(log.Fields{"length": len(protoMts.Metrics)}).Debug("Metrics chunk received from AppOptics")
+		logF.WithFields(log.Fields{"length": len(protoMts.Metrics)}).Debug("Metrics chunk received from Snap")
 
 		streamMts := convertProtoToMetrics(protoMts.Metrics)
 		mts = append(mts, streamMts...)
