@@ -160,6 +160,7 @@ func isValidIdentifier(s string) bool {
 		case el >= 'a' && el <= 'z':
 		case el >= '0' && el <= '9':
 		case el == '-' || el == '_':
+		case el == '.':
 		default:
 			return false
 		}
