@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	monitorTestTimeout = 3 * time.Second
+	monitorTestTimeout  = 3 * time.Second
 	memoryLeakTestDelay = 1 * time.Second
 )
 
