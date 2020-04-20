@@ -62,20 +62,19 @@ func StartPublisherGRPC(srv Server, proxy PublisherProxy, grpcLn net.Listener, p
 }
 
 func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	var err error
 	closeChan := make(chan error, 1)
 	pluginrpc.RegisterHandlerController(srv, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
 
 	go func() {
-		err := srv.Serve(grpcLn) // may be blocking (depending on implementation)
-		if err != nil {
-			closeChan <- err
-		}
+		err = srv.Serve(grpcLn) // may be blocking (depending on implementation)
+		close(closeChan)
 	}()
 
-	exitErr := <-closeChan // may be blocking (depending on implementation)
+	<-closeChan // may be blocking (depending on implementation)
 
-	if exitErr != nil && exitErr != RequestedKillError {
-		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+	if err != nil && err != RequestedKillError {
+		log.WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
 	shutdownPlugin(srv)

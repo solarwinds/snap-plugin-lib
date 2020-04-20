@@ -26,24 +26,13 @@ type controlService struct {
 	closeCh chan<- error  // request exit to main routine
 }
 
-func newControlService(closeCh chan<- error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
+func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
 	cs := &controlService{
 		pingCh:  make(chan struct{}),
 		closeCh: closeCh,
 	}
 
-	if pingTimeout != time.Duration(0) && maxMissingPingCounter != 0 {
-		go cs.monitor(pingTimeout, maxMissingPingCounter)
-	} else {
-		go func() {
-			for {
-				_, ok := <-cs.pingCh
-				if !ok {
-					return
-				}
-			}
-		}()
-	}
+	go cs.monitor(pingTimeout, maxMissingPingCounter, closeCh)
 
 	return cs
 }
@@ -64,9 +53,24 @@ func (cs *controlService) Kill(context.Context, *pluginrpc.KillRequest) (*plugin
 	return &pluginrpc.KillResponse{}, nil
 }
 
-func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
+func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint, closeCh chan error) {
 	pingMissed := uint(0)
 
+	// infinitive monitoring (unless unload)
+	if timeout == time.Duration(0) || maxPingMissed == 0 {
+		for {
+			select {
+			case <-closeCh:
+				return
+			case _, ok := <-cs.pingCh:
+				if !ok {
+					return
+				}
+			}
+		}
+	}
+
+	// monitor for max ping missed
 	for {
 		select {
 		case <-cs.pingCh:
@@ -82,6 +86,8 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 				cs.closeCh <- fmt.Errorf("ping message missed %d times (timeout: %s)", maxPingMissed, timeout)
 				return
 			}
+		case <-closeCh:
+			return
 		}
 	}
 }

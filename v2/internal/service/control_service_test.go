@@ -3,15 +3,19 @@
 package service
 
 import (
+	"runtime"
 	"testing"
 	"time"
 )
 
 const (
 	monitorTestTimeout = 3 * time.Second
+	memoryLeakTestDelay = 1 * time.Second
 )
 
 func TestControlServiceMonitor_MissingPing(t *testing.T) {
+	initGoroutines := runtime.NumGoroutine()
+
 	closeCh := make(chan error)
 	doneTestCh := make(chan bool)
 
@@ -49,9 +53,18 @@ func TestControlServiceMonitor_MissingPing(t *testing.T) {
 	case <-time.After(monitorTestTimeout):
 		t.Fatalf("test timeout")
 	}
+
+	close(closeCh)
+	time.Sleep(memoryLeakTestDelay)
+
+	if initGoroutines != runtime.NumGoroutine() {
+		t.Fatalf("memory leak")
+	}
 }
 
 func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
+	initGoroutines := runtime.NumGoroutine()
+
 	closeCh := make(chan error)
 	doneTestCh := make(chan bool)
 
@@ -84,5 +97,50 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 		t.Fatalf("last ping shouldn't have been received")
 	case <-time.After(monitorTestTimeout):
 		t.Fatalf("test timeout")
+	}
+
+	close(closeCh)
+	time.Sleep(memoryLeakTestDelay)
+
+	if initGoroutines != runtime.NumGoroutine() {
+		t.Fatalf("memory leak")
+	}
+}
+
+func TestControlServiceMonitor_ClosingInfinitiveMonitor(t *testing.T) {
+	initGoroutines := runtime.NumGoroutine()
+
+	closeCh := make(chan error)
+	doneTestCh := make(chan bool)
+
+	cs := newControlService(closeCh, 0, 0)
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		cs.pingCh <- struct{}{}
+
+		time.Sleep(2000 * time.Millisecond)
+		cs.pingCh <- struct{}{}
+
+		time.Sleep(100 * time.Millisecond)
+		cs.pingCh <- struct{}{}
+
+		doneTestCh <- true
+	}()
+
+	select {
+	case <-doneTestCh:
+		// ok
+	case <-closeCh:
+		t.Fatalf("monitor shouldn't exit")
+	case <-time.After(monitorTestTimeout):
+		t.Fatalf("test timeout")
+	}
+
+	close(closeCh)
+	time.Sleep(memoryLeakTestDelay)
+
+	if initGoroutines != runtime.NumGoroutine() {
+		t.Fatalf("memory leak")
 	}
 }
