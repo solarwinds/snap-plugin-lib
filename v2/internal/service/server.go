@@ -68,7 +68,6 @@ func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingM
 
 	go func() {
 		err = srv.Serve(grpcLn) // may be blocking (depending on implementation)
-		close(closeChan)
 	}()
 
 	<-closeChan // may be blocking (depending on implementation)
