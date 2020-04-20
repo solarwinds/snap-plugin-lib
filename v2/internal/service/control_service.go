@@ -23,7 +23,7 @@ var (
 
 type controlService struct {
 	pingCh  chan struct{} // notification about received ping
-	closeCh chan<- error  // request exit to main routine
+	closeCh chan error  // request exit to main routine
 }
 
 func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
@@ -32,35 +32,41 @@ func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissing
 		closeCh: closeCh,
 	}
 
-	go cs.monitor(pingTimeout, maxMissingPingCounter, closeCh)
+	go cs.monitor(pingTimeout, maxMissingPingCounter)
 
 	return cs
 }
 
-func (cs *controlService) Ping(context.Context, *pluginrpc.PingRequest) (*pluginrpc.PingResponse, error) {
+func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*pluginrpc.PingResponse, error) {
 	logControlService.Debug("GRPC Ping() received")
 
-	cs.pingCh <- struct{}{}
+	select {
+	case <-ctx.Done():
+	case cs.pingCh <- struct{}{}:
+	}
 
 	return &pluginrpc.PingResponse{}, nil
 }
 
-func (cs *controlService) Kill(context.Context, *pluginrpc.KillRequest) (*pluginrpc.KillResponse, error) {
+func (cs *controlService) Kill(ctx context.Context, _ *pluginrpc.KillRequest) (*pluginrpc.KillResponse, error) {
 	logControlService.Debug("GRPC Kill() received")
 
-	cs.closeCh <- RequestedKillError
+	select {
+	case <-ctx.Done():
+	case cs.closeCh <- RequestedKillError:
+	}
 
 	return &pluginrpc.KillResponse{}, nil
 }
 
-func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint, closeCh chan error) {
+func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 	pingMissed := uint(0)
 
 	// infinitive monitoring (unless unload)
 	if timeout == time.Duration(0) || maxPingMissed == 0 {
 		for {
 			select {
-			case <-closeCh:
+			case <-cs.closeCh:
 				return
 			case _, ok := <-cs.pingCh:
 				if !ok {
@@ -86,7 +92,7 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint, clo
 				cs.closeCh <- fmt.Errorf("ping message missed %d times (timeout: %s)", maxPingMissed, timeout)
 				return
 			}
-		case <-closeCh:
+		case <-cs.closeCh:
 			return
 		}
 	}

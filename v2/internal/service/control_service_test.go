@@ -3,6 +3,7 @@
 package service
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 	"time"
@@ -92,7 +93,9 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 
 	select {
 	case <-closeCh:
-		// ok
+		// ok, unblock test routine to avoid a leak
+		<-cs.pingCh
+		<-doneTestCh
 	case <-doneTestCh:
 		t.Fatalf("last ping shouldn't have been received")
 	case <-time.After(monitorTestTimeout):
@@ -103,6 +106,7 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 	time.Sleep(memoryLeakTestDelay)
 
 	if initGoroutines != runtime.NumGoroutine() {
+		fmt.Print(runtime.NumGoroutine())
 		t.Fatalf("memory leak")
 	}
 }

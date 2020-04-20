@@ -68,12 +68,14 @@ func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingM
 
 	go func() {
 		err = srv.Serve(grpcLn) // may be blocking (depending on implementation)
-		close(closeChan)
+		if err != nil {
+			closeChan <- err
+		}
 	}()
 
-	<-closeChan // may be blocking (depending on implementation)
+	exitErr := <-closeChan // may be blocking (depending on implementation)
 
-	if err != nil && err != RequestedKillError {
+	if exitErr != nil && exitErr != RequestedKillError {
 		log.WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
