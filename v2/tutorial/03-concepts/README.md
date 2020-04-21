@@ -152,11 +152,11 @@ example.time.second 21 {map[]}
 #### State
 
 At times, you will need to remember values and objects between consecutive collections, ie:
-- credentials,
-- objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
-- cashe,
-- post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/blob/ao-12231-tutorial_ch89/v2/tutorial/03-concepts/README.md#state-and-configuration)),
-- custom statistics.
+- credentials
+- objects representing any client created during Load phase (like: TPC, REST, GRPC etc)
+- cache
+- post-processed configuration (see: [State and configuration](https://github.com/librato/snap-plugin-lib-go/blob/ao-12231-tutorial_ch89/v2/tutorial/03-concepts/README.md#state-and-configuration))
+- custom statistics
 
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
