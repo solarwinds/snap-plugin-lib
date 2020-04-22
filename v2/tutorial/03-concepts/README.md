@@ -41,7 +41,7 @@ When task is defined for a plugin, snap will send a `Load()` request to plugin c
 When a task handling is no longer needed snap sends an `Unload()` request.
 As for `Load()`, we can provide some custom code which will be executed when the task is finished.
 
-> Keep in mind, however, this doesn't necessarily mean the plugin is not needed as some other tasks that rely on this plugin may still be running.
+> Keep in mind that this doesn't necessarily mean the plugin is not needed as some other tasks that rely on this plugin may still be running.
 
 Let's introduce empty custom implementation of `Load()` method:
 ```go
