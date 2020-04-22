@@ -64,7 +64,7 @@ func (cs *controlService) Kill(ctx context.Context, _ *pluginrpc.KillRequest) (*
 func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 	pingMissed := uint(0)
 
-	// infinitive monitoring (unless unload)
+	// infinite monitoring (until unload)
 	if timeout == time.Duration(0) || maxPingMissed == 0 {
 		for {
 			select {
