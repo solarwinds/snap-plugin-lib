@@ -22,14 +22,16 @@ var (
 )
 
 type controlService struct {
-	pingCh  chan struct{} // notification about received ping
-	closeCh chan error  // request exit to main routine
+	pingCh chan struct{}   // notification about received ping
+	ctx    context.Context // check for a notification for top level code (service crash etc.)
+	errCh  chan error
 }
 
-func newControlService(closeCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
+func newControlService(ctx context.Context, errCh chan error, pingTimeout time.Duration, maxMissingPingCounter uint) *controlService {
 	cs := &controlService{
-		pingCh:  make(chan struct{}),
-		closeCh: closeCh,
+		pingCh: make(chan struct{}),
+		ctx:    ctx,
+		errCh:  errCh,
 	}
 
 	go cs.monitor(pingTimeout, maxMissingPingCounter)
@@ -41,7 +43,7 @@ func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*
 	logControlService.Debug("GRPC Ping() received")
 
 	select {
-	case <-ctx.Done():
+	case <-ctx.Done(): // rpc done
 	case cs.pingCh <- struct{}{}:
 	}
 
@@ -53,7 +55,7 @@ func (cs *controlService) Kill(ctx context.Context, _ *pluginrpc.KillRequest) (*
 
 	select {
 	case <-ctx.Done():
-	case cs.closeCh <- RequestedKillError:
+	case cs.errCh <- RequestedKillError:
 	}
 
 	return &pluginrpc.KillResponse{}, nil
@@ -66,7 +68,7 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 	if timeout == time.Duration(0) || maxPingMissed == 0 {
 		for {
 			select {
-			case <-cs.closeCh:
+			case <-cs.ctx.Done():
 				return
 			case _, ok := <-cs.pingCh:
 				if !ok {
@@ -89,10 +91,10 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 			}).Warningf("Ping timeout occurred")
 
 			if pingMissed >= maxPingMissed {
-				cs.closeCh <- fmt.Errorf("ping message missed %d times (timeout: %s)", maxPingMissed, timeout)
+				cs.errCh <- fmt.Errorf("ping message missed %d times (timeout: %s)", maxPingMissed, timeout)
 				return
 			}
-		case <-cs.closeCh:
+		case <-cs.ctx.Done():
 			return
 		}
 	}

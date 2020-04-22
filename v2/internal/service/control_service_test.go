@@ -3,7 +3,7 @@
 package service
 
 import (
-	"fmt"
+	"context"
 	"runtime"
 	"testing"
 	"time"
@@ -14,13 +14,23 @@ const (
 	memoryLeakTestDelay = 1 * time.Second
 )
 
+func routineChecker(t *testing.T, initRoutinesNo int) {
+	time.Sleep(memoryLeakTestDelay)
+
+	completeRoutinesNo := runtime.NumGoroutine()
+	if initRoutinesNo != completeRoutinesNo {
+		t.Fatalf("memory leak (%d != %d)", initRoutinesNo, completeRoutinesNo)
+	}
+}
+
 func TestControlServiceMonitor_MissingPing(t *testing.T) {
-	initGoroutines := runtime.NumGoroutine()
+	defer routineChecker(t, runtime.NumGoroutine())
 
 	closeCh := make(chan error)
 	doneTestCh := make(chan bool)
 
-	cs := newControlService(closeCh, 200*time.Millisecond, 3)
+	ctx, cancelFn := context.WithCancel(context.Background())
+	cs := newControlService(ctx, closeCh, 200*time.Millisecond, 3)
 
 	go func() {
 		// ok
@@ -48,6 +58,7 @@ func TestControlServiceMonitor_MissingPing(t *testing.T) {
 
 	select {
 	case <-doneTestCh:
+		cancelFn()
 		// ok
 	case <-closeCh:
 		t.Fatalf("monitor shouldn't exit")
@@ -56,20 +67,16 @@ func TestControlServiceMonitor_MissingPing(t *testing.T) {
 	}
 
 	close(closeCh)
-	time.Sleep(memoryLeakTestDelay)
-
-	if initGoroutines != runtime.NumGoroutine() {
-		t.Fatalf("memory leak")
-	}
 }
 
 func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
-	initGoroutines := runtime.NumGoroutine()
+	defer routineChecker(t, runtime.NumGoroutine())
 
 	closeCh := make(chan error)
 	doneTestCh := make(chan bool)
 
-	cs := newControlService(closeCh, 200*time.Millisecond, 3)
+	ctx, cancelFn := context.WithCancel(context.Background())
+	cs := newControlService(ctx, closeCh, 200*time.Millisecond, 3)
 
 	go func() {
 		// ok
@@ -93,9 +100,10 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 
 	select {
 	case <-closeCh:
-		// ok, unblock test routine to avoid a leak
-		<-cs.pingCh
+		// ok
+		<-cs.pingCh // unblock test goroutine
 		<-doneTestCh
+		cancelFn()
 	case <-doneTestCh:
 		t.Fatalf("last ping shouldn't have been received")
 	case <-time.After(monitorTestTimeout):
@@ -103,21 +111,16 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 	}
 
 	close(closeCh)
-	time.Sleep(memoryLeakTestDelay)
-
-	if initGoroutines != runtime.NumGoroutine() {
-		fmt.Print(runtime.NumGoroutine())
-		t.Fatalf("memory leak")
-	}
 }
 
 func TestControlServiceMonitor_ClosingInfinitiveMonitor(t *testing.T) {
-	initGoroutines := runtime.NumGoroutine()
+	defer routineChecker(t, runtime.NumGoroutine())
 
 	closeCh := make(chan error)
 	doneTestCh := make(chan bool)
 
-	cs := newControlService(closeCh, 0, 0)
+	ctx, cancelFn := context.WithCancel(context.Background())
+	cs := newControlService(ctx, closeCh, 0, 0)
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -135,6 +138,7 @@ func TestControlServiceMonitor_ClosingInfinitiveMonitor(t *testing.T) {
 	select {
 	case <-doneTestCh:
 		// ok
+		cancelFn()
 	case <-closeCh:
 		t.Fatalf("monitor shouldn't exit")
 	case <-time.After(monitorTestTimeout):
@@ -142,9 +146,4 @@ func TestControlServiceMonitor_ClosingInfinitiveMonitor(t *testing.T) {
 	}
 
 	close(closeCh)
-	time.Sleep(memoryLeakTestDelay)
-
-	if initGoroutines != runtime.NumGoroutine() {
-		t.Fatalf("memory leak")
-	}
 }

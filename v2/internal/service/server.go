@@ -7,6 +7,7 @@ Package rpc:
 package service
 
 import (
+	"context"
 	"net"
 	"time"
 
@@ -61,19 +62,28 @@ func StartPublisherGRPC(srv Server, proxy PublisherProxy, grpcLn net.Listener, p
 	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
+type controlNotification struct {
+	ctx      context.Context
+	cancelFn context.CancelFunc
+	errCh    chan error
+}
+
 func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	var err error
-	closeChan := make(chan error, 1)
-	pluginrpc.RegisterHandlerController(srv, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
+	errChan := make(chan error)
+
+	ctx, cancelfn := context.WithCancel(context.Background())
+	pluginrpc.RegisterHandlerController(srv, newControlService(ctx, errChan, pingTimeout, pingMaxMissedCount))
 
 	go func() {
 		err = srv.Serve(grpcLn) // may be blocking (depending on implementation)
 		if err != nil {
-			closeChan <- err
+			errChan <- err
 		}
 	}()
 
-	exitErr := <-closeChan // may be blocking (depending on implementation)
+	exitErr := <-errChan // may be blocking (depending on implementation)
+	cancelfn()           // signal ping monitor (via ctx)
 
 	if exitErr != nil && exitErr != RequestedKillError {
 		log.WithError(err).Errorf("Major error occurred - plugin will be shut down")
