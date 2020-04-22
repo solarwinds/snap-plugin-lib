@@ -113,7 +113,7 @@ func TestControlServiceMonitor_MaxMissedPings(t *testing.T) {
 	close(closeCh)
 }
 
-func TestControlServiceMonitor_ClosingInfinitiveMonitor(t *testing.T) {
+func TestControlServiceMonitor_ClosingInfiniteMonitor(t *testing.T) {
 	defer routineChecker(t, runtime.NumGoroutine())
 
 	closeCh := make(chan error)
