@@ -58,8 +58,8 @@ func TestControlServiceMonitor_MissingPing(t *testing.T) {
 
 	select {
 	case <-doneTestCh:
-		cancelFn()
 		// ok
+		cancelFn()
 	case <-closeCh:
 		t.Fatalf("monitor shouldn't exit")
 	case <-time.After(monitorTestTimeout):

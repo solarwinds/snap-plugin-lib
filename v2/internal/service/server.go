@@ -62,12 +62,6 @@ func StartPublisherGRPC(srv Server, proxy PublisherProxy, grpcLn net.Listener, p
 	startGRPC(srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
-type controlNotification struct {
-	ctx      context.Context
-	cancelFn context.CancelFunc
-	errCh    chan error
-}
-
 func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
 	var err error
 	errChan := make(chan error)

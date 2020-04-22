@@ -23,7 +23,7 @@ var (
 
 type controlService struct {
 	pingCh chan struct{}   // notification about received ping
-	ctx    context.Context // check for a notification for top level code (service crash etc.)
+	ctx    context.Context // check for a notification from top level code (service crash etc.)
 	errCh  chan error
 }
 
@@ -43,7 +43,7 @@ func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*
 	logControlService.Debug("GRPC Ping() received")
 
 	select {
-	case <-ctx.Done(): // rpc done
+	case <-ctx.Done():
 	case cs.pingCh <- struct{}{}:
 	}
 
