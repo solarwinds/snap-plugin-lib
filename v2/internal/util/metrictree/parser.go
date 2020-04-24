@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 const (
@@ -21,7 +22,9 @@ const minNamespaceElements = 2
 
 const initCacheSize = 100
 
+var filteredNsBufferRWLock = sync.RWMutex{}
 var filteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
+var noFilteredNsBufferRWLock = sync.RWMutex{}
 var noFilteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
@@ -41,9 +44,13 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 		var err error
 
 		if isFilter {
+			filteredNsBufferRWLock.RLock()
 			parsedEl, ok = filteredNsBuffer[nsElem]
+			filteredNsBufferRWLock.RUnlock()
 		} else {
+			noFilteredNsBufferRWLock.RLock()
 			parsedEl, ok = noFilteredNsBuffer[nsElem]
+			noFilteredNsBufferRWLock.RUnlock()
 		}
 
 		if !ok {
@@ -58,9 +65,13 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 		}
 
 		if isFilter {
+			filteredNsBufferRWLock.Lock()
 			filteredNsBuffer[nsElem] = parsedEl
+			filteredNsBufferRWLock.Unlock()
 		} else {
+			noFilteredNsBufferRWLock.Lock()
 			noFilteredNsBuffer[nsElem] = parsedEl
+			noFilteredNsBufferRWLock.Unlock()
 		}
 
 		ns.elements = append(ns.elements, parsedEl)
