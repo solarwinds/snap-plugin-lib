@@ -27,15 +27,32 @@ var filteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
 var noFilteredNsBufferRWLock = sync.RWMutex{}
 var noFilteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
 
+func SplitNamespace(s string) ([]string, string, error) {
+	if len(s) == 0 {
+		return nil, "", fmt.Errorf("namespace too short")
+	}
+
+	sep := s[:1]
+	if !strings.ContainsAny(sep, `/\._@-#&^?'%|`) {
+		return nil, "", fmt.Errorf("invalid namespace separator")
+	}
+
+	return strings.Split(s, sep), sep, nil
+}
+
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
-	splitNs := strings.Split(s, NsSeparator)
+
+	splitNs, nsSeparator, err := SplitNamespace(s)
+	if err != nil {
+		return nil, err
+	}
 	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
 	}
 	if splitNs[0] != "" {
-		return nil, fmt.Errorf("namespace should start with '%s'", NsSeparator)
+		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
 	}
 
 	for i, nsElem := range splitNs[1:] {
@@ -90,7 +107,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			if !isValidIdentifier(groupName) {
+			if !isValidIdentifier(groupName, false) {
 				return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
 			}
 
@@ -103,14 +120,14 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 				return newDynamicRegexpElement(groupName, r), nil
 			}
 
-			if isValidIdentifier(groupValue) {
+			if isValidIdentifier(groupValue, true) {
 				return newDynamicSpecificElement(groupName, groupValue), nil
 			}
 
 			return nil, fmt.Errorf("invalid character(s) used for group value [%s]", groupValue)
 		}
 
-		if isValidIdentifier(dynElem) {
+		if isValidIdentifier(dynElem, false) {
 			return newDynamicAnyElement(dynElem), nil
 		}
 
@@ -139,7 +156,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		return newStaticAnyElement(), nil
 	}
 
-	if isValidIdentifier(s) { // is it static element ie. metric
+	if isValidIdentifier(s, false) { // is it static element ie. metric
 		if isFilter {
 			return newStaticSpecificAcceptingGroupElement(s), nil
 		} else {
@@ -160,7 +177,7 @@ func isSurroundedWith(s string, prefix, suffix string) bool {
 	return true
 }
 
-func isValidIdentifier(s string) bool {
+func isValidIdentifier(s string, groupValue bool) bool {
 	if len(s) == 0 {
 		return false
 	}
@@ -172,6 +189,8 @@ func isValidIdentifier(s string) bool {
 		case el >= '0' && el <= '9':
 		case el == '-' || el == '_':
 		case el == '.':
+		case groupValue && el == '/':
+		case groupValue && el == '\\':
 		default:
 			return false
 		}
