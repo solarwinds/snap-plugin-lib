@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	NsSeparator                  = "/"
+	DefaultNsSeparator           = "/"
+	allowedNsSeparators          = `/` + `\` + `.` + `_` + `@` + `-` + `#` + `&` + `^` + `?` + `'` + `%` + `|`
 	regexBeginIndicator          = "{"
 	regexEndIndicator            = "}"
 	staticAnyMatcher             = "*"
@@ -33,8 +34,8 @@ func SplitNamespace(s string) ([]string, string, error) {
 	}
 
 	sep := s[:1]
-	if !strings.ContainsAny(sep, `/\._@-#&^?'%|`) {
-		return nil, "", fmt.Errorf("invalid namespace separator")
+	if !strings.ContainsAny(sep, allowedNsSeparators) {
+		return nil, "", fmt.Errorf("invalid namespace separator %s. Allowed ones are: %s", sep, allowedNsSeparators)
 	}
 
 	return strings.Split(s, sep), sep, nil
@@ -44,15 +45,12 @@ func SplitNamespace(s string) ([]string, string, error) {
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
 
-	splitNs, nsSeparator, err := SplitNamespace(s)
+	splitNs, _, err := SplitNamespace(s)
 	if err != nil {
 		return nil, err
 	}
 	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
-	}
-	if splitNs[0] != "" {
-		return nil, fmt.Errorf("namespace should start with '%s'", nsSeparator)
 	}
 
 	for i, nsElem := range splitNs[1:] {

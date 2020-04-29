@@ -348,7 +348,7 @@ func (n *Node) path() string {
 		nsElems = append(nsElems, node.currentElement.String())
 	}
 
-	return NsSeparator + strings.Join(nsElems, NsSeparator)
+	return DefaultNsSeparator + strings.Join(nsElems, DefaultNsSeparator)
 }
 
 func (n *Node) groupIndicator() []string {
