@@ -178,7 +178,7 @@ func newStaticAnyElement() *staticAnyElement {
 }
 
 func (*staticAnyElement) Match(s string) bool {
-	return isValidIdentifier(s, false)
+	return isValidIdentifier(s)
 }
 
 func (sae *staticAnyElement) Compatible(s string) bool {
@@ -203,7 +203,7 @@ func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
 }
 
 func (*staticRecursiveAnyElement) Match(s string) bool {
-	return isValidIdentifier(s, false)
+	return isValidIdentifier(s)
 }
 
 func (*staticRecursiveAnyElement) Compatible(s string) bool {
@@ -271,7 +271,7 @@ func newStaticRegexpElement(r *regexp.Regexp) *staticRegexpElement {
 }
 
 func (sre *staticRegexpElement) Match(s string) bool {
-	return !containsGroup(s) && isValidIdentifier(s, false) && sre.regExp.MatchString(s)
+	return !containsGroup(s) && isValidIdentifier(s) && sre.regExp.MatchString(s)
 }
 
 func (*staticRegexpElement) Compatible(s string) bool {
@@ -307,11 +307,11 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			return groupName == dae.group && isValidIdentifier(groupValue, true)
+			return groupName == dae.group && isValidGroupIdentifier(groupValue)
 		}
 	}
 
-	return isValidIdentifier(s, false)
+	return isValidIdentifier(s)
 }
 
 func (dae *dynamicAnyElement) Compatible(s string) bool {
@@ -407,7 +407,7 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			return dre.group == groupName && isValidIdentifier(groupValue, true) && dre.regexp.MatchString(groupValue)
+			return dre.group == groupName && isValidGroupIdentifier(groupValue) && dre.regexp.MatchString(groupValue)
 		}
 	} else {
 		if dre.regexp.MatchString(s) {

@@ -105,7 +105,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			if !isValidIdentifier(groupName, false) {
+			if !isValidIdentifier(groupName) {
 				return nil, fmt.Errorf("invalid character(s) used for group name [%s]", groupName)
 			}
 
@@ -118,14 +118,14 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 				return newDynamicRegexpElement(groupName, r), nil
 			}
 
-			if isValidIdentifier(groupValue, true) {
+			if isValidGroupIdentifier(groupValue) {
 				return newDynamicSpecificElement(groupName, groupValue), nil
 			}
 
 			return nil, fmt.Errorf("invalid character(s) used for group value [%s]", groupValue)
 		}
 
-		if isValidIdentifier(dynElem, false) {
+		if isValidIdentifier(dynElem) {
 			return newDynamicAnyElement(dynElem), nil
 		}
 
@@ -154,7 +154,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 		return newStaticAnyElement(), nil
 	}
 
-	if isValidIdentifier(s, false) { // is it static element ie. metric
+	if isValidIdentifier(s) { // is it static element ie. metric
 		if isFilter {
 			return newStaticSpecificAcceptingGroupElement(s), nil
 		} else {
@@ -175,7 +175,7 @@ func isSurroundedWith(s string, prefix, suffix string) bool {
 	return true
 }
 
-func isValidIdentifier(s string, groupValue bool) bool {
+func isValidIdentifier(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
@@ -187,8 +187,27 @@ func isValidIdentifier(s string, groupValue bool) bool {
 		case el >= '0' && el <= '9':
 		case el == '-' || el == '_':
 		case el == '.':
-		case groupValue && el == '/':
-		case groupValue && el == '\\':
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func isValidGroupIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	for _, el := range s {
+		switch {
+		case el >= 'A' && el <= 'Z':
+		case el >= 'a' && el <= 'z':
+		case el >= '0' && el <= '9':
+		case el == '-' || el == '_':
+		case el == '.':
+		case el == '/' || el == '\\':
 		default:
 			return false
 		}
