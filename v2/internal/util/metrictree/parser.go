@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	NsSeparator                  = "/"
+	DefaultNsSeparator           = "/"
+	allowedNsSeparators          = `/` + `\` + `.` + `_` + `@` + `-` + `#` + `&` + `^` + `?` + `'` + `%` + `|`
 	regexBeginIndicator          = "{"
 	regexEndIndicator            = "}"
 	staticAnyMatcher             = "*"
@@ -27,15 +28,29 @@ var filteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
 var noFilteredNsBufferRWLock = sync.RWMutex{}
 var noFilteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
 
+func SplitNamespace(s string) ([]string, string, error) {
+	if len(s) == 0 {
+		return nil, "", fmt.Errorf("namespace too short")
+	}
+
+	sep := s[:1]
+	if !strings.ContainsAny(sep, allowedNsSeparators) {
+		return nil, "", fmt.Errorf("invalid namespace separator %s. Allowed ones are: %s", sep, allowedNsSeparators)
+	}
+
+	return strings.Split(s, sep), sep, nil
+}
+
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
-	splitNs := strings.Split(s, NsSeparator)
+
+	splitNs, _, err := SplitNamespace(s)
+	if err != nil {
+		return nil, err
+	}
 	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
-	}
-	if splitNs[0] != "" {
-		return nil, fmt.Errorf("namespace should start with '%s'", NsSeparator)
 	}
 
 	for i, nsElem := range splitNs[1:] {
@@ -103,7 +118,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 				return newDynamicRegexpElement(groupName, r), nil
 			}
 
-			if isValidIdentifier(groupValue) {
+			if isValidGroupIdentifier(groupValue) {
 				return newDynamicSpecificElement(groupName, groupValue), nil
 			}
 
@@ -172,6 +187,27 @@ func isValidIdentifier(s string) bool {
 		case el >= '0' && el <= '9':
 		case el == '-' || el == '_':
 		case el == '.':
+		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func isValidGroupIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	for _, el := range s {
+		switch {
+		case el >= 'A' && el <= 'Z':
+		case el >= 'a' && el <= 'z':
+		case el >= '0' && el <= '9':
+		case el == '-' || el == '_':
+		case el == '.':
+		case el == '/' || el == '\\':
 		default:
 			return false
 		}

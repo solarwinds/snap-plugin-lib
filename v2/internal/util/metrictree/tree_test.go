@@ -16,11 +16,11 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		// Add valid rules
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
-		So(v.AddRule("/plugin/group2/metric2"), ShouldBeNil)
+		So(v.AddRule(".plugin.group2.metric2"), ShouldBeNil)
 		So(v.AddRule("/plugin/group2/metric3"), ShouldBeNil)
 		So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeNil)
 		So(v.AddRule("/plugin/group4/[dyn2]/metric5"), ShouldBeNil)
-		So(v.AddRule("/plugin/group5/[dyn3]/metric4"), ShouldBeNil) // ok - last element may be repeated if there is no ambiguity
+		So(v.AddRule("@plugin@group5@[dyn3]@metric4"), ShouldBeNil) // ok - last element may be repeated if there is no ambiguity
 		So(v.AddRule("/plugin/group6/metric1"), ShouldBeNil)        // ok - last element may be repeated if there is no ambiguity
 
 		// Double-check that rules were applied
@@ -30,7 +30,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		validMetricsToAdd := []string{
 			"/plugin/group1/metric1",
 			"/plugin/group2/metric2",
-			"/plugin/group3/[dyn1=id1]/metric4",
+			".plugin.group3.[dyn1=/id1/].metric4",
 			"/plugin/group3/id2/metric4",
 			"/plugin/group6/metric1",
 		}
@@ -42,7 +42,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group3/[dyn1=id1]"), ShouldBeTrue)
+		So(v.IsPartiallyValid("-plugin-group3-[dyn1=/id1]"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
 		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
 
@@ -50,7 +50,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		invalidMetricsToAdd := []string{
 			"/plugin/group5/[dyn3]/metric4",
 			"/plugin/group1/metric1/",
-			"/plugin/group1/metric2",
+			".plugin.group1.metric2",
 			"/plugin/group1",
 			"/plugin",
 			"/plugin/[group1=group1]/metric1",
@@ -81,7 +81,7 @@ func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 
 		// Add valid rules
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeNil)
-		So(v.AddRule("/plugin/{id[234]{1,}}/{.*}"), ShouldBeNil)
+		So(v.AddRule("_plugin_{id[234]{1,}}_{.*}"), ShouldBeNil)
 		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
 		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
 
@@ -97,7 +97,7 @@ func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 		validMetricsToAdd := []string{
 			"/plugin/group1/metric1",
 			"/plugin/id2/metric4",
-			"/plugin/id15/group3/metric3",
+			".plugin.id15.group3.metric3",
 			"/plugin/group4/m1",
 			"/plugin/group4/m1/m2",
 		}
@@ -132,9 +132,9 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 		// Add valid definition rules
 		So(d.AddRule("/plugin/group1/[dyn1]/metric1"), ShouldBeNil)
 		So(d.AddRule("/plugin/group2/sub1/metric1"), ShouldBeNil)
-		So(d.AddRule("/plugin/group2/sub2/metric2"), ShouldBeNil)
+		So(d.AddRule(".plugin.group2.sub2.metric2"), ShouldBeNil)
 		So(d.AddRule("/plugin/group2/sub3/metric3"), ShouldBeNil)
-		So(d.AddRule("/plugin/group3/[dyn2]/[dyn3]/metric2"), ShouldBeNil)
+		So(d.AddRule("_plugin_group3_[dyn2]_[dyn3]_metric2"), ShouldBeNil)
 		So(d.AddRule("/plugin/group4/[dyn1]/[dyn3]/metric2"), ShouldBeNil)
 
 		// Add valid filtering rules
@@ -142,10 +142,10 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 		So(v.AddRule("/plugin/group2/*/{metric[123]+}"), ShouldBeNil)
 		So(v.AddRule("/plugin/group3/id1/[dyn3=id2]/metric2"), ShouldBeNil)
 		So(v.AddRule("/plugin/group3/{id3+}/[dyn3={id4+}]/metric2"), ShouldBeNil)
-		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
+		So(v.AddRule("_plugin_group4_**"), ShouldBeNil)
 
 		// Add invalid filtering rules (no compatible with definitions)
-		So(v.AddRule("/plugin/group1/id1/metric12"), ShouldBeError)
+		So(v.AddRule(".plugin.group1.id1.metric12"), ShouldBeError)
 		So(v.AddRule("/plugins/group1/id1/metric1"), ShouldBeError)
 		So(v.AddRule("/plugin/group2/[sub2]/{metric[123]+}"), ShouldBeError)
 		So(v.AddRule("/plugin/group3/[dyn2]/[dyn4=val]/metric2"), ShouldBeError)
@@ -159,7 +159,7 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 			"/plugin/group1/id1/metric1",
 			"/plugin/group2/sub2/metric2",
 			"/plugin/group3/id1/[dyn3=id2]/metric2",
-			"/plugin/group3/[dyn2=id1]/[dyn3=id2]/metric2",
+			".plugin.group3.[dyn2=id1].[dyn3=id2].metric2",
 		}
 
 		for _, mt := range validMetricsToAdd {

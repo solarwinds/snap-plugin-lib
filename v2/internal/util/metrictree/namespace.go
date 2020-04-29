@@ -307,7 +307,7 @@ func (dae *dynamicAnyElement) Match(s string) bool {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			return groupName == dae.group && isValidIdentifier(groupValue)
+			return groupName == dae.group && isValidGroupIdentifier(groupValue)
 		}
 	}
 
@@ -407,7 +407,7 @@ func (dre *dynamicRegexpElement) Match(s string) bool {
 			groupName := dynElem[0:eqIndex]
 			groupValue := dynElem[eqIndex+1:]
 
-			return dre.group == groupName && isValidIdentifier(groupValue) && dre.regexp.MatchString(groupValue)
+			return dre.group == groupName && isValidGroupIdentifier(groupValue) && dre.regexp.MatchString(groupValue)
 		}
 	} else {
 		if dre.regexp.MatchString(s) {

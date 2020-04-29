@@ -14,8 +14,6 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
-const nsSeparator = metrictree.NsSeparator
-
 type pluginContext struct {
 	*commonProxy.Context
 
@@ -70,7 +68,11 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	}
 
 	var mtNamespace []types.NamespaceElement
-	nsDefFormat := strings.Split(ns, metrictree.NsSeparator)[1:]
+	nsDefFormat, nsSeparator, err := metrictree.SplitNamespace(ns)
+	if err != nil {
+		return err
+	}
+	nsDefFormat = nsDefFormat[1:]
 
 	for i, nsElem := range nsDefFormat {
 		groupName := groupPositions[i]
