@@ -48,7 +48,7 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		os.Exit(errorExitStatus)
 	}
 
-	jsonMeta := printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 	if metaCh != nil {
 		metaCh <- jsonMeta
 		close(metaCh)

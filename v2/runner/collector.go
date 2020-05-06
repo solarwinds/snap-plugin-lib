@@ -79,7 +79,7 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 			os.Exit(errorExitStatus)
 		}
 
-		jsonMeta := printMetaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		jsonMeta := metaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 		if metaCh != nil {
 			metaCh <- jsonMeta
 			close(metaCh)
