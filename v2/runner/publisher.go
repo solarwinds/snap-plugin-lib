@@ -42,6 +42,11 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 
 	logrus.SetLevel(opt.LogLevel)
 
+	if opt.PrintVersion {
+		printVersion(name, version)
+		os.Exit(normalExitStatus)
+	}
+
 	r, err := acquireResources(opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
