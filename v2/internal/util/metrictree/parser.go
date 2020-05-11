@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"unicode"
 )
 
 const (
@@ -200,15 +201,12 @@ func isValidGroupIdentifier(s string) bool {
 		return false
 	}
 
-	for _, el := range s {
-		switch {
-		case el >= 'A' && el <= 'Z':
-		case el >= 'a' && el <= 'z':
-		case el >= '0' && el <= '9':
-		case el == '-' || el == '_':
-		case el == '.':
-		case el == '/' || el == '\\':
-		default:
+	// allow only ASCII characters
+	for i, el := range s {
+		if (i == 0 && el == '{') || (i == len(s)-1 && el == '}') {
+			return false
+		}
+		if el > unicode.MaxASCII {
 			return false
 		}
 	}
