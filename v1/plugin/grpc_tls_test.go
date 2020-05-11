@@ -30,6 +30,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -293,6 +294,10 @@ func TestInvalidClientFailsAgainstTLSServer(t *testing.T) {
 }
 
 func TestTLSClientFailsAgainstInvalidServer(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
 	Convey("In the ideal secure world", t, func() {
 		Convey("when insecure plugin server is started", func() {
 			setUpSecureTestcase(false, true)
