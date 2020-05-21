@@ -28,7 +28,11 @@ required = [
   go-tests = true
   unused-packages = true
 
-# To be removed AO-16152
+# Following to be removed AO-16152
 [[constraint]]
   name= "github.com/golang/protobuf"
   version = "=v1.3.5"
+
+[[override]]
+    name = "google.golang.org/genproto"
+    revision = "09dca8ec288408e2ff58c1178674d147d68709da"

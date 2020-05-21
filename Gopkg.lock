@@ -84,7 +84,7 @@
   revision = "fce0ec30dd00773d3fa974351d04ce2737b5c4d9"
 
 [[projects]]
-  digest = "1:cd125a51c22a6a75a4a70352a76f875349c74243ff8b08a4d761f70ac2bd9212"
+  digest = "1:41eaa9d3386a685920751260c7beef7afc75dd1977faa59c26cfd35e54bbee1a"
   name = "github.com/jhump/protoreflect"
   packages = [
     "codec",
@@ -94,8 +94,8 @@
     "internal",
   ]
   pruneopts = "UT"
-  revision = "43f69034e50eb4a370349b6b7194ef0c7b33d5ed"
-  version = "v1.6.0"
+  revision = "e52bab97a7adafa869f1b0ba0385b9996587807e"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:4b63210654b1f2b664f74ec434a1bb1cb442b3d75742cc064a10808d1cca6361"
@@ -114,12 +114,12 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
+  digest = "1:09cb61dc19af93deae01587e2fdb1c081e0bf48f1a5ad5fa24f48750dc57dce8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
+  revision = "edb144dfd453055e1e49a3d8b410a660b5a87613"
+  version = "v1.0.3"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -138,7 +138,7 @@
   version = "v1.5.2"
 
 [[projects]]
-  digest = "1:a1b3e8dca0272d3971000ef0459322a3e678107607284310766bcb2c51f996cb"
+  digest = "1:01d5dff1c5ba0fd8a1e100cc3fe0405f31daeed776c90fb78f921fb4e8177447"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
@@ -148,16 +148,16 @@
     "process",
   ]
   pruneopts = "UT"
-  revision = "53cec6b37e6a2fa787e771c706f7c1fd67ec40f1"
-  version = "v2.20.3"
+  revision = "a81cf97fce2300934e6c625b9917103346c26ba3"
+  version = "v2.20.4"
 
 [[projects]]
-  digest = "1:0599141a8403114d34f1e546604ad6c5361b70dfa80e80c635f438cdbf71b43a"
+  digest = "1:05eebdd5727fea23083fce0d98d307d70c86baed644178e81608aaa9f09ea469"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d417be0fe654de640a82370515129985b407c7e3"
-  version = "v1.5.0"
+  revision = "60c74ad9be0d874af0ab0daef6ab07c5c5911f0d"
+  version = "v1.6.0"
 
 [[projects]]
   digest = "1:237af0cf68bac89e21af72e6cd6b64f388854895e75f82ad08c6c011e1a8286c"
@@ -215,7 +215,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f9a7240d0ea3bf872ddf93145604fb51f276141fd493ed94b48d551dba79113b"
+  digest = "1:87e711477da505a3f8f66389358acd68b41e72125826ba869e1fb88a73dde6db"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -227,18 +227,19 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "d3edc9973b7eb1fb302b0ff2c62357091cea9a30"
+  revision = "0ba52f642ac2f9371a88bfdde41f4b4e195a37c0"
 
 [[projects]]
   branch = "master"
-  digest = "1:968aac203feaa75d5e4c758550abcd9523dd736e5e3c2892e94feb9006e4fb36"
+  digest = "1:2f5a21f14e8b888ef4cb276a228d728084bb2404becc205cdd783b9e2cbee658"
   name = "golang.org/x/sys"
   packages = [
+    "internal/unsafeheader",
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "669c56c373c468cbe0f0c12b7939832b26088d33"
+  revision = "fe76b779f299728f3bd63f77ea2c815504229c3b"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -267,7 +268,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4306ace663cbd0c8e1f93b651c4d106d7b99a0d7707e964c4239917ad987beb0"
+  digest = "1:9083d8a263480c1db55fe28ddc881be625bbb721bad2f9b559a8bb88963f5751"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -280,12 +281,15 @@
     "go/loader",
     "go/packages",
     "go/types/typeutil",
+    "internal/event",
+    "internal/event/core",
+    "internal/event/keys",
+    "internal/event/label",
     "internal/gocommand",
     "internal/packagesinternal",
-    "internal/telemetry/event",
   ]
   pruneopts = "UT"
-  revision = "332987a829c3275fbfaf9afc93f78891e6650632"
+  revision = "cf2d1e09c8456c17308b4e86852cabb97ec0b384"
 
 [[projects]]
   branch = "master"
@@ -299,15 +303,14 @@
   revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
-  branch = "master"
   digest = "1:1c2a9b5021f7fe23a6f880468633f407f8b600a67e29b10f1892ae4425085820"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "b5235f65be3618aac92278c41932e3f9007a653a"
+  revision = "09dca8ec288408e2ff58c1178674d147d68709da"
 
 [[projects]]
-  digest = "1:a7f15d03c0dd3cf7ce505708cae58c021ba4e76bf80b7ad0376739d46e5263de"
+  digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -337,6 +340,7 @@
     "internal/grpcutil",
     "internal/resolver/dns",
     "internal/resolver/passthrough",
+    "internal/status",
     "internal/syscall",
     "internal/transport",
     "keepalive",
@@ -350,24 +354,24 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "ac54eec90516cee50fc6b9b113b34628a85f976f"
-  version = "v1.28.1"
+  revision = "754ee590a4f386d0910d887f3b8776354042260b"
+  version = "v1.29.1"
 
 [[projects]]
-  digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
+  digest = "1:d7f1bd887dc650737a421b872ca883059580e9f8314d601f88025df4f4802dce"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "53403b58ad1b561927d19068c655246f2db79d48"
-  version = "v2.2.8"
+  revision = "0b1645d91e851e735d3e23330303ce81f70adbe3"
+  version = "v2.3.0"
 
 [[projects]]
   branch = "v3"
-  digest = "1:55d59c3399c684c4e3edc6c404e5dc85b072363918bf2a2c6b0e6e4807ea73bf"
+  digest = "1:f87d6c8edf5e57ae4a355abc05aca1dbf38b073068bba96c1fbbff852a1e2fd3"
   name = "gopkg.in/yaml.v3"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9f266ea9e77c4c7aab4cf02650570e7c7b3031a5"
+  revision = "2ff61e1afc866138abf1a8adf3cc89721090ac31"
 
 [[projects]]
   digest = "1:295d39c259ca58770baea36c80255b9ac5adc8198dc5f09c97a366bf586a16da"
