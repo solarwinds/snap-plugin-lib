@@ -7,15 +7,6 @@ required = [
   name="honnef.co/go/tools"
   revision="d36bf90409063c0fe4fecdc07cc71e25b59a4050"
 
-# Actual code dependencies
-[[constraint]]
-  name = "github.com/julienschmidt/httprouter"
-  version = "1.1.0"
-
-[[constraint]]
-  name = "github.com/urfave/cli"
-  version = "1.19.1"
-
 [[override]]
   name = "github.com/cpuguy83/go-md2man"
   version = "=v1.0.9"
@@ -24,6 +15,3 @@ required = [
   go-tests = true
   unused-packages = true
 
-## [[override]]
-##     name = "google.golang.org/genproto"
-##     revision = "09dca8ec288408e2ff58c1178674d147d68709da"
