@@ -6,10 +6,16 @@ required = [
 [[override]]
   name="honnef.co/go/tools"
   revision="d36bf90409063c0fe4fecdc07cc71e25b59a4050"
+  #branch = "master"
+
+
+# [[override]]
+#   name = "github.com/cpuguy83/go-md2man"
+#   version = "=v1.0.9"
 
 [[override]]
-  name = "github.com/cpuguy83/go-md2man"
-  version = "=v1.0.9"
+  name = "github.com/russross/blackfriday"
+  version = "=v1.5.2"
 
 [prune]
   go-tests = true
