@@ -303,11 +303,12 @@
   revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
-  digest = "1:1c2a9b5021f7fe23a6f880468633f407f8b600a67e29b10f1892ae4425085820"
+  branch = "master"
+  digest = "1:7ac26fa764d15fdbc6a9b6de1d29fc0b38bbd485d24a2aa80add05a064ec6a04"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "09dca8ec288408e2ff58c1178674d147d68709da"
+  revision = "e9a78aa275b76bea0505dad5d819f8200c85b0eb"
 
 [[projects]]
   digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
