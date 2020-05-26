@@ -22,8 +22,8 @@
   name = "github.com/cpuguy83/go-md2man"
   packages = ["md2man"]
   pruneopts = "UT"
-  revision = "7c3bbf680b77a502b5f4eedf5be3a49e1688443d"
-  version = "v1.0.9"
+  revision = "7762f7e404f8416dfa1d9bb6a8c192aa9acb4d19"
+  version = "v1.0.10"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -57,7 +57,7 @@
   version = "v1.2.4"
 
 [[projects]]
-  digest = "1:27ccbd0558b448c5a55f32cd73d7bfe63c650206ee64fef75cae1502ede51cdd"
+  digest = "1:9d2705f9d2e7da697c24b2ab104567b155107b2aad26ca615973c0a8f02f757a"
   name = "github.com/golang/protobuf"
   packages = [
     "jsonpb",
@@ -72,8 +72,8 @@
     "ptypes/wrappers",
   ]
   pruneopts = "UT"
-  revision = "84668698ea25b64748563aa20726db66a6b8d299"
-  version = "v1.3.5"
+  revision = "d04d7b157bb510b1e0c10132224b616ac0e26b17"
+  version = "v1.4.2"
 
 [[projects]]
   branch = "master"
@@ -239,7 +239,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "fe76b779f299728f3bd63f77ea2c815504229c3b"
+  revision = "05986578812163b26672dabd9b425240ae2bb0ad"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -289,7 +289,7 @@
     "internal/packagesinternal",
   ]
   pruneopts = "UT"
-  revision = "cf2d1e09c8456c17308b4e86852cabb97ec0b384"
+  revision = "cb1345f3a375367f8439bba882e90348348288d9"
 
 [[projects]]
   branch = "master"
@@ -303,11 +303,12 @@
   revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
-  digest = "1:1c2a9b5021f7fe23a6f880468633f407f8b600a67e29b10f1892ae4425085820"
+  branch = "master"
+  digest = "1:7ac26fa764d15fdbc6a9b6de1d29fc0b38bbd485d24a2aa80add05a064ec6a04"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "09dca8ec288408e2ff58c1178674d147d68709da"
+  revision = "e9a78aa275b76bea0505dad5d819f8200c85b0eb"
 
 [[projects]]
   digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
@@ -356,6 +357,52 @@
   pruneopts = "UT"
   revision = "754ee590a4f386d0910d887f3b8776354042260b"
   version = "v1.29.1"
+
+[[projects]]
+  digest = "1:7028a6c8e3796baad9b5b1994e3b3107b673ab369704133b414857f0d37254a7"
+  name = "google.golang.org/protobuf"
+  packages = [
+    "encoding/protojson",
+    "encoding/prototext",
+    "encoding/protowire",
+    "internal/descfmt",
+    "internal/descopts",
+    "internal/detectknown",
+    "internal/detrand",
+    "internal/encoding/defval",
+    "internal/encoding/json",
+    "internal/encoding/messageset",
+    "internal/encoding/tag",
+    "internal/encoding/text",
+    "internal/errors",
+    "internal/fieldnum",
+    "internal/fieldsort",
+    "internal/filedesc",
+    "internal/filetype",
+    "internal/flags",
+    "internal/genname",
+    "internal/impl",
+    "internal/mapsort",
+    "internal/pragma",
+    "internal/set",
+    "internal/strs",
+    "internal/version",
+    "proto",
+    "reflect/protoreflect",
+    "reflect/protoregistry",
+    "runtime/protoiface",
+    "runtime/protoimpl",
+    "types/descriptorpb",
+    "types/known/anypb",
+    "types/known/durationpb",
+    "types/known/emptypb",
+    "types/known/structpb",
+    "types/known/timestamppb",
+    "types/known/wrapperspb",
+  ]
+  pruneopts = "UT"
+  revision = "d165be301fb1e13390ad453281ded24385fd8ebc"
+  version = "v1.23.0"
 
 [[projects]]
   digest = "1:d7f1bd887dc650737a421b872ca883059580e9f8314d601f88025df4f4802dce"

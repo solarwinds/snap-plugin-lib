@@ -77,4 +77,6 @@ func TestCollectProcessMetrics(t *testing.T) {
 
 	// Assert
 	require.Nil(t, err)
+
+	require.True(t, ctx.AssertExpectations(t))
 }
