@@ -10,8 +10,8 @@ func StartCollectorInProcess(collector plugin.InProcessCollector, opt *plugin.Op
 	startCollector(types.NewCollector(collector.Name(), collector.Version(), collector), opt, grpcChan, metaCh)
 }
 
-func StartStreamingCollectorInProcess(collector plugin.InProcessStreamingCollector, opt *plugin.Options, grpChan chan<- grpchan.Channel, metaCh chan<- []byte) {
-	startCollector(types.NewStreamingCollector(collector.Name(), collector.Version(), collector), opt, grpChan, metaCh)
+func StartStreamingCollectorInProcess(collector plugin.InProcessStreamingCollector, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
+	startCollector(types.NewStreamingCollector(collector.Name(), collector.Version(), collector), opt, grpcChan, metaCh)
 }
 
 func StartPublisherInProcess(publisher plugin.InProcessPublisher, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
