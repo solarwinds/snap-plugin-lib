@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fullstorydev/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
@@ -34,7 +33,7 @@ func StartStreamingCollector(collector plugin.StreamingCollector, name string, v
 		os.Exit(errorExitStatus)
 	}
 
-	startCollector(types.NewStreamingCollector(name, version, collector), opt, nil, nil)
+	startCollector(types.NewStreamingCollector(name, version, collector), opt, InProcChanWriteOnly{})
 }
 
 func StartCollector(collector plugin.Collector, name string, version string) {
@@ -44,10 +43,10 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	startCollector(types.NewCollector(name, version, collector), opt, nil, nil)
+	startCollector(types.NewCollector(name, version, collector), opt, InProcChanWriteOnly{})
 }
 
-func startCollector(collector types.Collector, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
+func startCollector(collector types.Collector, opt *plugin.Options, inProcChan InProcChanWriteOnly) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -85,9 +84,9 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 		}
 
 		jsonMeta := metaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
-		if metaCh != nil {
-			metaCh <- jsonMeta
-			close(metaCh)
+		if inProcChan.MetaCh != nil {
+			inProcChan.MetaCh <- jsonMeta
+			close(inProcChan.MetaCh)
 		}
 
 		if opt.EnableProfiling {
@@ -107,8 +106,8 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 		}
 
 		// We need to bind the gRPC client on the other end to the same channel so need to return it from here
-		if grpcChan != nil {
-			grpcChan <- srv.(*service.Channel).Channel
+		if inProcChan.GRPCChan != nil {
+			inProcChan.GRPCChan <- srv.(*service.Channel).Channel
 		}
 
 		// main blocking operation
