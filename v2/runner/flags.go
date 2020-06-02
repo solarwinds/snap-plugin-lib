@@ -37,6 +37,9 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 	flagParser := flag.NewFlagSet(name, flag.ContinueOnError)
 
 	// common flags
+	flagParser.BoolVar(&opt.PrintVersion,
+		"version", false,
+		"Print version of plugin")
 
 	flagParser.StringVar(&opt.PluginIP,
 		"plugin-ip", defaultPluginIP,

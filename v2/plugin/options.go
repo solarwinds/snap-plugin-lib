@@ -34,4 +34,5 @@ type Options struct {
 	PluginFilter         string        `json:"-"`
 	DebugCollectCounts   int           `json:"-"`
 	DebugCollectInterval time.Duration `json:"-"`
+	PrintVersion         bool          `json:"-"`
 }

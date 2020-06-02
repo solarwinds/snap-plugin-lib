@@ -66,6 +66,11 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 
 	logrus.SetLevel(opt.LogLevel)
 
+	if opt.PrintVersion {
+		printVersion(collector.Name(), collector.Version())
+		os.Exit(normalExitStatus)
+	}
+
 	if opt.PrintExampleTask {
 		printExampleTask(ctxMan, collector.Name())
 		os.Exit(normalExitStatus)
