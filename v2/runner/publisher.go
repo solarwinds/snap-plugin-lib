@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/fullstorydev/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/sirupsen/logrus"
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
@@ -20,10 +20,10 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	startPublisher(publisher, name, version, opt, InProcChanWriteOnly{})
+	startPublisher(publisher, name, version, opt, nil, nil)
 }
 
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, inProcChan InProcChanWriteOnly) {
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -54,9 +54,9 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 	}
 
 	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
-	if inProcChan.MetaCh != nil {
-		inProcChan.MetaCh <- jsonMeta
-		close(inProcChan.MetaCh)
+	if metaCh != nil {
+		metaCh <- jsonMeta
+		close(metaCh)
 	}
 
 	if opt.EnableProfiling {
@@ -76,8 +76,8 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 	}
 
 	// We need to bind the gRPC client on the other end to the same channel so need to return it from here
-	if inProcChan.GRPCChan != nil {
-		inProcChan.GRPCChan <- srv.(*service.Channel).Channel
+	if grpcChan != nil {
+		grpcChan <- srv.(*service.Channel).Channel
 	}
 
 	// main blocking operation
