@@ -34,7 +34,7 @@ func StartStreamingCollector(collector plugin.StreamingCollector, name string, v
 		os.Exit(errorExitStatus)
 	}
 
-	startCollector(types.NewStreamingCollector(name, version, collector), opt, nil)
+	startCollector(types.NewStreamingCollector(name, version, collector), opt, nil, nil)
 }
 
 func StartCollector(collector plugin.Collector, name string, version string) {
@@ -44,10 +44,10 @@ func StartCollector(collector plugin.Collector, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	startCollector(types.NewCollector(name, version, collector), opt, nil)
+	startCollector(types.NewCollector(name, version, collector), opt, nil, nil)
 }
 
-func startCollector(collector types.Collector, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+func startCollector(collector types.Collector, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -84,7 +84,11 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 			os.Exit(errorExitStatus)
 		}
 
-		printMetaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		jsonMeta := metaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		if metaCh != nil {
+			metaCh <- jsonMeta
+			close(metaCh)
+		}
 
 		if opt.EnableProfiling {
 			startPprofServer(r.pprofListener)

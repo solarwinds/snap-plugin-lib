@@ -20,10 +20,10 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	startPublisher(publisher, name, version, opt, nil)
+	startPublisher(publisher, name, version, opt, nil, nil)
 }
 
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
 	var err error
 
 	err = ValidateOptions(opt)
@@ -53,7 +53,11 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 		os.Exit(errorExitStatus)
 	}
 
-	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	if metaCh != nil {
+		metaCh <- jsonMeta
+		close(metaCh)
+	}
 
 	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
