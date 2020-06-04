@@ -3,6 +3,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 	"time"
@@ -64,7 +65,10 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	}
 
 	if !matchFilters {
-		return fmt.Errorf("couldn't match metrics with plugin filters: %v", ns)
+		if logrus.IsLevelEnabled(logrus.TraceLevel) {
+			log.WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+		}
+		return nil // don't throw error when metric is just filtered
 	}
 
 	var mtNamespace []types.NamespaceElement

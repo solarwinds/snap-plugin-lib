@@ -589,7 +589,7 @@ func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 
 	Convey("Validate that metrics are filtered according to metric definitions and filtering", kc.t, func() {
 		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
-		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // discarded - filtered (node-126 doesn't match filtered rule)
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
 
 		So(ctx.AddMetric("/kubernetes/container/appoptics1/node-251/pod-34/mycont155/status/ready", 15), ShouldBeNil)   // added
