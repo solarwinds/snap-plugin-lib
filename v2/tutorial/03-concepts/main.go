@@ -39,10 +39,10 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 	_ = ctx.AddMetric("/example/time/minute", t.Minute())
 	_ = ctx.AddMetric("/example/time/second", t.Second())
 
-	ctx.AddMetric("/example/date/day", t.Day(),
+	_ = ctx.AddMetric("/example/date/day", t.Day(),
 		plugin.MetricTimestamp(time.Now().Add(2*time.Hour)))
 
-	ctx.AddMetric("/example/time/hour", hour,
+	_ = ctx.AddMetric("/example/time/hour", hour,
 		plugin.MetricDescription("custom description for an hour metric"),
 		plugin.MetricUnit("HH"))
 

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
@@ -64,7 +66,10 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	}
 
 	if !matchFilters {
-		return fmt.Errorf("couldn't match metrics with plugin filters: %v", ns)
+		if logrus.IsLevelEnabled(logrus.TraceLevel) {
+			log.WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+		}
+		return nil // don't throw error when metric is just filtered
 	}
 
 	var mtNamespace []types.NamespaceElement
