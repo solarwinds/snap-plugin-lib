@@ -3,7 +3,7 @@ package service
 import (
 	"net"
 
-	"github.com/fullstorydev/grpchan/inprocgrpc"
+	"github.com/librato/grpchan/inprocgrpc"
 )
 
 type Channel struct {

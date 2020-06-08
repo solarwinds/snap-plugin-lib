@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"

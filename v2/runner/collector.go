@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
