@@ -34,17 +34,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:2a09faea89ce60b6024ca7c07aeffb1bb5e6f372529e9b625b927de7d2794295"
-  name = "github.com/fullstorydev/grpchan"
-  packages = [
-    ".",
-    "internal",
-  ]
-  pruneopts = "UT"
-  revision = "03a46bdc47562245604652734186d551c1ac244a"
-  version = "v1.0.1"
-
-[[projects]]
   digest = "1:440028f55cb322d8cb5b9d5ebec298a00b7d74690a658fe6b1c0c0b44341bfae"
   name = "github.com/go-ole/go-ole"
   packages = [
@@ -122,14 +111,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5f919deb57bca5450cb937a5c32de2ad16520665ab62c99d3154b4806ff2e224"
+  digest = "1:d3c9097d1b347f7ddc1c7fce967edb117c15b75e52b8a4072538c79bf699f396"
   name = "github.com/librato/grpchan"
   packages = [
     ".",
     "inprocgrpc",
+    "internal",
   ]
   pruneopts = "UT"
-  revision = "abfa5265c37516866901d90129b362a61bfa3602"
+  revision = "07f04229492e7c2f0eac77d97ca0f8fda123347a"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -322,7 +312,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "12044bf5ea91b8a5a57c6f153de38a18d4193ec9"
+  revision = "7c474a2e34828bdcbfd56bccd302a058cae3ecec"
 
 [[projects]]
   digest = "1:712fa3cb36bfb9e0d333e10f8dcb9b1e64aa2ec30cabed56c114b5e64d775823"
