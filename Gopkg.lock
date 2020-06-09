@@ -111,7 +111,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d3c9097d1b347f7ddc1c7fce967edb117c15b75e52b8a4072538c79bf699f396"
+  digest = "1:4826632a21ff151176096f4c034e1c53d489cd29ac9ed1fe1ecf001b71400e47"
   name = "github.com/librato/grpchan"
   packages = [
     ".",
@@ -119,7 +119,7 @@
     "internal",
   ]
   pruneopts = "UT"
-  revision = "07f04229492e7c2f0eac77d97ca0f8fda123347a"
+  revision = "25f8e207c51ba2184509b5cc51ae468d109e7378"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -214,6 +214,14 @@
   version = "v1.22.0"
 
 [[projects]]
+  digest = "1:2199118a5de91125b472c6a71ecd81b636d7ce252f64087e57f1ba5830f1451a"
+  name = "golang.org/x/mod"
+  packages = ["semver"]
+  pruneopts = "UT"
+  revision = "859b3ef565e237f9f1a0fb6b55385c497545680d"
+  version = "v0.3.0"
+
+[[projects]]
   branch = "master"
   digest = "1:87e711477da505a3f8f66389358acd68b41e72125826ba869e1fb88a73dde6db"
   name = "golang.org/x/net"
@@ -268,7 +276,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:25ec34206f923c417f3024cf171af78a99ee740e7b82b6d358f72d2d66eda09a"
+  digest = "1:89b3a71efab05192e7f804ad2abed4c54e7295f896883ce2e026551241c1bf95"
   name = "golang.org/x/tools"
   packages = [
     "go/analysis",
@@ -293,7 +301,7 @@
     "internal/packagesinternal",
   ]
   pruneopts = "UT"
-  revision = "c42cb6316fb67c8585afba656680ace2f1638b86"
+  revision = "5359b67ffbdf34795ab67871f44112ccc56e713c"
 
 [[projects]]
   branch = "master"
