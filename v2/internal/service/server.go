@@ -11,7 +11,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
@@ -33,7 +33,7 @@ type Server interface {
 
 // An abstraction providing a unified interface for
 // * the native go-grpc implementation
-// * https://github.com/fullstorydev/grpchan - this one provides a way of using gRPC with a custom transport
+// * https://github.com/librato/grpchan - this one provides a way of using gRPC with a custom transport
 //   (that means sth other than the native h2 - HTTP1.1 or inprocess/channels are available out of the box)
 func NewGRPCServer(opt *plugin.Options) (Server, error) {
 	if opt.AsThread {

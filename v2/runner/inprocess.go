@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
