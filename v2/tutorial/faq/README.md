@@ -33,8 +33,8 @@ If you find yourself in a situation when you can't find why metric is not presen
 
 There are several ways to achieve that at different levels:
 - you can write unit tests - library provides `mock.Context` if you want to test `Collect` method (take a look at `./collector/09-config/collector/*_test.go` to see how it can be achieved)
-- you can run a plugin in [Debug mode](https://github.com/librato/snap-plugin-lib-go/tree/master/tutorial/02-testing#debug-mode)
-- you can run a plugin with [Snap-mock](https://github.com/librato/snap-plugin-lib-go/tree/master/tutorial/02-testing#running-plugin-with-snap-mock)
+- you can run a plugin in [Debug mode](/v2/tutorial/02-testing#debug-mode)
+- you can run a plugin with [Snap-mock](/v2/tutorial/02-testing#running-plugin-with-snap-mock)
 - you can run a plugin in the Snap environment
 
 ----

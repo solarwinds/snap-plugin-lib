@@ -37,7 +37,7 @@ After you obtain the basics, we will instruct you how to write real, useful coll
 
 Each part of the tutorial contain complete golang source code, which you can run and modify depending on your needs.
 
-> Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin catalog related to version 1 can be found in the [Writing a Plugin](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial#writing-a-plugin) section.
+> Only version 2 of plugin-lib-go is covered in this tutorial. Examples and plugin catalog related to version 1 can be found in the [Writing a Plugin](/#writing-a-plugin) section.
 
 # Content 
 
