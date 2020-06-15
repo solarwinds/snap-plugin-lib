@@ -137,7 +137,7 @@ package rand
 ```
 
 ## Ready to Share
-You've made a plugin! Now it's time to share it. Create a release by following these [steps](https://help.github.com/articles/creating-releases/). We recommend that your release version match your plugin version, see example [here](/examples/snap-plugin-collector-rand/main.go#L29).
+You've made a plugin! Now it's time to share it. Create a release by following these [steps](https://help.github.com/articles/creating-releases/). We recommend that your release version match your plugin version, see example [here](/examples/v1/snap-plugin-collector-rand/main.go#L29).
 
 Don't forget to announce your plugin release on [slack](https://intelsdi-x.herokuapp.com/) and get your plugin added to the [Plugin Catalog](https://github.com/librato/snap/blob/master/docs/PLUGIN_CATALOG.md)!
 
