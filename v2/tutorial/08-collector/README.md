@@ -65,7 +65,7 @@ In the first line we are calling `TotalCpuUsage`, which is part of `Proxy` inter
 Then we handle possible errors by wrapping it into new one.
 If there were no errors, metric is added to results by calling `ctx.AddMetric()`.
 
-> You can ignore error value returned from `ctx.AddMetric()`. It's should be rather used only during debugging (see [explanation](/v2/tutorial/faq##should-i-handle-error-value-from-ctxaddmetric))    
+> You can ignore error value returned from `ctx.AddMetric()`. It's should be rather used only during debugging (see [explanation](/v2/tutorial/faq#should-i-handle-error-value-from-ctxaddmetric))    
 
 `collectTotalMemory` is similar to method we have just implemented:
 ```go
