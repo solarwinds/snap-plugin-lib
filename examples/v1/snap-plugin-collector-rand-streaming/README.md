@@ -86,7 +86,7 @@ After implementing a type that satisfies one of {collector, processor, publisher
 
 ### Meta options
 
-The available options are defined in [plugin/meta.go](https://github.com/librato/snap-plugin-lib-go/blob/master/v1/plugin/meta.go). You can use some or none of the options. The options with definitions/explanations are below:
+The available options are defined in [plugin/meta.go](/v1/plugin/meta.go). You can use some or none of the options. The options with definitions/explanations are below:
 
 ```go
 // ConcurrencyCount is the max number of concurrent calls the plugin
