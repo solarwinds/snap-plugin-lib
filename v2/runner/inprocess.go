@@ -2,18 +2,16 @@ package runner
 
 import (
 	"github.com/librato/grpchan"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/sirupsen/logrus"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-func StartCollectorInProcess(collector plugin.InProcessCollector, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
-	startCollector(types.NewCollector(collector.Name(), collector.Version(), collector), opt, grpcChan, metaCh)
-}
+type inProcessPlugin interface {
+	plugin.InProcessPlugin
 
-func StartStreamingCollectorInProcess(collector plugin.InProcessStreamingCollector, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
-	startCollector(types.NewStreamingCollector(collector.Name(), collector.Version(), collector), opt, grpcChan, metaCh)
-}
-
-func StartPublisherInProcess(publisher plugin.InProcessPublisher, opt *plugin.Options, grpcChan chan<- grpchan.Channel, metaCh chan<- []byte) {
-	startPublisher(publisher, publisher.Name(), publisher.Version(), opt, grpcChan, metaCh)
+	Options() *plugin.Options
+	GRPCChannel() chan<- grpchan.Channel
+	MetaChannel() chan<- []byte
+	Logger() logrus.FieldLogger
 }
