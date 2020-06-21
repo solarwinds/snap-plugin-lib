@@ -180,3 +180,7 @@ func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 	}
 	return mts
 }
+
+func (pc *pluginContext) RequestedMetrics() []string {
+	return pc.metricsFilters.ListRules()
+}

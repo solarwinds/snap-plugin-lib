@@ -45,6 +45,11 @@ type CollectContext interface {
 
 	// Provide information whether metric or metric group is reasonable to process (won't be filtered).
 	ShouldProcess(namespace string) bool
+
+	// List all requested metrics (filter).
+	// WARNING: library automatically filters metrics based on provided list. You should use this function
+	// in scenarios when output metrics namespaces are constructed based on input list (ie. snmp metrics based on OIDs)
+	RequestedMetrics() []string
 }
 
 ///////////////////////////////////////////////////////////////////////////////
