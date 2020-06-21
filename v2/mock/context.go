@@ -62,6 +62,11 @@ func (m *Context) ShouldProcess(ns string) bool {
 	return args.Bool(0)
 }
 
+func (m *Context) RequestedMetrics() []string {
+	args := m.Called()
+	return args.Get(0).([]string)
+}
+
 func (m *Context) IsDone() bool {
 	args := m.Called()
 	return args.Bool(0)
