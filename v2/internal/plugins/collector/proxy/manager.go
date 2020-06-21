@@ -257,7 +257,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 
 		err := newCtx.metricsFilters.AddRule(mtFilter)
 		if err != nil {
-			log.WithError(err).WithField("rule", mtFilter).Warn("can't add filtering rule, it will be ignored")
+			return fmt.Errorf("wrong filtering rule (%v): %v", mtFilter, err)
 		}
 	}
 
