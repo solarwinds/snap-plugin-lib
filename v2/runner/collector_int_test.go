@@ -605,6 +605,25 @@ func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 		So(ctx.AddMetric("/kubernetes/deployment/[namespace=papertrail15]/depl-52/status/updatedreplicas", 30), ShouldBeNil)  // added
 		So(ctx.AddMetric("/kubernetes/deployment/[name=appoptics3]/depl-2322/status/targetedreplicas", 1), ShouldBeError)     // discarded (name != namespace)
 	})
+
+	Convey("Validate collector context can provide requested metrics", kc.t, func() {
+		// Arrange
+		expectedReqMts := []string{
+			"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+			"/kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*",
+			"/kubernetes/deployment/papertrail15/*/*/*",
+			"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+			"/kubernetes/node/*/status/**",
+			"/kubernetes/pod/node-125/*/*/status/*/*",
+		}
+
+		// Act
+		reqMts := ctx.RequestedMetrics()
+
+		// Assert
+		So(reqMts, ShouldResemble, expectedReqMts)
+	})
+
 	return nil
 }
 
