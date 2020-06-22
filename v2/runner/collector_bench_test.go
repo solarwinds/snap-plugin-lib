@@ -183,7 +183,7 @@ func genMetricAddition(addRatio int, b *testing.B) {
 		chunkCh = ctxMan.RequestCollect(taskId)
 
 		select {
-		case chunk := <-chunkCh:
+		case <-chunkCh:
 		// ok
 		case <-time.After(collectTimeout):
 			panic("timeout occurred")

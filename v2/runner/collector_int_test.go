@@ -177,7 +177,6 @@ func (s *SuiteT) TestSimpleCollector() {
 
 	mtsSelector := []string{
 		"/plugin/metric1",
-		"plugin/metric2",
 		"/plugin/metric3",
 		"/plugin/group1/metric4",
 	}
@@ -242,6 +241,24 @@ func (s *SuiteT) TestSimpleCollector() {
 				s.T().Fatal("plugin should have been ended")
 			}
 		})
+	})
+}
+
+func (s *SuiteT) TestMisconfiguredCollector() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"plugin/metric2", // ! wrong namespace
+	}
+
+	noDefCollector := &simpleCollector{}
+	ln := s.startCollector(noDefCollector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate that load throws error when requested metrics/filters are invalid", s.T(), func() {
+		// Act
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
+		So(err, ShouldBeError)
 	})
 }
 
@@ -660,6 +677,29 @@ func (s *SuiteT) TestKubernetesCollector() {
 	})
 }
 
+func (s *SuiteT) TestMisconfiguredCollectorWithDefinedMetrics() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/kubernetes/pod/node-125/*/*/status/*/*",
+		"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+		"/kubernetes/node/*/status/**",
+		"kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*", // ! wrong
+		"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+		"/kubernetes/deployment/papertrail15/*/*/*",
+	}
+
+	noDefCollector := &kubernetesCollector{}
+	ln := s.startCollector(noDefCollector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate that load throws error when requested metrics/filters are invalid", s.T(), func() {
+		// Act
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
+		So(err, ShouldBeError)
+	})
+}
+
 /*****************************************************************************/
 
 type noDefinitionCollector struct {
@@ -713,7 +753,6 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 	mtsSelector := []string{
 		"/plugin/group1/subgroup1/metric1",
 		"/plugin/group2/{id.*}/metric1",
-		"/plugin/group2/[subgroup2={id.*}]/metric2",
 		"/plugin/group3/subgroup3/{.*}",
 		"/plugin/group3/subgroup4/**",
 	}
@@ -722,7 +761,7 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 	ln := s.startCollector(noDefCollector)
 	s.startClient(ln.Addr().String())
 
-	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
+	Convey("Validate that collector can gather metric when no definition is provided", s.T(), func() {
 		// Act
 		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 		So(err, ShouldBeNil)
