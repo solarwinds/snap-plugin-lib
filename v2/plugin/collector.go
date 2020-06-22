@@ -37,11 +37,8 @@ type CollectContext interface {
 	// Add concrete metric with calculated value
 	AddMetric(namespace string, value interface{}, modifier ...MetricModifier) error
 
-	// Add tags to specific metric
-	ApplyTagsByPath(namespace string, tags map[string]string) error
-
-	// Add tags to all metrics matching regular expression
-	ApplyTagsByRegExp(namespaceSelector string, tags map[string]string) error
+	// Always apply specific modifier(s) for a metrics matching namespace selector
+	AlwaysApply(namespaceSelector string, modifier ...MetricModifier) error
 
 	// Provide information whether metric or metric group is reasonable to process (won't be filtered).
 	ShouldProcess(namespace string) bool

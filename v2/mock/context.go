@@ -47,13 +47,8 @@ func (m *Context) AddMetric(ns string, value interface{}, modifiers ...plugin.Me
 	return args.Error(0)
 }
 
-func (m *Context) ApplyTagsByPath(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
-	return args.Error(0)
-}
-
-func (m *Context) ApplyTagsByRegExp(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
+func (m *Context) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) error {
+	args := m.Called(namespaceSelector, modifiers)
 	return args.Error(0)
 }
 

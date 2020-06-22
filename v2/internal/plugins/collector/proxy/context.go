@@ -142,14 +142,8 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) ApplyTagsByPath(string, map[string]string) error {
-	// TODO: https://swicloud.atlassian.net/browse/AO-12232
-	panic("implement me")
-}
-
-func (pc *pluginContext) ApplyTagsByRegExp(string, map[string]string) error {
-	// TODO: https://swicloud.atlassian.net/browse/AO-12232
-	panic("implement me")
+func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifier ...plugin.MetricModifier) error {
+	return nil
 }
 
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
