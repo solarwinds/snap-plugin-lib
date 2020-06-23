@@ -38,7 +38,7 @@ func startCollector(collector types.Collector) {
 	var err error
 
 	var opt *plugin.Options
-	inprocPlugin, inProc := collector.(inProcessPlugin)
+	inprocPlugin, inProc := collector.Unwrap().(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
 	}
