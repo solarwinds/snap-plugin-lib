@@ -16,12 +16,18 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
+type modifiersMetadata struct {
+	nsSelector string
+	modifiers  []plugin.MetricModifier
+}
+
 type pluginContext struct {
 	*commonProxy.Context
 
 	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
 	sessionMtsMutex sync.RWMutex
 	sessionMts      []*types.Metric
+	modifiersTable  []modifiersMetadata
 	ctxManager      *ContextManager // back-reference to context manager
 }
 
@@ -142,7 +148,12 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifier ...plugin.MetricModifier) error {
+func (pc *pluginContext) AlwaysApply(namespaceSelector string,  modifiers ...plugin.MetricModifier) error {
+	pc.modifiersTable = append(pc.modifiersTable, modifiersMetadata{
+		nsSelector: namespaceSelector,
+		modifiers:  modifiers,
+	})
+
 	return nil
 }
 
@@ -167,6 +178,19 @@ func (pc *pluginContext) ClearMetrics() {
 func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
+
+	// apply modifiers
+	for _, mt := range pc.sessionMts {
+		for _, modElement := range pc.modifiersTable {
+			validationTree := metrictree.NewMetricFilter(nil)
+			isValid, _ := validationTree.IsValid(mt.Namespace().String())
+			if isValid {
+				for _, modifier := range modElement.modifiers {
+					modifier.UpdateMetric(mt)
+				}
+			}
+		}
+	}
 
 	mts := pc.sessionMts
 	if clear {
