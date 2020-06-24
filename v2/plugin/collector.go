@@ -38,7 +38,8 @@ type CollectContext interface {
 	AddMetric(namespace string, value interface{}, modifier ...MetricModifier) error
 
 	// Always apply specific modifier(s) for a metrics matching namespace selector
-	AlwaysApply(namespaceSelector string, modifier ...MetricModifier) error
+	// Returns object which may be used to saturate modifiers (make them no-active)
+	AlwaysApply(namespaceSelector string, modifier ...MetricModifier) (Saturator, error)
 
 	// Provide information whether metric or metric group is reasonable to process (won't be filtered).
 	ShouldProcess(namespace string) bool

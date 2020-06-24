@@ -47,9 +47,9 @@ func (m *Context) AddMetric(ns string, value interface{}, modifiers ...plugin.Me
 	return args.Error(0)
 }
 
-func (m *Context) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) error {
+func (m *Context) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Saturator, error) {
 	args := m.Called(namespaceSelector, modifiers)
-	return args.Error(0)
+	return args.Get(0).(plugin.Saturator), args.Error(1)
 }
 
 func (m *Context) ShouldProcess(ns string) bool {

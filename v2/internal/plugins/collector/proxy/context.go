@@ -16,10 +16,20 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
+///////////////////////////////////////////////////////////////////////////////
+
 type modifiersMetadata struct {
 	nsSelector string
 	modifiers  []plugin.MetricModifier
+	validator  *metrictree.TreeValidator
+	active     bool
 }
+
+func (m *modifiersMetadata) Saturate() {
+	m.active = false
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 type pluginContext struct {
 	*commonProxy.Context
@@ -27,7 +37,7 @@ type pluginContext struct {
 	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
 	sessionMtsMutex sync.RWMutex
 	sessionMts      []*types.Metric
-	modifiersTable  []modifiersMetadata
+	modifiersTable  []*modifiersMetadata
 	ctxManager      *ContextManager // back-reference to context manager
 }
 
@@ -115,8 +125,23 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 		Description_: mtMeta.description,
 	}
 
+	// modifiers related to AddMetric
 	for _, m := range modifiers {
 		m.UpdateMetric(mt)
+	}
+
+	// modifiers list defined by AlwaysApply calls
+	for _, modElement := range pc.modifiersTable {
+		if !modElement.active {
+			continue 
+		}
+
+		isValid, _ := modElement.validator.IsValid(mt.Namespace().String())
+		if isValid {
+			for _, modifier := range modElement.modifiers {
+				modifier.UpdateMetric(mt)
+			}
+		}
 	}
 
 	pc.sessionMts = append(pc.sessionMts, mt)
@@ -148,13 +173,22 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) AlwaysApply(namespaceSelector string,  modifiers ...plugin.MetricModifier) error {
-	pc.modifiersTable = append(pc.modifiersTable, modifiersMetadata{
+func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Saturator, error) {
+	validator := metrictree.NewMetricFilter(nil)
+	err := validator.AddRule(namespaceSelector)
+	if err != nil {
+		return nil, fmt.Errorf("can't apply modifiers: %v", err)
+	}
+
+	modifierMeta := &modifiersMetadata{
 		nsSelector: namespaceSelector,
 		modifiers:  modifiers,
-	})
+		validator:  validator,
+		active:     true,
+	}
 
-	return nil
+	pc.modifiersTable = append(pc.modifiersTable, modifierMeta)
+	return modifierMeta, nil
 }
 
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
@@ -178,19 +212,6 @@ func (pc *pluginContext) ClearMetrics() {
 func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
-
-	// apply modifiers
-	for _, mt := range pc.sessionMts {
-		for _, modElement := range pc.modifiersTable {
-			validationTree := metrictree.NewMetricFilter(nil)
-			isValid, _ := validationTree.IsValid(mt.Namespace().String())
-			if isValid {
-				for _, modifier := range modElement.modifiers {
-					modifier.UpdateMetric(mt)
-				}
-			}
-		}
-	}
 
 	mts := pc.sessionMts
 	if clear {
