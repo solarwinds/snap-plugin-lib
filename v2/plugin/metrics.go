@@ -28,6 +28,9 @@ type MetricSetter interface {
 	// Add custom text-like object associated with measurement
 	AddTags(map[string]string)
 
+	// Remove tags with given keys
+	RemoveTags([]string)
+
 	// Set custom Description of measurement
 	SetDescription(string)
 

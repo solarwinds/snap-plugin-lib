@@ -64,6 +64,12 @@ func (m *Metric) AddTags(tags map[string]string) {
 	}
 }
 
+func (m *Metric) RemoveTags(keys []string) {
+	for _, k := range keys {
+		delete(m.Tags_, k)
+	}
+}
+
 func (m *Metric) SetDescription(description string) {
 	m.Description_ = description
 }

@@ -133,7 +133,7 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	// modifiers list defined by AlwaysApply calls
 	for _, modElement := range pc.modifiersTable {
 		if !modElement.active {
-			continue 
+			continue
 		}
 
 		isValid, _ := modElement.validator.IsValid(mt.Namespace().String())
