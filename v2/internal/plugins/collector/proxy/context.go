@@ -174,6 +174,9 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 }
 
 func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Saturator, error) {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
+
 	validator := metrictree.NewMetricFilter(metrictree.NewMetricDefinition())
 	err := validator.AddRule(namespaceSelector)
 	if err != nil {
@@ -202,11 +205,12 @@ func (pc *pluginContext) extractStaticValue(s string) string {
 	return s
 }
 
-func (pc *pluginContext) ClearMetrics() {
+func (pc *pluginContext) ClearCollectorSession() {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
 	pc.sessionMts = nil
+	pc.modifiersTable = nil
 }
 
 func (pc *pluginContext) Metrics(clear bool) []*types.Metric {

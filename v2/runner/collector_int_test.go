@@ -931,12 +931,15 @@ func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
 	// Shouldn't apply any tag
 	ctx.AddMetric("/coll/group3/metric4", 61) // mts.MetricSet[9]
 
+	// This one shouldn't apply in the next collect
+	_, _ = ctx.AlwaysApply("/coll/**", plugin.MetricTag("kg", "vg"))
+
 	return nil
 }
 
 func (s *SuiteT) TestCollectorWithAlwaysApply() {
 	// Arrange
-	const collectNumber = 1 //todo:adamik
+	const collectNumber = 2 // test two consecutive collect
 
 	jsonConfig := []byte(`{}`)
 	mtsSelector := []string{}
