@@ -895,44 +895,51 @@ func (s *SuiteT) TestUnloadingRunningStreaming() {
 /*****************************************************************************/
 
 type collectWithAlwaysApply struct {
+	t *testing.T
 }
 
 func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
-	sat, _ := ctx.AlwaysApply("/coll/group1/*", plugin.MetricTag("ka", "va"))
+	Convey("Validate AlwaysApply return values", c.t, func() {
+		sat, err1 := ctx.AlwaysApply("/coll/group1/*", plugin.MetricTag("ka", "va"))
+		So(err1, ShouldBeNil)
 
-	// Should apply tag ka: va
-	ctx.AddMetric("/coll/group1/metric1", 11, plugin.MetricTag("k1", "v1")) // mts.MetricSet[0]
-	ctx.AddMetric("/coll/group1/metric2", 12, plugin.MetricTag("k2", "v2")) // mts.MetricSet[1]
-	ctx.AddMetric("/coll/group2/metric3", 13, plugin.MetricTag("k3", "v3")) // mts.MetricSet[2]
+		// Should apply tag ka: va
+		ctx.AddMetric("/coll/group1/metric1", 11, plugin.MetricTag("k1", "v1")) // mts.MetricSet[0]
+		ctx.AddMetric("/coll/group1/metric2", 12, plugin.MetricTag("k2", "v2")) // mts.MetricSet[1]
+		ctx.AddMetric("/coll/group2/metric3", 13, plugin.MetricTag("k3", "v3")) // mts.MetricSet[2]
 
-	sat.Saturate()
+		sat.Saturate()
 
-	// Should not more apply tag ka: va
-	ctx.AddMetric("/coll/group1/metric1", 21, plugin.MetricTag("k1", "v1")) // mts.MetricSet[3]
-	ctx.AddMetric("/coll/group1/metric2", 22, plugin.MetricTag("k2", "v2")) // mts.MetricSet[4]
-	ctx.AddMetric("/coll/group2/metric3", 23, plugin.MetricTag("k3", "v3")) // mts.MetricSet[5]
+		// Should not more apply tag ka: va
+		ctx.AddMetric("/coll/group1/metric1", 21, plugin.MetricTag("k1", "v1")) // mts.MetricSet[3]
+		ctx.AddMetric("/coll/group1/metric2", 22, plugin.MetricTag("k2", "v2")) // mts.MetricSet[4]
+		ctx.AddMetric("/coll/group2/metric3", 23, plugin.MetricTag("k3", "v3")) // mts.MetricSet[5]
 
-	sat2, _ := ctx.AlwaysApply("/coll/group3/metric4", plugin.MetricTag("kb", "vb"))
-	sat3, _ := ctx.AlwaysApply("/coll/group3/*", plugin.MetricTag("kc", "vc"))
+		sat2, err2 := ctx.AlwaysApply("/coll/group3/metric4", plugin.MetricTag("kb", "vb"))
+		sat3, err3 := ctx.AlwaysApply("/coll/group3/*", plugin.MetricTag("kc", "vc"))
+		So(err2, ShouldBeNil)
+		So(err3, ShouldBeNil)
 
-	// Should apply tag kb: vb and kc: vc
-	ctx.AddMetric("/coll/group3/metric4", 31) // mts.MetricSet[6]
+		// Should apply tag kb: vb and kc: vc
+		ctx.AddMetric("/coll/group3/metric4", 31) // mts.MetricSet[6]
 
-	// Should apply kc: vc
-	ctx.AddMetric("/coll/group3/metric5", 41) // mts.MetricSet[7]
+		// Should apply kc: vc
+		ctx.AddMetric("/coll/group3/metric5", 41) // mts.MetricSet[7]
 
-	sat3.Saturate()
+		sat3.Saturate()
 
-	// Should apply tag kb: vb
-	ctx.AddMetric("/coll/group3/metric4", 51) // mts.MetricSet[8]
+		// Should apply tag kb: vb
+		ctx.AddMetric("/coll/group3/metric4", 51) // mts.MetricSet[8]
 
-	sat2.Saturate()
+		sat2.Saturate()
 
-	// Shouldn't apply any tag
-	ctx.AddMetric("/coll/group3/metric4", 61) // mts.MetricSet[9]
+		// Shouldn't apply any tag
+		ctx.AddMetric("/coll/group3/metric4", 61) // mts.MetricSet[9]
 
-	// This one shouldn't apply in the next collect
-	_, _ = ctx.AlwaysApply("/coll/**", plugin.MetricTag("kg", "vg"))
+		// This one shouldn't apply in the next collect
+		_, err4 := ctx.AlwaysApply("/coll/**", plugin.MetricTag("kg", "vg"))
+		So(err4, ShouldBeNil)
+	})
 
 	return nil
 }
@@ -944,7 +951,7 @@ func (s *SuiteT) TestCollectorWithAlwaysApply() {
 	jsonConfig := []byte(`{}`)
 	mtsSelector := []string{}
 
-	collector := &collectWithAlwaysApply{}
+	collector := &collectWithAlwaysApply{t: s.T()}
 	ln := s.startCollector(collector)
 	s.startClient(ln.Addr().String())
 
