@@ -891,3 +891,66 @@ func (s *SuiteT) TestUnloadingRunningStreaming() {
 		})
 	})
 }
+
+/*****************************************************************************/
+
+type collectWithAlwaysApply struct {
+}
+
+func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
+	sat, _ := ctx.AlwaysApply("/coll/group1/*", plugin.MetricTag("ka", "va"))
+
+	// Should apply tag ka: va
+	ctx.AddMetric("/coll/group1/metric1", 11, plugin.MetricTag("k1", "v1"))
+	ctx.AddMetric("/coll/group1/metric2", 12, plugin.MetricTag("k2", "v2"))
+	ctx.AddMetric("/coll/group2/metric3", 13, plugin.MetricTag("k3", "v3"))
+
+	sat.Saturate()
+
+	// Should not more apply tag ka: va
+	ctx.AddMetric("/coll/group1/metric1", 21, plugin.MetricTag("k1", "v1"))
+	ctx.AddMetric("/coll/group1/metric2", 22, plugin.MetricTag("k2", "v2"))
+	ctx.AddMetric("/coll/group2/metric3", 23, plugin.MetricTag("k3", "v3"))
+
+	_, _ = ctx.AlwaysApply("/coll/group3/metric4", plugin.MetricTag("kb", "vb"))
+	sat3, _ := ctx.AlwaysApply("/coll/group3/*", plugin.MetricTag("kc", "vc"))
+
+	// Should apply tag kb: vb and kc: vc
+	ctx.AddMetric("/coll/group3/metric4", 31)
+
+	// Should apply kc: vc
+	ctx.AddMetric("/coll/group3/metric5", 41)
+
+	sat3.Saturate()
+
+	// Should apply tag kb: vb
+	ctx.AddMetric("/coll/group3/metric4", 51)
+
+	return nil
+}
+
+func (s *SuiteT) TestCollectorWithAlwaysApply() {
+	// Arrange
+	const collectNumber = 1 //todo:adamik
+
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{}
+
+	collector := &collectWithAlwaysApply{}
+	ln := s.startCollector(collector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate collector can utilize method AlwaysApply", s.T(), func() {
+		_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+
+		for i := 0; i < collectNumber; i++ {
+			Convey(fmt.Sprintf("Collect no. %d", i+1), func() {
+				mts, err := s.sendCollect("task-1")
+
+				So(err, ShouldBeNil)
+				So(mts.MetricSet, ShouldNotBeNil)
+				So(len(mts.MetricSet), ShouldEqual, 9)
+			})
+		}
+	})
+}

@@ -174,7 +174,7 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 }
 
 func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Saturator, error) {
-	validator := metrictree.NewMetricFilter(nil)
+	validator := metrictree.NewMetricFilter(metrictree.NewMetricDefinition())
 	err := validator.AddRule(namespaceSelector)
 	if err != nil {
 		return nil, fmt.Errorf("can't apply modifiers: %v", err)
