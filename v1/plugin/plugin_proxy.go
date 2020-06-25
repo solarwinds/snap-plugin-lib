@@ -28,9 +28,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TODO(danielscottt): logging
-// TODO(danielscottt): plugin panics
-
 var (
 	// Timeout settings
 
@@ -83,7 +80,6 @@ func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, 
 }
 
 func (p *pluginProxy) Kill(ctx context.Context, arg *rpc.KillArg) (*rpc.ErrReply, error) {
-	// TODO(CDR) log kill reason
 	p.halt <- struct{}{}
 	return &rpc.ErrReply{}, nil
 }

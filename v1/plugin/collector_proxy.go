@@ -26,8 +26,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TODO(danielscottt): plugin panics
-
 const maxCollectChunkSize = 100
 
 type collectorProxy struct {
