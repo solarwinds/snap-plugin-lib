@@ -21,11 +21,11 @@ package plugin
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	log "github.com/sirupsen/logrus"
 )
 
 // TODO(danielscottt): logging
@@ -77,8 +77,7 @@ func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, 
 	p.lastPing = time.Now()
 	p.lastPingMu.Unlock()
 
-	//Change to log
-	fmt.Println("Heartbeat received at:", p.lastPing)
+	log.WithField("timestamp", p.lastPing).Debug("Heartbeat received ")
 
 	return &rpc.ErrReply{}, nil
 }
@@ -102,7 +101,7 @@ func (p *pluginProxy) HeartbeatWatch() {
 	p.lastPing = time.Now()
 	p.lastPingMu.Unlock()
 
-	fmt.Println("Heartbeat started")
+	log.Debug("Heartbeat started")
 
 	count := 0
 	for {
@@ -112,9 +111,9 @@ func (p *pluginProxy) HeartbeatWatch() {
 
 		if sincePing >= p.PingTimeoutDuration {
 			count++
-			fmt.Printf("Heartbeat timeout %v of %v.  (Duration between checks %v)", count, PingTimeoutLimit, p.PingTimeoutDuration)
+			log.WithField("check-duration", p.PingTimeoutDuration).Warning("Heartbeat timeout %v of %v", count, PingTimeoutLimit)
 			if count >= PingTimeoutLimit {
-				fmt.Println("Heartbeat timeout expired!")
+				log.Error("Heartbeat timeout expired!")
 				defer close(p.halt)
 				return
 			}
