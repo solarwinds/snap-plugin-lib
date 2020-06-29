@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -113,5 +114,5 @@ func (*myCollector) Load(ctx plugin.Context) error {
 }
 
 func main() {
-	runner.StartCollector(newMyCollector(), pluginName, pluginVersion)
+	runner.StartCollector(context.Background(), newMyCollector(), pluginName, pluginVersion)
 }

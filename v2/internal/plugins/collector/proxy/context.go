@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -12,12 +13,14 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
 
 type pluginContext struct {
 	*commonProxy.Context
+	ctx context.Context
 
 	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
 	sessionMtsMutex sync.RWMutex
@@ -37,6 +40,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 
 	pc := &pluginContext{
 		Context:        baseContext,
+		ctx:            ctxManager.ctx,
 		metricsFilters: metrictree.NewMetricFilter(ctxManager.metricsDefinition),
 		ctxManager:     ctxManager,
 		sessionMts:     nil,
@@ -67,7 +71,7 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 
 	if !matchFilters {
 		if logrus.IsLevelEnabled(logrus.TraceLevel) {
-			log.WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+			log.FromCtx(pc.ctx).WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
 		}
 		return nil // don't throw error when metric is just filtered
 	}

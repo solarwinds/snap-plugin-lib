@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StartPublisher(publisher plugin.Publisher, name string, version string) {
+func StartPublisher(ctx context.Context, publisher plugin.Publisher, name string, version string) {
 	var err error
 
 	var opt *plugin.Options
@@ -35,7 +36,7 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(name, version, types.PluginTypePublisher, opt)
+	statsController, err := stats.NewController(ctx, name, version, types.PluginTypePublisher, opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -63,16 +64,16 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	if opt.EnableProfiling {
-		startPprofServer(r.pprofListener)
+		startPprofServer(ctx, r.pprofListener)
 		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 	}
 
 	if opt.EnableStatsServer {
-		startStatsServer(r.statsListener, statsController)
+		startStatsServer(ctx, r.statsListener, statsController)
 		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 	}
 
-	srv, err := service.NewGRPCServer(opt)
+	srv, err := service.NewGRPCServer(ctx, opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't initialize GRPC Server (%v)\n", err)
 		os.Exit(errorExitStatus)
@@ -84,5 +85,5 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 	}
 
 	// main blocking operation
-	service.StartPublisherGRPC(srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+	service.StartPublisherGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 }

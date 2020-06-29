@@ -1,12 +1,14 @@
 package stats
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
@@ -18,7 +20,7 @@ const (
 	reqChannelSize   = 10
 )
 
-var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "statistics"})
+var moduleFields = logrus.Fields{"layer": "lib", "module": "statistics"}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,9 +35,9 @@ type Controller interface {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func NewController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
+func NewController(ctx context.Context, pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
 	if opt.EnableStats {
-		return NewStatsController(pluginName, pluginVersion, pluginType, opt)
+		return NewStatsController(ctx, pluginName, pluginVersion, pluginType, opt)
 	}
 
 	return NewEmptyController()
@@ -51,15 +53,18 @@ type StatisticsController struct {
 	incomingRequestCh chan chan *Statistics
 	closeCh           chan struct{}
 	stats             *Statistics
+
+	ctx context.Context
 }
 
-func NewStatsController(pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
+func NewStatsController(ctx context.Context, pluginName string, pluginVersion string, pluginType types.PluginType, opt *plugin.Options) (Controller, error) {
 	optJson, err := json.Marshal(opt)
 	if err != nil {
 		return nil, err
 	}
 
 	sc := &StatisticsController{
+		ctx:        ctx,
 		pluginType: pluginType,
 
 		startedSync:       sync.Once{},
@@ -158,7 +163,7 @@ func (sc *StatisticsController) UpdateStreamingStat(taskID string, metricsCount 
 ///////////////////////////////////////////////////////////////////////////////
 
 func (sc *StatisticsController) applyLoadStat(taskID string, config string, filters []string) {
-	log.WithFields(logrus.Fields{
+	log.FromCtx(sc.ctx).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Load",
 	}).Trace("Applying statistic")
@@ -182,7 +187,7 @@ func (sc *StatisticsController) applyLoadStat(taskID string, config string, filt
 }
 
 func (sc *StatisticsController) applyUnloadStat(taskID string) {
-	log.WithFields(logrus.Fields{
+	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Unload",
 	}).Trace("Applying statistic")
@@ -195,7 +200,7 @@ func (sc *StatisticsController) applyUnloadStat(taskID string) {
 }
 
 func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int, _ bool, startTime, completeTime time.Time) {
-	log.WithFields(logrus.Fields{
+	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Collect",
 	}).Trace("Applying statistic")
@@ -247,7 +252,7 @@ func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int
 }
 
 func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
-	log.WithFields(logrus.Fields{
+	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Streaming",
 	}).Trace("Applying statistic")

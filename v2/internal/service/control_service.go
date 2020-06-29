@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 var (
-	logControlService = log.WithField("service", "Control")
+	controlSrvFields = logrus.Fields{"service": "Control"}
 
 	RequestedKillError = errors.New("kill requested")
 )
@@ -40,7 +41,7 @@ func newControlService(ctx context.Context, errCh chan error, pingTimeout time.D
 }
 
 func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*pluginrpc.PingResponse, error) {
-	logControlService.Debug("GRPC Ping() received")
+	log.FromCtx(cs.ctx).WithFields(controlSrvFields).Debug("GRPC Ping() received")
 
 	select {
 	case <-ctx.Done():
@@ -51,7 +52,7 @@ func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*
 }
 
 func (cs *controlService) Kill(ctx context.Context, _ *pluginrpc.KillRequest) (*pluginrpc.KillResponse, error) {
-	logControlService.Debug("GRPC Kill() received")
+	log.FromCtx(cs.ctx).WithFields(controlSrvFields).Debug("GRPC Kill() received")
 
 	select {
 	case <-ctx.Done():
@@ -85,7 +86,7 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 			pingMissed = 0
 		case <-time.After(timeout):
 			pingMissed++
-			log.WithFields(logrus.Fields{
+			log.FromCtx(cs.ctx).WithFields(controlSrvFields).WithFields(logrus.Fields{
 				"missed": pingMissed,
 				"max":    maxPingMissed,
 			}).Warningf("Ping timeout occurred")

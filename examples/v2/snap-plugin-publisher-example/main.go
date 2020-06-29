@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"math/rand"
 	"time"
 
@@ -37,5 +38,5 @@ func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 }
 
 func main() {
-	runner.StartPublisher(&myPublisher{}, pluginName, pluginVersion)
+	runner.StartPublisher(context.Background(), &myPublisher{}, pluginName, pluginVersion)
 }

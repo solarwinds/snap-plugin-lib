@@ -6,6 +6,7 @@ Package proxy:
 package proxy
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -23,7 +25,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "collector-proxy"})
+var moduleFields = logrus.Fields{"layer": "lib", "module": "collector-proxy"}
 
 const (
 	RequestAllMetricsFilter = "/*"
@@ -49,6 +51,7 @@ type metricMetadata struct {
 
 type ContextManager struct {
 	*commonProxy.ContextManager
+	ctx context.Context
 
 	collector  types.Collector // reference to custom plugin code
 	contextMap sync.Map        // (synced map[int]*pluginContext) map of contexts associated with taskIDs
@@ -63,9 +66,10 @@ type ContextManager struct {
 	ExampleConfig yaml.Node // example config
 }
 
-func NewContextManager(collector types.Collector, statsController stats.Controller) *ContextManager {
+func NewContextManager(ctx context.Context, collector types.Collector, statsController stats.Controller) *ContextManager {
 	cm := &ContextManager{
 		ContextManager: commonProxy.NewContextManager(),
+		ctx:            ctx,
 
 		collector:  collector,
 		contextMap: sync.Map{},
@@ -128,6 +132,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 }
 
 func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+	logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
 	taskCtx := cm.TaskContext(id)
 
 	var mts []*types.Metric
@@ -140,8 +145,9 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
-				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
-				log.Trace(string(debug.Stack()))
+				logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
+				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				logF.Trace(string(debug.Stack()))
 				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
 			}
 		}()
@@ -160,13 +166,13 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 				err = fmt.Errorf("user-defined Collect method ended with error: %v", err)
 			}
 
-			log.WithFields(logrus.Fields{
+			logF.WithFields(logrus.Fields{
 				"elapsed":      endTime.Sub(startTime).String(),
 				"metrics-num":  len(mts),
 				"warnings-num": len(warnings),
 			}).Debug("Collect completed")
 		} else {
-			log.WithFields(logrus.Fields{
+			logF.WithFields(logrus.Fields{
 				"elapsed": endTime.Sub(startTime).String(),
 			}).Info("Collect completed after task had been canceled")
 		}
@@ -184,6 +190,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+	logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
 	var err error
 
 	startTime := time.Now()
@@ -197,8 +204,8 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
 				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
-				log.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
-				log.Trace(string(debug.Stack()))
+				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				logF.Trace(string(debug.Stack()))
 			}
 		}()
 
@@ -243,7 +250,6 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 	if _, ok := cm.contextMap.Load(id); ok {
 		return errors.New("context with given id was already defined")
 	}
-
 	newCtx, err := NewPluginContext(cm, rawConfig)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
@@ -283,7 +289,9 @@ func (cm *ContextManager) UnloadTask(id string) error {
 				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
 			}
 
-			log.WithField("task-id", id).Trace("other action is active, requesting stop")
+			log.FromCtx(cm.ctx).WithFields(moduleFields).
+				WithField("task-id", id).Trace("other action is active, requesting stop")
+
 			cm.ReleaseTask(id)
 			time.Sleep(unloadRetryInterval)
 
@@ -299,9 +307,9 @@ func (cm *ContextManager) UnloadTask(id string) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	context := contextI.(*pluginContext)
+	pluginCtx := contextI.(*pluginContext)
 	if unloadable, ok := cm.collector.Unwrap().(plugin.UnloadableCollector); ok {
-		err := unloadable.Unload(context)
+		err := unloadable.Unload(pluginCtx)
 		if err != nil {
 			return fmt.Errorf("error occured when trying to unload a task (%s): %v", id, err)
 		}
@@ -320,10 +328,10 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("context with given id is not defined")
 	}
-	context := contextI.(*pluginContext)
+	pluginCtx := contextI.(*pluginContext)
 
 	if collectorWithCustomInfo, ok := cm.collector.Unwrap().(plugin.CustomizableInfoCollector); ok {
-		infoObj := collectorWithCustomInfo.CustomInfo(context)
+		infoObj := collectorWithCustomInfo.CustomInfo(pluginCtx)
 
 		infoJSON, err := json.Marshal(infoObj)
 		if err != nil {
@@ -342,7 +350,8 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
-		log.WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
+		log.FromCtx(cm.ctx).WithFields(moduleFields).
+			WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
 	}
 
 	cm.metricsMetadata[ns] = metricMetadata{
@@ -377,7 +386,8 @@ func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.Unwrap().(plugin.DefinableCollector); ok {
 		err := definable.PluginDefinition(cm)
 		if err != nil {
-			log.WithError(err).Errorf("Error occurred during plugin definition")
+			log.FromCtx(cm.ctx).WithFields(moduleFields).
+				WithError(err).Errorf("Error occurred during plugin definition")
 		}
 	}
 }

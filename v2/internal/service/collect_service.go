@@ -4,29 +4,33 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/sirupsen/logrus"
 )
 
 const (
 	maxCollectChunkSize = 100
 )
 
-var logCollectService = log.WithField("service", "Collect")
+var collectSrvFields = logrus.WithField("service", "Collect")
 
 type collectService struct {
 	proxy CollectorProxy
+	ctx   context.Context
 }
 
-func newCollectService(proxy CollectorProxy) pluginrpc.CollectorServer {
+func newCollectService(ctx context.Context, proxy CollectorProxy) pluginrpc.CollectorServer {
 	return &collectService{
 		proxy: proxy,
+		ctx:   ctx,
 	}
 }
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("task-id", taskID)
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Collect() received")
 	defer logF.Debug("GRPC Collect() completed")
@@ -54,7 +58,7 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Load() received")
 	defer logF.Debug("GRPC Load() completed")
@@ -67,7 +71,7 @@ func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadColle
 
 func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadCollectorRequest) (*pluginrpc.UnloadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Unload() received")
 	defer logF.Debug("GRPC Unload() completed")
@@ -77,7 +81,7 @@ func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadC
 
 func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	taskID := request.GetTaskId()
-	logF := logCollectService.WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Info() received")
 	defer logF.Debug("GRPC Info() completed")
@@ -91,6 +95,7 @@ func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoReque
 }
 
 func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields)
 	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
 
 	for _, warn := range warnings {
@@ -102,22 +107,24 @@ func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer,
 			Warnings: protoWarnings,
 		})
 		if err != nil {
-			logControlService.WithError(err).Error("can't send warnings chunk over GRPC")
+			logF.WithError(err).Error("can't send warnings chunk over GRPC")
 			return err
 		}
 
-		logControlService.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
+		logF.WithField("len", len(protoWarnings)).Debug("warnings chunk has been sent to snap")
 	}
 
 	return nil
 }
 
 func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields)
+
 	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
 		if err != nil {
-			logCollectService.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
+			logF.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
 		} else {
 			protoMts = append(protoMts, protoMt)
 		}
@@ -127,11 +134,11 @@ func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, 
 				MetricSet: protoMts,
 			})
 			if err != nil {
-				logCollectService.WithError(err).Error("can't send metrics chunk over GRPC")
+				logF.WithError(err).Error("can't send metrics chunk over GRPC")
 				return err
 			}
 
-			logCollectService.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
+			logF.WithField("len", len(protoMts)).Debug("metrics chunk has been sent to snap")
 			protoMts = make([]*pluginrpc.Metric, 0, len(pluginMts))
 		}
 	}
