@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fullstorydev/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
@@ -28,27 +27,29 @@ const (
 )
 
 func StartStreamingCollector(collector plugin.StreamingCollector, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
-		os.Exit(errorExitStatus)
-	}
-
-	startCollector(types.NewStreamingCollector(name, version, collector), opt, nil)
+	startCollector(types.NewStreamingCollector(name, version, collector))
 }
 
 func StartCollector(collector plugin.Collector, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
-		os.Exit(errorExitStatus)
-	}
-
-	startCollector(types.NewCollector(name, version, collector), opt, nil)
+	startCollector(types.NewCollector(name, version, collector))
 }
 
-func startCollector(collector types.Collector, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
+func startCollector(collector types.Collector) {
 	var err error
+
+	var opt *plugin.Options
+	inprocPlugin, inProc := collector.Unwrap().(inProcessPlugin)
+	if inProc {
+		opt = inprocPlugin.Options()
+	}
+
+	if opt == nil {
+		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
+	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
@@ -66,20 +67,30 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 
 	logrus.SetLevel(opt.LogLevel)
 
+	if opt.PrintVersion {
+		printVersion(collector.Name(), collector.Version())
+		os.Exit(normalExitStatus)
+	}
+
 	if opt.PrintExampleTask {
 		printExampleTask(ctxMan, collector.Name())
 		os.Exit(normalExitStatus)
 	}
 
-	switch opt.DebugMode {
-	case false:
+	if opt.DebugMode {
+		startCollectorInSingleMode(ctxMan, opt)
+	} else {
 		r, err := acquireResources(opt)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
 			os.Exit(errorExitStatus)
 		}
 
-		printMetaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		jsonMeta := metaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		if inProc {
+			inprocPlugin.MetaChannel() <- jsonMeta
+			close(inprocPlugin.MetaChannel())
+		}
 
 		if opt.EnableProfiling {
 			startPprofServer(r.pprofListener)
@@ -98,15 +109,12 @@ func startCollector(collector types.Collector, opt *plugin.Options, grpcChan cha
 		}
 
 		// We need to bind the gRPC client on the other end to the same channel so need to return it from here
-		if grpcChan != nil {
-			grpcChan <- srv.(*service.Channel).Channel
+		if inProc {
+			inprocPlugin.GRPCChannel() <- srv.(*service.Channel).Channel
 		}
 
 		// main blocking operation
 		service.StartCollectorGRPC(srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
-
-	case true:
-		startCollectorInSingleMode(ctxMan, opt)
 	}
 }
 

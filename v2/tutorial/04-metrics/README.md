@@ -78,11 +78,11 @@ func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error 
 `DefineMetric()` has four arguments:
 - metric name,
 - unit (used i.e. by AppOptics front end),
-- indication if metric is default (see: [Example task](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#printing-example-task-file))
+- indication if metric is default (see: [Example task](/v2/tutorial/05-tools#printing-example-task-file))
 - metric description (used by AppOptics front-end)
 
 There are two major advantages of providing this list:
-1. user can obtain accurate default task (see: [Example task](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#printing-example-task-file))
+1. user can obtain accurate default task (see: [Example task](/v2/tutorial/05-tools#printing-example-task-file))
 2. additional validation when metrics are calculated - user can't add metric which was not defined
 
 Try to add following code at the end of `Collect()` metric:

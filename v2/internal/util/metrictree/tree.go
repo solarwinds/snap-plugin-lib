@@ -142,7 +142,12 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bo
 		panic("compatibilityMode can be only used for definition tree")
 	}
 
-	nsElems := strings.Split(ns, NsSeparator)[1:]
+	nsElems, _, err := SplitNamespace(ns)
+	if err != nil {
+		return false, nil
+	}
+
+	nsElems = nsElems[1:]
 	groupIndicator := make([]string, len(nsElems))
 
 	// special case - no rules defined - everything is valid and there are no groups (2nd param contains empty strings)
@@ -343,7 +348,7 @@ func (n *Node) path() string {
 		nsElems = append(nsElems, node.currentElement.String())
 	}
 
-	return NsSeparator + strings.Join(nsElems, NsSeparator)
+	return DefaultNsSeparator + strings.Join(nsElems, DefaultNsSeparator)
 }
 
 func (n *Node) groupIndicator() []string {

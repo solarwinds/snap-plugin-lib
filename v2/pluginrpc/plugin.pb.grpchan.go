@@ -4,7 +4,7 @@
 package pluginrpc
 
 import (
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )

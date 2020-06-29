@@ -7,14 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 )
-
-const nsSeparator = metrictree.NsSeparator
 
 type pluginContext struct {
 	*commonProxy.Context
@@ -66,11 +66,18 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	}
 
 	if !matchFilters {
-		return fmt.Errorf("couldn't match metrics with plugin filters: %v", ns)
+		if logrus.IsLevelEnabled(logrus.TraceLevel) {
+			log.WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+		}
+		return nil // don't throw error when metric is just filtered
 	}
 
 	var mtNamespace []types.NamespaceElement
-	nsDefFormat := strings.Split(ns, metrictree.NsSeparator)[1:]
+	nsDefFormat, nsSeparator, err := metrictree.SplitNamespace(ns)
+	if err != nil {
+		return err
+	}
+	nsDefFormat = nsDefFormat[1:]
 
 	for i, nsElem := range nsDefFormat {
 		groupName := groupPositions[i]
@@ -172,4 +179,8 @@ func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 		pc.sessionMts = nil
 	}
 	return mts
+}
+
+func (pc *pluginContext) RequestedMetrics() []string {
+	return pc.metricsFilters.ListRules()
 }

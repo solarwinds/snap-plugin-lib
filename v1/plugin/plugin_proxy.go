@@ -39,7 +39,7 @@ var (
 	PingTimeoutLimit = 3
 	// PingTimeoutDuration is the duration during which a ping healthcheck
 	// should be received
-	PingTimeoutDuration = 3 * time.Second
+	PingTimeoutDuration = 6 * time.Second
 )
 
 type pluginProxyConstructor func(Plugin) *pluginProxy

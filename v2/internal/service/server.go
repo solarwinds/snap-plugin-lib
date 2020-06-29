@@ -7,10 +7,11 @@ Package rpc:
 package service
 
 import (
+	"context"
 	"net"
 	"time"
 
-	"github.com/fullstorydev/grpchan"
+	"github.com/librato/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
@@ -32,7 +33,7 @@ type Server interface {
 
 // An abstraction providing a unified interface for
 // * the native go-grpc implementation
-// * https://github.com/fullstorydev/grpchan - this one provides a way of using gRPC with a custom transport
+// * https://github.com/librato/grpchan - this one provides a way of using gRPC with a custom transport
 //   (that means sth other than the native h2 - HTTP1.1 or inprocess/channels are available out of the box)
 func NewGRPCServer(opt *plugin.Options) (Server, error) {
 	if opt.AsThread {
@@ -62,20 +63,23 @@ func StartPublisherGRPC(srv Server, proxy PublisherProxy, grpcLn net.Listener, p
 }
 
 func startGRPC(srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	closeChan := make(chan error, 1)
-	pluginrpc.RegisterHandlerController(srv, newControlService(closeChan, pingTimeout, pingMaxMissedCount))
+	errChan := make(chan error)
+
+	ctx, cancelFn := context.WithCancel(context.Background())
+	pluginrpc.RegisterHandlerController(srv, newControlService(ctx, errChan, pingTimeout, pingMaxMissedCount))
 
 	go func() {
 		err := srv.Serve(grpcLn) // may be blocking (depending on implementation)
 		if err != nil {
-			closeChan <- err
+			errChan <- err
 		}
 	}()
 
-	exitErr := <-closeChan // may be blocking (depending on implementation)
+	err := <-errChan // may be blocking (depending on implementation)
+	cancelFn()       // signal ping monitor (via ctx)
 
-	if exitErr != nil && exitErr != RequestedKillError {
-		log.WithError(exitErr).Errorf("Major error occurred - plugin will be shut down")
+	if err != nil && err != RequestedKillError {
+		log.WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
 	shutdownPlugin(srv)

@@ -69,7 +69,7 @@ From the perspective of a plugin developer the most important options are:
 | -debug-collect-interval | Interval between consecutive collect requests (default 5s)                      |
 | -log-level              |  Minimal level of logged messages (you should use either `debug` or `trace`)    | 
 
-> Other useful flags, like: `-plugin-config`, `-plugin-filter` and `*stats*` related will be discussed later. (see: [Stats](https://github.com/librato/snap-plugin-lib-go/tree/ao-12231-tutorial/tutorial/05-tools#stats-server))
+> Other useful flags, like: `-plugin-config`, `-plugin-filter` and `*stats*` related will be discussed later. (see: [Stats](/v2/tutorial/05-tools#stats-server))
   
 #### Debug-mode
 

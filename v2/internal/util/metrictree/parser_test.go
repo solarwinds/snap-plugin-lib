@@ -275,9 +275,7 @@ func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 		"[=]",
 		"[gr+]",
 		"[group={]",
-		"[group={reg[}]",
 		"[gr+={id.*}]",
-		"[group=id+]",
 	}
 
 	Convey("Validate parseNamespaceElement - negative scenarios", t, func() {

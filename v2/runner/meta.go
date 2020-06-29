@@ -44,7 +44,7 @@ type meta struct {
 	}
 }
 
-func printMetaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) {
+func metaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{}
@@ -80,4 +80,5 @@ func printMetaInformation(name string, version string, typ types.PluginType, opt
 	}
 
 	fmt.Printf("%s\n", string(jsonMeta))
+	return jsonMeta
 }

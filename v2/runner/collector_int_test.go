@@ -177,7 +177,6 @@ func (s *SuiteT) TestSimpleCollector() {
 
 	mtsSelector := []string{
 		"/plugin/metric1",
-		"plugin/metric2",
 		"/plugin/metric3",
 		"/plugin/group1/metric4",
 	}
@@ -242,6 +241,24 @@ func (s *SuiteT) TestSimpleCollector() {
 				s.T().Fatal("plugin should have been ended")
 			}
 		})
+	})
+}
+
+func (s *SuiteT) TestMisconfiguredCollector() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"plugin/metric2", // ! wrong namespace
+	}
+
+	noDefCollector := &simpleCollector{}
+	ln := s.startCollector(noDefCollector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate that load throws error when requested metrics/filters are invalid", s.T(), func() {
+		// Act
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
+		So(err, ShouldBeError)
 	})
 }
 
@@ -589,7 +606,7 @@ func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 
 	Convey("Validate that metrics are filtered according to metric definitions and filtering", kc.t, func() {
 		So(ctx.AddMetric("/kubernetes/pod/node-125/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // added
-		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeError) // discarded - filtered (node-126 doesn't match filtered rule)
+		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/phase/Running", 1), ShouldBeNil)   // discarded - filtered (node-126 doesn't match filtered rule)
 		So(ctx.AddMetric("/kubernetes/pod/node-126/appoptics1/pod-124/status/plase/Running", 1), ShouldBeError) // discarded - no metric "plase" defined
 
 		So(ctx.AddMetric("/kubernetes/container/appoptics1/node-251/pod-34/mycont155/status/ready", 15), ShouldBeNil)   // added
@@ -605,6 +622,25 @@ func (kc *kubernetesCollector) Collect(ctx plugin.CollectContext) error {
 		So(ctx.AddMetric("/kubernetes/deployment/[namespace=papertrail15]/depl-52/status/updatedreplicas", 30), ShouldBeNil)  // added
 		So(ctx.AddMetric("/kubernetes/deployment/[name=appoptics3]/depl-2322/status/targetedreplicas", 1), ShouldBeError)     // discarded (name != namespace)
 	})
+
+	Convey("Validate collector context can provide requested metrics", kc.t, func() {
+		// Arrange
+		expectedReqMts := []string{
+			"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+			"/kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*",
+			"/kubernetes/deployment/papertrail15/*/*/*",
+			"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+			"/kubernetes/node/*/status/**",
+			"/kubernetes/pod/node-125/*/*/status/*/*",
+		}
+
+		// Act
+		reqMts := ctx.RequestedMetrics()
+
+		// Assert
+		So(reqMts, ShouldResemble, expectedReqMts)
+	})
+
 	return nil
 }
 
@@ -638,6 +674,29 @@ func (s *SuiteT) TestKubernetesCollector() {
 		So(err, ShouldBeNil)
 
 		// Assert is handled within kubernetesCollector.Collect() method
+	})
+}
+
+func (s *SuiteT) TestMisconfiguredCollectorWithDefinedMetrics() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"/kubernetes/pod/node-125/*/*/status/*/*",
+		"/kubernetes/container/*/*/*/{mycont[0-9]{3,}}/status/*",
+		"/kubernetes/node/*/status/**",
+		"kubernetes/deployment/[namespace={appoptics[0-9]+}]/*/status/*", // ! wrong
+		"/kubernetes/deployment/{loggly[0-9]+}/*/{.*}/*",
+		"/kubernetes/deployment/papertrail15/*/*/*",
+	}
+
+	noDefCollector := &kubernetesCollector{}
+	ln := s.startCollector(noDefCollector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate that load throws error when requested metrics/filters are invalid", s.T(), func() {
+		// Act
+		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
+		So(err, ShouldBeError)
 	})
 }
 
@@ -694,7 +753,6 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 	mtsSelector := []string{
 		"/plugin/group1/subgroup1/metric1",
 		"/plugin/group2/{id.*}/metric1",
-		"/plugin/group2/[subgroup2={id.*}]/metric2",
 		"/plugin/group3/subgroup3/{.*}",
 		"/plugin/group3/subgroup4/**",
 	}
@@ -703,7 +761,7 @@ func (s *SuiteT) TestWithoutDefinitionCollector() {
 	ln := s.startCollector(noDefCollector)
 	s.startClient(ln.Addr().String())
 
-	Convey("Validate that collector can gather metric when only filter is provided", s.T(), func() {
+	Convey("Validate that collector can gather metric when no definition is provided", s.T(), func() {
 		// Act
 		_, err := s.sendLoad("task-1", jsonConfig, mtsSelector)
 		So(err, ShouldBeNil)

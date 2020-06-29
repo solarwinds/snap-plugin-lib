@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
+	"unicode"
 )
 
 const (
-	NsSeparator                  = "/"
+	DefaultNsSeparator           = "/"
+	allowedNsSeparators          = `/` + `\` + `.` + `_` + `@` + `-` + `#` + `&` + `^` + `?` + `'` + `%` + `|`
 	regexBeginIndicator          = "{"
 	regexEndIndicator            = "}"
 	staticAnyMatcher             = "*"
@@ -21,18 +24,34 @@ const minNamespaceElements = 2
 
 const initCacheSize = 100
 
+var filteredNsBufferRWLock = sync.RWMutex{}
 var filteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
+var noFilteredNsBufferRWLock = sync.RWMutex{}
 var noFilteredNsBuffer = make(map[string]namespaceElement, initCacheSize)
+
+func SplitNamespace(s string) ([]string, string, error) {
+	if len(s) == 0 {
+		return nil, "", fmt.Errorf("namespace too short")
+	}
+
+	sep := s[:1]
+	if !strings.ContainsAny(sep, allowedNsSeparators) {
+		return nil, "", fmt.Errorf("invalid namespace separator %s. Allowed ones are: %s", sep, allowedNsSeparators)
+	}
+
+	return strings.Split(s, sep), sep, nil
+}
 
 // Parsing whole selector (ie. "/plugin/[group={reg}]/group2/metric1) into smaller elements
 func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 	ns := &Namespace{}
-	splitNs := strings.Split(s, NsSeparator)
+
+	splitNs, _, err := SplitNamespace(s)
+	if err != nil {
+		return nil, err
+	}
 	if len(splitNs)-1 < minNamespaceElements {
 		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
-	}
-	if splitNs[0] != "" {
-		return nil, fmt.Errorf("namespace should start with '%s'", NsSeparator)
 	}
 
 	for i, nsElem := range splitNs[1:] {
@@ -41,9 +60,13 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 		var err error
 
 		if isFilter {
+			filteredNsBufferRWLock.RLock()
 			parsedEl, ok = filteredNsBuffer[nsElem]
+			filteredNsBufferRWLock.RUnlock()
 		} else {
+			noFilteredNsBufferRWLock.RLock()
 			parsedEl, ok = noFilteredNsBuffer[nsElem]
+			noFilteredNsBufferRWLock.RUnlock()
 		}
 
 		if !ok {
@@ -58,9 +81,13 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 		}
 
 		if isFilter {
+			filteredNsBufferRWLock.Lock()
 			filteredNsBuffer[nsElem] = parsedEl
+			filteredNsBufferRWLock.Unlock()
 		} else {
+			noFilteredNsBufferRWLock.Lock()
 			noFilteredNsBuffer[nsElem] = parsedEl
+			noFilteredNsBufferRWLock.Unlock()
 		}
 
 		ns.elements = append(ns.elements, parsedEl)
@@ -92,7 +119,7 @@ func parseNamespaceElement(s string, isFilter bool) (namespaceElement, error) {
 				return newDynamicRegexpElement(groupName, r), nil
 			}
 
-			if isValidIdentifier(groupValue) {
+			if isValidGroupIdentifier(groupValue) {
 				return newDynamicSpecificElement(groupName, groupValue), nil
 			}
 
@@ -162,6 +189,24 @@ func isValidIdentifier(s string) bool {
 		case el == '-' || el == '_':
 		case el == '.':
 		default:
+			return false
+		}
+	}
+
+	return true
+}
+
+func isValidGroupIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	// allow only ASCII characters
+	for i, el := range s {
+		if (i == 0 && el == '{') || (i == len(s)-1 && el == '}') {
+			return false
+		}
+		if el > unicode.MaxASCII {
 			return false
 		}
 	}

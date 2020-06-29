@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fullstorydev/grpchan"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
@@ -14,17 +13,21 @@ import (
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
-	opt, err := ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
-		os.Exit(errorExitStatus)
+	var err error
+
+	var opt *plugin.Options
+	inprocPlugin, inProc := publisher.(inProcessPlugin)
+	if inProc {
+		opt = inprocPlugin.Options()
 	}
 
-	startPublisher(publisher, name, version, opt, nil)
-}
-
-func startPublisher(publisher plugin.Publisher, name string, version string, opt *plugin.Options, grpcChan chan<- grpchan.Channel) {
-	var err error
+	if opt == nil {
+		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+			os.Exit(errorExitStatus)
+		}
+	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
@@ -42,13 +45,22 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 
 	logrus.SetLevel(opt.LogLevel)
 
+	if opt.PrintVersion {
+		printVersion(name, version)
+		os.Exit(normalExitStatus)
+	}
+
 	r, err := acquireResources(opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
-	printMetaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	if inProc {
+		inprocPlugin.MetaChannel() <- jsonMeta
+		close(inprocPlugin.MetaChannel())
+	}
 
 	if opt.EnableProfiling {
 		startPprofServer(r.pprofListener)
@@ -67,8 +79,8 @@ func startPublisher(publisher plugin.Publisher, name string, version string, opt
 	}
 
 	// We need to bind the gRPC client on the other end to the same channel so need to return it from here
-	if grpcChan != nil {
-		grpcChan <- srv.(*service.Channel).Channel
+	if inProc {
+		inprocPlugin.GRPCChannel() <- srv.(*service.Channel).Channel
 	}
 
 	// main blocking operation
