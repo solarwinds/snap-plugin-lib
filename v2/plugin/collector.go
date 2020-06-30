@@ -39,7 +39,7 @@ type CollectContext interface {
 
 	// Always apply specific modifier(s) for a metrics matching namespace selector
 	// Returns object which may be used to dismiss modifiers (make them no-active)
-	AlwaysApply(namespaceSelector string, modifier ...MetricModifier) (ModifierCloser, error)
+	AlwaysApply(namespaceSelector string, modifier ...MetricModifier) (Dismisser, error)
 
 	// Dismisses all modifiers created by calling AlwaysApply
 	DismissAllModifiers()

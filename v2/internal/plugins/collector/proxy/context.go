@@ -173,7 +173,7 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.ModifierCloser, error) {
+func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Dismisser, error) {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
