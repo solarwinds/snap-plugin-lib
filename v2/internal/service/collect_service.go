@@ -14,7 +14,7 @@ const (
 	maxCollectChunkSize = 100
 )
 
-var collectSrvFields = logrus.WithField("service", "Collect")
+var collectSrvFields = logrus.Fields{"service": "Collect"}
 
 type collectService struct {
 	proxy CollectorProxy
@@ -30,7 +30,7 @@ func newCollectService(ctx context.Context, proxy CollectorProxy) pluginrpc.Coll
 
 func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream pluginrpc.Collector_CollectServer) error {
 	taskID := request.GetTaskId()
-	logF := log.FromCtx(cs.ctx).WithFields(moduleFields).WithField("task-id", taskID)
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields).WithFields(collectSrvFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Collect() received")
 	defer logF.Debug("GRPC Collect() completed")
@@ -58,7 +58,7 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithFields(collectSrvFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Load() received")
 	defer logF.Debug("GRPC Load() completed")
@@ -71,7 +71,7 @@ func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadColle
 
 func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadCollectorRequest) (*pluginrpc.UnloadCollectorResponse, error) {
 	taskID := request.GetTaskId()
-	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithFields(collectSrvFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Unload() received")
 	defer logF.Debug("GRPC Unload() completed")
@@ -81,7 +81,7 @@ func (cs *collectService) Unload(ctx context.Context, request *pluginrpc.UnloadC
 
 func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoRequest) (*pluginrpc.InfoResponse, error) {
 	taskID := request.GetTaskId()
-	logF := log.FromCtx(ctx).WithFields(moduleFields).WithField("task-id", taskID)
+	logF := log.FromCtx(ctx).WithFields(moduleFields).WithFields(collectSrvFields).WithField("task-id", taskID)
 
 	logF.Debug("GRPC Info() received")
 	defer logF.Debug("GRPC Info() completed")
@@ -95,7 +95,7 @@ func (cs *collectService) Info(ctx context.Context, request *pluginrpc.InfoReque
 }
 
 func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer, warnings []types.Warning) error {
-	logF := log.FromCtx(cs.ctx).WithFields(moduleFields)
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields).WithFields(collectSrvFields)
 	protoWarnings := make([]*pluginrpc.Warning, 0, len(warnings))
 
 	for _, warn := range warnings {
@@ -118,7 +118,7 @@ func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer,
 }
 
 func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
-	logF := log.FromCtx(cs.ctx).WithFields(moduleFields)
+	logF := log.FromCtx(cs.ctx).WithFields(moduleFields).WithFields(collectSrvFields)
 
 	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
 	for i, pluginMt := range pluginMts {

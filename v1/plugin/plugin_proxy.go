@@ -107,7 +107,7 @@ func (p *pluginProxy) HeartbeatWatch() {
 
 		if sincePing >= p.PingTimeoutDuration {
 			count++
-			log.WithField("check-duration", p.PingTimeoutDuration).Warning("Heartbeat timeout %v of %v", count, PingTimeoutLimit)
+			log.WithField("check-duration", p.PingTimeoutDuration).Warningf("Heartbeat timeout %v of %v", count, PingTimeoutLimit)
 			if count >= PingTimeoutLimit {
 				log.Error("Heartbeat timeout expired!")
 				defer close(p.halt)
