@@ -1,6 +1,6 @@
 package plugin
 
-// Interface responsible for saturate metric modifiers
-type Saturator interface {
-	Saturate()
+// Interface responsible for dismissal of metric modifiers
+type ModifierCloser interface {
+	Dismiss()
 }

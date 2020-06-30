@@ -908,7 +908,7 @@ func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
 		ctx.AddMetric("/coll/group1/metric2", 12, plugin.MetricTag("k2", "v2")) // mts.MetricSet[1]
 		ctx.AddMetric("/coll/group2/metric3", 13, plugin.MetricTag("k3", "v3")) // mts.MetricSet[2]
 
-		sat.Saturate()
+		sat.Dismiss()
 
 		// Should not more apply tag ka: va
 		ctx.AddMetric("/coll/group1/metric1", 21, plugin.MetricTag("k1", "v1")) // mts.MetricSet[3]
@@ -926,12 +926,12 @@ func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
 		// Should apply kc: vc
 		ctx.AddMetric("/coll/group3/metric5", 41) // mts.MetricSet[7]
 
-		sat3.Saturate()
+		sat3.Dismiss()
 
 		// Should apply tag kb: vb
 		ctx.AddMetric("/coll/group3/metric4", 51) // mts.MetricSet[8]
 
-		sat2.Saturate()
+		sat2.Dismiss()
 
 		// Shouldn't apply any tag
 		ctx.AddMetric("/coll/group3/metric4", 61) // mts.MetricSet[9]

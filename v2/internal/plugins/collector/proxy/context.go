@@ -25,7 +25,7 @@ type modifiersMetadata struct {
 	active     bool
 }
 
-func (m *modifiersMetadata) Saturate() {
+func (m *modifiersMetadata) Dismiss() {
 	m.active = false
 }
 
@@ -173,7 +173,7 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Saturator, error) {
+func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.ModifierCloser, error) {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
@@ -192,6 +192,15 @@ func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plug
 
 	pc.modifiersTable = append(pc.modifiersTable, modifierMeta)
 	return modifierMeta, nil
+}
+
+func (pc *pluginContext) DismissAllModifiers() {
+	pc.sessionMtsMutex.Lock()
+	defer pc.sessionMtsMutex.Unlock()
+
+	for _, m := range pc.modifiersTable {
+		m.Dismiss()
+	}
 }
 
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
