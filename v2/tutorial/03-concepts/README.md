@@ -41,7 +41,7 @@ When task is defined for a plugin, snap will send a `Load()` request to plugin c
 When a task handling is no longer needed snap sends an `Unload()` request.
 As for `Load()`, we can provide some custom code which will be executed when the task is finished.
 
-> Keep in mind, however, this doesn't necessarily mean the plugin is not needed as some other tasks that rely on this plugin may still be running.
+> Keep in mind that this doesn't necessarily mean the plugin is not needed as some other tasks that rely on this plugin may still be running.
 
 Let's introduce empty custom implementation of `Load()` method:
 ```go
@@ -152,11 +152,11 @@ example.time.second 21 {map[]}
 #### State
 
 At times, you will need to remember values and objects between consecutive collections, ie:
-- credentials,
-- objects representing any client created during Load phase (like: TPC, REST, GRPC etc),
-- cashe,
-- post-processed configuration (see: [State and configuration](/v2/tutorial/03-concepts/README.md#state-and-configuration)),
-- custom statistics.
+- credentials
+- objects representing any client created during Load phase (like: TPC, REST, GRPC etc)
+- cache
+- post-processed configuration (see: [State and configuration](/v2/tutorial/03-concepts/README.md#state-and-configuration))
+- custom statistics
 
 In that case, `ctx.Store()` and `ctx.Load()` come in handy, allowing to store and read objects for a given task (context).
 
