@@ -65,8 +65,8 @@ func (s *SuiteT) startCollector(collector plugin.Collector) net.Listener {
 
 	go func() {
 		statsController, _ := stats.NewEmptyController()
-		contextManager := proxy.NewContextManager(types.NewCollector("test-collector", "1.0.0", collector), statsController)
-		service.StartCollectorGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
+		contextManager := proxy.NewContextManager(context.Background(), types.NewCollector("test-collector", "1.0.0", collector), statsController)
+		service.StartCollectorGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
 
@@ -81,8 +81,8 @@ func (s *SuiteT) startStreamingCollector(collector plugin.StreamingCollector) ne
 
 	go func() {
 		statsController, _ := stats.NewEmptyController()
-		contextManager := proxy.NewContextManager(types.NewStreamingCollector("test-collector", "1.0.0", collector), statsController)
-		service.StartCollectorGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
+		contextManager := proxy.NewContextManager(context.Background(), types.NewStreamingCollector("test-collector", "1.0.0", collector), statsController)
+		service.StartCollectorGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0)
 		s.endCh <- true
 	}()
 

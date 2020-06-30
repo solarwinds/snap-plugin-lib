@@ -9,6 +9,8 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 
+	stdctx "context"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -23,7 +25,7 @@ func TestStatistics(t *testing.T) {
 	Convey("Validate that calculating statistics calculation is correct", t, func() {
 		startTime := time.Unix(100000, 0)
 
-		sci, _ := NewStatsController(pluginName, pluginVersion, types.PluginTypeCollector, &plugin.Options{})
+		sci, _ := NewStatsController(stdctx.Background(), pluginName, pluginVersion, types.PluginTypeCollector, &plugin.Options{})
 		sc := sci.(*StatisticsController)
 
 		// Load task1 and perform some collections
