@@ -1,21 +1,21 @@
 package plugin
 
-type inProcessPlugin interface {
+type InProcessPlugin interface {
 	Name() string
 	Version() string
 }
 
 type InProcessCollector interface {
 	Collector
-	inProcessPlugin
+	InProcessPlugin
 }
 
 type InProcessStreamingCollector interface {
 	StreamingCollector
-	inProcessPlugin
+	InProcessPlugin
 }
 
 type InProcessPublisher interface {
 	Publisher
-	inProcessPlugin
+	InProcessPlugin
 }
