@@ -1,5 +1,9 @@
 package plugin
 
+import (
+	"github.com/sirupsen/logrus"
+)
+
 // CollectContext provides state and configuration API to be used by custom code.
 type Context interface {
 	// Returns configuration value by providing path (representing its position in JSON tree)
@@ -29,4 +33,7 @@ type Context interface {
 
 	// Check if task is completed (via listening on a channel)
 	Done() <-chan struct{}
+
+	// Reference to logger object
+	Logger() *logrus.Entry
 }
