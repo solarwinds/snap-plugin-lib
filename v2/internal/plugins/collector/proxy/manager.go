@@ -117,7 +117,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 	pContext := contextIf.(*pluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
-	pContext.ClearMetrics()
+	pContext.ClearCollectorSession()
 	pContext.ResetWarnings()
 
 	switch cm.collector.Type() {

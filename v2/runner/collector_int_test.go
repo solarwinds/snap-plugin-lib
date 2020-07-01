@@ -891,3 +891,93 @@ func (s *SuiteT) TestUnloadingRunningStreaming() {
 		})
 	})
 }
+
+/*****************************************************************************/
+
+type collectWithAlwaysApply struct {
+	t *testing.T
+}
+
+func (c *collectWithAlwaysApply) Collect(ctx plugin.CollectContext) error {
+	Convey("Validate AlwaysApply return values", c.t, func() {
+		sat, err1 := ctx.AlwaysApply("/coll/group1/*", plugin.MetricTag("ka", "va"))
+		So(err1, ShouldBeNil)
+
+		// Should apply tag ka: va
+		ctx.AddMetric("/coll/group1/metric1", 11, plugin.MetricTag("k1", "v1")) // mts.MetricSet[0]
+		ctx.AddMetric("/coll/group1/metric2", 12, plugin.MetricTag("k2", "v2")) // mts.MetricSet[1]
+		ctx.AddMetric("/coll/group2/metric3", 13, plugin.MetricTag("k3", "v3")) // mts.MetricSet[2]
+
+		sat.Dismiss()
+
+		// Should not more apply tag ka: va
+		ctx.AddMetric("/coll/group1/metric1", 21, plugin.MetricTag("k1", "v1")) // mts.MetricSet[3]
+		ctx.AddMetric("/coll/group1/metric2", 22, plugin.MetricTag("k2", "v2")) // mts.MetricSet[4]
+		ctx.AddMetric("/coll/group2/metric3", 23, plugin.MetricTag("k3", "v3")) // mts.MetricSet[5]
+
+		sat2, err2 := ctx.AlwaysApply("/coll/group3/metric4", plugin.MetricTag("kb", "vb"))
+		sat3, err3 := ctx.AlwaysApply("/coll/group3/*", plugin.MetricTag("kc", "vc"))
+		So(err2, ShouldBeNil)
+		So(err3, ShouldBeNil)
+
+		// Should apply tag kb: vb and kc: vc
+		ctx.AddMetric("/coll/group3/metric4", 31) // mts.MetricSet[6]
+
+		// Should apply kc: vc
+		ctx.AddMetric("/coll/group3/metric5", 41) // mts.MetricSet[7]
+
+		sat3.Dismiss()
+
+		// Should apply tag kb: vb
+		ctx.AddMetric("/coll/group3/metric4", 51) // mts.MetricSet[8]
+
+		sat2.Dismiss()
+
+		// Shouldn't apply any tag
+		ctx.AddMetric("/coll/group3/metric4", 61) // mts.MetricSet[9]
+
+		// This one shouldn't apply in the next collect
+		_, err4 := ctx.AlwaysApply("/coll/**", plugin.MetricTag("kg", "vg"))
+		So(err4, ShouldBeNil)
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestCollectorWithAlwaysApply() {
+	// Arrange
+	const collectNumber = 2 // test two consecutive collect
+
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{}
+
+	collector := &collectWithAlwaysApply{t: s.T()}
+	ln := s.startCollector(collector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate collector can utilize method AlwaysApply", s.T(), func() {
+		_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+
+		for i := 0; i < collectNumber; i++ {
+			Convey(fmt.Sprintf("Collect no. %d", i+1), func() {
+				mts, err := s.sendCollect("task-1")
+
+				So(err, ShouldBeNil)
+				So(mts.MetricSet, ShouldNotBeNil)
+				So(len(mts.MetricSet), ShouldEqual, 10)
+
+				So(mts.MetricSet[0].Tags, ShouldResemble, map[string]string{"k1": "v1", "ka": "va"})
+				So(mts.MetricSet[1].Tags, ShouldResemble, map[string]string{"k2": "v2", "ka": "va"})
+				So(mts.MetricSet[2].Tags, ShouldResemble, map[string]string{"k3": "v3"})
+				So(mts.MetricSet[3].Tags, ShouldResemble, map[string]string{"k1": "v1"})
+				So(mts.MetricSet[4].Tags, ShouldResemble, map[string]string{"k2": "v2"})
+				So(mts.MetricSet[5].Tags, ShouldResemble, map[string]string{"k3": "v3"})
+
+				So(mts.MetricSet[6].Tags, ShouldResemble, map[string]string{"kb": "vb", "kc": "vc"})
+				So(mts.MetricSet[7].Tags, ShouldResemble, map[string]string{"kc": "vc"})
+				So(mts.MetricSet[8].Tags, ShouldResemble, map[string]string{"kb": "vb"})
+				So(mts.MetricSet[9].Tags, ShouldBeNil)
+			})
+		}
+	})
+}

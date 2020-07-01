@@ -18,6 +18,12 @@ func MetricTags(tags map[string]string) MetricModifier {
 	}
 }
 
+func RemoveMetricTags(tags []string) MetricModifier {
+	return &removeMetricTags{
+		tagsToRemove: tags,
+	}
+}
+
 func MetricTimestamp(timestamp time.Time) MetricModifier {
 	return &metricTimestamp{
 		timestamp: timestamp,
@@ -44,6 +50,14 @@ type metricTags struct {
 
 func (m metricTags) UpdateMetric(mt MetricSetter) {
 	mt.AddTags(m.tags)
+}
+
+type removeMetricTags struct {
+	tagsToRemove []string
+}
+
+func (m removeMetricTags) UpdateMetric(mt MetricSetter) {
+	mt.RemoveTags(m.tagsToRemove)
 }
 
 type metricTimestamp struct {

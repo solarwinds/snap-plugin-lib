@@ -48,14 +48,13 @@ func (m *Context) AddMetric(ns string, value interface{}, modifiers ...plugin.Me
 	return args.Error(0)
 }
 
-func (m *Context) ApplyTagsByPath(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
-	return args.Error(0)
+func (m *Context) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Dismisser, error) {
+	args := m.Called(namespaceSelector, modifiers)
+	return args.Get(0).(plugin.Dismisser), args.Error(1)
 }
 
-func (m *Context) ApplyTagsByRegExp(ns string, tags map[string]string) error {
-	args := m.Called(ns, tags)
-	return args.Error(0)
+func (m *Context) DismissAllModifiers() {
+	m.Called()
 }
 
 func (m *Context) ShouldProcess(ns string) bool {
