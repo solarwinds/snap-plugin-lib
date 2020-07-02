@@ -22,7 +22,7 @@ const (
 ///////////////////////////////////////////////////////////////////////////////
 
 func startPprofServer(ctx context.Context, ln net.Listener) {
-	log.FromCtx(ctx).WithFields(moduleFields).Infof("Running profiling server on address %s", ln.Addr())
+	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running profiling server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
 
@@ -42,7 +42,7 @@ func startPprofServer(ctx context.Context, ln net.Listener) {
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.FromCtx(ctx).WithError(err).Warn("Pprof server stopped")
+			log.WithCtx(ctx).WithError(err).Warn("Pprof server stopped")
 		}
 	}()
 }
@@ -50,7 +50,7 @@ func startPprofServer(ctx context.Context, ln net.Listener) {
 ///////////////////////////////////////////////////////////////////////////////
 
 func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controller) {
-	log.FromCtx(ctx).WithFields(moduleFields).Infof("Running stats server on address")
+	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running stats server on address")
 
 	h := http.NewServeMux()
 
@@ -61,13 +61,13 @@ func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controll
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.FromCtx(ctx).WithError(err).Warn("Stats server stopped")
+			log.WithCtx(ctx).WithError(err).Warn("Stats server stopped")
 		}
 	}()
 }
 
 func statsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, stats stats.Controller) {
-	logF := log.FromCtx(ctx).WithFields(moduleFields)
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
 	logF.WithField("URI", r.RequestURI).Trace("Handling statistics request")
 
 	respCh := stats.RequestStat()

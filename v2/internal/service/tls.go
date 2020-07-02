@@ -67,7 +67,7 @@ func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
 		}
 		ok := clientCA.AppendCertsFromPEM(caCert)
 		if !ok {
-			log.FromCtx(ctx).WithField("path", f).Warn("given file is not a certificate")
+			log.WithCtx(ctx).WithField("path", f).Warn("given file is not a certificate")
 		}
 	}
 

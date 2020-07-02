@@ -163,7 +163,7 @@ func (sc *StatisticsController) UpdateStreamingStat(taskID string, metricsCount 
 ///////////////////////////////////////////////////////////////////////////////
 
 func (sc *StatisticsController) applyLoadStat(taskID string, config string, filters []string) {
-	log.FromCtx(sc.ctx).WithFields(logrus.Fields{
+	log.WithCtx(sc.ctx).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Load",
 	}).Trace("Applying statistic")
@@ -187,7 +187,7 @@ func (sc *StatisticsController) applyLoadStat(taskID string, config string, filt
 }
 
 func (sc *StatisticsController) applyUnloadStat(taskID string) {
-	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Unload",
 	}).Trace("Applying statistic")
@@ -200,7 +200,7 @@ func (sc *StatisticsController) applyUnloadStat(taskID string) {
 }
 
 func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int, _ bool, startTime, completeTime time.Time) {
-	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Collect",
 	}).Trace("Applying statistic")
@@ -252,7 +252,7 @@ func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int
 }
 
 func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
-	log.FromCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Streaming",
 	}).Trace("Applying statistic")

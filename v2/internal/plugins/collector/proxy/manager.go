@@ -132,7 +132,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 }
 
 func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
-	logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
+	logF := cm.logger().WithFields(moduleFields)
 	taskCtx := cm.TaskContext(id)
 
 	var mts []*types.Metric
@@ -145,10 +145,9 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
-				logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
-				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has ended with panic")
 				logF.Trace(string(debug.Stack()))
-				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
+				err = fmt.Errorf("user-defined function has ended with panic: %v", r)
 			}
 		}()
 
@@ -190,7 +189,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 }
 
 func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
-	logF := log.FromCtx(cm.ctx).WithFields(moduleFields)
+	logF := cm.logger().WithFields(moduleFields)
 	var err error
 
 	startTime := time.Now()
@@ -203,8 +202,8 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
-				err = fmt.Errorf("user-defined function has been ended with panic: %v", r)
-				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has been ended with panic")
+				err = fmt.Errorf("user-defined function has ended with panic: %v", r)
+				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has ended with panic")
 				logF.Trace(string(debug.Stack()))
 			}
 		}()
@@ -289,7 +288,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 				return fmt.Errorf("can't process unload request, unable to cancel other task with the same ID")
 			}
 
-			log.FromCtx(cm.ctx).WithFields(moduleFields).
+			log.WithCtx(cm.ctx).WithFields(moduleFields).
 				WithField("task-id", id).Trace("other action is active, requesting stop")
 
 			cm.ReleaseTask(id)
@@ -350,7 +349,7 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
-		log.FromCtx(cm.ctx).WithFields(moduleFields).
+		cm.logger().WithFields(moduleFields).
 			WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
 	}
 
@@ -364,11 +363,6 @@ func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, d
 // Define description for dynamic element
 func (cm *ContextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
-}
-
-// Define global tags that will be applied to all metrics
-func (cm *ContextManager) DefineGlobalTags(string, map[string]string) {
-	panic("implement")
 }
 
 func (cm *ContextManager) DefineExampleConfig(cfg string) error {
@@ -386,7 +380,7 @@ func (cm *ContextManager) RequestPluginDefinition() {
 	if definable, ok := cm.collector.Unwrap().(plugin.DefinableCollector); ok {
 		err := definable.PluginDefinition(cm)
 		if err != nil {
-			log.FromCtx(cm.ctx).WithFields(moduleFields).
+			log.WithCtx(cm.ctx).WithFields(moduleFields).
 				WithError(err).Errorf("Error occurred during plugin definition")
 		}
 	}
@@ -405,4 +399,8 @@ func (cm *ContextManager) ListDefaultMetrics() []string {
 	sort.Strings(result)
 
 	return result
+}
+
+func (cm *ContextManager) logger() *logrus.Entry {
+	return log.WithCtx(cm.ctx)
 }

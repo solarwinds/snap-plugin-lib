@@ -87,7 +87,7 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 
 	if !matchFilters {
 		if logrus.IsLevelEnabled(logrus.TraceLevel) {
-			log.FromCtx(pc.ctx).WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+			log.WithCtx(pc.ctx).WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
 		}
 		return nil // don't throw error when metric is just filtered
 	}

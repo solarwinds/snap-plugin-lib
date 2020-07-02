@@ -41,7 +41,7 @@ func newControlService(ctx context.Context, errCh chan error, pingTimeout time.D
 }
 
 func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*pluginrpc.PingResponse, error) {
-	log.FromCtx(cs.ctx).WithFields(controlSrvFields).Debug("GRPC Ping() received")
+	cs.logger().WithFields(controlSrvFields).Debug("GRPC Ping() received")
 
 	select {
 	case <-ctx.Done():
@@ -52,7 +52,7 @@ func (cs *controlService) Ping(ctx context.Context, _ *pluginrpc.PingRequest) (*
 }
 
 func (cs *controlService) Kill(ctx context.Context, _ *pluginrpc.KillRequest) (*pluginrpc.KillResponse, error) {
-	log.FromCtx(cs.ctx).WithFields(controlSrvFields).Debug("GRPC Kill() received")
+	cs.logger().WithFields(controlSrvFields).Debug("GRPC Kill() received")
 
 	select {
 	case <-ctx.Done():
@@ -86,7 +86,7 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 			pingMissed = 0
 		case <-time.After(timeout):
 			pingMissed++
-			log.FromCtx(cs.ctx).WithFields(controlSrvFields).WithFields(logrus.Fields{
+			cs.logger().WithFields(controlSrvFields).WithFields(logrus.Fields{
 				"missed": pingMissed,
 				"max":    maxPingMissed,
 			}).Warningf("Ping timeout occurred")
@@ -99,4 +99,8 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 			return
 		}
 	}
+}
+
+func (cs *controlService) logger() *logrus.Entry {
+	return log.WithCtx(cs.ctx)
 }

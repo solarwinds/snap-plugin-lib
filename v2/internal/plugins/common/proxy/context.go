@@ -108,7 +108,7 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
-	logF := log.FromCtx(c.ctx).WithFields(moduleFields)
+	logF := c.Logger().WithFields(moduleFields)
 
 	if c.IsDone() {
 		logF.Warning("task has been canceled")
@@ -169,5 +169,5 @@ func (c *Context) ReleaseContext() {
 }
 
 func (c *Context) Logger() *logrus.Entry {
-	return log.FromCtx(c.ctx)
+	return log.WithCtx(c.ctx)
 }

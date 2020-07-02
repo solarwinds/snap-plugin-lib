@@ -80,7 +80,7 @@ func startGRPC(ctx context.Context, srv Server, grpcLn net.Listener, pingTimeout
 	cancelFn()       // signal ping monitor (via ctx)
 
 	if err != nil && err != RequestedKillError {
-		log.FromCtx(ctx).WithFields(moduleFields).
+		log.WithCtx(ctx).WithFields(moduleFields).
 			WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
@@ -96,7 +96,7 @@ func shutdownPlugin(ctx context.Context, srv Server) {
 		stopped <- true
 	}()
 
-	logF := log.FromCtx(ctx).WithFields(moduleFields)
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
 
 	// If RPC calls lasting too much, stop server by force
 	select {

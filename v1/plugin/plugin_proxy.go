@@ -74,7 +74,7 @@ func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, 
 	p.lastPing = time.Now()
 	p.lastPingMu.Unlock()
 
-	log.WithField("timestamp", p.lastPing).Debug("Heartbeat received ")
+	log.WithField("timestamp", p.lastPing).Debug("Heartbeat received")
 
 	return &rpc.ErrReply{}, nil
 }
@@ -107,7 +107,11 @@ func (p *pluginProxy) HeartbeatWatch() {
 
 		if sincePing >= p.PingTimeoutDuration {
 			count++
-			log.WithField("check-duration", p.PingTimeoutDuration).Warningf("Heartbeat timeout %v of %v", count, PingTimeoutLimit)
+			log.WithFields(log.Fields{
+				"check-duration":     p.PingTimeoutDuration,
+				"count":              count,
+				"ping-timeout-limit": PingTimeoutLimit,
+			}).Warning("Heartbeat timeout")
 			if count >= PingTimeoutLimit {
 				log.Error("Heartbeat timeout expired!")
 				defer close(p.halt)

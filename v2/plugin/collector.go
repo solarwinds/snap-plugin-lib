@@ -65,9 +65,6 @@ type CollectorDefinition interface {
 	// Define description for dynamic element
 	DefineGroup(name string, description string)
 
-	// Define global tags that will be applied to all metrics
-	DefineGlobalTags(namespaceSelector string, tags map[string]string)
-
 	// Define example config (which will be presented when example task is printed)
 	DefineExampleConfig(cfg string) error
 }
