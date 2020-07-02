@@ -22,7 +22,7 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-    runner.StartCollector(context.Background(), &simpleCollector{}, "example", "1.0.0")
+    runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }
 ```
 
@@ -98,7 +98,7 @@ Intermediate strings serve as groups (collector sub-functions) and simplifies fi
 
 ```go
 func main() {
-    runner.StartCollector(context.Background(), &simpleCollector{}, "example", "1.0.0")
+    runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }
 ```
 

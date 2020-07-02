@@ -14,5 +14,5 @@ const pluginName = "system-collector"
 const pluginVersion = "1.0.0"
 
 func main() {
-	runner.StartCollector(context.Background(), collector.New(proxy.New()), pluginName, pluginVersion)
+	runner.StartCollectorWithContext(context.Background(), collector.New(proxy.New()), pluginName, pluginVersion)
 }

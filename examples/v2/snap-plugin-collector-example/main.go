@@ -114,5 +114,5 @@ func (*myCollector) Load(ctx plugin.Context) error {
 }
 
 func main() {
-	runner.StartCollector(context.Background(), newMyCollector(), pluginName, pluginVersion)
+	runner.StartCollectorWithContext(context.Background(), newMyCollector(), pluginName, pluginVersion)
 }

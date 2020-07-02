@@ -27,11 +27,19 @@ const (
 	infiniteDebugCollectCount = -1
 )
 
-func StartStreamingCollector(ctx context.Context, collector plugin.StreamingCollector, name string, version string) {
+func StartStreamingCollector(collector plugin.StreamingCollector, name string, version string) {
+	StartStreamingCollectorWithContext(context.Background(), collector, name, version)
+}
+
+func StartStreamingCollectorWithContext(ctx context.Context, collector plugin.StreamingCollector, name string, version string) {
 	startCollector(ctx, types.NewStreamingCollector(name, version, collector))
 }
 
-func StartCollector(ctx context.Context, collector plugin.Collector, name string, version string) {
+func StartCollector(collector plugin.Collector, name string, version string) {
+	StartCollectorWithContext(context.Background(), collector, name, version)
+}
+
+func StartCollectorWithContext(ctx context.Context, collector plugin.Collector, name string, version string) {
 	startCollector(ctx, types.NewCollector(name, version, collector))
 }
 

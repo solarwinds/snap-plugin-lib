@@ -42,5 +42,5 @@ func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-	runner.StartStreamingCollector(context.Background(), &streamCollector{}, pluginName, pluginVersion)
+	runner.StartStreamingCollectorWithContext(context.Background(), &streamCollector{}, pluginName, pluginVersion)
 }

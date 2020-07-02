@@ -67,5 +67,5 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-	runner.StartCollector(context.Background(), &simpleCollector{}, "example", "1.0.0")
+	runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }
