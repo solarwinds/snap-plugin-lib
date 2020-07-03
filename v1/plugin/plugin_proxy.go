@@ -21,15 +21,12 @@ package plugin
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	log "github.com/sirupsen/logrus"
 )
-
-// TODO(danielscottt): logging
-// TODO(danielscottt): plugin panics
 
 var (
 	// Timeout settings
@@ -77,14 +74,12 @@ func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, 
 	p.lastPing = time.Now()
 	p.lastPingMu.Unlock()
 
-	//Change to log
-	fmt.Println("Heartbeat received at:", p.lastPing)
+	log.WithField("timestamp", p.lastPing).Debug("Heartbeat received")
 
 	return &rpc.ErrReply{}, nil
 }
 
 func (p *pluginProxy) Kill(ctx context.Context, arg *rpc.KillArg) (*rpc.ErrReply, error) {
-	// TODO(CDR) log kill reason
 	p.halt <- struct{}{}
 	return &rpc.ErrReply{}, nil
 }
@@ -102,7 +97,7 @@ func (p *pluginProxy) HeartbeatWatch() {
 	p.lastPing = time.Now()
 	p.lastPingMu.Unlock()
 
-	fmt.Println("Heartbeat started")
+	log.Debug("Heartbeat started")
 
 	count := 0
 	for {
@@ -112,9 +107,13 @@ func (p *pluginProxy) HeartbeatWatch() {
 
 		if sincePing >= p.PingTimeoutDuration {
 			count++
-			fmt.Printf("Heartbeat timeout %v of %v.  (Duration between checks %v)", count, PingTimeoutLimit, p.PingTimeoutDuration)
+			log.WithFields(log.Fields{
+				"check-duration":     p.PingTimeoutDuration,
+				"count":              count,
+				"ping-timeout-limit": PingTimeoutLimit,
+			}).Warning("Heartbeat timeout")
 			if count >= PingTimeoutLimit {
-				fmt.Println("Heartbeat timeout expired!")
+				log.Error("heartbeat timeout expired!")
 				defer close(p.halt)
 				return
 			}

@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 )
 
 const (
@@ -19,8 +21,8 @@ const (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func startPprofServer(ln net.Listener) {
-	log.Infof("Running profiling server on address %s", ln.Addr())
+func startPprofServer(ctx context.Context, ln net.Listener) {
+	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running profiling server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
 
@@ -40,32 +42,33 @@ func startPprofServer(ln net.Listener) {
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.WithError(err).Warn("Pprof server stopped")
+			log.WithCtx(ctx).WithError(err).Warn("Pprof server stopped")
 		}
 	}()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func startStatsServer(ln net.Listener, stats stats.Controller) {
-	log.Infof("Running stats server on address")
+func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controller) {
+	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running stats server on address")
 
 	h := http.NewServeMux()
 
 	h.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
-		statsHandler(w, r, stats)
+		statsHandler(ctx, w, r, stats)
 	})
 
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.WithError(err).Warn("Stats server stopped")
+			log.WithCtx(ctx).WithError(err).Warn("Stats server stopped")
 		}
 	}()
 }
 
-func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller) {
-	log.WithField("URI", r.RequestURI).Trace("Handling statistics request")
+func statsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, stats stats.Controller) {
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
+	logF.WithField("URI", r.RequestURI).Trace("Handling statistics request")
 
 	respCh := stats.RequestStat()
 
@@ -73,7 +76,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller
 	case resp := <-respCh:
 		jsonStats, err := json.MarshalIndent(resp, "", jsonIndentString)
 		if err != nil {
-			log.WithField("stats", fmt.Sprintf("%v", resp)).WithError(err).Error("error when marshaling statistics struct")
+			logF.WithField("stats", fmt.Sprintf("%v", resp)).WithError(err).Error("error when marshaling statistics struct")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -81,11 +84,11 @@ func statsHandler(w http.ResponseWriter, r *http.Request, stats stats.Controller
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write(jsonStats)
 		if err != nil {
-			log.WithError(err).Error("error occurred when serving statistics request")
+			logF.WithError(err).Error("error occurred when serving statistics request")
 		}
 
 	case <-time.After(statsRequestTimeout):
-		log.WithField("timeout", statsRequestTimeout).Warning("timeout occurred when serving statistics request")
+		logF.WithField("timeout", statsRequestTimeout).Warning("timeout occurred when serving statistics request")
 		w.WriteHeader(http.StatusRequestTimeout)
 	}
 }

@@ -28,8 +28,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//TODO(danielscottt): plugin panics
-
 type publisherProxy struct {
 	pluginProxy
 

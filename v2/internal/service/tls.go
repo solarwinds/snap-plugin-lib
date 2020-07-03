@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -8,17 +9,18 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"google.golang.org/grpc/credentials"
 )
 
-func tlsCredentials(opt *plugin.Options) (credentials.TransportCredentials, error) {
+func tlsCredentials(ctx context.Context, opt *plugin.Options) (credentials.TransportCredentials, error) {
 	cert, err := tls.LoadX509KeyPair(opt.TLSServerCertPath, opt.TLSServerKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("invalid TLS certificate: %v", err)
 	}
 
-	clientCA, err := loadCACerts(opt.TLSClientCAPath)
+	clientCA, err := loadCACerts(ctx, opt.TLSClientCAPath)
 	if err != nil {
 		return nil, fmt.Errorf("can't read client CA Cert(s)")
 	}
@@ -33,7 +35,7 @@ func tlsCredentials(opt *plugin.Options) (credentials.TransportCredentials, erro
 	return tlsCreds, nil
 }
 
-func loadCACerts(caPath string) (*x509.CertPool, error) {
+func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
 	clientCA := x509.NewCertPool()
 	certFilesToProcess := []string{}
 
@@ -65,7 +67,7 @@ func loadCACerts(caPath string) (*x509.CertPool, error) {
 		}
 		ok := clientCA.AppendCertsFromPEM(caCert)
 		if !ok {
-			log.WithField("path", f).Warn("given file is not a certificate")
+			log.WithCtx(ctx).WithField("path", f).Warn("given file is not a certificate")
 		}
 	}
 

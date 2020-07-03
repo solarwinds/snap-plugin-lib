@@ -8,17 +8,20 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	log "github.com/sirupsen/logrus"
 )
 
 var logPublishService = log.WithField("service", "Publish")
 
 type publishingService struct {
 	proxy proxy.Publisher
+	ctx   context.Context
 }
 
-func newPublishingService(proxy proxy.Publisher) pluginrpc.PublisherServer {
+func newPublishingService(ctx context.Context, proxy proxy.Publisher) pluginrpc.PublisherServer {
 	return &publishingService{
 		proxy: proxy,
+		ctx:   ctx,
 	}
 }
 

@@ -4,6 +4,7 @@ The package "runner" provides simple API to start plugins in different modes.
 package runner
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -17,7 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "plugin-runner"})
+var moduleFields = logrus.Fields{"layer": "lib", "module": "plugin-runner"}
 
 const (
 	normalExitStatus = 0
@@ -27,14 +28,22 @@ const (
 )
 
 func StartStreamingCollector(collector plugin.StreamingCollector, name string, version string) {
-	startCollector(types.NewStreamingCollector(name, version, collector))
+	StartStreamingCollectorWithContext(context.Background(), collector, name, version)
+}
+
+func StartStreamingCollectorWithContext(ctx context.Context, collector plugin.StreamingCollector, name string, version string) {
+	startCollector(ctx, types.NewStreamingCollector(name, version, collector))
 }
 
 func StartCollector(collector plugin.Collector, name string, version string) {
-	startCollector(types.NewCollector(name, version, collector))
+	StartCollectorWithContext(context.Background(), collector, name, version)
 }
 
-func startCollector(collector types.Collector) {
+func StartCollectorWithContext(ctx context.Context, collector plugin.Collector, name string, version string) {
+	startCollector(ctx, types.NewCollector(name, version, collector))
+}
+
+func startCollector(ctx context.Context, collector types.Collector) {
 	var err error
 
 	var opt *plugin.Options
@@ -57,13 +66,13 @@ func startCollector(collector types.Collector) {
 		os.Exit(errorExitStatus)
 	}
 
-	statsController, err := stats.NewController(collector.Name(), collector.Version(), collector.Type(), opt)
+	statsController, err := stats.NewController(ctx, collector.Name(), collector.Version(), collector.Type(), opt)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
-	ctxMan := proxy.NewContextManager(collector, statsController)
+	ctxMan := proxy.NewContextManager(ctx, collector, statsController)
 
 	logrus.SetLevel(opt.LogLevel)
 
@@ -93,16 +102,16 @@ func startCollector(collector types.Collector) {
 		}
 
 		if opt.EnableProfiling {
-			startPprofServer(r.pprofListener)
+			startPprofServer(ctx, r.pprofListener)
 			defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
 		}
 
 		if opt.EnableStatsServer {
-			startStatsServer(r.statsListener, statsController)
+			startStatsServer(ctx, r.statsListener, statsController)
 			defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 		}
 
-		srv, err := service.NewGRPCServer(opt)
+		srv, err := service.NewGRPCServer(ctx, opt)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Can't initialize GRPC Server (%v)\n", err)
 			os.Exit(errorExitStatus)
@@ -114,7 +123,7 @@ func startCollector(collector types.Collector) {
 		}
 
 		// main blocking operation
-		service.StartCollectorGRPC(srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+		service.StartCollectorGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
 	}
 }
 

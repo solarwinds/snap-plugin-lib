@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"math/rand"
 	"time"
 
@@ -41,5 +42,5 @@ func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-	runner.StartStreamingCollector(&streamCollector{}, pluginName, pluginVersion)
+	runner.StartStreamingCollectorWithContext(context.Background(), &streamCollector{}, pluginName, pluginVersion)
 }

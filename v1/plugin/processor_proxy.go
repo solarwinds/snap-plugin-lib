@@ -25,8 +25,6 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 )
 
-//TODO(danielscottt): plugin panics
-
 type processorProxy struct {
 	pluginProxy
 

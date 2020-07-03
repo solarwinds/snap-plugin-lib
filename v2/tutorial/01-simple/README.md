@@ -8,6 +8,8 @@ The simplest plugin, gathering only 1 metric (every time with the same value) ca
 package main
 
 import (
+    "context"
+
     "github.com/librato/snap-plugin-lib-go/v2/plugin"
     "github.com/librato/snap-plugin-lib-go/v2/runner"
 )
@@ -20,7 +22,7 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-    runner.StartCollector(&simpleCollector{}, "example", "1.0.0")
+    runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }
 ```
 
@@ -96,7 +98,7 @@ Intermediate strings serve as groups (collector sub-functions) and simplifies fi
 
 ```go
 func main() {
-    runner.StartCollector(&simpleCollector{}, "example", "1.0.0")
+    runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }
 ```
 

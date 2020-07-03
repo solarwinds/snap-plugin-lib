@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/simpleconfig"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/sirupsen/logrus"
@@ -18,7 +19,7 @@ const (
 )
 
 var (
-	log = logrus.WithFields(logrus.Fields{"layer": "lib", "module": "common-proxy"})
+	moduleFields = logrus.Fields{"layer": "lib", "module": "common-proxy"}
 )
 
 type Context struct {
@@ -107,8 +108,10 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	logF := c.Logger().WithFields(moduleFields)
+
 	if c.IsDone() {
-		log.Warning("task has been canceled")
+		logF.Warning("task has been canceled")
 		return
 	}
 
@@ -116,12 +119,12 @@ func (c *Context) AddWarning(msg string) {
 	defer c.warningsMutex.Unlock()
 
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
-		log.Warning("Maximum number of warnings logged. New warning has been ignored")
+		logF.Warning("Maximum number of warnings logged. New warning has been ignored")
 		return
 	}
 
 	if len(msg) > maxWarningMsgSize {
-		log.Info("Warning message size exceeds maximum allowed value and will be cut off")
+		logF.Info("Warning message size exceeds maximum allowed value and will be cut off")
 		msg = msg[:maxWarningMsgSize]
 	}
 
@@ -163,4 +166,8 @@ func (c *Context) AttachContext(parentCtx context.Context) {
 
 func (c *Context) ReleaseContext() {
 	c.cancelFn()
+}
+
+func (c *Context) Logger() *logrus.Entry {
+	return log.WithCtx(c.ctx)
 }

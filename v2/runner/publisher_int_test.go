@@ -67,8 +67,8 @@ func (s *PublisherMediumSuite) startCollector(collector plugin.Collector) net.Li
 
 	go func() {
 		statsController, _ := stats.NewEmptyController()
-		contextManager := collProxy.NewContextManager(types.NewCollector("test-collector", "1.0.0", collector), statsController)
-		service.StartCollectorGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
+		contextManager := collProxy.NewContextManager(context.Background(), types.NewCollector("test-collector", "1.0.0", collector), statsController)
+		service.StartCollectorGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0)
 		s.endControllerCh <- true
 	}()
 
@@ -84,7 +84,7 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 	go func() {
 		statsController := &stats.EmptyController{}
 		contextManager := pubProxy.NewContextManager(publisher, statsController)
-		service.StartPublisherGRPC(grpc.NewServer(), contextManager, ln, 0, 0)
+		service.StartPublisherGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0)
 		s.endPublisherCh <- true
 	}()
 

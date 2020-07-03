@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -24,5 +25,5 @@ func (s simpleCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-	runner.StartCollector(&simpleCollector{}, "example", "1.0.0")
+	runner.StartCollectorWithContext(context.Background(), &simpleCollector{}, "example", "1.0.0")
 }

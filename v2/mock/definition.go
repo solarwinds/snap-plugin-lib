@@ -28,10 +28,6 @@ func (m *CollectorDefinition) DefineGroup(name string, description string) {
 	m.Called(name, description)
 }
 
-func (m *CollectorDefinition) DefineGlobalTags(namespaceSelector string, tags map[string]string) {
-	m.Called(namespaceSelector, tags)
-}
-
 func (m *CollectorDefinition) DefineExampleConfig(cfg string) error {
 	args := m.Called(cfg)
 	return args.Error(0)

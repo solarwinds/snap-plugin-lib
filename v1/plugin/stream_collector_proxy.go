@@ -104,7 +104,7 @@ func (p *StreamProxy) errorSend(errChan chan string, stream rpc.StreamCollector_
 				Error: &rpc.ErrReply{Error: r},
 			}
 			if err := stream.Send(reply); err != nil {
-				fmt.Println(err.Error())
+				log.WithError(err).Error("error during sending stream")
 			}
 		}
 	}
@@ -132,7 +132,7 @@ func (p *StreamProxy) metricSend(taskID string, ch chan []Metric, stream rpc.Str
 			for _, mt := range mts {
 				metric, err := toProtoMetric(mt)
 				if err != nil {
-					fmt.Println(err.Error())
+					log.WithError(err).Error("can't convert metric to protocol buffer")
 					break
 				}
 				metrics = append(metrics, metric)

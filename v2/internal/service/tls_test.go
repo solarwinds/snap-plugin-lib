@@ -61,7 +61,7 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 
 		// Arrange (GRPC Server)
 		go func() {
-			srv, _ := NewGRPCServer(opt)
+			srv, _ := NewGRPCServer(context.Background(), opt)
 			pluginrpc.RegisterControllerServer(srv.(*grpc.Server), controlService)
 
 			go func() {
