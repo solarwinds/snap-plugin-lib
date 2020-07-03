@@ -19,7 +19,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 14 "main.go"
+#line 12 "main.go"
 
 #include <stdlib.h>
 
@@ -147,11 +147,15 @@ extern GoInt ctx_should_process(char* p0, char* p1);
 
 extern char* ctx_config(char* p0, char* p1);
 
+extern char** ctx_config_keys(char* p0);
+
 extern char* ctx_raw_config(char* p0);
 
-extern void ctx_store(char* p0, char* p1, void* p2);
+extern void ctx_add_warning(char* p0, char* p1);
 
-extern void* ctx_load(char* p0, char* p1);
+extern void ctx_log(char* p0, GoUint p1, char* p2, tag_t* p3, GoInt p4);
+
+extern GoInt ctx_is_done(char* p0);
 
 extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 

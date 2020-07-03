@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
-	"unsafe"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -152,6 +150,13 @@ func toGoValue(v *C.value_t) interface{} {
 /*****************************************************************************/
 // Collect related functions
 
+// ctx.Store() and ctx.Load() have to be implemented and managed on the
+// native language side due to garbage collection functionality (we can't
+// pass Python/C# address to Go side, since it may become invalid).
+
+// ctx.Done() returns channel which is not a simple type present in other
+// language. Only ctx.IsDone() may be used
+
 //export ctx_add_metric
 func ctx_add_metric(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
 	err := contextObject(ctx_id).AddMetric(C.GoString(ns), toGoValue(v))
@@ -173,7 +178,11 @@ func ctx_config(ctxId *C.char, key *C.char) *C.char {
 	return C.CString(v)
 }
 
-// todo: ctx_config_keys
+//export ctx_config_keys
+func ctx_config_keys(ctxId *C.char) **C.char {
+	// todo: adamik: implement
+	return (**C.char)(C.NULL)
+}
 
 //export ctx_raw_config
 func ctx_raw_config(ctxId *C.char) *C.char {
@@ -182,15 +191,19 @@ func ctx_raw_config(ctxId *C.char) *C.char {
 	return C.CString(rc)
 }
 
-//export ctx_store
-func ctx_store(ctxId *C.char, key *C.char, obj unsafe.Pointer) {
-	contextObject(ctxId).Store(C.GoString(key), obj)
+//export ctx_add_warning
+func ctx_add_warning(ctxId *C.char, message *C.char) {
+	// todo: adamik: implement
 }
 
-//export ctx_load
-func ctx_load(ctxId *C.char, key *C.char) unsafe.Pointer {
-	v, _ := contextObject(ctxId).Load(C.GoString(key))
-	return unsafe.Pointer(reflect.ValueOf(v).Pointer())
+//export ctx_log
+func ctx_log(ctxId *C.char, level uint, message *C.char, fields *C.tag_t, fieldsCount int) {
+	// todo: adamik: implement
+}
+
+//export ctx_is_done
+func ctx_is_done(ctxId *C.char) int {
+	return boolToInt(contextObject(ctxId).IsDone())
 }
 
 /*****************************************************************************/

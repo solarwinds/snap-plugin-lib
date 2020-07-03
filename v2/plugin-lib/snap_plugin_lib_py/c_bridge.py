@@ -53,12 +53,6 @@ class DefineContext:
                                     string_to_bytes(description))
 
     @staticmethod
-    def define_global_tags(selector, tags):
-        PLUGIN_LIB_OBJ.define_global_tags(string_to_bytes(selector),
-                                          dict_to_tags(tags),
-                                          len(tags))
-
-    @staticmethod
     @throw_exception_if_error
     def define_example_config(config):
         return PLUGIN_LIB_OBJ.define_example_config(string_to_bytes(config))
@@ -92,20 +86,6 @@ class CollectContext(Context):
         return PLUGIN_LIB_OBJ.ctx_add_metric(self.ctx_id(),
                                              string_to_bytes(namespace),
                                              to_value_t(value))
-
-    @throw_exception_if_error
-    def apply_tags_by_path(self, namespace, tags):
-        return PLUGIN_LIB_OBJ.ctx_apply_tags_by_path(self.ctx_id(),
-                                                     string_to_bytes(namespace),
-                                                     dict_to_tags(tags),
-                                                     len(tags))
-
-    @throw_exception_if_error
-    def apply_tags_by_regexp(self, selector, tags):
-        return PLUGIN_LIB_OBJ.ctx_apply_tags_by_regexp(self.ctx_id(),
-                                                       string_to_bytes(selector),
-                                                       dict_to_tags(tags),
-                                                       len(tags))
 
     def should_process(self, namespace):
         return bool(PLUGIN_LIB_OBJ.ctx_should_process(self.ctx_id(),
