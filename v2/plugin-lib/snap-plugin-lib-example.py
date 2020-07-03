@@ -1,9 +1,13 @@
-from snap_plugin_lib_py import *
+from snap_plugin_lib_py import BasePlugin, start_collector
 
 
 class ExamplePlugin(BasePlugin):
     def define_plugin(self, ctx):
-        ctx.define_example_config('{"ip": "127.0.0.1", "port": 5434}')
+        example_config = {
+            "ip": "127.0.0.1",
+            "port": 5434
+        }
+        ctx.define_example_config(example_config)
         ctx.define_tasks_per_instance_limit(4)
         ctx.define_instances_limit(3)
 
