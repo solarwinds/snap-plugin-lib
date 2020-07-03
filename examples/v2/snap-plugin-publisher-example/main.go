@@ -38,5 +38,5 @@ func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 }
 
 func main() {
-	runner.StartPublisher(context.Background(), &myPublisher{}, pluginName, pluginVersion)
+	runner.StartPublisherWithContext(context.Background(), &myPublisher{}, pluginName, pluginVersion)
 }

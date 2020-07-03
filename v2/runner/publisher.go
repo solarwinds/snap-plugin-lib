@@ -13,7 +13,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StartPublisher(ctx context.Context, publisher plugin.Publisher, name string, version string) {
+func StartPublisher(publisher plugin.Publisher, name string, version string) {
+	StartPublisherWithContext(context.Background(), publisher, name, version)
+}
+
+func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, name string, version string) {
 	var err error
 
 	var opt *plugin.Options
