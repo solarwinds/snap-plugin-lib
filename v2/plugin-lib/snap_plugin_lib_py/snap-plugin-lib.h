@@ -3,21 +3,23 @@
 /* package github.com/librato/snap-plugin-lib-go/v2/plugin-lib */
 
 
-#line 1 "cgo-builtin-prolog"
+#line 1 "cgo-builtin-export-prolog"
 
 #include <stddef.h> /* for ptrdiff_t below */
 
 #ifndef GO_CGO_EXPORT_PROLOGUE_H
 #define GO_CGO_EXPORT_PROLOGUE_H
 
+#ifndef GO_CGO_GOSTRING_TYPEDEF
 typedef struct { const char *p; ptrdiff_t n; } _GoString_;
+#endif
 
 #endif
 
 /* Start of preamble from import "C" comments.  */
 
 
-#line 13 "main.go"
+#line 14 "main.go"
 
 #include <stdlib.h>
 
@@ -122,7 +124,9 @@ typedef double _Complex GoComplex128;
 */
 typedef char _check_for_64_bit_pointer_matching_GoInt[sizeof(void*)==64/8 ? 1:-1];
 
+#ifndef GO_CGO_GOSTRING_TYPEDEF
 typedef _GoString_ GoString;
+#endif
 typedef void *GoMap;
 typedef void *GoChan;
 typedef struct { void *t; void *v; } GoInterface;
@@ -139,12 +143,6 @@ extern "C" {
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2);
 
-extern error_t* ctx_add_metric_with_tags(char* p0, char* p1, GoInt p2, tag_t* p3, GoInt p4);
-
-extern error_t* ctx_apply_tags_by_path(char* p0, char* p1, tag_t* p2, GoInt p3);
-
-extern error_t* ctx_apply_tags_by_regexp(char* p0, char* p1, tag_t* p2, GoInt p3);
-
 extern GoInt ctx_should_process(char* p0, char* p1);
 
 extern char* ctx_config(char* p0, char* p1);
@@ -158,8 +156,6 @@ extern void* ctx_load(char* p0, char* p1);
 extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 
 extern void define_group(char* p0, char* p1);
-
-extern void define_global_tags(char* p0, tag_t* p1, GoInt p2);
 
 extern error_t* define_example_config(char* p0);
 

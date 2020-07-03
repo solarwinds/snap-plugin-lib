@@ -33,7 +33,7 @@ func (m *modifiersMetadata) Dismiss() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type pluginContext struct {
+type PluginContext struct {
 	*commonProxy.Context
 	ctx context.Context
 
@@ -45,7 +45,7 @@ type pluginContext struct {
 	ctxManager      *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byte) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byte) (*PluginContext, error) {
 	if ctxManager == nil {
 		return nil, errors.New("can't create context without valid context manager")
 	}
@@ -55,7 +55,7 @@ func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byt
 		return nil, err
 	}
 
-	pc := &pluginContext{
+	pc := &PluginContext{
 		Context:        baseContext,
 		ctx:            ctxManager.ctx,
 		taskID:         taskID,
@@ -67,7 +67,7 @@ func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byt
 	return pc, nil
 }
 
-func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
+func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
 	if pc.IsDone() {
 		return fmt.Errorf("task has been canceled")
 	}
@@ -155,7 +155,7 @@ func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	return nil
 }
 
-func (pc *pluginContext) ShouldProcess(ns string) bool {
+func (pc *PluginContext) ShouldProcess(ns string) bool {
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
 	if err != nil {
 		return false
@@ -170,7 +170,7 @@ func (pc *pluginContext) ShouldProcess(ns string) bool {
 	return shouldProcess
 }
 
-func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
+func (pc *PluginContext) metricMeta(nsKey string) metricMetadata {
 	if mtMeta, ok := pc.ctxManager.metricsMetadata[nsKey]; ok {
 		return mtMeta
 	}
@@ -179,7 +179,7 @@ func (pc *pluginContext) metricMeta(nsKey string) metricMetadata {
 	return metricMetadata{}
 }
 
-func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Dismisser, error) {
+func (pc *PluginContext) AlwaysApply(namespaceSelector string, modifiers ...plugin.MetricModifier) (plugin.Dismisser, error) {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
@@ -200,7 +200,7 @@ func (pc *pluginContext) AlwaysApply(namespaceSelector string, modifiers ...plug
 	return modifierMeta, nil
 }
 
-func (pc *pluginContext) DismissAllModifiers() {
+func (pc *PluginContext) DismissAllModifiers() {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
@@ -211,7 +211,7 @@ func (pc *pluginContext) DismissAllModifiers() {
 
 // extract static value when adding metrics like. /plugin/[grp=id]/m1
 // function assumes valid format
-func (pc *pluginContext) extractStaticValue(s string) string {
+func (pc *PluginContext) extractStaticValue(s string) string {
 	eqIndex := strings.Index(s, "=")
 	if eqIndex != -1 {
 		return s[eqIndex+1 : len(s)-1]
@@ -220,7 +220,7 @@ func (pc *pluginContext) extractStaticValue(s string) string {
 	return s
 }
 
-func (pc *pluginContext) ClearCollectorSession() {
+func (pc *PluginContext) ClearCollectorSession() {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
@@ -228,7 +228,7 @@ func (pc *pluginContext) ClearCollectorSession() {
 	pc.modifiersTable = nil
 }
 
-func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
+func (pc *PluginContext) Metrics(clear bool) []*types.Metric {
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()
 
@@ -239,10 +239,10 @@ func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 	return mts
 }
 
-func (pc *pluginContext) RequestedMetrics() []string {
+func (pc *PluginContext) RequestedMetrics() []string {
 	return pc.metricsFilters.ListRules()
 }
 
-func (pc *pluginContext) TaskID() string {
+func (pc *PluginContext) TaskID() string {
 	return pc.taskID
 }

@@ -54,7 +54,7 @@ type ContextManager struct {
 	ctx context.Context
 
 	collector  types.Collector // reference to custom plugin code
-	contextMap sync.Map        // (synced map[int]*pluginContext) map of contexts associated with taskIDs
+	contextMap sync.Map        // (synced map[int]*PluginContext) map of contexts associated with taskIDs
 
 	metricsDefinition *metrictree.TreeValidator // metrics defined by plugin (code)
 
@@ -114,7 +114,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 		return
 	}
 
-	pContext := contextIf.(*pluginContext)
+	pContext := contextIf.(*PluginContext)
 
 	pContext.AttachContext(cm.TaskContext(id))
 	pContext.ClearCollectorSession()
@@ -131,7 +131,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 	pContext.ReleaseContext()
 }
 
-func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+func (cm *ContextManager) collect(id string, context *PluginContext, chunkCh chan<- types.CollectChunk) {
 	logF := cm.logger().WithFields(moduleFields)
 	taskCtx := cm.TaskContext(id)
 
@@ -188,7 +188,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 	close(chunkCh)
 }
 
-func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+func (cm *ContextManager) streamingCollect(id string, context *PluginContext, chunkCh chan<- types.CollectChunk) {
 	logF := cm.logger().WithFields(moduleFields)
 	var err error
 
@@ -223,7 +223,7 @@ func (cm *ContextManager) streamingCollect(id string, context *pluginContext, ch
 	}
 }
 
-func (cm *ContextManager) handleChunk(id string, err error, context *pluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
+func (cm *ContextManager) handleChunk(id string, err error, context *PluginContext, chunkCh chan<- types.CollectChunk, startTime time.Time) {
 	mts := context.Metrics(true)
 	warnings := context.Warnings(true)
 
@@ -306,7 +306,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	pluginCtx := contextI.(*pluginContext)
+	pluginCtx := contextI.(*PluginContext)
 	if unloadable, ok := cm.collector.Unwrap().(plugin.UnloadableCollector); ok {
 		err := unloadable.Unload(pluginCtx)
 		if err != nil {
@@ -327,7 +327,7 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("context with given id is not defined")
 	}
-	pluginCtx := contextI.(*pluginContext)
+	pluginCtx := contextI.(*PluginContext)
 
 	if collectorWithCustomInfo, ok := cm.collector.Unwrap().(plugin.CustomizableInfoCollector); ok {
 		infoObj := collectorWithCustomInfo.CustomInfo(pluginCtx)

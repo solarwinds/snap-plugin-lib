@@ -22,10 +22,6 @@ global collector_py
 
 PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
-PLUGIN_LIB_OBJ.ctx_add_metric_with_tags.restype = POINTER(CError)
-PLUGIN_LIB_OBJ.ctx_apply_tags_by_path.restype = POINTER(CError)
-PLUGIN_LIB_OBJ.ctx_apply_tags_by_regexp.restype = POINTER(CError)
-PLUGIN_LIB_OBJ.ctx_apply_tags_by_regexp.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_load.restype = c_void_p
@@ -96,14 +92,6 @@ class CollectContext(Context):
         return PLUGIN_LIB_OBJ.ctx_add_metric(self.ctx_id(),
                                              string_to_bytes(namespace),
                                              to_value_t(value))
-
-    @throw_exception_if_error
-    def add_metric_with_tags(self, namespace, value, tags):
-        return PLUGIN_LIB_OBJ.ctx_add_metric_with_tags(self.ctx_id(),
-                                                       string_to_bytes(namespace),
-                                                       c_longlong(value),
-                                                       dict_to_tags(tags),
-                                                       len(tags))
 
     @throw_exception_if_error
     def apply_tags_by_path(self, namespace, tags):

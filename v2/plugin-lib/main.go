@@ -158,24 +158,6 @@ func ctx_add_metric(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
 	return toCError(err)
 }
 
-//export ctx_add_metric_with_tags
-func ctx_add_metric_with_tags(ctxId *C.char, ns *C.char, v int, tags *C.tag_t, tagsCount int) *C.error_t {
-	err := contextObject(ctxId).AddMetricWithTags(C.GoString(ns), v, ctagsToMap(tags, tagsCount))
-	return toCError(err)
-}
-
-//export ctx_apply_tags_by_path
-func ctx_apply_tags_by_path(ctxId *C.char, ns *C.char, tags *C.tag_t, tagsCount int) *C.error_t {
-	err := contextObject(ctxId).ApplyTagsByPath(C.GoString(ns), ctagsToMap(tags, tagsCount))
-	return toCError(err)
-}
-
-//export ctx_apply_tags_by_regexp
-func ctx_apply_tags_by_regexp(ctxId *C.char, ns *C.char, tags *C.tag_t, tagsCount int) *C.error_t {
-	err := contextObject(ctxId).ApplyTagsByRegExp(C.GoString(ns), ctagsToMap(tags, tagsCount))
-	return toCError(err)
-}
-
 //export ctx_should_process
 func ctx_should_process(ctxId *C.char, ns *C.char) int {
 	return boolToInt(contextObject(ctxId).ShouldProcess(C.GoString(ns)))
@@ -222,11 +204,6 @@ func define_metric(namespace *C.char, unit *C.char, isDefault int, description *
 //export define_group
 func define_group(name *C.char, description *C.char) {
 	pluginDef.DefineGroup(C.GoString(name), C.GoString(description))
-}
-
-//export define_global_tags
-func define_global_tags(namespace *C.char, tags *C.tag_t, tagsCount int) {
-	pluginDef.DefineGlobalTags(C.GoString(namespace), ctagsToMap(tags, tagsCount))
 }
 
 //export define_example_config

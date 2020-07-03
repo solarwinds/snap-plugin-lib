@@ -7,7 +7,7 @@ class ExamplePlugin(BasePlugin):
             "ip": "127.0.0.1",
             "port": 5434
         }
-        ctx.define_example_config(example_config)
+        ctx.define_example_config(str(example_config))
         ctx.define_tasks_per_instance_limit(4)
         ctx.define_instances_limit(3)
 
@@ -24,7 +24,6 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group1/metric3", 40)
         ctx.add_metric("/python/group2/dyn1/metric4", 40)
         ctx.add_metric("/python/group2/dyn15/metric4", 11)
-        ctx.add_metric_with_tags("/python/group2/dyn21/metric5", 35, {"tag1": "v1", "tags56": "v2"})
         ctx.add_metric("/python/group2/dyn55/metric4", 5.34)
         ctx.add_metric("/python/group2/dyn56/metric4", -21)
         ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
