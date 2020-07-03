@@ -104,7 +104,7 @@ func (p *StreamProxy) errorSend(errChan chan string, stream rpc.StreamCollector_
 				Error: &rpc.ErrReply{Error: r},
 			}
 			if err := stream.Send(reply); err != nil {
-				log.WithError(err).Error("error sending stream error")
+				log.WithError(err).Error("error during sending stream")
 			}
 		}
 	}
