@@ -37,6 +37,7 @@ type pluginContext struct {
 	*commonProxy.Context
 	ctx context.Context
 
+	taskID          string
 	metricsFilters  *metrictree.TreeValidator // metric filters defined by task (yaml)
 	sessionMtsMutex sync.RWMutex
 	sessionMts      []*types.Metric
@@ -44,7 +45,7 @@ type pluginContext struct {
 	ctxManager      *ContextManager // back-reference to context manager
 }
 
-func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byte) (*pluginContext, error) {
 	if ctxManager == nil {
 		return nil, errors.New("can't create context without valid context manager")
 	}
@@ -57,6 +58,7 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 	pc := &pluginContext{
 		Context:        baseContext,
 		ctx:            ctxManager.ctx,
+		taskID:         taskID,
 		metricsFilters: metrictree.NewMetricFilter(ctxManager.metricsDefinition),
 		ctxManager:     ctxManager,
 		sessionMts:     nil,
@@ -239,4 +241,8 @@ func (pc *pluginContext) Metrics(clear bool) []*types.Metric {
 
 func (pc *pluginContext) RequestedMetrics() []string {
 	return pc.metricsFilters.ListRules()
+}
+
+func (pc *pluginContext) TaskID() string {
+	return pc.taskID
 }

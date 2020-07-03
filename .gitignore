@@ -39,6 +39,9 @@ _testmain.go
 *.out
 *.orig
 *.tmp
+*.dll
+*.lib
+*.so
 
 # Output of the go coverage tool
 *.out
