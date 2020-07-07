@@ -24,7 +24,7 @@ PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
-PLUGIN_LIB_OBJ.ctx_load.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
 
 
 ###############################################################################
@@ -60,35 +60,38 @@ class DefineContext:
 
 class Context:
     def __init__(self, ctx_id):
-        self._ctx_id = ctx_id
+        self.__ctx_id = ctx_id
 
     @throw_exception_if_null("object with given key doesn't exists")
     def config(self, key: str):
-        return PLUGIN_LIB_OBJ.ctx_config(self.ctx_id(),
+        return PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(),
                                          string_to_bytes(key)).decode(encoding='utf-8')
 
     def raw_config(self):
-        return PLUGIN_LIB_OBJ.ctx_raw_config(self.ctx_id()).decode(encoding='utf-8')
+        return PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id()).decode(encoding='utf-8')
 
     def store(self, key, obj):
-        storedObjectMap[self.ctx_id()][key] = obj
+        storedObjectMap[self._ctx_id()][key] = obj
 
     def load(self, key):
-        return storedObjectMap[self.ctx_id()][key]
+        return storedObjectMap[self._ctx_id()][key]
 
-    def ctx_id(self):
-        return self._ctx_id
+    def is_done(self):
+        return bool(PLUGIN_LIB_OBJ.ctx_is_done(self._ctx_id()))
+
+    def _ctx_id(self):
+        return self.__ctx_id
 
 
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(self, namespace, value):
-        return PLUGIN_LIB_OBJ.ctx_add_metric(self.ctx_id(),
+        return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
                                              string_to_bytes(namespace),
                                              to_value_t(value))
 
     def should_process(self, namespace):
-        return bool(PLUGIN_LIB_OBJ.ctx_should_process(self.ctx_id(),
+        return bool(PLUGIN_LIB_OBJ.ctx_should_process(self._ctx_id(),
                                                       string_to_bytes(namespace)))
 
 

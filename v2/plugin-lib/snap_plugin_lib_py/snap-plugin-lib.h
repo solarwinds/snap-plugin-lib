@@ -143,7 +143,13 @@ extern "C" {
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2);
 
+extern error_t* ctx_always_apply(char* p0, char* p1);
+
+extern void ctx_dismiss_all_modifiers();
+
 extern GoInt ctx_should_process(char* p0, char* p1);
+
+extern char** ctx_requested_metrics(char* p0);
 
 extern char* ctx_config(char* p0, char* p1);
 
@@ -153,7 +159,7 @@ extern char* ctx_raw_config(char* p0);
 
 extern void ctx_add_warning(char* p0, char* p1);
 
-extern void ctx_log(char* p0, GoUint p1, char* p2, tag_t* p3, GoInt p4);
+extern void ctx_log(char* p0, GoInt p1, char* p2, tag_t* p3, GoInt p4);
 
 extern GoInt ctx_is_done(char* p0);
 

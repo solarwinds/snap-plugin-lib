@@ -29,6 +29,9 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
         ctx.add_metric("/python/group2/dyn58/metric4", True)
 
+        print("Debug", ctx.is_done())
+
+
     def load(self, ctx):
         pass
 

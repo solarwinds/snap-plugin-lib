@@ -186,8 +186,8 @@ func ctx_requested_metrics(ctxID *C.char) **C.char {
 }
 
 //export ctx_config
-func ctx_config(ctxId *C.char, key *C.char) *C.char {
-	v, ok := contextObject(ctxId).Config(C.GoString(key))
+func ctx_config(ctxID *C.char, key *C.char) *C.char {
+	v, ok := contextObject(ctxID).Config(C.GoString(key))
 	if !ok {
 		return (*C.char)(C.NULL)
 	}
@@ -196,21 +196,21 @@ func ctx_config(ctxId *C.char, key *C.char) *C.char {
 }
 
 //export ctx_config_keys
-func ctx_config_keys(ctxId *C.char) **C.char {
+func ctx_config_keys(ctxID *C.char) **C.char {
 	// todo: adamik: implement
 	return (**C.char)(C.NULL)
 }
 
 //export ctx_raw_config
-func ctx_raw_config(ctxId *C.char) *C.char {
-	rc := string(contextObject(ctxId).RawConfig())
+func ctx_raw_config(ctxID *C.char) *C.char {
+	rc := string(contextObject(ctxID).RawConfig())
 	fmt.Printf("rc=%#v\n", rc)
 	return C.CString(rc)
 }
 
 //export ctx_add_warning
-func ctx_add_warning(ctxId *C.char, message *C.char) {
-	// todo: adamik: implement
+func ctx_add_warning(ctxID *C.char, message *C.char) {
+	contextObject(ctxID).AddWarning(C.GoString(message))
 }
 
 //export ctx_log
