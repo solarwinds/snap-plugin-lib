@@ -1,4 +1,4 @@
-from snap_plugin_lib_py import BasePlugin, start_collector
+from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_ERROR
 
 
 class ExamplePlugin(BasePlugin):
@@ -31,7 +31,10 @@ class ExamplePlugin(BasePlugin):
 
         print("$$$", ctx.is_done())
         ctx.add_warning("This is a warning.")
-
+        ctx.log(LOGLEVEL_ERROR, "Error log!", {
+            "fa": "va",
+            "fb": "vb"
+        })
 
     def load(self, ctx):
         pass

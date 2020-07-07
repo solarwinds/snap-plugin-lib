@@ -7,6 +7,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
+	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -214,13 +215,19 @@ func ctx_add_warning(ctxID *C.char, message *C.char) {
 }
 
 //export ctx_log
-func ctx_log(ctxId *C.char, level int, message *C.char, fields *C.tag_t, fieldsCount int) {
-	// todo: adamik: implement
+func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.tag_t, fieldsCount int) {
+	logF := contextObject(ctxID).Logger()
+	for i := 0; i < fieldsCount; i++ {
+		k := C.tag_key(fields, C.int(i))
+		v := C.tag_value(fields, C.int(i))
+		logF = logF.WithField(C.GoString(k), C.GoString(v))
+	}
+	logF.Log(logrus.Level(int(level)), C.GoString(message))
 }
 
 //export ctx_is_done
-func ctx_is_done(ctxId *C.char) int {
-	return boolToInt(contextObject(ctxId).IsDone())
+func ctx_is_done(ctxID *C.char) int {
+	return boolToInt(contextObject(ctxID).IsDone())
 }
 
 /*****************************************************************************/

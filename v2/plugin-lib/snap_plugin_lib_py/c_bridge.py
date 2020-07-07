@@ -25,6 +25,8 @@ PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
+PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
 
 
 ###############################################################################
@@ -75,6 +77,13 @@ class Context:
 
     def load(self, key):
         return storedObjectMap[self._ctx_id()][key]
+
+    def log(self, level, message, fields):
+        return PLUGIN_LIB_OBJ.ctx_log(self._ctx_id(),
+                                      level,
+                                      string_to_bytes(message),
+                                      dict_to_tags(fields),
+                                      len(fields))
 
     def add_warning(self, message):
         return PLUGIN_LIB_OBJ.ctx_add_warning(self._ctx_id(),

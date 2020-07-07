@@ -19,7 +19,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 12 "main.go"
+#line 13 "main.go"
 
 #include <stdlib.h>
 
@@ -159,7 +159,7 @@ extern char* ctx_raw_config(char* p0);
 
 extern void ctx_add_warning(char* p0, char* p1);
 
-extern void ctx_log(char* p0, GoInt p1, char* p2, tag_t* p3, GoInt p4);
+extern void ctx_log(char* p0, int p1, char* p2, tag_t* p3, GoInt p4);
 
 extern GoInt ctx_is_done(char* p0);
 
