@@ -158,14 +158,31 @@ func toGoValue(v *C.value_t) interface{} {
 // language. Only ctx.IsDone() may be used
 
 //export ctx_add_metric
-func ctx_add_metric(ctx_id *C.char, ns *C.char, v *C.value_t) *C.error_t {
-	err := contextObject(ctx_id).AddMetric(C.GoString(ns), toGoValue(v))
+func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t) *C.error_t {
+	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v))
 	return toCError(err)
 }
 
+//export ctx_always_apply
+func ctx_always_apply(ctxID *C.char, ns *C.char) *C.error_t {
+	// todo: adamik: implement
+	return toCError(nil)
+}
+
+//export ctx_dismiss_all_modifiers
+func ctx_dismiss_all_modifiers() {
+	// todo: adamik: implement
+}
+
 //export ctx_should_process
-func ctx_should_process(ctxId *C.char, ns *C.char) int {
-	return boolToInt(contextObject(ctxId).ShouldProcess(C.GoString(ns)))
+func ctx_should_process(ctxID *C.char, ns *C.char) int {
+	return boolToInt(contextObject(ctxID).ShouldProcess(C.GoString(ns)))
+}
+
+//export ctx_requested_metrics
+func ctx_requested_metrics(ctxID *C.char) **C.char {
+	// todo: adamik: implement
+	return (**C.char)(C.NULL)
 }
 
 //export ctx_config
@@ -197,7 +214,7 @@ func ctx_add_warning(ctxId *C.char, message *C.char) {
 }
 
 //export ctx_log
-func ctx_log(ctxId *C.char, level uint, message *C.char, fields *C.tag_t, fieldsCount int) {
+func ctx_log(ctxId *C.char, level int, message *C.char, fields *C.tag_t, fieldsCount int) {
 	// todo: adamik: implement
 }
 
