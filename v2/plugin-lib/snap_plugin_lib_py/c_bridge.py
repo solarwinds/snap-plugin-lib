@@ -76,6 +76,10 @@ class Context:
     def load(self, key):
         return storedObjectMap[self._ctx_id()][key]
 
+    def add_warning(self, message):
+        return PLUGIN_LIB_OBJ.ctx_add_warning(self._ctx_id(),
+                                              string_to_bytes(message))
+
     def is_done(self):
         return bool(PLUGIN_LIB_OBJ.ctx_is_done(self._ctx_id()))
 

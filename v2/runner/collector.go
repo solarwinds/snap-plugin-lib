@@ -158,6 +158,14 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 				fmt.Printf("%s\n", mt)
 			}
 			fmt.Printf("\n")
+
+			if len(chunk.Warnings) != 0 {
+				fmt.Printf("Gathered warnings (length=%d): \n", len(chunk.Warnings))
+				for _, w := range chunk.Warnings {
+					fmt.Printf("%s\n", w)
+				}
+				fmt.Printf("\n")
+			}
 		}
 
 		// wait to request new collection or exit
