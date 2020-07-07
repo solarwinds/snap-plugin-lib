@@ -80,8 +80,7 @@ func startGRPC(ctx context.Context, srv Server, grpcLn net.Listener, pingTimeout
 	cancelFn()       // signal ping monitor (via ctx)
 
 	if err != nil && err != RequestedKillError {
-		log.WithCtx(ctx).WithFields(moduleFields).
-			WithError(err).Errorf("Major error occurred - plugin will be shut down")
+		log.WithCtx(ctx).WithFields(moduleFields).WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
 	shutdownPlugin(ctx, srv)
