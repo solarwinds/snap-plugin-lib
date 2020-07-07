@@ -10,6 +10,7 @@ import (
 const loggerKey = "logger"
 
 func WithCtx(ctx context.Context) *logrus.Entry {
+	context.WithCancel(context.WithValue(context.Background(), "a", "b"))
 	var log *logrus.Entry
 	var err error
 

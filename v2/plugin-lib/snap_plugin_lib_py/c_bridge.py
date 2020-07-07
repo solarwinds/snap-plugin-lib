@@ -2,6 +2,7 @@ import os.path
 from collections import defaultdict
 from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
 import platform
+from itertools import count
 
 from .convertions import string_to_bytes, dict_to_tags, CError, to_value_t
 from .exceptions import throw_exception_if_error, throw_exception_if_null
@@ -27,6 +28,8 @@ PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_requested_metrics.restype = POINTER(c_char_p)
 
 
 ###############################################################################
@@ -72,6 +75,16 @@ class Context:
     def raw_config(self):
         return PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id()).decode(encoding='utf-8')
 
+    def requested_metrics(self):
+        req_mts_c = PLUGIN_LIB_OBJ.ctx_requested_metrics(self._ctx_id())
+        req_mts = []
+        for i in count(0):
+            if req_mts_c[i] is None:
+                break
+            req_mts.append(req_mts_c[i].decode(encoding='utf-8'))
+
+        return req_mts
+
     def store(self, key, obj):
         storedObjectMap[self._ctx_id()][key] = obj
 
@@ -91,6 +104,9 @@ class Context:
 
     def is_done(self):
         return bool(PLUGIN_LIB_OBJ.ctx_is_done(self._ctx_id()))
+
+    def dismiss_all_modifiers(self):
+        PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers(self._ctx_id())
 
     def _ctx_id(self):
         return self.__ctx_id

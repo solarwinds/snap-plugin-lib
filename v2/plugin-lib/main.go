@@ -75,6 +75,14 @@ static inline void free_error_msg(error_t * err) {
 	free(err);
 }
 
+static inline char** alloc_str_array(int size) {
+	return malloc(sizeof(char*) * size);
+}
+
+static inline void set_str_array_element(char **str_array, int index, char *element) {
+	str_array[index] = element;
+}
+
 static inline void free_memory(void * p) {
 	free(p);
 }
@@ -160,6 +168,7 @@ func toGoValue(v *C.value_t) interface{} {
 
 //export ctx_add_metric
 func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t) *C.error_t {
+	// todo: adamik: implement
 	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v))
 	return toCError(err)
 }
@@ -171,8 +180,8 @@ func ctx_always_apply(ctxID *C.char, ns *C.char) *C.error_t {
 }
 
 //export ctx_dismiss_all_modifiers
-func ctx_dismiss_all_modifiers() {
-	// todo: adamik: implement
+func ctx_dismiss_all_modifiers(ctxID *C.char) {
+	contextObject(ctxID).DismissAllModifiers()
 }
 
 //export ctx_should_process
@@ -182,8 +191,14 @@ func ctx_should_process(ctxID *C.char, ns *C.char) int {
 
 //export ctx_requested_metrics
 func ctx_requested_metrics(ctxID *C.char) **C.char {
-	// todo: adamik: implement
-	return (**C.char)(C.NULL)
+	reqMts := contextObject(ctxID).RequestedMetrics()
+	cStrArr := C.alloc_str_array(C.int(len(reqMts) + 1))
+	for i, mt := range reqMts {
+		C.set_str_array_element(cStrArr, C.int(i), (*C.char)(C.CString(mt)))
+	}
+	C.set_str_array_element(cStrArr, C.int(len(reqMts)), (*C.char)(C.NULL)) // last element of array is always None (NULL)
+
+	return cStrArr
 }
 
 //export ctx_config

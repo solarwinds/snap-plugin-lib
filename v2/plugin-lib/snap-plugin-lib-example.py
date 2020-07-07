@@ -29,12 +29,14 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
         ctx.add_metric("/python/group2/dyn58/metric4", True)
 
-        print("$$$", ctx.is_done())
-        ctx.add_warning("This is a warning.")
-        ctx.log(LOGLEVEL_ERROR, "Error log!", {
-            "fa": "va",
-            "fb": "vb"
-        })
+        # print("$$$", ctx.is_done())
+        # ctx.add_warning("This is a warning.")
+        # ctx.log(LOGLEVEL_ERROR, "Error log!", {
+        #     "fa": "va",
+        #     "fb": "vb"
+        # })
+        # ctx.dismiss_all_modifiers()
+        print(ctx.requested_metrics())
 
     def load(self, ctx):
         pass

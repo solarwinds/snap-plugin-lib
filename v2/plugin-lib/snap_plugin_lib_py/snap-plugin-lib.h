@@ -85,6 +85,14 @@ static inline void free_error_msg(error_t * err) {
 	free(err);
 }
 
+static inline char** alloc_str_array(int size) {
+	return malloc(sizeof(char*) * size);
+}
+
+static inline void set_str_array_element(char **str_array, int index, char *element) {
+	str_array[index] = element;
+}
+
 static inline void free_memory(void * p) {
 	free(p);
 }
@@ -145,7 +153,7 @@ extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2);
 
 extern error_t* ctx_always_apply(char* p0, char* p1);
 
-extern void ctx_dismiss_all_modifiers();
+extern void ctx_dismiss_all_modifiers(char* p0);
 
 extern GoInt ctx_should_process(char* p0, char* p1);
 
