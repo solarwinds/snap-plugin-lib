@@ -87,7 +87,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	}
 
 	if opt.DebugMode {
-		startCollectorInSingleMode(ctxMan, opt)
+		startCollectorInDebugMode(ctxMan, opt)
 	} else {
 		r, err := acquireResources(opt)
 		if err != nil {
@@ -127,8 +127,8 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	}
 }
 
-func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
-	const singleModeTaskID = "task-1"
+func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
+	const debugModeTaskID = "task-1"
 
 	// Load task based on command line options
 	var filter []string
@@ -136,7 +136,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		filter = strings.Split(opt.PluginFilter, filterSeparator)
 	}
 
-	errLoad := ctxManager.LoadTask(singleModeTaskID, []byte(opt.PluginConfig), filter)
+	errLoad := ctxManager.LoadTask(debugModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
 		os.Exit(errorExitStatus)
@@ -144,7 +144,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 
 	for runCount := 0; ; {
 		// Request metrics collection
-		chunkCh := ctxManager.RequestCollect(singleModeTaskID)
+		chunkCh := ctxManager.RequestCollect(debugModeTaskID)
 
 		for chunk := range chunkCh {
 			if chunk.Err != nil {
@@ -171,7 +171,7 @@ func startCollectorInSingleMode(ctxManager *proxy.ContextManager, opt *plugin.Op
 		time.Sleep(opt.DebugCollectInterval)
 	}
 
-	errUnload := ctxManager.UnloadTask(singleModeTaskID)
+	errUnload := ctxManager.UnloadTask(debugModeTaskID)
 	if errUnload != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
