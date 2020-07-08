@@ -132,7 +132,6 @@ func startCollector(ctx context.Context, collector types.Collector) {
 }
 
 func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
-	ctx := ctxManager.Context()
 	const debugModeTaskID = "task-1"
 
 	// Load task based on command line options
