@@ -146,6 +146,6 @@ func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, 
 	return nil
 }
 
-func (cs *collectService) logger() *logrus.Entry {
+func (cs *collectService) logger() logrus.FieldLogger {
 	return log.WithCtx(cs.ctx)
 }

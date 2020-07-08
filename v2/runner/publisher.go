@@ -64,7 +64,7 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 		os.Exit(errorExitStatus)
 	}
 
-	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	jsonMeta := metaInformation(ctx, name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 	if inProc {
 		inprocPlugin.MetaChannel() <- jsonMeta
 		close(inprocPlugin.MetaChannel())

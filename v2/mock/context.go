@@ -77,7 +77,7 @@ func (m *Context) Done() <-chan struct{} {
 	return args.Get(0).(<-chan struct{})
 }
 
-func (m *Context) Logger() *logrus.Entry {
+func (m *Context) Logger() logrus.FieldLogger {
 	args := m.Called()
 	return args.Get(0).(*logrus.Entry)
 }

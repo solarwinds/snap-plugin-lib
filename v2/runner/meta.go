@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -45,7 +46,7 @@ type meta struct {
 	}
 }
 
-func metaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
+func metaInformation(ctx context.Context, name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{}

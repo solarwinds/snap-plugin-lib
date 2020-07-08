@@ -168,6 +168,6 @@ func (c *Context) ReleaseContext() {
 	c.cancelFn()
 }
 
-func (c *Context) Logger() *logrus.Entry {
+func (c *Context) Logger() logrus.FieldLogger {
 	return log.WithCtx(c.ctx)
 }

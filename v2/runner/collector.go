@@ -99,7 +99,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 			os.Exit(errorExitStatus)
 		}
 
-		jsonMeta := metaInformation(collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+		jsonMeta := metaInformation(ctx, collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 		if inProc {
 			inprocPlugin.MetaChannel() <- jsonMeta
 			close(inprocPlugin.MetaChannel())
@@ -132,6 +132,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 }
 
 func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Options) {
+	ctx := ctxManager.Context()
 	const debugModeTaskID = "task-1"
 
 	// Load task based on command line options
@@ -142,7 +143,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errLoad := ctxManager.LoadTask(debugModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
-		log.WithCtx(ctx).WithError(err).Error("Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
+		log.WithCtx(ctx).WithError(errLoad).Error("Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
 		os.Exit(errorExitStatus)
 	}
 
@@ -152,7 +153,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 		for chunk := range chunkCh {
 			if chunk.Err != nil {
-				log.WithCtx(ctx).WithError(err).Error("Error occurred during metrics collection in a standalone mode (reason: %v)\n", chunk.Err)
+				log.WithCtx(ctx).WithError(chunk.Err).Error("Error occurred during metrics collection in a standalone mode (reason: %v)\n", chunk.Err)
 				os.Exit(errorExitStatus)
 			}
 
@@ -177,7 +178,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errUnload := ctxManager.UnloadTask(debugModeTaskID)
 	if errUnload != nil {
-		log.WithCtx(ctx).WithError(err).Error("Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
+		log.WithCtx(ctx).WithError(errUnload).Error("Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
 	}
 }

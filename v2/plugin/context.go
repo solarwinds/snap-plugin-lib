@@ -35,5 +35,5 @@ type Context interface {
 	Done() <-chan struct{}
 
 	// Reference to logger object
-	Logger() *logrus.Entry
+	Logger() logrus.FieldLogger
 }

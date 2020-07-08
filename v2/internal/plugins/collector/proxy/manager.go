@@ -90,6 +90,10 @@ func NewContextManager(ctx context.Context, collector types.Collector, statsCont
 ///////////////////////////////////////////////////////////////////////////////
 // proxy.Collector related methods
 
+func (cm *ContextManager) Context() context.Context {
+	return cm.ctx
+}
+
 func (cm *ContextManager) RequestCollect(id string) <-chan types.CollectChunk {
 	chunkCh := make(chan types.CollectChunk)
 	go cm.requestCollect(id, chunkCh)
@@ -401,6 +405,6 @@ func (cm *ContextManager) ListDefaultMetrics() []string {
 	return result
 }
 
-func (cm *ContextManager) logger() *logrus.Entry {
+func (cm *ContextManager) logger() logrus.FieldLogger {
 	return log.WithCtx(cm.ctx)
 }
