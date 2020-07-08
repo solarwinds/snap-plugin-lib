@@ -77,7 +77,7 @@ func metaInformation(ctx context.Context, name string, version string, typ types
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Can't provide plugin metadata information (reason: %v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Can't provide plugin metadata information")
 		os.Exit(errorExitStatus)
 	}
 

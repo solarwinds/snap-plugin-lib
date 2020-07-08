@@ -59,20 +59,20 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	if opt == nil {
 		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Error("Error occured during plugin startup (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Error occured during plugin startup")
 			os.Exit(errorExitStatus)
 		}
 	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Invalid plugin options (%v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Invalid plugin options")
 		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(ctx, collector.Name(), collector.Version(), collector.Type(), opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Error occured when starting statistics controller (%v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
 
@@ -95,7 +95,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	} else {
 		r, err := acquireResources(opt)
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Error("Can't acquire resources for plugin services (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Can't acquire resources for plugin services")
 			os.Exit(errorExitStatus)
 		}
 
@@ -117,7 +117,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 
 		srv, err := service.NewGRPCServer(ctx, opt)
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Error("Can't initialize GRPC Server (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Can't initialize GRPC Server")
 			os.Exit(errorExitStatus)
 		}
 
@@ -143,7 +143,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errLoad := ctxManager.LoadTask(debugModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
-		log.WithCtx(ctx).WithError(errLoad).Error("Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
+		log.WithCtx(ctx).WithError(errLoad).Error("Couldn't load a task in a standalone mode")
 		os.Exit(errorExitStatus)
 	}
 
@@ -153,7 +153,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 		for chunk := range chunkCh {
 			if chunk.Err != nil {
-				log.WithCtx(ctx).WithError(chunk.Err).Error("Error occurred during metrics collection in a standalone mode (reason: %v)\n", chunk.Err)
+				log.WithCtx(ctx).WithError(chunk.Err).Error("Error occurred during metrics collection in a standalone mode")
 				os.Exit(errorExitStatus)
 			}
 
@@ -178,7 +178,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errUnload := ctxManager.UnloadTask(debugModeTaskID)
 	if errUnload != nil {
-		log.WithCtx(ctx).WithError(errUnload).Error("Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
+		log.WithCtx(ctx).WithError(errUnload).Error("Couldn't unload a task in a standalone mode")
 		os.Exit(errorExitStatus)
 	}
 }
