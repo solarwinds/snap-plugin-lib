@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const loggerKey = "logger"
+const loggerCtxKey = "logger"
 
 func WithCtx(ctx context.Context) *logrus.Entry {
 	var log *logrus.Entry
@@ -22,8 +22,12 @@ func WithCtx(ctx context.Context) *logrus.Entry {
 	return log
 }
 
+func ToCtx(ctx context.Context, logger *logrus.Entry) context.Context {
+	return context.WithValue(ctx, loggerCtxKey, logger)
+}
+
 func withCtx(ctx context.Context) (*logrus.Entry, error) {
-	logI := ctx.Value(loggerKey)
+	logI := ctx.Value(loggerCtxKey)
 	if logI == nil {
 		return nil, errors.New("no logger in context")
 	}
