@@ -7,7 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const loggerCtxKey = "logger"
+type ctxKey string
+
+const loggerCtxKey ctxKey = "logger"
 
 func WithCtx(ctx context.Context) logrus.FieldLogger {
 	var log logrus.FieldLogger
