@@ -29,23 +29,25 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 		ctx = log.ToCtx(ctx, logger)
 	}
 
+	logF := logger(ctx).WithField("service", "publisher")
+
 	if opt == nil {
 		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Error("Error occured during plugin startup")
+			logF.WithError(err).Error("Error occured during plugin startup")
 			os.Exit(errorExitStatus)
 		}
 	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Invalid plugin options")
+		logF.WithError(err).Error("Invalid plugin options")
 		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(ctx, name, version, types.PluginTypePublisher, opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Error occured when starting statistics controller")
+		logF.WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
 
@@ -60,7 +62,7 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 
 	r, err := acquireResources(opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Can't acquire resources for plugin services")
+		logF.WithError(err).Error("Can't acquire resources for plugin services")
 		os.Exit(errorExitStatus)
 	}
 
@@ -82,7 +84,7 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 
 	srv, err := service.NewGRPCServer(ctx, opt)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Can't initialize GRPC Server")
+		logF.WithError(err).Error("Can't initialize GRPC Server")
 		os.Exit(errorExitStatus)
 	}
 

@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -47,6 +46,8 @@ type meta struct {
 }
 
 func metaInformation(ctx context.Context, name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
+	logF := logger(ctx).WithField("service", "meta")
+
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{}
@@ -77,7 +78,7 @@ func metaInformation(ctx context.Context, name string, version string, typ types
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		log.WithCtx(ctx).WithError(err).Error("Can't provide plugin metadata information")
+		logF.WithError(err).Error("Can't provide plugin metadata information")
 		os.Exit(errorExitStatus)
 	}
 

@@ -108,10 +108,10 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
-	logF := c.Logger().WithFields(moduleFields)
+	logF := log.WithCtx(c.ctx).WithFields(moduleFields).WithField("service", "proxy")
 
 	if c.IsDone() {
-		logF.Warning("task has been canceled")
+		logF.Warn("task has been canceled")
 		return
 	}
 
@@ -119,7 +119,7 @@ func (c *Context) AddWarning(msg string) {
 	defer c.warningsMutex.Unlock()
 
 	if len(c.sessionWarnings) >= maxNoOfWarnings {
-		logF.Warning("Maximum number of warnings logged. New warning has been ignored")
+		logF.Warn("Maximum number of warnings logged. New warning has been ignored")
 		return
 	}
 
@@ -166,8 +166,4 @@ func (c *Context) AttachContext(parentCtx context.Context) {
 
 func (c *Context) ReleaseContext() {
 	c.cancelFn()
-}
-
-func (c *Context) Logger() logrus.FieldLogger {
-	return log.WithCtx(c.ctx)
 }

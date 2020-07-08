@@ -163,7 +163,8 @@ func (sc *StatisticsController) UpdateStreamingStat(taskID string, metricsCount 
 ///////////////////////////////////////////////////////////////////////////////
 
 func (sc *StatisticsController) applyLoadStat(taskID string, config string, filters []string) {
-	log.WithCtx(sc.ctx).WithFields(logrus.Fields{
+	logF := sc.logger()
+	logF.WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Load",
 	}).Trace("Applying statistic")
@@ -187,7 +188,8 @@ func (sc *StatisticsController) applyLoadStat(taskID string, config string, filt
 }
 
 func (sc *StatisticsController) applyUnloadStat(taskID string) {
-	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	logF := sc.logger()
+	logF.WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Unload",
 	}).Trace("Applying statistic")
@@ -200,7 +202,8 @@ func (sc *StatisticsController) applyUnloadStat(taskID string) {
 }
 
 func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int, _ bool, startTime, completeTime time.Time) {
-	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	logF := sc.logger()
+	logF.WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Collect",
 	}).Trace("Applying statistic")
@@ -252,7 +255,8 @@ func (sc *StatisticsController) applyCollectStat(taskID string, metricsCount int
 }
 
 func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int, startTime, lastUpdate time.Time) {
-	log.WithCtx(sc.ctx).WithFields(moduleFields).WithFields(logrus.Fields{
+	logF := sc.logger()
+	logF.WithFields(moduleFields).WithFields(logrus.Fields{
 		"task-id":        taskID,
 		"statistic-type": "Streaming",
 	}).Trace("Applying statistic")
@@ -264,6 +268,10 @@ func (sc *StatisticsController) applyStreamStat(taskID string, metricsCount int,
 	td.Counters.TotalMetrics += metricsCount
 
 	sc.stats.TasksDetails[taskID] = td
+}
+
+func (sc *StatisticsController) logger() logrus.FieldLogger {
+	return log.WithCtx(sc.ctx).WithFields(moduleFields).WithField("service", "stats")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
