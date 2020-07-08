@@ -19,7 +19,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 13 "main.go"
+#line 3 "main.go"
 
 #include <stdlib.h>
 
@@ -60,6 +60,11 @@ typedef struct {
     char * value;
 } tag_t;
 
+typedef struct {
+	tag_t * tag_array;
+	int length;
+} tag_wrapper_t;
+
 static inline char * tag_key(tag_t * tags, int index) { return tags[index].key; }
 static inline char * tag_value(tag_t * tags, int index) { return tags[index].value; }
 
@@ -85,6 +90,49 @@ static inline void free_error_msg(error_t * err) {
 	free(err);
 }
 
+typedef struct {
+	int sec;
+	int nsec;
+} time_with_ns_t;
+
+typedef struct {
+	tag_wrapper_t * tags_to_add;
+	tag_wrapper_t * tags_to_remove;
+	time_with_ns_t * timestamp;
+	char ** description;
+	char ** unit;
+} modifiers_t;
+
+static inline modifiers_t * alloc_modifiers() {
+	modifiers_t * modifiers = (modifiers_t *) malloc(sizeof(modifiers_t));
+	modifiers->tags_to_add = NULL;
+	modifiers->tags_to_remove = NULL;
+	modifiers->timestamp = NULL;
+	modifiers->description = NULL;
+	modifiers->unit = NULL;
+	return modifiers;
+}
+
+static inline void set_modifier_description (modifiers_t * modifiers, char * description) {
+	modifiers->description = &description;
+}
+
+static inline void set_modifier_unit (modifiers_t * modifiers, char * unit) {
+	modifiers->unit = &unit;
+}
+
+static inline void set_modifier_tags_to_add (modifiers_t * modifiers, tag_wrapper_t * tags) {
+	modifiers->tags_to_add = tags;
+}
+
+static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, tag_wrapper_t * tags) {
+	modifiers->tags_to_remove = tags;
+}
+
+static inline void set_modifier_timestamp (modifiers_t * modifiers, time_with_ns_t * timestamp) {
+	modifiers->timestamp = timestamp;
+}
+
 static inline char** alloc_str_array(int size) {
 	return malloc(sizeof(char*) * size);
 }
@@ -96,7 +144,6 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
 static inline void free_memory(void * p) {
 	free(p);
 }
-
 
 #line 1 "cgo-generated-wrapper"
 
