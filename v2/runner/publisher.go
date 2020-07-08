@@ -24,6 +24,9 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 	inprocPlugin, inProc := publisher.(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
+
+		logger := inprocPlugin.Logger()
+		ctx = log.ToCtx(ctx, logger)
 	}
 
 	if opt == nil {

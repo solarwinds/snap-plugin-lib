@@ -51,6 +51,9 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	inprocPlugin, inProc := collector.Unwrap().(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
+
+		logger := inprocPlugin.Logger()
+		ctx = log.ToCtx(ctx, logger)
 	}
 
 	if opt == nil {
