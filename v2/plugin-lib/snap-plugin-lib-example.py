@@ -31,10 +31,10 @@ class ExamplePlugin(BasePlugin):
 
         # print("$$$", ctx.is_done())
         # ctx.add_warning("This is a warning.")
-        # ctx.log(LOGLEVEL_ERROR, "Error log!", {
-        #     "fa": "va",
-        #     "fb": "vb"
-        # })
+        ctx.log(LOGLEVEL_ERROR, "Error log!", {
+            "fa": "va",
+            "fb": "vb"
+        })
         # ctx.dismiss_all_modifiers()
         print(ctx.requested_metrics())
         print(ctx.config_keys())

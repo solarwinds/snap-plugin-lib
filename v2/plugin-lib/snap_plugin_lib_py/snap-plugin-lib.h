@@ -58,15 +58,16 @@ static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 typedef struct {
     char * key;
     char * value;
-} tag_t;
+} map_element_t;
 
 typedef struct {
-	tag_t * tag_array;
+	map_element_t * elements;
 	int length;
-} tag_wrapper_t;
+} map_t;
 
-static inline char * tag_key(tag_t * tags, int index) { return tags[index].key; }
-static inline char * tag_value(tag_t * tags, int index) { return tags[index].value; }
+static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
+static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
+static inline int get_map_length(map_t * map) { return map->length; }
 
 typedef struct {
     char * msg;
@@ -96,8 +97,8 @@ typedef struct {
 } time_with_ns_t;
 
 typedef struct {
-	tag_wrapper_t * tags_to_add;
-	tag_wrapper_t * tags_to_remove;
+	map_t * tags_to_add;
+	map_t * tags_to_remove;
 	time_with_ns_t * timestamp;
 	char ** description;
 	char ** unit;
@@ -121,11 +122,11 @@ static inline void set_modifier_unit (modifiers_t * modifiers, char * unit) {
 	modifiers->unit = &unit;
 }
 
-static inline void set_modifier_tags_to_add (modifiers_t * modifiers, tag_wrapper_t * tags) {
+static inline void set_modifier_tags_to_add (modifiers_t * modifiers, map_t * tags) {
 	modifiers->tags_to_add = tags;
 }
 
-static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, tag_wrapper_t * tags) {
+static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, map_t * tags) {
 	modifiers->tags_to_remove = tags;
 }
 
@@ -214,7 +215,7 @@ extern char* ctx_raw_config(char* p0);
 
 extern void ctx_add_warning(char* p0, char* p1);
 
-extern void ctx_log(char* p0, int p1, char* p2, tag_t* p3, GoInt p4);
+extern void ctx_log(char* p0, int p1, char* p2, map_t p3);
 
 extern GoInt ctx_is_done(char* p0);
 

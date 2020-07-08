@@ -4,7 +4,7 @@ from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
 import platform
 from itertools import count
 
-from .convertions import string_to_bytes, dict_to_tags, CError, to_value_t, cstrarray_to_list
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -75,7 +75,6 @@ class Context:
 
     def config_keys(self):
         config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())
-        print(config_list_c)
         return cstrarray_to_list(config_list_c)
 
     def raw_config(self):
@@ -92,10 +91,11 @@ class Context:
         return storedObjectMap[self._ctx_id()][key]
 
     def log(self, level, message, fields):
+        d = dict_to_cmap(fields)
         return PLUGIN_LIB_OBJ.ctx_log(self._ctx_id(),
                                       level,
                                       string_to_bytes(message),
-                                      dict_to_tags(fields),
+                                      dict_to_cmap(fields),
                                       len(fields))
 
     def add_warning(self, message):

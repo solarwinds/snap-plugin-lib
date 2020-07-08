@@ -38,15 +38,16 @@ static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 typedef struct {
     char * key;
     char * value;
-} tag_t;
+} map_element_t;
 
 typedef struct {
-	tag_t * tag_array;
+	map_element_t * elements;
 	int length;
-} tag_wrapper_t;
+} map_t;
 
-static inline char * tag_key(tag_t * tags, int index) { return tags[index].key; }
-static inline char * tag_value(tag_t * tags, int index) { return tags[index].value; }
+static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
+static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
+static inline int get_map_length(map_t * map) { return map->length; }
 
 typedef struct {
     char * msg;
@@ -76,8 +77,8 @@ typedef struct {
 } time_with_ns_t;
 
 typedef struct {
-	tag_wrapper_t * tags_to_add;
-	tag_wrapper_t * tags_to_remove;
+	map_t * tags_to_add;
+	map_t * tags_to_remove;
 	time_with_ns_t * timestamp;
 	char ** description;
 	char ** unit;
@@ -101,11 +102,11 @@ static inline void set_modifier_unit (modifiers_t * modifiers, char * unit) {
 	modifiers->unit = &unit;
 }
 
-static inline void set_modifier_tags_to_add (modifiers_t * modifiers, tag_wrapper_t * tags) {
+static inline void set_modifier_tags_to_add (modifiers_t * modifiers, map_t * tags) {
 	modifiers->tags_to_add = tags;
 }
 
-static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, tag_wrapper_t * tags) {
+static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, map_t * tags) {
 	modifiers->tags_to_remove = tags;
 }
 
@@ -171,11 +172,11 @@ func boolToInt(v bool) int {
 	return 1
 }
 
-func ctagsToMap(tags *C.tag_t, tagsCount int) map[string]string {
+func ctagsToMap(tags *C.map_t) map[string]string {
 	tagsMap := map[string]string{}
-	for i := 0; i < tagsCount; i++ {
-		k := C.GoString(C.tag_key(tags, C.int(i)))
-		v := C.GoString(C.tag_value(tags, C.int(i)))
+	for i := 0; i < int(C.get_map_length(tags)); i++ {
+		k := C.GoString(C.get_map_key(tags, C.int(i)))
+		v := C.GoString(C.get_map_value(tags, C.int(i)))
 		tagsMap[k] = v
 	}
 	return tagsMap
@@ -270,7 +271,6 @@ func ctx_config_keys(ctxID *C.char) **C.char {
 //export ctx_raw_config
 func ctx_raw_config(ctxID *C.char) *C.char {
 	rc := string(contextObject(ctxID).RawConfig())
-	fmt.Printf("rc=%#v\n", rc)
 	return C.CString(rc)
 }
 
@@ -280,11 +280,11 @@ func ctx_add_warning(ctxID *C.char, message *C.char) {
 }
 
 //export ctx_log
-func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.tag_t, fieldsCount int) {
+func ctx_log(ctxID *C.char, level C.int, message *C.char, fields C.map_t) {
 	logF := contextObject(ctxID).Logger()
-	for i := 0; i < fieldsCount; i++ {
-		k := C.tag_key(fields, C.int(i))
-		v := C.tag_value(fields, C.int(i))
+	for i := 0; i < int(C.get_map_length(&fields)); i++ {
+		k := C.get_map_key(&fields, C.int(i))
+		v := C.get_map_value(&fields, C.int(i))
 		logF = logF.WithField(C.GoString(k), C.GoString(v))
 	}
 	logF.Log(logrus.Level(int(level)), C.GoString(message))

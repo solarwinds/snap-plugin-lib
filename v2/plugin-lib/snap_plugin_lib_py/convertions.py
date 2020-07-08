@@ -1,4 +1,4 @@
-from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int
+from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER
 from itertools import count
 
 from snap_plugin_lib_py.exceptions import PluginLibException
@@ -12,10 +12,17 @@ _, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
 LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
 
 
-class Tags(Structure):
+class MapElement(Structure):
     _fields_ = [
         ("key", c_char_p),
         ("value", c_char_p)
+    ]
+
+
+class Map(Structure):
+    _fields_ = [
+        ("elements", POINTER(MapElement)),
+        ("length", c_int)
     ]
 
 
@@ -53,15 +60,17 @@ def string_to_bytes(s):
         raise Exception("Invalid type, expected string or bytes")
 
 
-# Converts python dictionary to array of objects
-def dict_to_tags(d):
-    tags = (Tags * len(d))()
+# Converts python dictionary to C map pointer
+def dict_to_cmap(d):
+    cmap = Map()
+    cmap.elements = (MapElement * len(d))()
+    cmap.length = len(d)
 
     for i, (k, v) in enumerate(d.items()):
-        tags[i].key = string_to_bytes(k)
-        tags[i].value = string_to_bytes(v)
+        cmap.elements[i].key = string_to_bytes(k)
+        cmap.elements[i].value = string_to_bytes(v)
 
-    return tags
+    return cmap
 
 
 # Converts C **char to Python list
