@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
@@ -75,7 +76,7 @@ func metaInformation(name string, version string, typ types.PluginType, opt *plu
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't provide plugin metadata information (reason: %v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Can't provide plugin metadata information (reason: %v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 

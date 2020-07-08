@@ -13,6 +13,7 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -55,20 +56,20 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	if opt == nil {
 		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Error occured during plugin startup (%v)\n", err)
 			os.Exit(errorExitStatus)
 		}
 	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Invalid plugin options (%v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Invalid plugin options (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(ctx, collector.Name(), collector.Version(), collector.Type(), opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
+		log.WithCtx(ctx).WithError(err).Error("Error occured when starting statistics controller (%v)\n", err)
 		os.Exit(errorExitStatus)
 	}
 
@@ -91,7 +92,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	} else {
 		r, err := acquireResources(opt)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Can't acquire resources for plugin services (%v)\n", err)
 			os.Exit(errorExitStatus)
 		}
 
@@ -113,7 +114,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 
 		srv, err := service.NewGRPCServer(ctx, opt)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Can't initialize GRPC Server (%v)\n", err)
+			log.WithCtx(ctx).WithError(err).Error("Can't initialize GRPC Server (%v)\n", err)
 			os.Exit(errorExitStatus)
 		}
 
@@ -138,7 +139,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errLoad := ctxManager.LoadTask(debugModeTaskID, []byte(opt.PluginConfig), filter)
 	if errLoad != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
+		log.WithCtx(ctx).WithError(err).Error("Couldn't load a task in a standalone mode (reason: %v)\n", errLoad)
 		os.Exit(errorExitStatus)
 	}
 
@@ -148,7 +149,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 		for chunk := range chunkCh {
 			if chunk.Err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "Error occurred during metrics collection in a standalone mode (reason: %v)\n", chunk.Err)
+				log.WithCtx(ctx).WithError(err).Error("Error occurred during metrics collection in a standalone mode (reason: %v)\n", chunk.Err)
 				os.Exit(errorExitStatus)
 			}
 
@@ -173,7 +174,7 @@ func startCollectorInDebugMode(ctxManager *proxy.ContextManager, opt *plugin.Opt
 
 	errUnload := ctxManager.UnloadTask(debugModeTaskID)
 	if errUnload != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
+		log.WithCtx(ctx).WithError(err).Error("Couldn't unload a task in a standalone mode (reason: %v)\n", errUnload)
 		os.Exit(errorExitStatus)
 	}
 }
