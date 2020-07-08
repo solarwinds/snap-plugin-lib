@@ -4,7 +4,7 @@ from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
 import platform
 from itertools import count
 
-from .convertions import string_to_bytes, dict_to_tags, CError, to_value_t
+from .convertions import string_to_bytes, dict_to_tags, CError, to_value_t, cstrarray_to_list
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -30,6 +30,7 @@ PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_requested_metrics.restype = POINTER(c_char_p)
+PLUGIN_LIB_OBJ.ctx_config_keys.restype = POINTER(c_char_p)
 
 
 ###############################################################################
@@ -72,18 +73,17 @@ class Context:
         return PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(),
                                          string_to_bytes(key)).decode(encoding='utf-8')
 
+    def config_keys(self):
+        config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())
+        print(config_list_c)
+        return cstrarray_to_list(config_list_c)
+
     def raw_config(self):
         return PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id()).decode(encoding='utf-8')
 
     def requested_metrics(self):
         req_mts_c = PLUGIN_LIB_OBJ.ctx_requested_metrics(self._ctx_id())
-        req_mts = []
-        for i in count(0):
-            if req_mts_c[i] is None:
-                break
-            req_mts.append(req_mts_c[i].decode(encoding='utf-8'))
-
-        return req_mts
+        return cstrarray_to_list(req_mts_c)
 
     def store(self, key, obj):
         storedObjectMap[self._ctx_id()][key] = obj

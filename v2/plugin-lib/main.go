@@ -141,6 +141,16 @@ func toCError(err error) *C.error_t {
 	return C.alloc_error_msg((*C.char)(errMsg))
 }
 
+func toCStrArray(arr []string) **C.char {
+	cStrArr := C.alloc_str_array(C.int(len(arr) + 1))
+	for i, el := range arr {
+		C.set_str_array_element(cStrArr, C.int(i), (*C.char)(C.CString(el)))
+	}
+	C.set_str_array_element(cStrArr, C.int(len(arr)), (*C.char)(C.NULL)) // last element of array is always None (NULL)
+
+	return cStrArr
+}
+
 func toGoValue(v *C.value_t) interface{} {
 	switch (*v).vtype {
 	case C.TYPE_INT64:
@@ -191,14 +201,7 @@ func ctx_should_process(ctxID *C.char, ns *C.char) int {
 
 //export ctx_requested_metrics
 func ctx_requested_metrics(ctxID *C.char) **C.char {
-	reqMts := contextObject(ctxID).RequestedMetrics()
-	cStrArr := C.alloc_str_array(C.int(len(reqMts) + 1))
-	for i, mt := range reqMts {
-		C.set_str_array_element(cStrArr, C.int(i), (*C.char)(C.CString(mt)))
-	}
-	C.set_str_array_element(cStrArr, C.int(len(reqMts)), (*C.char)(C.NULL)) // last element of array is always None (NULL)
-
-	return cStrArr
+	return toCStrArray(contextObject(ctxID).RequestedMetrics())
 }
 
 //export ctx_config
@@ -213,8 +216,7 @@ func ctx_config(ctxID *C.char, key *C.char) *C.char {
 
 //export ctx_config_keys
 func ctx_config_keys(ctxID *C.char) **C.char {
-	// todo: adamik: implement
-	return (**C.char)(C.NULL)
+	return toCStrArray(contextObject(ctxID).ConfigKeys())
 }
 
 //export ctx_raw_config

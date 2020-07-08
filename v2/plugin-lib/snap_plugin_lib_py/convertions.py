@@ -1,4 +1,5 @@
 from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int
+from itertools import count
 
 from snap_plugin_lib_py.exceptions import PluginLibException
 
@@ -8,7 +9,7 @@ max_uint = 18446744073709551615
 
 _, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
 _, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
-    LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
+LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
 
 
 class Tags(Structure):
@@ -40,7 +41,7 @@ class CValue(Structure):
     ]
 
 
-# Convert string to bytes if necessary.
+# Converts string to bytes if necessary.
 # Allow to use string type in Python code and covert it to required char *
 # (bytes) when calling C Api
 def string_to_bytes(s):
@@ -52,7 +53,7 @@ def string_to_bytes(s):
         raise Exception("Invalid type, expected string or bytes")
 
 
-# Converting python dictionary to array of objects
+# Converts python dictionary to array of objects
 def dict_to_tags(d):
     tags = (Tags * len(d))()
 
@@ -61,6 +62,17 @@ def dict_to_tags(d):
         tags[i].value = string_to_bytes(v)
 
     return tags
+
+
+# Converts C **char to Python list
+def cstrarray_to_list(arr):
+    result_list = []
+    for i in count(0):
+        if arr[i] is None:
+            break
+        result_list.append(arr[i].decode(encoding='utf-8'))
+
+    return result_list
 
 
 def to_value_t(v):

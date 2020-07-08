@@ -37,6 +37,7 @@ class ExamplePlugin(BasePlugin):
         # })
         # ctx.dismiss_all_modifiers()
         print(ctx.requested_metrics())
+        print(ctx.config_keys())
 
     def load(self, ctx):
         pass
