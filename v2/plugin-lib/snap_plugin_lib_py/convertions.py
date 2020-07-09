@@ -1,3 +1,4 @@
+import math
 from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER, pointer
 from itertools import count
 
@@ -105,6 +106,12 @@ def cstrarray_to_list(arr):
         result_list.append(arr[i].decode(encoding='utf-8'))
 
     return result_list
+
+
+def time_to_ctimewithns(timestamp):
+    sec = int(math.floor(timestamp))
+    nsec = int(math.floor(timestamp - sec) * 1e9)
+    return pointer(TimeWithNs(sec, nsec))
 
 
 def to_value_t(v):

@@ -150,7 +150,7 @@ func contextObject(ctxId *C.char) *proxy.PluginContext {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
 	if !ok {
-		panic(fmt.Sprintf("can't aquire context object with id %s", id))
+		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 
 	ctxObj, okType := ctx.(*proxy.PluginContext)
@@ -216,18 +216,7 @@ func toGoValue(v *C.value_t) interface{} {
 	panic(fmt.Sprintf("Invalid type %v", (*v).vtype))
 }
 
-/*****************************************************************************/
-// Collect related functions
-
-// ctx.Store() and ctx.Load() have to be implemented and managed on the
-// native language side due to garbage collection functionality (we can't
-// pass Python/C# address to Go side, since it may become invalid).
-
-// ctx.Done() returns channel which is not a simple type present in other
-// language. Only ctx.IsDone() may be used
-
-//export ctx_add_metric
-func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
+func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	var appliedModifiers []plugin.MetricModifier
 
 	if modifiers.tags_to_add != nil {
@@ -247,14 +236,29 @@ func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifi
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(*modifiers.unit)))
 	}
 
-	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), appliedModifiers...)
+	return appliedModifiers
+}
+
+/*****************************************************************************/
+// C API - Collect related functions
+
+// ctx.Store() and ctx.Load() have to be implemented and managed on the
+// native language side due to garbage collection functionality (we can't
+// pass Python/C# address to Go side, since it may become invalid).
+
+// ctx.Done() returns channel which is not a simple type present in other
+// language. Only ctx.IsDone() may be used
+
+//export ctx_add_metric
+func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
+	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), toGoModifiers(modifiers)...)
 	return toCError(err)
 }
 
 //export ctx_always_apply
-func ctx_always_apply(ctxID *C.char, ns *C.char) *C.error_t {
-	// todo: adamik: implement
-	return toCError(nil)
+func ctx_always_apply(ctxID *C.char, ns *C.char, modifiers *C.modifiers_t) *C.error_t {
+	_, err := contextObject(ctxID).AlwaysApply(C.GoString(ns), toGoModifiers(modifiers)...)
+	return toCError(err)
 }
 
 //export ctx_dismiss_all_modifiers
@@ -315,7 +319,7 @@ func ctx_is_done(ctxID *C.char) int {
 }
 
 /*****************************************************************************/
-// DefinePlugin related functions
+// C API - DefinePlugin related functions
 
 //export define_metric
 func define_metric(namespace *C.char, unit *C.char, isDefault int, description *C.char) {
@@ -344,6 +348,7 @@ func define_instances_limit(limit int) {
 }
 
 /*****************************************************************************/
+// C API - runner related functions
 
 //export start_collector
 func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {

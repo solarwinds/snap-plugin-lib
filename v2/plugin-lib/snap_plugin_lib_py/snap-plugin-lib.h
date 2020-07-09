@@ -199,7 +199,7 @@ extern "C" {
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 
-extern error_t* ctx_always_apply(char* p0, char* p1);
+extern error_t* ctx_always_apply(char* p0, char* p1, modifiers_t* p2);
 
 extern void ctx_dismiss_all_modifiers(char* p0);
 

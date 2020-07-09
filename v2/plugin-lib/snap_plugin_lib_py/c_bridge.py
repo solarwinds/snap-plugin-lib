@@ -2,9 +2,9 @@ import os.path
 from collections import defaultdict
 from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer
 import platform
-from itertools import count
 
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, TimeWithNs
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
+    time_to_ctimewithns
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -91,7 +91,6 @@ class Context:
         return storedObjectMap[self._ctx_id()][key]
 
     def log(self, level, message, fields):
-        d = dict_to_cmap(fields)
         return PLUGIN_LIB_OBJ.ctx_log(self._ctx_id(),
                                       level,
                                       string_to_bytes(message),
@@ -115,17 +114,27 @@ class Context:
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
-        modifiers = Modifiers()
-
-        modifiers.tags_to_add = pointer(dict_to_cmap(tags)) if tags is not None else None
-        modifiers.timestamp = pointer(TimeWithNs(10, 10)) if timestamp is not None else None
-        modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
-        modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
-
         return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
                                              string_to_bytes(namespace),
                                              to_value_t(value),
-                                             modifiers)
+                                             self.__create_modifier(tags, None, timestamp, description, unit))
+
+    def always_apply(self, namespace, *,
+                     tags_to_add=None, tags_to_remove=None, timestamp=None, description=None, unit=None):
+        return PLUGIN_LIB_OBJ.ctx_always_apply(self._ctx_id(),
+                                               string_to_bytes(namespace),
+                                               self.__create_modifier(tags_to_add, tags_to_remove, timestamp,
+                                                                      description, unit))
+
+    @staticmethod
+    def __create_modifier(tags_to_add, tags_to_remove, timestamp, description, unit):
+        modifiers = Modifiers()
+        modifiers.tags_to_add = pointer(dict_to_cmap(tags_to_add)) if tags_to_add is not None else None
+        modifiers.tags_to_remove = pointer(dict_to_cmap(tags_to_remove)) if tags_to_remove is not None else None
+        modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
+        modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
+        modifiers.timestamp = time_to_ctimewithns(timestamp) if timestamp is not None else None
+        return modifiers
 
     def should_process(self, namespace):
         return bool(PLUGIN_LIB_OBJ.ctx_should_process(self._ctx_id(),
