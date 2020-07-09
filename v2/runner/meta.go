@@ -23,8 +23,9 @@ type meta struct {
 	}
 
 	GRPC struct {
-		IP   string // IP on which GRPC service is being served
-		Port int    // Port on which GRPC service is being served
+		IP         string // IP on which GRPC service is being served
+		Port       int    // Port on which GRPC service is being served
+		TLSEnabled bool   // if enabled
 	}
 
 	Constraints struct {
@@ -57,6 +58,7 @@ func metaInformation(name string, version string, typ types.PluginType, opt *plu
 
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListenerAddr().Port
+	m.GRPC.TLSEnabled = opt.EnableTLS
 
 	m.Constraints.TasksLimit = tasksLimit
 	m.Constraints.InstancesLimit = instancesLimit
