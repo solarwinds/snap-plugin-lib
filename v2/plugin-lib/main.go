@@ -172,11 +172,11 @@ func boolToInt(v bool) int {
 	return 1
 }
 
-func ctagsToMap(tags *C.map_t) map[string]string {
+func cMapToMap(m *C.map_t) map[string]string {
 	tagsMap := map[string]string{}
-	for i := 0; i < int(C.get_map_length(tags)); i++ {
-		k := C.GoString(C.get_map_key(tags, C.int(i)))
-		v := C.GoString(C.get_map_value(tags, C.int(i)))
+	for i := 0; i < int(C.get_map_length(m)); i++ {
+		k := C.GoString(C.get_map_key(m, C.int(i)))
+		v := C.GoString(C.get_map_value(m, C.int(i)))
 		tagsMap[k] = v
 	}
 	return tagsMap
@@ -226,9 +226,14 @@ func toGoValue(v *C.value_t) interface{} {
 // language. Only ctx.IsDone() may be used
 
 //export ctx_add_metric
-func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t) *C.error_t {
-	// todo: adamik: implement
-	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v))
+func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
+	var appliedModifiers []plugin.MetricModifier
+
+	if modifiers.tags_to_add != nil {
+		fmt.Printf("********* adamik ***=%#v\n", cMapToMap(modifiers.tags_to_add))
+	}
+
+	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), appliedModifiers...)
 	return toCError(err)
 }
 
@@ -280,11 +285,11 @@ func ctx_add_warning(ctxID *C.char, message *C.char) {
 }
 
 //export ctx_log
-func ctx_log(ctxID *C.char, level C.int, message *C.char, fields C.map_t) {
+func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 	logF := contextObject(ctxID).Logger()
-	for i := 0; i < int(C.get_map_length(&fields)); i++ {
-		k := C.get_map_key(&fields, C.int(i))
-		v := C.get_map_value(&fields, C.int(i))
+	for i := 0; i < int(C.get_map_length(fields)); i++ {
+		k := C.get_map_key(fields, C.int(i))
+		v := C.get_map_value(fields, C.int(i))
 		logF = logF.WithField(C.GoString(k), C.GoString(v))
 	}
 	logF.Log(logrus.Level(int(level)), C.GoString(message))

@@ -197,7 +197,7 @@ extern "C" {
 #endif
 
 
-extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2);
+extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 
 extern error_t* ctx_always_apply(char* p0, char* p1);
 
@@ -215,7 +215,7 @@ extern char* ctx_raw_config(char* p0);
 
 extern void ctx_add_warning(char* p0, char* p1);
 
-extern void ctx_log(char* p0, int p1, char* p2, map_t p3);
+extern void ctx_log(char* p0, int p1, char* p2, map_t* p3);
 
 extern GoInt ctx_is_done(char* p0);
 

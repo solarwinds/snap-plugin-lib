@@ -19,7 +19,7 @@ class ExamplePlugin(BasePlugin):
         ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
-        ctx.add_metric("/python/group1/metric1", 10)
+        ctx.add_metric("/python/group1/metric1", 10, tags={"a": "10", "b": "20"})
         ctx.add_metric("/python/group1/metric2", 20)
         ctx.add_metric("/python/group1/metric3", 40)
         ctx.add_metric("/python/group2/dyn1/metric4", 40)

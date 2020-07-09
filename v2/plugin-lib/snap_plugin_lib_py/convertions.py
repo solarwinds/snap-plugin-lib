@@ -1,4 +1,4 @@
-from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER
+from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER, pointer
 from itertools import count
 
 from snap_plugin_lib_py.exceptions import PluginLibException
@@ -24,6 +24,29 @@ class Map(Structure):
         ("elements", POINTER(MapElement)),
         ("length", c_int)
     ]
+
+
+class TimeWithNs(Structure):
+    _fields_ = [
+        ("sec", c_int),
+        ("nsec", c_int)
+    ]
+
+class Modifiers(Structure):
+    _fields_ = [
+        ("tags_to_add", POINTER(Map)),
+        ("tags_to_remove", POINTER(Map)),
+        ("timestamp", POINTER(TimeWithNs)),
+        ("description", POINTER(c_char_p)),
+        ("unit", POINTER(c_char_p))
+    ]
+
+
+#   map_t * tags_to_add;
+# 	map_t * tags_to_remove;
+# 	time_with_ns_t * timestamp;
+# 	char ** description;
+# 	char ** unit;
 
 
 class CError(Structure):

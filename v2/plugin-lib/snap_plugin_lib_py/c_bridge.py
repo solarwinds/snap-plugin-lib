@@ -1,10 +1,10 @@
 import os.path
 from collections import defaultdict
-from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE
+from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer
 import platform
 from itertools import count
 
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -114,10 +114,16 @@ class Context:
 
 class CollectContext(Context):
     @throw_exception_if_error
-    def add_metric(self, namespace, value):
+    def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
+        modifiers = Modifiers()
+
+        if tags is not None:
+            modifiers.tags_to_add = pointer(dict_to_cmap(tags))
+
         return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
                                              string_to_bytes(namespace),
-                                             to_value_t(value))
+                                             to_value_t(value),
+                                             modifiers)
 
     def should_process(self, namespace):
         return bool(PLUGIN_LIB_OBJ.ctx_should_process(self._ctx_id(),
