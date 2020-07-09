@@ -21,16 +21,20 @@ global collector_py
 ###############################################################################
 # C functions metadata
 
-PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
-PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
-PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
-PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
-PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
-PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_always_apply.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_should_process.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_requested_metrics.restype = POINTER(c_char_p)
+
+PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
 PLUGIN_LIB_OBJ.ctx_config_keys.restype = POINTER(c_char_p)
+PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
+PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
+PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
+PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
+
+PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 
 
 ###############################################################################
@@ -38,14 +42,6 @@ PLUGIN_LIB_OBJ.ctx_config_keys.restype = POINTER(c_char_p)
 # Load, store are exceptions since it's safer to keep Python references on Python side
 
 class DefineContext:
-    @staticmethod
-    def define_tasks_per_instance_limit(limit):
-        PLUGIN_LIB_OBJ.define_tasks_per_instance_limit(limit)
-
-    @staticmethod
-    def define_instances_limit(limit):
-        PLUGIN_LIB_OBJ.define_instances_limit(limit)
-
     @staticmethod
     def define_metric(namespace, unit, is_default, description):
         PLUGIN_LIB_OBJ.define_metric(string_to_bytes(namespace),
@@ -62,6 +58,14 @@ class DefineContext:
     @throw_exception_if_error
     def define_example_config(config):
         return PLUGIN_LIB_OBJ.define_example_config(string_to_bytes(config))
+
+    @staticmethod
+    def define_tasks_per_instance_limit(limit):
+        PLUGIN_LIB_OBJ.define_tasks_per_instance_limit(limit)
+
+    @staticmethod
+    def define_instances_limit(limit):
+        PLUGIN_LIB_OBJ.define_instances_limit(limit)
 
 
 class Context:
@@ -80,22 +84,11 @@ class Context:
     def raw_config(self):
         return PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id()).decode(encoding='utf-8')
 
-    def requested_metrics(self):
-        req_mts_c = PLUGIN_LIB_OBJ.ctx_requested_metrics(self._ctx_id())
-        return cstrarray_to_list(req_mts_c)
-
     def store(self, key, obj):
         storedObjectMap[self._ctx_id()][key] = obj
 
     def load(self, key):
         return storedObjectMap[self._ctx_id()][key]
-
-    def log(self, level, message, fields):
-        return PLUGIN_LIB_OBJ.ctx_log(self._ctx_id(),
-                                      level,
-                                      string_to_bytes(message),
-                                      dict_to_cmap(fields),
-                                      len(fields))
 
     def add_warning(self, message):
         return PLUGIN_LIB_OBJ.ctx_add_warning(self._ctx_id(),
@@ -104,8 +97,12 @@ class Context:
     def is_done(self):
         return bool(PLUGIN_LIB_OBJ.ctx_is_done(self._ctx_id()))
 
-    def dismiss_all_modifiers(self):
-        PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers(self._ctx_id())
+    def log(self, level, message, fields):
+        return PLUGIN_LIB_OBJ.ctx_log(self._ctx_id(),
+                                      level,
+                                      string_to_bytes(message),
+                                      dict_to_cmap(fields),
+                                      len(fields))
 
     def _ctx_id(self):
         return self.__ctx_id
@@ -126,6 +123,17 @@ class CollectContext(Context):
                                                self.__create_modifier(tags_to_add, tags_to_remove, timestamp,
                                                                       description, unit))
 
+    def dismiss_all_modifiers(self):
+        PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers(self._ctx_id())
+
+    def should_process(self, namespace):
+        return bool(PLUGIN_LIB_OBJ.ctx_should_process(self._ctx_id(),
+                                                      string_to_bytes(namespace)))
+
+    def requested_metrics(self):
+        req_mts_c = PLUGIN_LIB_OBJ.ctx_requested_metrics(self._ctx_id())
+        return cstrarray_to_list(req_mts_c)
+
     @staticmethod
     def __create_modifier(tags_to_add, tags_to_remove, timestamp, description, unit):
         modifiers = Modifiers()
@@ -135,10 +143,6 @@ class CollectContext(Context):
         modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
         modifiers.timestamp = time_to_ctimewithns(timestamp) if timestamp is not None else None
         return modifiers
-
-    def should_process(self, namespace):
-        return bool(PLUGIN_LIB_OBJ.ctx_should_process(self._ctx_id(),
-                                                      string_to_bytes(namespace)))
 
 
 ###############################################################################

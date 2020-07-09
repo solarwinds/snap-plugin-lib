@@ -1,6 +1,6 @@
 import time
 
-from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_ERROR, LOGLEVEL_INFO
+from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_INFO
 
 
 class ExamplePlugin(BasePlugin):
@@ -21,6 +21,11 @@ class ExamplePlugin(BasePlugin):
         ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
+        ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
+            "name": "py-example"
+        })
+        print("Requested metrics: ", ctx.requested_metrics())
+
         ctx.add_metric("/python/group1/metric1", 10,
                        tags={"a": "10", "b": "20"},
                        timestamp=time.time(),
@@ -41,7 +46,6 @@ class ExamplePlugin(BasePlugin):
             "name": "py-example"
         })
 
-        print("Requested metrics: ", ctx.requested_metrics())
         print("Config keys:", ctx.config_keys())
         print("Config: ", ctx.raw_config())
 

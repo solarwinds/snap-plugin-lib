@@ -173,7 +173,7 @@ func boolToInt(v bool) int {
 	return 1
 }
 
-func cMapToMap(m *C.map_t) map[string]string {
+func toGoMap(m *C.map_t) map[string]string {
 	tagsMap := map[string]string{}
 	for i := 0; i < int(C.get_map_length(m)); i++ {
 		k := C.GoString(C.get_map_key(m, C.int(i)))
@@ -220,7 +220,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	var appliedModifiers []plugin.MetricModifier
 
 	if modifiers.tags_to_add != nil {
-		appliedModifiers = append(appliedModifiers, plugin.MetricTags(cMapToMap(modifiers.tags_to_add)))
+		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_add)))
 	}
 
 	if modifiers.timestamp != nil {
@@ -276,6 +276,8 @@ func ctx_requested_metrics(ctxID *C.char) **C.char {
 	return toCStrArray(contextObject(ctxID).RequestedMetrics())
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 //export ctx_config
 func ctx_config(ctxID *C.char, key *C.char) *C.char {
 	v, ok := contextObject(ctxID).Config(C.GoString(key))
@@ -302,6 +304,11 @@ func ctx_add_warning(ctxID *C.char, message *C.char) {
 	contextObject(ctxID).AddWarning(C.GoString(message))
 }
 
+//export ctx_is_done
+func ctx_is_done(ctxID *C.char) int {
+	return boolToInt(contextObject(ctxID).IsDone())
+}
+
 //export ctx_log
 func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 	logF := contextObject(ctxID).Logger()
@@ -311,11 +318,6 @@ func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 		logF = logF.WithField(C.GoString(k), C.GoString(v))
 	}
 	logF.Log(logrus.Level(int(level)), C.GoString(message))
-}
-
-//export ctx_is_done
-func ctx_is_done(ctxID *C.char) int {
-	return boolToInt(contextObject(ctxID).IsDone())
 }
 
 /*****************************************************************************/
@@ -336,6 +338,8 @@ func define_example_config(cfg *C.char) *C.error_t {
 	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
 	return toCError(err)
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {

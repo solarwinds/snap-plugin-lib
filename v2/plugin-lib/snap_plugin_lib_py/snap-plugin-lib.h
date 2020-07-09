@@ -215,9 +215,9 @@ extern char* ctx_raw_config(char* p0);
 
 extern void ctx_add_warning(char* p0, char* p1);
 
-extern void ctx_log(char* p0, int p1, char* p2, map_t* p3);
-
 extern GoInt ctx_is_done(char* p0);
+
+extern void ctx_log(char* p0, int p1, char* p2, map_t* p3);
 
 extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 
