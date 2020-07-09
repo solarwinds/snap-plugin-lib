@@ -4,7 +4,7 @@ from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, poi
 import platform
 from itertools import count
 
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, TimeWithNs
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Dependent library
@@ -117,8 +117,10 @@ class CollectContext(Context):
     def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
         modifiers = Modifiers()
 
-        if tags is not None:
-            modifiers.tags_to_add = pointer(dict_to_cmap(tags))
+        modifiers.tags_to_add = pointer(dict_to_cmap(tags)) if tags is not None else None
+        modifiers.timestamp = pointer(TimeWithNs(10, 10)) if timestamp is not None else None
+        modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
+        modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
 
         return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
                                              string_to_bytes(namespace),

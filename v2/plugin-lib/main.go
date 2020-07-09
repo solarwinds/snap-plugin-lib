@@ -131,6 +131,7 @@ import "C"
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -230,7 +231,20 @@ func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifi
 	var appliedModifiers []plugin.MetricModifier
 
 	if modifiers.tags_to_add != nil {
-		fmt.Printf("********* adamik ***=%#v\n", cMapToMap(modifiers.tags_to_add))
+		appliedModifiers = append(appliedModifiers, plugin.MetricTags(cMapToMap(modifiers.tags_to_add)))
+	}
+
+	if modifiers.timestamp != nil {
+		appliedModifiers = append(appliedModifiers,
+			plugin.MetricTimestamp(time.Unix(int64(modifiers.timestamp.sec), int64(modifiers.timestamp.nsec))))
+	}
+
+	if modifiers.description != nil {
+		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(*modifiers.description)))
+	}
+
+	if modifiers.unit != nil {
+		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(*modifiers.unit)))
 	}
 
 	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), appliedModifiers...)

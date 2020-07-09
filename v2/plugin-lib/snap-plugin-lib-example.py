@@ -1,4 +1,6 @@
-from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_ERROR
+import time
+
+from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_ERROR, LOGLEVEL_INFO
 
 
 class ExamplePlugin(BasePlugin):
@@ -19,7 +21,12 @@ class ExamplePlugin(BasePlugin):
         ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
-        ctx.add_metric("/python/group1/metric1", 10, tags={"a": "10", "b": "20"})
+        ctx.add_metric("/python/group1/metric1", 10,
+                       tags={"a": "10", "b": "20"},
+                       timestamp=time.time(),
+                       description="Custom metric description",
+                       unit="Custom metric unit")
+
         ctx.add_metric("/python/group1/metric2", 20)
         ctx.add_metric("/python/group1/metric3", 40)
         ctx.add_metric("/python/group2/dyn1/metric4", 40)
@@ -29,21 +36,19 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
         ctx.add_metric("/python/group2/dyn58/metric4", True)
 
-        # print("$$$", ctx.is_done())
-        # ctx.add_warning("This is a warning.")
-        ctx.log(LOGLEVEL_ERROR, "Error log!", {
-            "fa": "va",
-            "fb": "vb"
-        })
-        # ctx.dismiss_all_modifiers()
-        print(ctx.requested_metrics())
-        print(ctx.config_keys())
-
     def load(self, ctx):
-        pass
+        ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
+            "name": "py-example"
+        })
+
+        print("Requested metrics: ", ctx.requested_metrics())
+        print("Config keys:", ctx.config_keys())
+        print("Config: ", ctx.raw_config())
 
     def unload(self, ctx):
-        pass
+        ctx.log(LOGLEVEL_INFO, "Plugin is being unloaded", {
+            "name": "py-example"
+        })
 
 
 if __name__ == '__main__':
