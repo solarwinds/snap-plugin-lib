@@ -64,6 +64,7 @@ func StartPublisherGRPC(ctx context.Context, srv Server, proxy PublisherProxy, g
 }
 
 func startGRPC(ctx context.Context, srv Server, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
 	errChan := make(chan error)
 
 	csCtx, cancelFn := context.WithCancel(ctx)
@@ -80,14 +81,14 @@ func startGRPC(ctx context.Context, srv Server, grpcLn net.Listener, pingTimeout
 	cancelFn()       // signal ping monitor (via ctx)
 
 	if err != nil && err != RequestedKillError {
-		log.WithCtx(ctx).WithFields(moduleFields).
-			WithError(err).Errorf("Major error occurred - plugin will be shut down")
+		logF.WithError(err).Errorf("Major error occurred - plugin will be shut down")
 	}
 
 	shutdownPlugin(ctx, srv)
 }
 
 func shutdownPlugin(ctx context.Context, srv Server) {
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
 	stopped := make(chan bool, 1)
 
 	// try to complete all remaining rpc calls
@@ -96,14 +97,12 @@ func shutdownPlugin(ctx context.Context, srv Server) {
 		stopped <- true
 	}()
 
-	logF := log.WithCtx(ctx).WithFields(moduleFields)
-
 	// If RPC calls lasting too much, stop server by force
 	select {
 	case <-stopped:
 		logF.Debug("GRPC server stopped gracefully")
 	case <-time.After(GRPCGracefulStopTimeout):
 		srv.Stop()
-		logF.Warning("GRPC server couldn't have been stopped gracefully. Some metrics might have been lost")
+		logF.Warn("GRPC server couldn't have been stopped gracefully. Some metrics might have been lost")
 	}
 }

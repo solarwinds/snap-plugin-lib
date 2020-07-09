@@ -101,6 +101,6 @@ func (cs *controlService) monitor(timeout time.Duration, maxPingMissed uint) {
 	}
 }
 
-func (cs *controlService) logger() *logrus.Entry {
-	return log.WithCtx(cs.ctx)
+func (cs *controlService) logger() logrus.FieldLogger {
+	return log.WithCtx(cs.ctx).WithFields(moduleFields).WithField("service", "Control")
 }
