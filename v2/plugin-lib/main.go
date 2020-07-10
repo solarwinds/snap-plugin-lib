@@ -13,21 +13,21 @@ static inline void call_c_define_callback(define_callback_t callback) { callback
 
 // some helpers to manage C/Go memory/access interactions
 enum value_type_t {
-	TYPE_INVALID,
-	TYPE_INT64,
-	TYPE_UINT64,
-	TYPE_DOUBLE,
-	TYPE_BOOL,
+    TYPE_INVALID,
+    TYPE_INT64,
+    TYPE_UINT64,
+    TYPE_DOUBLE,
+    TYPE_BOOL,
 };
 
 typedef struct {
-	union  {
-		long long v_int64;
-		unsigned long long v_uint64;
-		double v_double;
-		int v_bool;
-	} value;
-	int vtype; // value_type_t;
+    union  {
+        long long v_int64;
+        unsigned long long v_uint64;
+        double v_double;
+        int v_bool;
+    } value;
+    int vtype; // value_type_t;
 } value_t;
 
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
@@ -40,10 +40,34 @@ typedef struct {
     char * value;
 } map_element_t;
 
+static inline void free_map_element_internals(map_element_t * m) {
+    if (m == NULL) return;
+
+    if (m->key != NULL) {
+        free(m->key);
+        m->key = NULL;
+    }
+
+    if (m->value != NULL) {
+        free(m->value);
+        m->value = NULL;
+    }
+}
+
 typedef struct {
-	map_element_t * elements;
-	int length;
+    map_element_t * elements;
+    int length;
 } map_t;
+
+static inline void free_map_internals(map_t * m) {
+    if (m == NULL || m->length <= 0) return;
+
+    for (int i = 0; i < m->length; i++) {
+        free_map_element_internals(&m->elements[i]);
+    }
+
+    free(m->elements);
+}
 
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
 static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
@@ -60,70 +84,97 @@ static inline error_t * alloc_error_msg(char * msg) {
 }
 
 static inline void free_error_msg(error_t * err) {
-	if (err == NULL) {
-		return;
-	}
+    if (err == NULL) return;
 
-	if (err->msg != NULL) {
-		free(err->msg);
-	}
-
-	free(err);
+    if (err->msg != NULL) {
+        free(err->msg);
+    }
 }
 
 typedef struct {
-	int sec;
-	int nsec;
+    int sec;
+    int nsec;
 } time_with_ns_t;
 
 typedef struct {
-	map_t * tags_to_add;
-	map_t * tags_to_remove;
-	time_with_ns_t * timestamp;
-	char ** description;
-	char ** unit;
+    map_t * tags_to_add;
+    map_t * tags_to_remove;
+    time_with_ns_t * timestamp;
+    char ** description;
+    char ** unit;
 } modifiers_t;
 
 static inline modifiers_t * alloc_modifiers() {
-	modifiers_t * modifiers = (modifiers_t *) malloc(sizeof(modifiers_t));
-	modifiers->tags_to_add = NULL;
-	modifiers->tags_to_remove = NULL;
-	modifiers->timestamp = NULL;
-	modifiers->description = NULL;
-	modifiers->unit = NULL;
-	return modifiers;
+    modifiers_t * modifiers = (modifiers_t *) malloc(sizeof(modifiers_t));
+    modifiers->tags_to_add = NULL;
+    modifiers->tags_to_remove = NULL;
+    modifiers->timestamp = NULL;
+    modifiers->description = NULL;
+    modifiers->unit = NULL;
+    return modifiers;
+}
+
+static inline void free_modifiers_internals(modifiers_t * m) {
+    if (m == NULL) return;
+
+    if (m->tags_to_add != NULL) {
+        free_map_internals(m->tags_to_add);
+        free(m->tags_to_add);
+        m->tags_to_add = NULL;
+    }
+
+    if (m->tags_to_remove != NULL) {
+        free_map_internals(m->tags_to_remove);
+        free(m->tags_to_remove);
+        m->tags_to_remove = NULL;
+    }
+
+    if (m->timestamp != NULL) {
+        free(m->timestamp);
+        m->timestamp = NULL;
+    };
+
+    if (m->description != NULL && *(m->description) != NULL) {
+        free(*(m->description));
+        m->description = NULL;
+    };
+
+if (m->unit != NULL && *(m->unit) != NULL) {
+        free(*(m->unit));
+        m->unit = NULL;
+    };
 }
 
 static inline void set_modifier_description (modifiers_t * modifiers, char * description) {
-	modifiers->description = &description;
+    modifiers->description = &description;
 }
 
 static inline void set_modifier_unit (modifiers_t * modifiers, char * unit) {
-	modifiers->unit = &unit;
+    modifiers->unit = &unit;
 }
 
 static inline void set_modifier_tags_to_add (modifiers_t * modifiers, map_t * tags) {
-	modifiers->tags_to_add = tags;
+    modifiers->tags_to_add = tags;
 }
 
 static inline void set_modifier_tags_to_remove (modifiers_t * modifiers, map_t * tags) {
-	modifiers->tags_to_remove = tags;
+    modifiers->tags_to_remove = tags;
 }
 
 static inline void set_modifier_timestamp (modifiers_t * modifiers, time_with_ns_t * timestamp) {
-	modifiers->timestamp = timestamp;
+    modifiers->timestamp = timestamp;
 }
 
 static inline char** alloc_str_array(int size) {
-	return malloc(sizeof(char*) * size);
+    return malloc(sizeof(char*) * size);
 }
 
 static inline void set_str_array_element(char **str_array, int index, char *element) {
-	str_array[index] = element;
+    str_array[index] = element;
 }
 
 static inline void free_memory(void * p) {
-	free(p);
+    free(p);
 }
 */
 import "C"
