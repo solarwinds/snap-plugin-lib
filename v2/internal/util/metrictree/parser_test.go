@@ -1,3 +1,5 @@
+// +build small
+
 /*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
@@ -13,8 +15,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-
-// +build small
 
 package metrictree
 
@@ -32,7 +32,6 @@ type parseNamespaceValidScenario struct {
 	usableForDefinition               bool
 	usableForAdditionWhenDefinition   bool
 	usableForAdditionWhenNoDefinition bool
-	usableForSelection                bool
 }
 
 var parseNamespaceValidScenarios = []parseNamespaceValidScenario{

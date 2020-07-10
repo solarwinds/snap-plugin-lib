@@ -1,4 +1,9 @@
 /*
+The package "plugin" provides interfaces to define custom plugins and Context interface
+which allows to perform any collection-related operation.
+*/
+
+/*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +19,6 @@
     limitations under the License.
 */
 
-/*
-The package "plugin" provides interfaces to define custom plugins and Context interface
-which allows to perform any collection-related operation.
-*/
 package plugin
 
 type Collector interface {

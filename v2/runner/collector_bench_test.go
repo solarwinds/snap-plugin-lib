@@ -1,3 +1,12 @@
+// +build bench
+
+/*
+Benchmark test mainly measures:
+- the time needed to create validation tree (1-33 metrics)
+- the time needed to validate metrics based only on definition tree (100-10000)
+- the time needed to validate metrics based on definition and filtering tree
+*/
+
 /*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
@@ -12,15 +21,6 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-*/
-
-// +build bench
-
-/*
-Benchmark test mainly measures:
-- the time needed to create validation tree (1-33 metrics)
-- the time needed to validate metrics based only on definition tree (100-10000)
-- the time needed to validate metrics based on definition and filtering tree
 */
 
 package runner

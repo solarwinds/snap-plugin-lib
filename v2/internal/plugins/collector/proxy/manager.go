@@ -1,4 +1,10 @@
 /*
+Package proxy:
+1) Manages context for different task created for the same plugin
+2) Serves as an entry point for any "controller" (like. Rpc)
+*/
+
+/*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +20,6 @@
     limitations under the License.
 */
 
-/*
-Package proxy:
-1) Manages context for different task created for the same plugin
-2) Serves as an entry point for any "controller" (like. Rpc)
-*/
 package proxy
 
 import (

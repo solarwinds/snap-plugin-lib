@@ -1,3 +1,5 @@
+// +build medium
+
 /*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
@@ -13,8 +15,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-
-// +build medium
 
 package stats
 

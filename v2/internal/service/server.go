@@ -1,4 +1,11 @@
 /*
+Package rpc:
+* contains Protocol Buffer types definitions
+* handles GRPC communication (server side), passing it to proxies.
+* contains Implementation of GRPC services.
+*/
+
+/*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +21,6 @@
     limitations under the License.
 */
 
-/*
-Package rpc:
-* contains Protocol Buffer types definitions
-* handles GRPC communication (server side), passing it to proxies.
-* contains Implementation of GRPC services.
-*/
 package service
 
 import (

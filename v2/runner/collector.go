@@ -1,4 +1,8 @@
 /*
+The package "runner" provides simple API to start plugins in different modes.
+*/
+
+/*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +18,6 @@
     limitations under the License.
 */
 
-/*
-The package "runner" provides simple API to start plugins in different modes.
-*/
 package runner
 
 import (
