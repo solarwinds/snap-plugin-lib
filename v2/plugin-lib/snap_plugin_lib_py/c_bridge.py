@@ -1,6 +1,6 @@
 import os.path
 from collections import defaultdict
-from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer
+from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, byref
 import platform
 
 from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
@@ -111,10 +111,15 @@ class Context:
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
-        return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
-                                             string_to_bytes(namespace),
-                                             to_value_t(value),
-                                             self.__create_modifier(tags, None, timestamp, description, unit))
+        m = self.__create_modifier(tags, None, timestamp, description, unit)
+        err = PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
+                                            string_to_bytes(namespace),
+                                            to_value_t(value),
+                                            m)
+
+        PLUGIN_LIB_OBJ.go_free_modifiers_internals(m)
+
+        return err
 
     def always_apply(self, namespace, *,
                      tags_to_add=None, tags_to_remove=None, timestamp=None, description=None, unit=None):
@@ -137,8 +142,8 @@ class CollectContext(Context):
     @staticmethod
     def __create_modifier(tags_to_add, tags_to_remove, timestamp, description, unit):
         modifiers = Modifiers()
-        modifiers.tags_to_add = pointer(dict_to_cmap(tags_to_add)) if tags_to_add is not None else None
-        modifiers.tags_to_remove = pointer(dict_to_cmap(tags_to_remove)) if tags_to_remove is not None else None
+        modifiers.tags_to_add = dict_to_cmap(tags_to_add) if tags_to_add is not None else None
+        modifiers.tags_to_remove = dict_to_cmap(tags_to_remove) if tags_to_remove is not None else None
         modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
         modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
         modifiers.timestamp = time_to_ctimewithns(timestamp) if timestamp is not None else None

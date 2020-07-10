@@ -138,32 +138,32 @@ static inline modifiers_t * alloc_modifiers() {
 static void free_modifiers_internals(modifiers_t * m) {
     if (m == NULL) return;
 
-    if (m->tags_to_add != NULL) {
-        free_map_internals(m->tags_to_add);
-        free(m->tags_to_add);
-        m->tags_to_add = NULL;
-    }
+    //if (m->tags_to_add != NULL) {
+    //    free_map_internals(m->tags_to_add);
+    //    free(m->tags_to_add);
+    //    m->tags_to_add = NULL;
+    //}
 
-    if (m->tags_to_remove != NULL) {
-        free_map_internals(m->tags_to_remove);
-        free(m->tags_to_remove);
-        m->tags_to_remove = NULL;
-    }
-
+    //if (m->tags_to_remove != NULL) {
+    //    free_map_internals(m->tags_to_remove);
+    //    free(m->tags_to_remove);
+    //    m->tags_to_remove = NULL;
+    //}
+	//
     if (m->timestamp != NULL) {
-        free(m->timestamp);
-        m->timestamp = NULL;
+       //free(m->timestamp);
+       m->timestamp = NULL;
     };
-
-    if (m->description != NULL && *(m->description) != NULL) {
-        free(*(m->description));
-        m->description = NULL;
-    };
-
-if (m->unit != NULL && *(m->unit) != NULL) {
-        free(*(m->unit));
-        m->unit = NULL;
-    };
+	//
+    //if (m->description != NULL && *(m->description) != NULL) {
+    //    free(*(m->description));
+    //    m->description = NULL;
+    //};
+	//
+	//if (m->unit != NULL && *(m->unit) != NULL) {
+    //    free(*(m->unit));
+    //    m->unit = NULL;
+    //};
 }
 
 static inline void set_modifier_description (modifiers_t * modifiers, char * description) {

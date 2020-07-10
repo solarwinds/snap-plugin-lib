@@ -3,6 +3,7 @@ package main
 /*
 #include <stdlib.h>
 #include <stdio.h>
+#include <memory.h>
 
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
@@ -118,32 +119,32 @@ static inline modifiers_t * alloc_modifiers() {
 static void free_modifiers_internals(modifiers_t * m) {
     if (m == NULL) return;
 
-    if (m->tags_to_add != NULL) {
-        free_map_internals(m->tags_to_add);
-        free(m->tags_to_add);
-        m->tags_to_add = NULL;
-    }
+    //if (m->tags_to_add != NULL) {
+    //    free_map_internals(m->tags_to_add);
+    //    free(m->tags_to_add);
+    //    m->tags_to_add = NULL;
+    //}
 
-    if (m->tags_to_remove != NULL) {
-        free_map_internals(m->tags_to_remove);
-        free(m->tags_to_remove);
-        m->tags_to_remove = NULL;
-    }
-
+    //if (m->tags_to_remove != NULL) {
+    //    free_map_internals(m->tags_to_remove);
+    //    free(m->tags_to_remove);
+    //    m->tags_to_remove = NULL;
+    //}
+	//
     if (m->timestamp != NULL) {
-        free(m->timestamp);
-        m->timestamp = NULL;
+       delete(m->timestamp);
+       m->timestamp = NULL;
     };
-
-    if (m->description != NULL && *(m->description) != NULL) {
-        free(*(m->description));
-        m->description = NULL;
-    };
-
-if (m->unit != NULL && *(m->unit) != NULL) {
-        free(*(m->unit));
-        m->unit = NULL;
-    };
+	//
+    //if (m->description != NULL && *(m->description) != NULL) {
+    //    free(*(m->description));
+    //    m->description = NULL;
+    //};
+	//
+	//if (m->unit != NULL && *(m->unit) != NULL) {
+    //    free(*(m->unit));
+    //    m->unit = NULL;
+    //};
 }
 
 static inline void set_modifier_description (modifiers_t * modifiers, char * description) {
@@ -293,7 +294,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	if modifiers.description != nil {
 		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(*modifiers.description)))
 	}
-	
+
 	if modifiers.unit != nil {
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(*modifiers.unit)))
 	}
@@ -328,7 +329,7 @@ func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifi
 	//C.free_memory_charptr(ns)
 	//C.free_memory(unsafe.Pointer(v))
 	//C.free_modifiers_internals(modifiers)
-	//C.free_memory(unsafe.Pointer(modifiers))
+	//C.free_memory(modifiers)
 	return toCError(err)
 }
 

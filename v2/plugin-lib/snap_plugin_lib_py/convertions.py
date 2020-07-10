@@ -10,7 +10,7 @@ max_uint = 18446744073709551615
 
 _, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
 _, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
-LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
+    LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
 
 
 class MapElement(Structure):
@@ -33,6 +33,7 @@ class TimeWithNs(Structure):
         ("nsec", c_int)
     ]
 
+
 class Modifiers(Structure):
     _fields_ = [
         ("tags_to_add", POINTER(Map)),
@@ -41,13 +42,6 @@ class Modifiers(Structure):
         ("description", POINTER(c_char_p)),
         ("unit", POINTER(c_char_p))
     ]
-
-
-#   map_t * tags_to_add;
-# 	map_t * tags_to_remove;
-# 	time_with_ns_t * timestamp;
-# 	char ** description;
-# 	char ** unit;
 
 
 class CError(Structure):
@@ -94,7 +88,7 @@ def dict_to_cmap(d):
         cmap.elements[i].key = string_to_bytes(k)
         cmap.elements[i].value = string_to_bytes(v)
 
-    return cmap
+    return pointer(cmap)
 
 
 # Converts C **char to Python list
