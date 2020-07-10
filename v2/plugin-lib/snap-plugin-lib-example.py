@@ -21,10 +21,10 @@ class ExamplePlugin(BasePlugin):
         ctx.define_metric("/python/group2/[dyn]/metric5", "C", False, "2nd dynamic metric")
 
     def collect(self, ctx):
-        ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
-            "name": "py-example"
-        })
-        print("Requested metrics: ", ctx.requested_metrics())
+        # ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
+        #     "name": "py-example"
+        # })
+        # print("Requested metrics: ", ctx.requested_metrics())
 
         ctx.add_metric("/python/group1/metric1", 10,
                        tags={"a": "10", "b": "20"},

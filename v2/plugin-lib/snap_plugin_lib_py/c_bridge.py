@@ -142,7 +142,7 @@ class CollectContext(Context):
         modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
         modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
         modifiers.timestamp = time_to_ctimewithns(timestamp) if timestamp is not None else None
-        return modifiers
+        return pointer(modifiers)
 
 
 ###############################################################################

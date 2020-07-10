@@ -22,6 +22,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 #line 3 "main.go"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
@@ -134,7 +135,7 @@ static inline modifiers_t * alloc_modifiers() {
     return modifiers;
 }
 
-static inline void free_modifiers_internals(modifiers_t * m) {
+static void free_modifiers_internals(modifiers_t * m) {
     if (m == NULL) return;
 
     if (m->tags_to_add != NULL) {
@@ -197,6 +198,12 @@ static inline void free_memory(void * p) {
     free(p);
 }
 
+static inline void free_memory_charptr (char * p) {
+	printf("ptr=%p\n", p);
+
+	//free(p);
+}
+
 #line 1 "cgo-generated-wrapper"
 
 
@@ -247,6 +254,8 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
+
+extern void go_free_modifiers_internals(modifiers_t* p0);
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 

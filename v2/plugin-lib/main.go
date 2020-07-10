@@ -2,6 +2,7 @@ package main
 
 /*
 #include <stdlib.h>
+#include <stdio.h>
 
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
@@ -114,7 +115,7 @@ static inline modifiers_t * alloc_modifiers() {
     return modifiers;
 }
 
-static inline void free_modifiers_internals(modifiers_t * m) {
+static void free_modifiers_internals(modifiers_t * m) {
     if (m == NULL) return;
 
     if (m->tags_to_add != NULL) {
@@ -175,6 +176,12 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
 
 static inline void free_memory(void * p) {
     free(p);
+}
+
+static inline void free_memory_charptr (char * p) {
+	printf("ptr=%p\n", p);
+
+	//free(p);
 }
 */
 import "C"
@@ -270,6 +277,10 @@ func toGoValue(v *C.value_t) interface{} {
 func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	var appliedModifiers []plugin.MetricModifier
 
+	if modifiers == nil {
+		return appliedModifiers
+	}
+
 	if modifiers.tags_to_add != nil {
 		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_add)))
 	}
@@ -282,7 +293,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	if modifiers.description != nil {
 		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(*modifiers.description)))
 	}
-
+	
 	if modifiers.unit != nil {
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(*modifiers.unit)))
 	}
@@ -300,9 +311,24 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 // ctx.Done() returns channel which is not a simple type present in other
 // language. Only ctx.IsDone() may be used
 
+//export go_free_modifiers_internals
+func go_free_modifiers_internals(m *C.modifiers_t) {
+	C.free_modifiers_internals(m)
+}
+
 //export ctx_add_metric
 func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
 	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), toGoModifiers(modifiers)...)
+	//fmt.Printf("ns=%#v\n", ns)
+	//fmt.Printf("*ns=%#v\n", *ns)
+	//fmt.Printf("&ns=%#v\n", &ns)
+	//fmt.Printf("nsp=%p\n", ns)
+
+	//fmt.Printf("v=%#v\n", v)
+	//C.free_memory_charptr(ns)
+	//C.free_memory(unsafe.Pointer(v))
+	//C.free_modifiers_internals(modifiers)
+	//C.free_memory(unsafe.Pointer(modifiers))
 	return toCError(err)
 }
 
