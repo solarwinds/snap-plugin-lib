@@ -36,6 +36,8 @@ func tlsCredentials(ctx context.Context, opt *plugin.Options) (credentials.Trans
 }
 
 func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
+
 	clientCA := x509.NewCertPool()
 	certFilesToProcess := []string{}
 
@@ -67,7 +69,7 @@ func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
 		}
 		ok := clientCA.AppendCertsFromPEM(caCert)
 		if !ok {
-			log.WithCtx(ctx).WithField("path", f).Warn("given file is not a certificate")
+			logF.WithField("path", f).Warn("given file is not a certificate")
 		}
 	}
 

@@ -22,7 +22,8 @@ const (
 ///////////////////////////////////////////////////////////////////////////////
 
 func startPprofServer(ctx context.Context, ln net.Listener) {
-	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running profiling server on address %s", ln.Addr())
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
+	logF.Infof("Running profiling server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
 
@@ -42,7 +43,7 @@ func startPprofServer(ctx context.Context, ln net.Listener) {
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Warn("Pprof server stopped")
+			logF.WithError(err).Warn("Pprof server stopped")
 		}
 	}()
 }
@@ -50,7 +51,8 @@ func startPprofServer(ctx context.Context, ln net.Listener) {
 ///////////////////////////////////////////////////////////////////////////////
 
 func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controller) {
-	log.WithCtx(ctx).WithFields(moduleFields).Infof("Running stats server on address")
+	logF := log.WithCtx(ctx).WithFields(moduleFields)
+	logF.Infof("Running stats server on address")
 
 	h := http.NewServeMux()
 
@@ -61,7 +63,7 @@ func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controll
 	go func() {
 		err := http.Serve(ln, h)
 		if err != nil {
-			log.WithCtx(ctx).WithError(err).Warn("Stats server stopped")
+			logF.WithError(err).Warn("Stats server stopped")
 		}
 	}()
 }
@@ -88,7 +90,7 @@ func statsHandler(ctx context.Context, w http.ResponseWriter, r *http.Request, s
 		}
 
 	case <-time.After(statsRequestTimeout):
-		logF.WithField("timeout", statsRequestTimeout).Warning("timeout occurred when serving statistics request")
+		logF.WithField("timeout", statsRequestTimeout).Warn("timeout occurred when serving statistics request")
 		w.WriteHeader(http.StatusRequestTimeout)
 	}
 }

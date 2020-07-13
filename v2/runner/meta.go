@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -44,7 +45,9 @@ type meta struct {
 	}
 }
 
-func metaInformation(name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
+func metaInformation(ctx context.Context, name string, version string, typ types.PluginType, opt *plugin.Options, r *resources, tasksLimit, instancesLimit int) []byte {
+	logF := logger(ctx).WithField("service", "meta")
+
 	ip := r.grpcListenerAddr().IP.String()
 
 	m := meta{}
@@ -75,7 +78,7 @@ func metaInformation(name string, version string, typ types.PluginType, opt *plu
 	// Print
 	jsonMeta, err := json.Marshal(m)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't provide plugin metadata information (reason: %v)\n", err)
+		logF.WithError(err).Error("Can't provide plugin metadata information")
 		os.Exit(errorExitStatus)
 	}
 

@@ -2,12 +2,12 @@ package runner
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
+	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/sirupsen/logrus"
@@ -24,25 +24,30 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 	inprocPlugin, inProc := publisher.(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
+
+		logger := inprocPlugin.Logger()
+		ctx = log.ToCtx(ctx, logger)
 	}
+
+	logF := logger(ctx).WithField("service", "publisher")
 
 	if opt == nil {
 		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypePublisher, os.Args[1:])
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Error occured during plugin startup (%v)\n", err)
+			logF.WithError(err).Error("Error occured during plugin startup")
 			os.Exit(errorExitStatus)
 		}
 	}
 
 	err = ValidateOptions(opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Invalid plugin options (%v)\n", err)
+		logF.WithError(err).Error("Invalid plugin options")
 		os.Exit(errorExitStatus)
 	}
 
 	statsController, err := stats.NewController(ctx, name, version, types.PluginTypePublisher, opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Error occured when starting statistics controller (%v)\n", err)
+		logF.WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
 
@@ -57,11 +62,11 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 
 	r, err := acquireResources(opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't acquire resources for plugin services (%v)\n", err)
+		logF.WithError(err).Error("Can't acquire resources for plugin services")
 		os.Exit(errorExitStatus)
 	}
 
-	jsonMeta := metaInformation(name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
+	jsonMeta := metaInformation(ctx, name, version, types.PluginTypePublisher, opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 	if inProc {
 		inprocPlugin.MetaChannel() <- jsonMeta
 		close(inprocPlugin.MetaChannel())
@@ -79,7 +84,7 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 
 	srv, err := service.NewGRPCServer(ctx, opt)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't initialize GRPC Server (%v)\n", err)
+		logF.WithError(err).Error("Can't initialize GRPC Server")
 		os.Exit(errorExitStatus)
 	}
 

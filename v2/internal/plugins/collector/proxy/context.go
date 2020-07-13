@@ -67,7 +67,9 @@ func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byt
 	return pc, nil
 }
 
-func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
+func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
+	logF := log.WithCtx(pc.ctx).WithFields(moduleFields).WithField("service", "metrics")
+
 	if pc.IsDone() {
 		return fmt.Errorf("task has been canceled")
 	}
@@ -89,7 +91,7 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 
 	if !matchFilters {
 		if logrus.IsLevelEnabled(logrus.TraceLevel) {
-			log.WithCtx(pc.ctx).WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
+			logF.WithField("ns", ns).Trace("couldn't match metrics with plugin filters")
 		}
 		return nil // don't throw error when metric is just filtered
 	}
