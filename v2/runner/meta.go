@@ -25,7 +25,7 @@ type meta struct {
 	GRPC struct {
 		IP         string // IP on which GRPC service is being served
 		Port       int    // Port on which GRPC service is being served
-		TLSEnabled bool   // if enabled
+		TLSEnabled bool   // true if TLS is enabled
 	}
 
 	Constraints struct {
