@@ -23,6 +23,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <memory.h>
 
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
@@ -61,34 +62,10 @@ typedef struct {
     char * value;
 } map_element_t;
 
-static inline void free_map_element_internals(map_element_t * m) {
-    if (m == NULL) return;
-
-    if (m->key != NULL) {
-        free(m->key);
-        m->key = NULL;
-    }
-
-    if (m->value != NULL) {
-        free(m->value);
-        m->value = NULL;
-    }
-}
-
 typedef struct {
     map_element_t * elements;
     int length;
 } map_t;
-
-static inline void free_map_internals(map_t * m) {
-    if (m == NULL || m->length <= 0) return;
-
-    for (int i = 0; i < m->length; i++) {
-        free_map_element_internals(&m->elements[i]);
-    }
-
-    free(m->elements);
-}
 
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
 static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
@@ -135,37 +112,6 @@ static inline modifiers_t * alloc_modifiers() {
     return modifiers;
 }
 
-static void free_modifiers_internals(modifiers_t * m) {
-    if (m == NULL) return;
-
-    //if (m->tags_to_add != NULL) {
-    //    free_map_internals(m->tags_to_add);
-    //    free(m->tags_to_add);
-    //    m->tags_to_add = NULL;
-    //}
-
-    //if (m->tags_to_remove != NULL) {
-    //    free_map_internals(m->tags_to_remove);
-    //    free(m->tags_to_remove);
-    //    m->tags_to_remove = NULL;
-    //}
-	//
-    if (m->timestamp != NULL) {
-       //free(m->timestamp);
-       m->timestamp = NULL;
-    };
-	//
-    //if (m->description != NULL && *(m->description) != NULL) {
-    //    free(*(m->description));
-    //    m->description = NULL;
-    //};
-	//
-	//if (m->unit != NULL && *(m->unit) != NULL) {
-    //    free(*(m->unit));
-    //    m->unit = NULL;
-    //};
-}
-
 static inline void set_modifier_description (modifiers_t * modifiers, char * description) {
     modifiers->description = &description;
 }
@@ -194,15 +140,6 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
     str_array[index] = element;
 }
 
-static inline void free_memory(void * p) {
-    free(p);
-}
-
-static inline void free_memory_charptr (char * p) {
-	printf("ptr=%p\n", p);
-
-	//free(p);
-}
 
 #line 1 "cgo-generated-wrapper"
 
@@ -254,8 +191,6 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-
-extern void go_free_modifiers_internals(modifiers_t* p0);
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 

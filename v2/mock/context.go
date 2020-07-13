@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
@@ -75,6 +76,11 @@ func (m *Context) IsDone() bool {
 func (m *Context) Done() <-chan struct{} {
 	args := m.Called()
 	return args.Get(0).(<-chan struct{})
+}
+
+func (m *Context) Logger() *logrus.Entry {
+	args := m.Called()
+	return args.Get(0).(*logrus.Entry)
 }
 
 // publisher context

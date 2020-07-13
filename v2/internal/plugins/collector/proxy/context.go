@@ -67,7 +67,7 @@ func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byt
 	return pc, nil
 }
 
-func (pc *pluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
+func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin.MetricModifier) error {
 	logF := log.WithCtx(pc.ctx).WithFields(moduleFields).WithField("service", "metrics")
 
 	if pc.IsDone() {

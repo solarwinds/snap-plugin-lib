@@ -135,7 +135,7 @@ func (cm *ContextManager) requestCollect(id string, chunkCh chan<- types.Collect
 	pContext.ReleaseContext()
 }
 
-func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+func (cm *ContextManager) collect(id string, context *PluginContext, chunkCh chan<- types.CollectChunk) {
 	logF := cm.logger()
 	taskCtx := cm.TaskContext(id)
 
@@ -192,7 +192,7 @@ func (cm *ContextManager) collect(id string, context *pluginContext, chunkCh cha
 	close(chunkCh)
 }
 
-func (cm *ContextManager) streamingCollect(id string, context *pluginContext, chunkCh chan<- types.CollectChunk) {
+func (cm *ContextManager) streamingCollect(id string, context *PluginContext, chunkCh chan<- types.CollectChunk) {
 	logF := cm.logger()
 	var err error
 
