@@ -40,8 +40,9 @@ type meta struct {
 	}
 
 	GRPC struct {
-		IP   string // IP on which GRPC service is being served
-		Port int    // Port on which GRPC service is being served
+		IP         string // IP on which GRPC service is being served
+		Port       int    // Port on which GRPC service is being served
+		TLSEnabled bool   // true if TLS is enabled
 	}
 
 	Constraints struct {
@@ -76,6 +77,7 @@ func metaInformation(ctx context.Context, name string, version string, typ types
 
 	m.GRPC.IP = ip
 	m.GRPC.Port = r.grpcListenerAddr().Port
+	m.GRPC.TLSEnabled = opt.EnableTLS
 
 	m.Constraints.TasksLimit = tasksLimit
 	m.Constraints.InstancesLimit = instancesLimit
