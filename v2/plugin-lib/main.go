@@ -284,18 +284,18 @@ func ctx_config(ctxID *C.char, key *C.char) *C.char {
 		return (*C.char)(C.NULL)
 	}
 
-	return C.CString(v)
+	return C.CString(v) // todo: adamik: dealloc
 }
 
 //export ctx_config_keys
 func ctx_config_keys(ctxID *C.char) **C.char {
-	return toCStrArray(contextObject(ctxID).ConfigKeys())
+	return toCStrArray(contextObject(ctxID).ConfigKeys()) // todo: adamik: dealloc
 }
 
 //export ctx_raw_config
 func ctx_raw_config(ctxID *C.char) *C.char {
 	rc := string(contextObject(ctxID).RawConfig())
-	return C.CString(rc)
+	return C.CString(rc) // todo: adamik: dealloc
 }
 
 //export ctx_add_warning
@@ -338,19 +338,19 @@ func define_group(name *C.char, description *C.char) {
 //export define_example_config
 func define_example_config(cfg *C.char) *C.error_t {
 	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
-	return toCError(err)
+	return toCError(err) // todo: adamik: dealloc
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {
-	pluginDef.DefineTasksPerInstanceLimit(limit)
+	_ = pluginDef.DefineTasksPerInstanceLimit(limit)
 }
 
 //export define_instances_limit
 func define_instances_limit(limit int) {
-	pluginDef.DefineInstancesLimit(limit)
+	_ = pluginDef.DefineInstancesLimit(limit)
 }
 
 /*****************************************************************************/
@@ -402,7 +402,7 @@ func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) err
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
 
-	C.call_c_callback(callback, C.CString(taskID))
+	C.call_c_callback(callback, C.CString(taskID)) // todo: adamik: dealloc
 	return nil
 }
 
