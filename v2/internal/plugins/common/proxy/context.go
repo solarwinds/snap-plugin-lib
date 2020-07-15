@@ -160,7 +160,7 @@ func (c *Context) Done() <-chan struct{} {
 	return c.ctx.Done()
 }
 
-func (c *Context) Logger() *logrus.Entry {
+func (c *Context) Logger() logrus.FieldLogger {
 	return log.WithCtx(c.ctx).WithFields(logrus.Fields{
 		"layer": "user-code",
 	})

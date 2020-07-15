@@ -2,7 +2,7 @@ import math
 from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER, pointer
 from itertools import count
 
-from snap_plugin_lib_py.exceptions import PluginLibException
+from .exceptions import PluginLibException
 
 min_int = -9223372036854775807
 max_int = 9223372036854775807
@@ -66,10 +66,13 @@ class CValue(Structure):
     ]
 
 
-# Converts string to bytes if necessary.
-# Allow to use string type in Python code and covert it to required char *
-# (bytes) when calling C Api
 def string_to_bytes(s):
+    """
+    Converts string to bytes if necessary.
+    Allow to use string type in Python code and covert it to required char *
+    (bytes) when calling C Api
+    """
+
     if isinstance(s, type("")):
         return bytes(s, 'utf-8')
     elif isinstance(s, type(b"")):
@@ -78,8 +81,9 @@ def string_to_bytes(s):
         raise Exception("Invalid type, expected string or bytes")
 
 
-# Converts python dictionary to C map pointer
 def dict_to_cmap(d):
+    """Converts python dictionary to C map pointer"""
+
     cmap = Map()
     cmap.elements = (MapElement * len(d))()
     cmap.length = len(d)
@@ -91,8 +95,8 @@ def dict_to_cmap(d):
     return pointer(cmap)
 
 
-# Converts C **char to Python list
 def cstrarray_to_list(arr):
+    """Converts C **char to Python list"""
     result_list = []
     for i in count(0):
         if arr[i] is None:

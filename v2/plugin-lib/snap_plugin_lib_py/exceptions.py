@@ -21,7 +21,6 @@ def throw_exception_if_null(exception_msg):
     def func_wrapper(func):
         def inner_wrapper(*args, **kwargs):
             err = func(*args, **kwargs)
-            print(err)
             if err is None:
                 raise PluginLibException(exception_msg)
 

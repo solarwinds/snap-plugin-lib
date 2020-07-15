@@ -171,7 +171,7 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	}
 
 	flagParser := newFlagParser(pluginName, pluginType, opt)
-	argsToParse := args[0:]
+	argsToParse := args[:]
 	if len(args) > 0 && strings.HasSuffix(args[0], ".py") {
 		// ignore first parameter if plugin is an interpreted code
 		argsToParse = args[1:]

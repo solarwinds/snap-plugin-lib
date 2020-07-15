@@ -1,7 +1,7 @@
 import os.path
-from collections import defaultdict
-from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, byref
 import platform
+from collections import defaultdict
+from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer
 
 from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
     time_to_ctimewithns
@@ -72,7 +72,7 @@ class Context:
     def __init__(self, ctx_id):
         self.__ctx_id = ctx_id
 
-    @throw_exception_if_null("object with given key doesn't exists")
+    @throw_exception_if_null("object with given key doesn't exist")
     def config(self, key: str):
         return PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(),
                                          string_to_bytes(key)).decode(encoding='utf-8')
@@ -111,22 +111,17 @@ class Context:
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
-        m = self.__create_modifier(tags, None, timestamp, description, unit)
-        err = PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
-                                            string_to_bytes(namespace),
-                                            to_value_t(value),
-                                            m)
-
-        PLUGIN_LIB_OBJ.go_free_modifiers_internals(m)
-
-        return err
+        return PLUGIN_LIB_OBJ.ctx_add_metric(self._ctx_id(),
+                                             string_to_bytes(namespace),
+                                             to_value_t(value),
+                                             self.__create_modifiers(tags, None, timestamp, description, unit))
 
     def always_apply(self, namespace, *,
                      tags_to_add=None, tags_to_remove=None, timestamp=None, description=None, unit=None):
         return PLUGIN_LIB_OBJ.ctx_always_apply(self._ctx_id(),
                                                string_to_bytes(namespace),
-                                               self.__create_modifier(tags_to_add, tags_to_remove, timestamp,
-                                                                      description, unit))
+                                               self.__create_modifiers(tags_to_add, tags_to_remove, timestamp,
+                                                                       description, unit))
 
     def dismiss_all_modifiers(self):
         PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers(self._ctx_id())
@@ -140,7 +135,7 @@ class CollectContext(Context):
         return cstrarray_to_list(req_mts_c)
 
     @staticmethod
-    def __create_modifier(tags_to_add, tags_to_remove, timestamp, description, unit):
+    def __create_modifiers(tags_to_add, tags_to_remove, timestamp, description, unit):
         modifiers = Modifiers()
         modifiers.tags_to_add = dict_to_cmap(tags_to_add) if tags_to_add is not None else None
         modifiers.tags_to_remove = dict_to_cmap(tags_to_remove) if tags_to_remove is not None else None

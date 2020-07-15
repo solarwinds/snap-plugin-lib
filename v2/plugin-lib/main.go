@@ -316,7 +316,10 @@ func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 		v := C.get_map_value(fields, C.int(i))
 		logF = logF.WithField(C.GoString(k), C.GoString(v))
 	}
-	logF.Log(logrus.Level(int(level)), C.GoString(message))
+
+	if logObj, ok := logF.(*logrus.Entry); ok {
+		logObj.Log(logrus.Level(int(level)), C.GoString(message))
+	}
 }
 
 /*****************************************************************************/
