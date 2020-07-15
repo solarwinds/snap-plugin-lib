@@ -107,29 +107,29 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		os.Exit(normalExitStatus)
 	}
 
+	r, err := acquireResources(opt)
+	if err != nil {
+		logF.WithError(err).Error("Can't acquire resources for plugin services")
+		os.Exit(errorExitStatus)
+	}
+
+	if opt.EnableProfiling {
+		startPprofServer(ctx, r.pprofListener)
+		defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
+	}
+
+	if opt.EnableStatsServer {
+		startStatsServer(ctx, r.statsListener, statsController)
+		defer r.statsListener.Close() // close stats service when GRPC service has been shut down
+	}
+
 	if opt.DebugMode {
 		startCollectorInDebugMode(ctxMan, opt)
 	} else {
-		r, err := acquireResources(opt)
-		if err != nil {
-			logF.WithError(err).Error("Can't acquire resources for plugin services")
-			os.Exit(errorExitStatus)
-		}
-
 		jsonMeta := metaInformation(ctx, collector.Name(), collector.Version(), collector.Type(), opt, r, ctxMan.TasksLimit, ctxMan.InstancesLimit)
 		if inProc {
 			inprocPlugin.MetaChannel() <- jsonMeta
 			close(inprocPlugin.MetaChannel())
-		}
-
-		if opt.EnableProfiling {
-			startPprofServer(ctx, r.pprofListener)
-			defer r.pprofListener.Close() // close pprof service when GRPC service has been shut down
-		}
-
-		if opt.EnableStatsServer {
-			startStatsServer(ctx, r.statsListener, statsController)
-			defer r.statsListener.Close() // close stats service when GRPC service has been shut down
 		}
 
 		srv, err := service.NewGRPCServer(ctx, opt)
