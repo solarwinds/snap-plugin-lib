@@ -347,7 +347,7 @@ func define_group(name *C.char, description *C.char) {
 //export define_example_config
 func define_example_config(cfg *C.char) *C.error_t {
 	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
-	return toCError(err) // todo: adamik: dealloc
+	return toCError(err)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -411,7 +411,10 @@ func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) err
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
 
-	C.call_c_callback(callback, C.CString(taskID)) // todo: adamik: dealloc
+	taskIDasPtr := C.CString(taskID)
+	C.call_c_callback(callback, taskIDasPtr)
+	dealloc_charp(taskIDasPtr)
+
 	return nil
 }
 
