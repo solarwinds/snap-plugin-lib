@@ -5,16 +5,16 @@ class PluginLibException(Exception):
     pass
 
 
-# Decorator - used to throw exception when function return not-null string
+# Decorator - used to throw exception when function return not-null error
 def throw_exception_if_error(func):
     def func_wrapper(*args, **kwargs):
         err = func(*args, **kwargs)
         if err.contents.msg is None:
             return None
 
-        err_msg = str(err.contents.msg)
+        err_msg = str(err.contents.msg.decode(encoding='utf-8'))
         if err_msg is not None:
-            PLUGIN_LIB_OBJ.dealloc_charp(err)
+            PLUGIN_LIB_OBJ.dealloc_error(err)
             raise PluginLibException(err_msg)
 
     return func_wrapper

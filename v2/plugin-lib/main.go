@@ -67,6 +67,8 @@ static inline void free_error_msg(error_t * err) {
     if (err->msg != NULL) {
         free(err->msg);
     }
+
+	free(err);
 }
 
 typedef struct {
@@ -226,7 +228,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 }
 
 /*****************************************************************************/
-// Deallocation API
+// Deallocate API
 
 //export dealloc_charp
 func dealloc_charp(p *C.char) {
@@ -238,6 +240,11 @@ func dealloc_charp(p *C.char) {
 //export dealloc_str_array
 func dealloc_str_array(p **C.char) {
 	C.free_str_array(p)
+}
+
+//export dealloc_error
+func dealloc_error(p *C.error_t) {
+	C.free_error_msg(p)
 }
 
 /*****************************************************************************/
@@ -286,18 +293,18 @@ func ctx_config(ctxID *C.char, key *C.char) *C.char {
 		return (*C.char)(C.NULL)
 	}
 
-	return C.CString(v) // todo: adamik: dealloc
+	return C.CString(v)
 }
 
 //export ctx_config_keys
 func ctx_config_keys(ctxID *C.char) **C.char {
-	return toCStrArray(contextObject(ctxID).ConfigKeys()) // todo: adamik: dealloc
+	return toCStrArray(contextObject(ctxID).ConfigKeys())
 }
 
 //export ctx_raw_config
 func ctx_raw_config(ctxID *C.char) *C.char {
 	rc := string(contextObject(ctxID).RawConfig())
-	return C.CString(rc) // todo: adamik: dealloc
+	return C.CString(rc)
 }
 
 //export ctx_add_warning

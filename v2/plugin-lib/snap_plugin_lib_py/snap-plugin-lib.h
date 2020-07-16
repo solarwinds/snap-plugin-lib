@@ -87,6 +87,8 @@ static inline void free_error_msg(error_t * err) {
     if (err->msg != NULL) {
         free(err->msg);
     }
+
+	free(err);
 }
 
 typedef struct {
@@ -181,6 +183,8 @@ extern "C" {
 extern void dealloc_charp(char* p0);
 
 extern void dealloc_str_array(char** p0);
+
+extern void dealloc_error(error_t* p0);
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 

@@ -79,7 +79,11 @@ class Context:
 
     def config_keys(self):
         config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())
-        return cstrarray_to_list(config_list_c)
+
+        ret_list = cstrarray_to_list(config_list_c)
+        PLUGIN_LIB_OBJ.dealloc_str_array(config_list_c)
+
+        return ret_list
 
     def raw_config(self):
         ret_ptr = PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id())

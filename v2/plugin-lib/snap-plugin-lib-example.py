@@ -1,6 +1,7 @@
 import time
 
 from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_INFO
+from snap_plugin_lib_py.exceptions import PluginLibException
 
 
 class ExamplePlugin(BasePlugin):
@@ -40,6 +41,11 @@ class ExamplePlugin(BasePlugin):
         ctx.add_metric("/python/group2/dyn56/metric4", -21)
         ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
         ctx.add_metric("/python/group2/dyn58/metric4", True)
+
+        try:
+            ctx.add_metric("/^$^%", 20)
+        except PluginLibException as e:
+            print("Exception: ", e)
 
     def load(self, ctx):
         ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
