@@ -34,7 +34,6 @@ func WithCtx(ctx context.Context) logrus.FieldLogger {
 	log, err = withCtx(ctx)
 	if err != nil {
 		log = logrus.WithFields(logrus.Fields{}) // default: logger
-		log.WithError(err).Info("Can't get logger from context, fallback to default")
 	}
 
 	return log

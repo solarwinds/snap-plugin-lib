@@ -127,6 +127,8 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint32{VUint32: t}
 	case uint64:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint64{VUint64: t}
+	case uint:
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint64{VUint64: uint64(t)}
 	case []byte:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VBytes{VBytes: t}
 	case bool:
@@ -134,7 +136,7 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 	case nil:
 		grpcValue.DataVariant = nil
 	default:
-		return nil, fmt.Errorf("unsupported type: %v given in metric data", t)
+		return nil, fmt.Errorf("unsupported type: %T given in metric data", t)
 	}
 
 	return grpcValue, nil

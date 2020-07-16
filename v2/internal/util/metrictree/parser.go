@@ -67,7 +67,7 @@ func ParseNamespace(s string, isFilter bool) (*Namespace, error) {
 		return nil, err
 	}
 	if len(splitNs)-1 < minNamespaceElements {
-		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d)", minNamespaceElements)
+		return nil, fmt.Errorf("namespace doesn't contain valid numbers of elements (min. %d): %s", minNamespaceElements, s)
 	}
 
 	for i, nsElem := range splitNs[1:] {
