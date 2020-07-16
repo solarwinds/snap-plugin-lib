@@ -27,20 +27,40 @@ class ExamplePlugin(BasePlugin):
         })
         print("Requested metrics: ", ctx.requested_metrics())
 
-        ctx.add_metric("/python/group1/metric1", 10,
-                       tags={"a": "10", "b": "20"},
-                       timestamp=time.time(),
-                       description="Custom metric description",
-                       unit="Custom metric unit")
+        mts = (
+            ("/python/group1/metric1", 10,
+             {"bastide": "80", "succubine": "31"}, "knifesmith threadmaker", "Albanian cheirosophy"),
 
-        ctx.add_metric("/python/group1/metric2", 20)
-        ctx.add_metric("/python/group1/metric3", 40)
-        ctx.add_metric("/python/group2/dyn1/metric4", 40)
-        ctx.add_metric("/python/group2/dyn15/metric4", 11)
-        ctx.add_metric("/python/group2/dyn55/metric4", 5.34)
-        ctx.add_metric("/python/group2/dyn56/metric4", -21)
-        ctx.add_metric("/python/group2/dyn57/metric4", 9223372036854775999)
-        ctx.add_metric("/python/group2/dyn58/metric4", True)
+            ("/python/group1/metric2", 20,
+             {"untransferred": "27", "cupolaman": "7"}, "Chastacosta Entoprocta", "octocotyloid lexicon"),
+
+            ("/python/group1/metric3", 40,
+             {"gymnotid": "59", "ineffable": "76"}, "reliantly relick", "Cerastium chilenite"),
+
+            ("/python/group2/dyn1/metric4", 40,
+             {"heelstrap": "48", "corbiculate": "84"}, "bastide koechlinite", "counteravouch euphon"),
+
+            ("/python/group2/dyn15/metric4", 11,
+             {"newelty": "64", "lungmotor": "36"}, "rootlessness unwise", "prepartake Tabebuia"),
+
+            ("/python/group2/dyn55/metric4", 5.34,
+             {"wresting": "71", "semidiaphaneity": "3"}, "overinsolent desilicify", "unindulgently planipetalous"),
+
+            ("/python/group2/dyn56/metric4", -21,
+             {"replenishingly": "83", "exululate": "50"}, "ostraite proliferant", "nonhomogenous unreeling"),
+
+            ("/python/group2/dyn57/metric4", 9223372036854775999,
+             {"masu": "84", "dallier": "55"}, "unrelevant corncake", "proconquest predeterministic"),
+
+            ("/python/group2/dyn58/metric4", True,
+             {"postcordial": "52", "cupping": "68"}, "liturgize buhr", "presentiveness sulfopurpurate"),
+
+            ("/python/group2/dyn3/metric5", 10,
+             {"foyaite": "64", "osoberry": "38"}, "jowler serape", "overknee pinnaclet")
+        )
+
+        for (mt, val, tags, desc, unit) in mts:
+            ctx.add_metric(mt, val, tags=tags, description=desc, unit=unit)
 
         try:
             ctx.add_metric("/^$^%", 20)
