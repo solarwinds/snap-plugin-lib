@@ -1,16 +1,10 @@
-import os.path
-import platform
 from collections import defaultdict
-from ctypes import CDLL, c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer
+from ctypes import c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, cast
 
 from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
     time_to_ctimewithns
+from .dynamic_lib import PLUGIN_LIB_OBJ
 from .exceptions import throw_exception_if_error, throw_exception_if_null
-
-# Dependent library
-PLUGIN_LIB_EXTENSION = ".dll" if (platform.system() == "Windows") else ".so"
-PLUGIN_LIB_FILE = "snap-plugin-lib%s" % PLUGIN_LIB_EXTENSION
-PLUGIN_LIB_OBJ = CDLL(os.path.join(os.path.dirname(__file__), PLUGIN_LIB_FILE))
 
 # Used to store object for a given context. Access example: storedObjectMap[ctx_id][key]
 storedObjectMap = defaultdict(dict)
@@ -27,9 +21,9 @@ PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_should_process.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_requested_metrics.restype = POINTER(c_char_p)
 
-PLUGIN_LIB_OBJ.ctx_config.restype = c_char_p
+PLUGIN_LIB_OBJ.ctx_config.restype = c_void_p  # -> string
 PLUGIN_LIB_OBJ.ctx_config_keys.restype = POINTER(c_char_p)
-PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_char_p
+PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_void_p  # -> string
 PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
@@ -72,17 +66,29 @@ class Context:
     def __init__(self, ctx_id):
         self.__ctx_id = ctx_id
 
-    @throw_exception_if_null("object with given key doesn't exist")
+    # @throw_exception_if_null("object with given key doesn't exist")
     def config(self, key: str):
-        return PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(),
-                                         string_to_bytes(key)).decode(encoding='utf-8')
+        ret_ptr = PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(),
+                                            string_to_bytes(key))
+
+        ret_char_ptr = cast(ret_ptr, c_char_p)
+        ret_str = ret_char_ptr.value.decode(encoding='utf-8')
+        PLUGIN_LIB_OBJ.dealloc_charp(ret_char_ptr)
+
+        return ret_str
 
     def config_keys(self):
         config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())
         return cstrarray_to_list(config_list_c)
 
     def raw_config(self):
-        return PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id()).decode(encoding='utf-8')
+        ret_ptr = PLUGIN_LIB_OBJ.ctx_raw_config(self._ctx_id())
+
+        ret_char_ptr = cast(ret_ptr, c_char_p)
+        ret_str = ret_char_ptr.value.decode(encoding='utf-8')
+        PLUGIN_LIB_OBJ.dealloc_charp(ret_char_ptr)
+
+        return ret_str
 
     def store(self, key, obj):
         storedObjectMap[self._ctx_id()][key] = obj

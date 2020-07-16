@@ -1,4 +1,4 @@
-from snap_plugin_lib_py.c_bridge import PLUGIN_LIB_OBJ
+from .dynamic_lib import PLUGIN_LIB_OBJ
 
 
 class PluginLibException(Exception):
@@ -24,9 +24,11 @@ def throw_exception_if_error(func):
 def throw_exception_if_null(exception_msg):
     def func_wrapper(func):
         def inner_wrapper(*args, **kwargs):
-            err = func(*args, **kwargs)
-            if err is None:
+            ret_value = func(*args, **kwargs)
+            if ret_value is None:
                 raise PluginLibException(exception_msg)
+
+            return ret_value
 
         return inner_wrapper
 

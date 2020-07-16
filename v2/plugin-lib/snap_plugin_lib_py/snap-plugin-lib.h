@@ -107,6 +107,8 @@ static inline char** alloc_str_array(int size) {
 }
 
 static inline void free_str_array(char **arr) {
+	if (arr == NULL) return;
+
 	char * arrEl = *arr;
 	for (;;) {
 		if (arrEl == NULL) {

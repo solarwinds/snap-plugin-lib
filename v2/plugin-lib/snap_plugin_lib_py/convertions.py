@@ -39,8 +39,8 @@ class Modifiers(Structure):
         ("tags_to_add", POINTER(Map)),
         ("tags_to_remove", POINTER(Map)),
         ("timestamp", POINTER(TimeWithNs)),
-        ("description", POINTER(c_char_p)),
-        ("unit", POINTER(c_char_p))
+        ("description", c_char_p),
+        ("unit", c_char_p)
     ]
 
 

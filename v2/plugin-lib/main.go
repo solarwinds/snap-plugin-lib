@@ -87,6 +87,8 @@ static inline char** alloc_str_array(int size) {
 }
 
 static inline void free_str_array(char **arr) {
+	if (arr == NULL) return;
+
 	char * arrEl = *arr;
 	for (;;) {
 		if (arrEl == NULL) {
@@ -228,7 +230,9 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 
 //export dealloc_charp
 func dealloc_charp(p *C.char) {
-	C.free(unsafe.Pointer(p))
+	if p != nil {
+		C.free(unsafe.Pointer(p))
+	}
 }
 
 //export dealloc_str_array
