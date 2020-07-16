@@ -86,6 +86,7 @@ static inline void free_error_msg(error_t * err) {
 
     if (err->msg != NULL) {
         free(err->msg);
+		err->msg = NULL;
     }
 
 	free(err);
