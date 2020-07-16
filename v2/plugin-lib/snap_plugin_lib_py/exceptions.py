@@ -1,3 +1,6 @@
+from snap_plugin_lib_py.c_bridge import PLUGIN_LIB_OBJ
+
+
 class PluginLibException(Exception):
     pass
 
@@ -11,6 +14,7 @@ def throw_exception_if_error(func):
 
         err_msg = str(err.contents.msg)
         if err_msg is not None:
+            PLUGIN_LIB_OBJ.dealloc_charp(err)
             raise PluginLibException(err_msg)
 
     return func_wrapper
