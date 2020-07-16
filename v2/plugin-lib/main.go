@@ -78,8 +78,8 @@ typedef struct {
     map_t * tags_to_add;
     map_t * tags_to_remove;
     time_with_ns_t * timestamp;
-    char ** description;
-    char ** unit;
+    char * description;
+    char * unit;
 } modifiers_t;
 
 static inline char** alloc_str_array(int size) {
@@ -213,11 +213,11 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	}
 
 	if modifiers.description != nil {
-		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(*modifiers.description)))
+		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(modifiers.description)))
 	}
 
 	if modifiers.unit != nil {
-		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(*modifiers.unit)))
+		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(modifiers.unit)))
 	}
 
 	return appliedModifiers

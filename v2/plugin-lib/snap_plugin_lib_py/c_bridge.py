@@ -139,8 +139,8 @@ class CollectContext(Context):
         modifiers = Modifiers()
         modifiers.tags_to_add = dict_to_cmap(tags_to_add) if tags_to_add is not None else None
         modifiers.tags_to_remove = dict_to_cmap(tags_to_remove) if tags_to_remove is not None else None
-        modifiers.description = pointer(c_char_p(string_to_bytes(description))) if description is not None else None
-        modifiers.unit = pointer(c_char_p(string_to_bytes(description))) if unit is not None else None
+        modifiers.description = c_char_p(string_to_bytes(description)) if description is not None else None
+        modifiers.unit = c_char_p(string_to_bytes(unit)) if unit is not None else None
         modifiers.timestamp = time_to_ctimewithns(timestamp) if timestamp is not None else None
         return pointer(modifiers)
 

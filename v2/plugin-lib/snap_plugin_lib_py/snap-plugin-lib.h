@@ -98,8 +98,8 @@ typedef struct {
     map_t * tags_to_add;
     map_t * tags_to_remove;
     time_with_ns_t * timestamp;
-    char ** description;
-    char ** unit;
+    char * description;
+    char * unit;
 } modifiers_t;
 
 static inline char** alloc_str_array(int size) {
