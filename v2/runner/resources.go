@@ -53,14 +53,14 @@ func acquireResources(opt *plugin.Options) (*resources, error) {
 	var err error
 	r := &resources{}
 
-	if !opt.AsThread || !opt.DebugMode {
+	if !opt.AsThread && !opt.DebugMode {
 		r.grpcListener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", opt.PluginIP, opt.GRPCPort))
 		if err != nil {
 			return nil, fmt.Errorf("can't create tcp connection for GRPC server (%s)", err)
 		}
 	}
 
-	if opt.AsThread && !opt.DebugMode {
+	if opt.AsThread {
 		// force disable profiling as plugin running as goroutine inside Snap will be covered by its pprof anyway
 		opt.EnableProfiling = false
 	}
