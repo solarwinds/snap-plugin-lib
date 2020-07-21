@@ -20,13 +20,14 @@ import (
 	"context"
 	"os"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
 	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {
@@ -43,6 +44,8 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 
 		logger := inprocPlugin.Logger()
 		ctx = log.ToCtx(ctx, logger)
+
+		publisher = inprocPlugin.Unwrap().(plugin.Publisher)
 	}
 
 	logF := logger(ctx).WithField("service", "publisher")
