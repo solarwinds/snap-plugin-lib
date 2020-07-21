@@ -196,17 +196,14 @@ func (c *Context) AttachContext(parentCtx context.Context) {
 	c.ctxMu.Lock()
 	defer c.ctxMu.Unlock()
 
-	if c.ctx == nil {
-		c.ctx, c.cancelFn = context.WithCancel(parentCtx)
-	}
+	c.ctx, c.cancelFn = context.WithCancel(parentCtx)
 }
 
 func (c *Context) ReleaseContext() {
 	c.ctxMu.Lock()
 	defer c.ctxMu.Unlock()
 
-	if c.ctx != nil {
+	if c.cancelFn != nil {
 		c.cancelFn()
-		c.ctx = nil
 	}
 }
