@@ -48,6 +48,7 @@ type Context struct {
 
 	ctx      context.Context
 	cancelFn context.CancelFunc
+	ctxMu    sync.RWMutex
 }
 
 type Warning struct {
@@ -124,6 +125,9 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 }
 
 func (c *Context) AddWarning(msg string) {
+	c.ctxMu.RLock()
+	defer c.ctxMu.RUnlock()
+
 	logF := log.WithCtx(c.ctx).WithFields(moduleFields).WithField("service", "proxy")
 
 	if c.IsDone() {
@@ -169,10 +173,16 @@ func (c *Context) ResetWarnings() {
 }
 
 func (c *Context) IsDone() bool {
+	c.ctxMu.RLock()
+	defer c.ctxMu.RUnlock()
+
 	return c.ctx.Err() != nil
 }
 
 func (c *Context) Done() <-chan struct{} {
+	c.ctxMu.RLock()
+	defer c.ctxMu.RUnlock()
+
 	return c.ctx.Done()
 }
 
@@ -183,9 +193,17 @@ func (c *Context) Logger() logrus.FieldLogger {
 }
 
 func (c *Context) AttachContext(parentCtx context.Context) {
+	c.ctxMu.Lock()
+	defer c.ctxMu.Unlock()
+
 	c.ctx, c.cancelFn = context.WithCancel(parentCtx)
 }
 
 func (c *Context) ReleaseContext() {
-	c.cancelFn()
+	c.ctxMu.Lock()
+	defer c.ctxMu.Unlock()
+
+	if c.cancelFn != nil {
+		c.cancelFn()
+	}
 }
