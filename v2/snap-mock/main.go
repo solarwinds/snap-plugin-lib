@@ -53,6 +53,7 @@ const (
 type Options struct {
 	PluginIP           string
 	PluginPort         int
+	PublisherPort      int
 	CollectInterval    time.Duration
 	PingInterval       time.Duration
 	MaxCollectRequests int
@@ -92,6 +93,10 @@ func parseCmdLine() *Options {
 	flag.IntVar(&opt.PluginPort,
 		"plugin-port", defaultGRPCPort,
 		"Port of GRPC Server run by plugin")
+
+	flag.IntVar(&opt.PublisherPort,
+		"publisher-port", defaultGRPCPort,
+		"Port of GRPC Server run by publisher plugin")
 
 	flag.StringVar(&opt.TaskId,
 		"task-id", defaultTaskID,
@@ -151,6 +156,15 @@ func main() {
 
 	opt := parseCmdLine()
 
+	grpcServer2Addr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PublisherPort)
+	fmt.Printf("imaslyk %s\n", grpcServer2Addr)
+	clpub, err := grpc.Dial(grpcServer2Addr, grpc.WithInsecure())
+	if err != nil {
+		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServer2Addr, err)
+		os.Exit(1)
+	}
+	defer func() { _ = clpub.Close() }()
+
 	// Create connection
 	grpcServerAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PluginPort)
 	cl, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
@@ -159,9 +173,15 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() { _ = cl.Close() }()
-
-	// Load, collect, unload routine
+	// Load, collect, publish, unload routine
 	go func() {
+		// Plubisher
+		fmt.Printf("maslyk weszlo")
+		publishClient := pluginrpc.NewPublisherClient(clpub)
+		errPub := doPubLoadRequest(publishClient, opt)
+		if errPub != nil {
+			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
+		}
 		collClient := pluginrpc.NewCollectorClient(cl)
 
 		err := doLoadRequest(collClient, opt)
@@ -186,10 +206,18 @@ func main() {
 
 				break
 			}
+			for i := 0; i < unloadMaxRetry; i++ {
+				err := doPubUnloadRequest(publishClient, opt)
+				if err != nil {
+					fmt.Printf("!! Can't unload plugin (%v), will retry (%d/%d)...\n", err, i+1, unloadMaxRetry)
+					time.Sleep(unloadRetryDelay)
+					continue
+				}
 
+				break
+			}
 			os.Exit(stoppedByUser)
 		}()
-
 		time.Sleep(grpcLoadDelay)
 
 		reqCounter := 0
@@ -226,6 +254,9 @@ func main() {
 				}
 			}
 
+            _ := doPublishRequest(publishClient, chunk.mts, opt)
+
+            // FIXME What?
 			if opt.RequestInfo {
 				info, err := doInfoRequest(collClient, opt)
 				if err != nil {
@@ -255,12 +286,17 @@ func main() {
 
 	// ping routine
 	contClient := pluginrpc.NewControllerClient(cl)
+	contPubClient := pluginrpc.NewControllerClient(clpub)
 
 	go func() {
 		for {
 			req := &pluginrpc.PingRequest{}
 			_, err := contClient.Ping(context.Background(), req)
 			if err != nil {
+				doneCh <- fmt.Errorf("can't start: %v", err)
+			}
+			_, err2 := contPubClient.Ping(context.Background(), req)
+			if err2 != nil {
 				doneCh <- fmt.Errorf("can't start: %v", err)
 			}
 			time.Sleep(opt.PingInterval)
@@ -304,6 +340,33 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	return err
 }
 
+func doPubLoadRequest(cc pluginrpc.PublisherClient, opt *Options) error {
+	reqLoad := &pluginrpc.LoadPublisherRequest{
+		TaskId:     opt.TaskId,
+		JsonConfig: []byte(opt.PluginConfig), // FIXME
+	}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	_, err := cc.Load(ctx, reqLoad)
+
+	return err
+}
+
+func doPubUnloadRequest(cc pluginrpc.PublisherClient, opt *Options) error {
+	reqUnload := &pluginrpc.UnloadPublisherRequest{
+		TaskId: opt.TaskId,
+	}
+
+	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
+	defer fn()
+
+	_, err := cc.Unload(ctx, reqUnload)
+
+	return err
+}
+
 func doUnloadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 	reqUnload := &pluginrpc.UnloadCollectorRequest{
 		TaskId: opt.TaskId,
@@ -341,6 +404,22 @@ func doInfoRequest(cc pluginrpc.CollectorClient, opt *Options) ([]byte, error) {
 	}
 	return resp.Info, nil
 }
+
+
+func doPublishRequest(pc pluginrpc.PublisherClient, mt []string, op *Options) {
+
+reqPubl := &pluginrpc.PublishRequest{
+    TaskId: opt.TaskId,
+    MetricSet: // Help
+
+}
+ go func(){
+
+ }
+
+return nil
+}
+
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectChunk {
 	var recvMts []string
