@@ -234,6 +234,9 @@ func main() {
 					doneCh <- nil
 				}()
 			}
+
+			var mtsChunks [][]*pluginrpc.Metric
+
 			chunkCh := doCollectRequest(collClient, opt)
 			for chunk := range chunkCh {
 				if err != nil {
@@ -249,10 +252,13 @@ func main() {
 				for _, mt := range chunk.mts {
 					fmt.Printf(" %s\n", grpcMetricToString(mt))
 				}
-				err := doPublishRequest(publishClient, chunk.mts, opt) // fixme
-				if err != nil {
-					fmt.Printf("Not good")
-				}
+
+				mtsChunks = append(mtsChunks, chunk.mts)
+			}
+
+			err := doPublishRequest(publishClient, mtsChunks, opt) // fixme
+			if err != nil {
+				fmt.Printf("Not good")
 			}
 
 			// FIXME What?
@@ -404,22 +410,19 @@ func doInfoRequest(cc pluginrpc.CollectorClient, opt *Options) ([]byte, error) {
 	return resp.Info, nil
 }
 
-func doPublishRequest(pc pluginrpc.PublisherClient, mt []*pluginrpc.Metric, opt *Options) error {
+func doPublishRequest(pc pluginrpc.PublisherClient, mts [][]*pluginrpc.Metric, opt *Options) error {
+	stream, _ := pc.Publish(context.Background())
 
-	fmt.Printf("weszlo w funckje")
-	reqPubl := &pluginrpc.PublishRequest{
-		TaskId:    opt.TaskId,
-		MetricSet: mt,
+	for _, chunk := range mts {
+		reqPubl := &pluginrpc.PublishRequest{
+			TaskId:    opt.TaskId,
+			MetricSet: chunk,
+		}
+		stream.Send(reqPubl)
 	}
 
-	ctx := context.Background()
-
-	PublisherStream, _ := pc.Publish(ctx)
-
-	PublisherStream.Send(reqPubl)
-	_, err := PublisherStream.CloseAndRecv()
+	_, err := stream.CloseAndRecv()
 	return err
-
 }
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectChunk {
