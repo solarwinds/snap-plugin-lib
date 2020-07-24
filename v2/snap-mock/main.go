@@ -76,7 +76,8 @@ const (
 )
 
 type collectChunk struct {
-	mts      []string
+	mts []*pluginrpc.Metric
+	//mts      []string
 	warnings []string
 	err      error
 }
@@ -157,7 +158,6 @@ func main() {
 	opt := parseCmdLine()
 
 	grpcServer2Addr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PublisherPort)
-	fmt.Printf("imaslyk %s\n", grpcServer2Addr)
 	clpub, err := grpc.Dial(grpcServer2Addr, grpc.WithInsecure())
 	if err != nil {
 		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServer2Addr, err)
@@ -175,8 +175,6 @@ func main() {
 	defer func() { _ = cl.Close() }()
 	// Load, collect, publish, unload routine
 	go func() {
-		// Plubisher
-		fmt.Printf("maslyk weszlo")
 		publishClient := pluginrpc.NewPublisherClient(clpub)
 		errPub := doPubLoadRequest(publishClient, opt)
 		if errPub != nil {
@@ -236,7 +234,6 @@ func main() {
 					doneCh <- nil
 				}()
 			}
-
 			chunkCh := doCollectRequest(collClient, opt)
 			for chunk := range chunkCh {
 				if err != nil {
@@ -250,13 +247,15 @@ func main() {
 
 				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
 				for _, mt := range chunk.mts {
-					fmt.Printf(" %s\n", mt)
+					fmt.Printf(" %s\n", grpcMetricToString(mt))
+				}
+				err := doPublishRequest(publishClient, chunk.mts, opt) // fixme
+				if err != nil {
+					fmt.Printf("Not good")
 				}
 			}
 
-            _ := doPublishRequest(publishClient, chunk.mts, opt)
-
-            // FIXME What?
+			// FIXME What?
 			if opt.RequestInfo {
 				info, err := doInfoRequest(collClient, opt)
 				if err != nil {
@@ -405,24 +404,26 @@ func doInfoRequest(cc pluginrpc.CollectorClient, opt *Options) ([]byte, error) {
 	return resp.Info, nil
 }
 
+func doPublishRequest(pc pluginrpc.PublisherClient, mt []*pluginrpc.Metric, opt *Options) error {
 
-func doPublishRequest(pc pluginrpc.PublisherClient, mt []string, op *Options) {
+	fmt.Printf("weszlo w funckje")
+	reqPubl := &pluginrpc.PublishRequest{
+		TaskId:    opt.TaskId,
+		MetricSet: mt,
+	}
 
-reqPubl := &pluginrpc.PublishRequest{
-    TaskId: opt.TaskId,
-    MetricSet: // Help
+	ctx := context.Background()
+
+	PublisherStream, _ := pc.Publish(ctx)
+
+	PublisherStream.Send(reqPubl)
+	_, err := PublisherStream.CloseAndRecv()
+	return err
 
 }
- go func(){
-
- }
-
-return nil
-}
-
 
 func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectChunk {
-	var recvMts []string
+	var recvMts []*pluginrpc.Metric
 	var recvWarns []string
 
 	chunkCh := make(chan collectChunk)
@@ -467,7 +468,8 @@ func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectCh
 			}
 
 			for _, mt := range resp.MetricSet {
-				recvMts = append(recvMts, grpcMetricToString(mt))
+				//recvMts = append(recvMts, grpcMetricToString(mt))
+				recvMts = append(recvMts, mt)
 			}
 
 			for _, warns := range resp.Warnings {
