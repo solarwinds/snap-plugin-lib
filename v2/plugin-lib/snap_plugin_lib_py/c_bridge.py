@@ -10,8 +10,7 @@ from .exceptions import throw_exception_if_error, throw_exception_if_null
 storedObjectMap = defaultdict(dict)
 
 # Reference to user-defined collector
-global collector_py
-
+global plugin_py
 ###############################################################################
 # C functions metadata
 
@@ -118,6 +117,14 @@ class Context:
         return self.__ctx_id
 
 
+class PublishContext(Context):
+    def listAllMetrics(self):
+        pass
+
+    def count(self):
+        pass
+
+
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(self, namespace, value, *, tags=None, timestamp=None, description=None, unit=None):
@@ -160,35 +167,52 @@ class CollectContext(Context):
 
 @CFUNCTYPE(None)
 def define_handler():
-    collector_py.define_plugin(DefineContext())
+    plugin_py.define_plugin(DefineContext())
 
 
 @CFUNCTYPE(None, c_char_p)
-def collect_handler(ctx_id):
-    collector_py.collect(CollectContext(ctx_id))
+def plugin_handler(ctx_id):
+#FIXME
+    if plugin_py.publish:
+        plugin_py.publish(PublishContext(ctx_id))
+    elif plugin_py.collect:
+        plugin_py.collect(CollectContext(ctx_id))
 
 
 @CFUNCTYPE(None, c_char_p)
 def load_handler(ctx_id):
-    collector_py.load(Context(ctx_id))
+    plugin_py.load(Context(ctx_id))
 
 
 @CFUNCTYPE(None, c_char_p)
 def unload_handler(ctx_id):
-    collector_py.unload(Context(ctx_id))
+    plugin_py.unload(Context(ctx_id))
 
 
 ###############################################################################
 # Collector setup
 
+# Merge?
 def start_c_collector(collector):
-    global collector_py
+    global plugin_py
 
     name = collector.name()
     version = collector.version()
-    collector_py = collector
+    plugin_py = collector
 
-    PLUGIN_LIB_OBJ.start_collector(collect_handler,
+    PLUGIN_LIB_OBJ.start_collector(plugin_handler,
+                                   load_handler,
+                                   unload_handler,
+                                   define_handler,
+                                   string_to_bytes(name), string_to_bytes(version))
+def start_c_publisher(publisher):
+    global plugin_py
+
+    name = publisher.name()
+    version = publisher.version()
+    plugin_py = publisher
+
+    PLUGIN_LIB_OBJ.start_publisher(plugin_handler,
                                    load_handler,
                                    unload_handler,
                                    define_handler,

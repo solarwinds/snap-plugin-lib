@@ -24,13 +24,14 @@ import (
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 )
 
-type pluginContext struct {
+type PluginContext struct {
 	*proxy.Context
 
-	sessionMts []*types.Metric
+	taskID     string
+    sessionMts []*types.Metric
 }
 
-func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginContext, error) {
+func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byte) (*PluginContext, error) {
 	if ctxManager == nil {
 		return nil, errors.New("can't create context without valid context manager")
 	}
@@ -40,12 +41,13 @@ func NewPluginContext(ctxManager *ContextManager, rawConfig []byte) (*pluginCont
 		return nil, err
 	}
 
-	return &pluginContext{
+	return &PluginContext{
 		Context: baseContext,
+        taskID:  taskID,
 	}, nil
 }
 
-func (pc *pluginContext) ListAllMetrics() []plugin.Metric {
+func (pc *PluginContext) ListAllMetrics() []plugin.Metric {
 	mts := make([]plugin.Metric, 0, len(pc.sessionMts))
 
 	for _, mt := range pc.sessionMts {
@@ -55,6 +57,10 @@ func (pc *pluginContext) ListAllMetrics() []plugin.Metric {
 	return mts
 }
 
-func (pc *pluginContext) Count() int {
+func (pc *PluginContext) Count() int {
 	return len(pc.sessionMts)
+}
+
+func (pc *PluginContext) TaskID() string {
+	return pc.taskID
 }

@@ -1,10 +1,10 @@
 import time
 
-from snap_plugin_lib_py import BasePlugin, start_collector, LOGLEVEL_INFO
+from snap_plugin_lib_py import BaseCollector, start_collector, LOGLEVEL_INFO
 from snap_plugin_lib_py.exceptions import PluginLibException
 
 
-class ExamplePlugin(BasePlugin):
+class ExampleCollectorPlugin(BaseCollector):
     def define_plugin(self, ctx):
         example_config = {
             "ip": "127.0.0.1",
@@ -83,5 +83,5 @@ class ExamplePlugin(BasePlugin):
 
 
 if __name__ == '__main__':
-    collector = ExamplePlugin("example", "0.0.1")
+    collector = ExampleCollectorPlugin("example", "0.0.1")
     start_collector(collector)

@@ -83,7 +83,7 @@ func (cm *ContextManager) RequestPublish(id string, mts []*types.Metric) types.P
 			Error: fmt.Errorf("can't find a context for a given id: %s", id),
 		}
 	}
-	context := contextIf.(*pluginContext)
+	context := contextIf.(*PluginContext)
 
 	context.sessionMts = mts // metrics to publish are set within context
 	context.ResetWarnings()
@@ -123,7 +123,7 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(cm, config)
+	newCtx, err := NewPluginContext(cm,id, config)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}
@@ -152,7 +152,7 @@ func (cm *ContextManager) UnloadTask(id string) error {
 		return errors.New("context with given id is not defined")
 	}
 
-	context := contextI.(*pluginContext)
+	context := contextI.(*PluginContext)
 	if unloadable, ok := cm.publisher.(plugin.UnloadablePublisher); ok {
 		err := unloadable.Unload(context)
 		if err != nil {
@@ -173,7 +173,7 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("context with given id is not defined")
 	}
-	context := contextI.(*pluginContext)
+	context := contextI.(*PluginContext)
 
 	if publisherWithCustomInfo, ok := cm.publisher.(plugin.CustomizableInfoPublisher); ok {
 		infoObj := publisherWithCustomInfo.CustomInfo(context)

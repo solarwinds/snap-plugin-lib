@@ -221,6 +221,10 @@ extern void define_instances_limit(GoInt p0);
 
 extern void start_collector(callback_t* p0, callback_t* p1, callback_t* p2, define_callback_t* p3, char* p4, char* p5);
 
+/***************************************************************************/
+
+extern void start_publisher(callback_t* p0, callback_t* p1, callback_t* p2, define_callback_t* p3, char* p4, char* p5);
+
 #ifdef __cplusplus
 }
 #endif

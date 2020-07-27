@@ -118,7 +118,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	collectorproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	commonproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
+	publisherproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
@@ -126,23 +128,51 @@ import (
 import "C"
 
 var contextMap = sync.Map{}
-var pluginDef plugin.CollectorDefinition
+var pluginDef plugin.Definition
+var collectorDef plugin.CollectorDefinition
 
 /*****************************************************************************/
 // helpers
 
-func contextObject(ctxId *C.char) *proxy.PluginContext {
+
+func contextObject(ctxId *C.char) *commonproxy.Context {
+	id := C.GoString(ctxId)
+	ctx, ok := contextMap.Load(id)
+	if !ok {
+		panic(fmt.Sprintf("can't aquire context object with id %v", id))
+	}
+	switch v := ctx.(type) {
+    	case *collectorproxy.PluginContext:
+	    	fmt.Sprintf("maslyk weszlo")
+    		ctxObj, okType := ctx.(*collectorproxy.PluginContext)
+
+    	    if !okType {
+	    	    panic("maslyk3 Invalid concrete type of context object")
+        	}
+        	return ctxObj.Context
+		case *publisherproxy.PluginContext:
+		    ctxObj, okType := ctx.(*publisherproxy.PluginContext)
+        	if !okType {
+        		panic("maslyk2 Invalid concrete type of context object")
+    	    }
+        	return ctxObj.Context
+	default:
+		panic(fmt.Sprintf("%s not supported plugin Cntext type", v))
+	}
+
+}
+
+func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
 	if !ok {
 		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 
-	ctxObj, okType := ctx.(*proxy.PluginContext)
+ctxObj, okType := ctx.(*collectorproxy.PluginContext)
 	if !okType {
-		panic("Invalid concrete type of context object")
+		panic("maslyk1 Invalid concrete type of context object")
 	}
-
 	return ctxObj
 }
 
@@ -260,29 +290,29 @@ func dealloc_error(p *C.error_t) {
 
 //export ctx_add_metric
 func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
-	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), toGoModifiers(modifiers)...)
+	err := collContextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), toGoModifiers(modifiers)...)
 	return toCError(err)
 }
 
 //export ctx_always_apply
 func ctx_always_apply(ctxID *C.char, ns *C.char, modifiers *C.modifiers_t) *C.error_t {
-	_, err := contextObject(ctxID).AlwaysApply(C.GoString(ns), toGoModifiers(modifiers)...)
+	_, err := collContextObject(ctxID).AlwaysApply(C.GoString(ns), toGoModifiers(modifiers)...)
 	return toCError(err)
 }
 
 //export ctx_dismiss_all_modifiers
 func ctx_dismiss_all_modifiers(ctxID *C.char) {
-	contextObject(ctxID).DismissAllModifiers()
+	collContextObject(ctxID).DismissAllModifiers()
 }
 
 //export ctx_should_process
 func ctx_should_process(ctxID *C.char, ns *C.char) int {
-	return boolToInt(contextObject(ctxID).ShouldProcess(C.GoString(ns)))
+	return boolToInt(collContextObject(ctxID).ShouldProcess(C.GoString(ns)))
 }
 
 //export ctx_requested_metrics
 func ctx_requested_metrics(ctxID *C.char) **C.char {
-	return toCStrArray(contextObject(ctxID).RequestedMetrics())
+	return toCStrArray(collContextObject(ctxID).RequestedMetrics())
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -337,17 +367,17 @@ func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 
 //export define_metric
 func define_metric(namespace *C.char, unit *C.char, isDefault int, description *C.char) {
-	pluginDef.DefineMetric(C.GoString(namespace), C.GoString(unit), intToBool(isDefault), C.GoString(description))
+	collectorDef.DefineMetric(C.GoString(namespace), C.GoString(unit), intToBool(isDefault), C.GoString(description))
 }
 
 //export define_group
 func define_group(name *C.char, description *C.char) {
-	pluginDef.DefineGroup(C.GoString(name), C.GoString(description))
+	collectorDef.DefineGroup(C.GoString(name), C.GoString(description))
 }
 
 //export define_example_config
 func define_example_config(cfg *C.char) *C.error_t {
-	err := pluginDef.DefineExampleConfig(C.GoString(cfg))
+	err := collectorDef.DefineExampleConfig(C.GoString(cfg))
 	return toCError(err)
 }
 
@@ -370,43 +400,84 @@ func define_instances_limit(limit int) {
 func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
-		loadCallback:    loadCallback,
-		unloadCallback:  unloadCallback,
-		defineCallback:  defineCallback,
+		bridge: bridgePlugin{
+			loadCallback:   loadCallback,
+			unloadCallback: unloadCallback,
+			defineCallback: defineCallback,
+		},
 	}
 	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version))
 }
 
-/*****************************************************************************/
+/***************************************************************************/
+//export start_publisher
+func start_publisher(publishCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
 
-type bridgeCollector struct {
-	collectCallback *C.callback_t
-	loadCallback    *C.callback_t
-	unloadCallback  *C.callback_t
-	defineCallback  *C.define_callback_t
+
+	bPublisher := &bridgePublisher{
+		publishCallback: publishCallback,
+		// FIXME nested??
+		bridge: bridgePlugin{
+			loadCallback:   loadCallback,
+			unloadCallback: unloadCallback,
+			defineCallback: defineCallback,
+		},
+	}
+	runner.StartPublisher(bPublisher, C.GoString(name), C.GoString(version))
 }
 
-func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
+/****************************************************************************/
+// FIXME
+
+type bridgePublisher struct {
+	publishCallback *C.callback_t
+	bridge          bridgePlugin
+}
+type bridgeCollector struct {
+	collectCallback *C.callback_t
+	bridge          bridgePlugin
+}
+type bridgePlugin struct {
+	loadCallback   *C.callback_t
+	unloadCallback *C.callback_t
+	defineCallback *C.define_callback_t
+}
+
+// FIXME
+func (bp *bridgePlugin) PluginDefinition(def plugin.PublisherDefinition) error {
 	pluginDef = def
-	C.call_c_define_callback(bc.defineCallback)
+	C.call_c_define_callback(bp.defineCallback)
 
 	return nil
 }
 
+func (bp *bridgePublisher) Publish(ctx plugin.PublishContext) error {
+	return bp.bridge.callC(ctx, bp.publishCallback)
+}
+
 func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
-	return bc.callC(ctx, bc.collectCallback)
+	return bc.bridge.callC(ctx, bc.collectCallback)
 }
 
-func (bc *bridgeCollector) Load(ctx plugin.Context) error {
-	return bc.callC(ctx, bc.loadCallback)
+func (bp *bridgePlugin) Load(ctx plugin.Context) error {
+	return bp.callC(ctx, bp.loadCallback)
 }
 
-func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
-	return bc.callC(ctx, bc.unloadCallback)
+func (bp *bridgePlugin) Unload(ctx plugin.Context) error {
+	return bp.callC(ctx, bp.unloadCallback)
 }
 
-func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) error {
-	ctxAsType := ctx.(*proxy.PluginContext)
+func (bp *bridgePlugin) callC(ctx plugin.Context, callback *C.callback_t) error {
+	// FIXME
+
+
+
+    //ctxAsType := ctx.(*collectorproxy.PluginContext)
+	ctxAsType := ctx.(*publisherproxy.PluginContext)
+
+
+
+
 	taskID := ctxAsType.TaskID()
 
 	contextMap.Store(taskID, ctxAsType)
