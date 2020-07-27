@@ -69,6 +69,13 @@ func startCollector(ctx context.Context, collector types.Collector) {
 
 		logger := inprocPlugin.Logger()
 		ctx = log.ToCtx(ctx, logger)
+
+		switch collector.Type() {
+		case types.PluginTypeCollector:
+			collector = types.NewCollector(collector.Name(), collector.Version(), inprocPlugin.Unwrap().(plugin.Collector))
+		case types.PluginTypeStreamingCollector:
+			collector = types.NewStreamingCollector(collector.Name(), collector.Version(), inprocPlugin.Unwrap().(plugin.StreamingCollector))
+		}
 	}
 
 	logF := logger(ctx).WithField("service", "collector")
