@@ -28,7 +28,7 @@ type PluginContext struct {
 	*proxy.Context
 
 	taskID     string
-    sessionMts []*types.Metric
+	sessionMts []*types.Metric
 }
 
 func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byte) (*PluginContext, error) {
@@ -43,7 +43,7 @@ func NewPluginContext(ctxManager *ContextManager, taskID string, rawConfig []byt
 
 	return &PluginContext{
 		Context: baseContext,
-        taskID:  taskID,
+		taskID:  taskID,
 	}, nil
 }
 

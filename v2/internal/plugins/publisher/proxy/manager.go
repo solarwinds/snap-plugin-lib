@@ -123,7 +123,7 @@ func (cm *ContextManager) LoadTask(id string, config []byte) error {
 		return errors.New("context with given id was already defined")
 	}
 
-	newCtx, err := NewPluginContext(cm,id, config)
+	newCtx, err := NewPluginContext(cm, id, config)
 	if err != nil {
 		return fmt.Errorf("can't load task: %v", err)
 	}

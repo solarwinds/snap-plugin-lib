@@ -197,6 +197,8 @@ extern GoInt ctx_should_process(char* p0, char* p1);
 
 extern char** ctx_requested_metrics(char* p0);
 
+extern GoInt ctx_count(char* p0);
+
 extern char* ctx_config(char* p0, char* p1);
 
 extern char** ctx_config_keys(char* p0);
@@ -215,7 +217,7 @@ extern void define_group(char* p0, char* p1);
 
 extern error_t* define_example_config(char* p0);
 
-// FIXME??
+// FIXME?? collectorDef or other type?
 
 extern void define_tasks_per_instance_limit(GoInt p0);
 

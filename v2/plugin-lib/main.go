@@ -128,9 +128,10 @@ import (
 import "C"
 
 var contextMap = sync.Map{}
-var pluginDef plugin.Definition //Needed even??
+var pluginDef plugin.Definition
 var collectorDef plugin.CollectorDefinition
-// FIXME var publisherDef plugin.CollectorDefinition
+var publisherDef plugin.PublisherDefinition
+
 /*****************************************************************************/
 // helpers
 // one or common?
@@ -160,7 +161,19 @@ func contextObject(ctxId *C.char) *commonproxy.Context {
 
 }
 
-// FIXME func publishContextObject(ctxId *C.char) *publisherproxy.PluginContext {
+func publContextObject(ctxId *C.char) *publisherproxy.PluginContext {
+	id := C.GoString(ctxId)
+	ctx, ok := contextMap.Load(id)
+	if !ok {
+		panic(fmt.Sprintf("can't aquire context object with id %v", id))
+	}
+
+	ctxObj, okType := ctx.(*publisherproxy.PluginContext)
+	if !okType {
+		panic("Invalid concrete type of context object")
+	}
+	return ctxObj
+}
 
 func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
 	id := C.GoString(ctxId)
@@ -204,6 +217,10 @@ func toCError(err error) *C.error_t {
 		errMsg = (*C.char)(C.CString(err.Error()))
 	}
 	return C.alloc_error_msg((*C.char)(errMsg))
+}
+
+func metricToStr() string {
+	return mtrStr
 }
 
 func toCStrArray(arr []string) **C.char {
@@ -315,6 +332,18 @@ func ctx_requested_metrics(ctxID *C.char) **C.char {
 	return toCStrArray(collContextObject(ctxID).RequestedMetrics())
 }
 
+//export ctx_count
+func ctx_count(ctxID *C.char) int {
+	return publContextObject(ctxID).Count()
+}
+
+//func ctx_list_all_metrics(ctxID *C.char) {
+//func ctx_list_all_metrics(ctxID *C.char) **C.char {
+//    mts := collContextObject(ctxID).ListAllMetrics()
+//    for _, mt := range mts:
+//
+//  return toCStrArray(collContextObject(ctxID).
+//}
 ///////////////////////////////////////////////////////////////////////////////
 
 //export ctx_config
@@ -383,16 +412,15 @@ func define_example_config(cfg *C.char) *C.error_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
 // FIXME?? collectorDef or other type?
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {
-	_ = collectorDef.DefineTasksPerInstanceLimit(limit)
+	_ = pluginDef.DefineTasksPerInstanceLimit(limit)
 }
 
 //export define_instances_limit
 func define_instances_limit(limit int) {
-	_ = collectorDef.DefineInstancesLimit(limit)
+	_ = pluginDef.DefineInstancesLimit(limit)
 }
 
 /*****************************************************************************/
@@ -437,6 +465,7 @@ func (bp *bridgePublisher) Publish(ctx plugin.PublishContext) error {
 
 func (bp *bridgePublisher) PluginDefinition(def plugin.PublisherDefinition) error {
 	pluginDef = def
+	publisherDef = def
 	C.call_c_define_callback(bp.defineCallback)
 
 	return nil
@@ -471,6 +500,7 @@ type bridgeCollector struct {
 }
 
 func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
+	pluginDef = def
 	collectorDef = def
 	C.call_c_define_callback(bc.defineCallback)
 

@@ -122,7 +122,7 @@ class PublishContext(Context):
         pass
 
     def count(self):
-        pass
+        return PLUGIN_LIB_OBJ.ctx_count(self._ctx_id())
 
 
 class CollectContext(Context):

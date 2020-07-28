@@ -10,7 +10,9 @@ class ExamplePublisherPlugin(BasePublisher):
         print(' define: 1')
 
     def publish(self, ctx):
-        print(' publish: 2')
+        print(' publish: 2i count:')
+        print (ctx.count())
+        print(' po count count:')
         ctx.log(LOGLEVEL_INFO, "Plugin is publishing", {
             "name": "py-example"
         })
