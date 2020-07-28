@@ -7,15 +7,16 @@ from snap_plugin_lib_py.exceptions import PluginLibException
 
 class ExamplePublisherPlugin(BasePublisher):
     def define_plugin(self, ctx):
-        print('1')
+        print(' define: 1')
 
     def publish(self, ctx):
+        print(' publish: 2')
         ctx.log(LOGLEVEL_INFO, "Plugin is publishing", {
             "name": "py-example"
         })
 
     def load(self, ctx):
-        print('3')
+        print('load: 3')
         ctx.log(LOGLEVEL_INFO, "Plugin is being loaded", {
             "name": "py-example"
         })
@@ -25,7 +26,7 @@ class ExamplePublisherPlugin(BasePublisher):
         ctx.log(LOGLEVEL_INFO, "Plugin is being unloaded", {
             "name": "py-example"
         })
-        print('4')
+        print('unload: 4')
 
 if __name__ == '__main__':
     publisher = ExamplePublisherPlugin("example", "0.0.1")

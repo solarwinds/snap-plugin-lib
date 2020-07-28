@@ -215,6 +215,8 @@ extern void define_group(char* p0, char* p1);
 
 extern error_t* define_example_config(char* p0);
 
+// FIXME??
+
 extern void define_tasks_per_instance_limit(GoInt p0);
 
 extern void define_instances_limit(GoInt p0);

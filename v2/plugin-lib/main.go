@@ -128,13 +128,12 @@ import (
 import "C"
 
 var contextMap = sync.Map{}
-var pluginDef plugin.Definition
+var pluginDef plugin.Definition //Needed even??
 var collectorDef plugin.CollectorDefinition
-
+// FIXME var publisherDef plugin.CollectorDefinition
 /*****************************************************************************/
 // helpers
-
-
+// one or common?
 func contextObject(ctxId *C.char) *commonproxy.Context {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
@@ -142,25 +141,26 @@ func contextObject(ctxId *C.char) *commonproxy.Context {
 		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 	switch v := ctx.(type) {
-    	case *collectorproxy.PluginContext:
-	    	fmt.Sprintf("maslyk weszlo")
-    		ctxObj, okType := ctx.(*collectorproxy.PluginContext)
+	case *collectorproxy.PluginContext:
+		ctxObj, okType := ctx.(*collectorproxy.PluginContext)
 
-    	    if !okType {
-	    	    panic("maslyk3 Invalid concrete type of context object")
-        	}
-        	return ctxObj.Context
-		case *publisherproxy.PluginContext:
-		    ctxObj, okType := ctx.(*publisherproxy.PluginContext)
-        	if !okType {
-        		panic("maslyk2 Invalid concrete type of context object")
-    	    }
-        	return ctxObj.Context
+		if !okType {
+			panic("Invalid concrete type of context object")
+		}
+		return ctxObj.Context
+	case *publisherproxy.PluginContext:
+		ctxObj, okType := ctx.(*publisherproxy.PluginContext)
+		if !okType {
+			panic("Invalid concrete type of context object")
+		}
+		return ctxObj.Context
 	default:
 		panic(fmt.Sprintf("%s not supported plugin Cntext type", v))
 	}
 
 }
+
+// FIXME func publishContextObject(ctxId *C.char) *publisherproxy.PluginContext {
 
 func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
 	id := C.GoString(ctxId)
@@ -169,9 +169,9 @@ func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
 		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 
-ctxObj, okType := ctx.(*collectorproxy.PluginContext)
+	ctxObj, okType := ctx.(*collectorproxy.PluginContext)
 	if !okType {
-		panic("maslyk1 Invalid concrete type of context object")
+		panic("Invalid concrete type of context object")
 	}
 	return ctxObj
 }
@@ -383,14 +383,16 @@ func define_example_config(cfg *C.char) *C.error_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
+// FIXME?? collectorDef or other type?
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {
-	_ = pluginDef.DefineTasksPerInstanceLimit(limit)
+	_ = collectorDef.DefineTasksPerInstanceLimit(limit)
 }
 
 //export define_instances_limit
 func define_instances_limit(limit int) {
-	_ = pluginDef.DefineInstancesLimit(limit)
+	_ = collectorDef.DefineInstancesLimit(limit)
 }
 
 /*****************************************************************************/
@@ -400,11 +402,9 @@ func define_instances_limit(limit int) {
 func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
-		bridge: bridgePlugin{
-			loadCallback:   loadCallback,
-			unloadCallback: unloadCallback,
-			defineCallback: defineCallback,
-		},
+		loadCallback:    loadCallback,
+		unloadCallback:  unloadCallback,
+		defineCallback:  defineCallback,
 	}
 	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version))
 }
@@ -413,71 +413,85 @@ func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, 
 //export start_publisher
 func start_publisher(publishCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
 
-
 	bPublisher := &bridgePublisher{
 		publishCallback: publishCallback,
-		// FIXME nested??
-		bridge: bridgePlugin{
-			loadCallback:   loadCallback,
-			unloadCallback: unloadCallback,
-			defineCallback: defineCallback,
-		},
+		loadCallback:    loadCallback,
+		unloadCallback:  unloadCallback,
+		defineCallback:  defineCallback,
 	}
 	runner.StartPublisher(bPublisher, C.GoString(name), C.GoString(version))
 }
 
 /****************************************************************************/
-// FIXME
 
 type bridgePublisher struct {
 	publishCallback *C.callback_t
-	bridge          bridgePlugin
-}
-type bridgeCollector struct {
-	collectCallback *C.callback_t
-	bridge          bridgePlugin
-}
-type bridgePlugin struct {
-	loadCallback   *C.callback_t
-	unloadCallback *C.callback_t
-	defineCallback *C.define_callback_t
+	loadCallback    *C.callback_t
+	unloadCallback  *C.callback_t
+	defineCallback  *C.define_callback_t
 }
 
-// FIXME
-func (bp *bridgePlugin) PluginDefinition(def plugin.PublisherDefinition) error {
+func (bp *bridgePublisher) Publish(ctx plugin.PublishContext) error {
+	return bp.callC(ctx, bp.publishCallback)
+}
+
+func (bp *bridgePublisher) PluginDefinition(def plugin.PublisherDefinition) error {
 	pluginDef = def
 	C.call_c_define_callback(bp.defineCallback)
 
 	return nil
 }
 
-func (bp *bridgePublisher) Publish(ctx plugin.PublishContext) error {
-	return bp.bridge.callC(ctx, bp.publishCallback)
-}
-
-func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
-	return bc.bridge.callC(ctx, bc.collectCallback)
-}
-
-func (bp *bridgePlugin) Load(ctx plugin.Context) error {
+func (bp *bridgePublisher) Load(ctx plugin.Context) error {
 	return bp.callC(ctx, bp.loadCallback)
 }
 
-func (bp *bridgePlugin) Unload(ctx plugin.Context) error {
+func (bp *bridgePublisher) Unload(ctx plugin.Context) error {
 	return bp.callC(ctx, bp.unloadCallback)
 }
 
-func (bp *bridgePlugin) callC(ctx plugin.Context, callback *C.callback_t) error {
-	// FIXME
-
-
-
-    //ctxAsType := ctx.(*collectorproxy.PluginContext)
+func (bp *bridgePublisher) callC(ctx plugin.Context, callback *C.callback_t) error {
 	ctxAsType := ctx.(*publisherproxy.PluginContext)
+	taskID := ctxAsType.TaskID()
+	contextMap.Store(taskID, ctxAsType)
+	defer contextMap.Delete(taskID)
 
+	taskIDasPtr := C.CString(taskID)
+	C.call_c_callback(callback, taskIDasPtr)
+	dealloc_charp(taskIDasPtr)
 
+	return nil
+}
 
+type bridgeCollector struct {
+	collectCallback *C.callback_t
+	loadCallback    *C.callback_t
+	unloadCallback  *C.callback_t
+	defineCallback  *C.define_callback_t
+}
 
+func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) error {
+	collectorDef = def
+	C.call_c_define_callback(bc.defineCallback)
+
+	return nil
+}
+
+func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
+	return bc.callC(ctx, bc.collectCallback)
+}
+
+func (bc *bridgeCollector) Load(ctx plugin.Context) error {
+	return bc.callC(ctx, bc.loadCallback)
+}
+
+func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
+	return bc.callC(ctx, bc.unloadCallback)
+}
+
+func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) error {
+
+	ctxAsType := ctx.(*collectorproxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 
 	contextMap.Store(taskID, ctxAsType)

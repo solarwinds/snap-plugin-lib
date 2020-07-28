@@ -173,7 +173,7 @@ def define_handler():
 @CFUNCTYPE(None, c_char_p)
 def plugin_handler(ctx_id):
 #FIXME
-    if plugin_py.publish:
+    if hasattr(plugin_py, "publish"):
         plugin_py.publish(PublishContext(ctx_id))
     elif plugin_py.collect:
         plugin_py.collect(CollectContext(ctx_id))
