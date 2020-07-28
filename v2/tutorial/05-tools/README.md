@@ -7,28 +7,9 @@ Currently supported format is YAML (due to ability to add comments).
 
 Example:
 ```go
- func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error {
+func (s simpleCollector) PluginDefinition(def plugin.CollectorDefinition) error {
  	cfg := `
- format: short # format of hour (short 0-12, long 0-24)
- options:
-   - zone: UTC # time zone
- `
- 	_ = def.DefineExampleConfig(cfg)
-    
-    // ...
-}
-```
-
-## Printing example task-file
-
-User can print/create default task based on metadata provided by the plugin creator.
-
-```bash
-./05-tools -print-example-task
-```
-
-Output:
-```yaml
+---
 version: 2
 schedule:
     type: simple
@@ -49,9 +30,46 @@ plugins:
         /example:
             plugin_tag: tag
     publish:
-        config:
-            period: 60
-            floor_second: 60
+        - plugin_name: publisher-appoptics
+ `
+ 	_ = def.DefineExampleConfig(cfg)
+    
+    // ...
+}
+```
+
+## Printing example task-file
+
+User can print/create default task based on metadata provided by the plugin creator.
+
+```bash
+./05-tools -print-example-task
+```
+
+Output:
+```yaml
+---
+version: 2
+schedule:
+    type: simple
+    interval: 60s
+plugins:
+  - name: examplecollector
+    metrics:
+      - /example/date/day
+      - /example/date/month
+      - /example/time/hour
+      - /example/time/minute
+      - /example/time/second
+    config:
+        format: short # format of hour (short 0-12, long 0-24)
+        options:
+          - zone: UTC # time zone
+    tags:
+        /example:
+            plugin_tag: tag
+    publish:
+        - plugin_name: publisher-appoptics
 ```
 
 ## Stats server
