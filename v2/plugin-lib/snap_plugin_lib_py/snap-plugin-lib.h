@@ -58,6 +58,32 @@ static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
 typedef struct {
+    char * namespace;
+} metric_t;
+
+// FIXME
+static inline metric_t* alloc_metric_pointer_array(int size) {
+    return  malloc(sizeof(metric_t) * size);
+}
+
+
+static inline void set_metric_pointer_array_element(metric_t* mt_array, int index, metric_t* element) {
+    mt_array[index] = *element;
+}
+
+static inline metric_t* alloc_metric_struct(char * namespaceString) {
+    metric_t* mt_struct = malloc(sizeof(metric_t));
+    mt_struct->namespace = namespaceString;
+    return mt_struct;
+}
+
+static inline void free_metric_struct(metric_t* mtArray) {
+    if (mtArray == NULL) return;
+
+    free(mtArray);
+}
+
+typedef struct {
     char * key;
     char * value;
 } map_element_t;
@@ -104,6 +130,7 @@ typedef struct {
     char * description;
     char * unit;
 } modifiers_t;
+
 
 static inline char** alloc_str_array(int size) {
     return malloc(sizeof(char*) * size);
@@ -199,6 +226,8 @@ extern char** ctx_requested_metrics(char* p0);
 
 extern GoInt ctx_count(char* p0);
 
+extern metric_t* ctx_list_all_metrics(char* p0);
+
 extern char* ctx_config(char* p0, char* p1);
 
 extern char** ctx_config_keys(char* p0);
@@ -216,8 +245,6 @@ extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
 extern void define_group(char* p0, char* p1);
 
 extern error_t* define_example_config(char* p0);
-
-// FIXME?? collectorDef or other type?
 
 extern void define_tasks_per_instance_limit(GoInt p0);
 

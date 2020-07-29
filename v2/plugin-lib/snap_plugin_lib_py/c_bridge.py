@@ -2,7 +2,7 @@ from collections import defaultdict
 from ctypes import c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, cast
 
 from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
-    time_to_ctimewithns
+    time_to_ctimewithns, cmtstrarray_to_list
 from .dynamic_lib import PLUGIN_LIB_OBJ
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
@@ -44,7 +44,7 @@ class DefineContext:
 
     @staticmethod
     def define_group(name, description):
-        PLUGIN_LIB_OBJ.define_group(string_to_bytes(name),
+        PstLUGIN_LIB_OBJ.define_group(string_to_bytes(name),
                                     string_to_bytes(description))
 
     @staticmethod
@@ -118,8 +118,10 @@ class Context:
 
 
 class PublishContext(Context):
-    def listAllMetrics(self):
-        pass
+    def list_all_metrics(self):
+        _mts = PLUGIN_LIB_OBJ.ctx_list_all_metrics(self._ctx_id())
+        return cmtstrarray_to_list()
+
 
     def count(self):
         return PLUGIN_LIB_OBJ.ctx_count(self._ctx_id())

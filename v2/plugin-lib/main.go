@@ -38,6 +38,32 @@ static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
 typedef struct {
+    char * namespace;
+} metric_t;
+
+// FIXME
+static inline metric_t* alloc_metric_pointer_array(int size) {
+    return  malloc(sizeof(metric_t) * size);
+}
+
+
+static inline void set_metric_pointer_array_element(metric_t* mt_array, int index, metric_t* element) {
+    mt_array[index] = *element;
+}
+
+static inline metric_t* alloc_metric_struct(char * namespaceString) {
+    metric_t* mt_struct = malloc(sizeof(metric_t));
+    mt_struct->namespace = namespaceString;
+    return mt_struct;
+}
+
+static inline void free_metric_struct(metric_t* mtArray) {
+    if (mtArray == NULL) return;
+
+    free(mtArray);
+}
+
+typedef struct {
     char * key;
     char * value;
 } map_element_t;
@@ -84,6 +110,7 @@ typedef struct {
     char * description;
     char * unit;
 } modifiers_t;
+
 
 static inline char** alloc_str_array(int size) {
     return malloc(sizeof(char*) * size);
@@ -133,8 +160,7 @@ var collectorDef plugin.CollectorDefinition
 var publisherDef plugin.PublisherDefinition
 
 /*****************************************************************************/
-// helpers
-// one or common?
+// ctx helpers
 func contextObject(ctxId *C.char) *commonproxy.Context {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
@@ -189,6 +215,8 @@ func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
 	return ctxObj
 }
 
+/*****************************************************************************/
+// mapping helpers
 func intToBool(v int) bool {
 	return v != 0
 }
@@ -219,9 +247,14 @@ func toCError(err error) *C.error_t {
 	return C.alloc_error_msg((*C.char)(errMsg))
 }
 
-func metricToStr() string {
-	return mtrStr
-}
+//FIXME??
+//func toCMetric(mt ) *C.metric_t {
+//    return C.alloc_metric_struct((*C.char)(C.CString(mt.Namespace.Name)))
+
+//    cMtArr = C.alloc_str_array(1)
+
+//func toCmetricArr() **C.metric_t {
+//}
 
 func toCStrArray(arr []string) **C.char {
 	cStrArr := C.alloc_str_array(C.int(len(arr) + 1))
@@ -337,13 +370,18 @@ func ctx_count(ctxID *C.char) int {
 	return publContextObject(ctxID).Count()
 }
 
-//func ctx_list_all_metrics(ctxID *C.char) {
-//func ctx_list_all_metrics(ctxID *C.char) **C.char {
-//    mts := collContextObject(ctxID).ListAllMetrics()
-//    for _, mt := range mts:
-//
-//  return toCStrArray(collContextObject(ctxID).
-//}
+//export ctx_list_all_metrics
+func ctx_list_all_metrics(ctxID *C.char) *C.metric_t {
+	mts := publContextObject(ctxID).ListAllMetrics()
+	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts) + 1))
+	for i, el := range mts {
+		cmt := C.alloc_metric_struct((*C.char)(C.CString(el.Namespace().String())))
+		C.set_metric_pointer_array_element(mtPtArr, C.int(i), cmt)
+	}
+	C.set_metric_pointer_array_element(mtPtArr, C.int(len(mts)), (*C.metric_t)(C.NULL)) // last element of array is always None (NULL)
+	return mtPtArr
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 //export ctx_config
@@ -412,7 +450,6 @@ func define_example_config(cfg *C.char) *C.error_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// FIXME?? collectorDef or other type?
 //export define_tasks_per_instance_limit
 func define_tasks_per_instance_limit(limit int) {
 	_ = pluginDef.DefineTasksPerInstanceLimit(limit)

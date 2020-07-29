@@ -12,6 +12,27 @@ _, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
 _, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
     LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
 
+class Metric(Structure):
+    _fields_ = [("namespace", c_char_p),
+
+    ]
+
+def cmtToDict(cmt):
+    tmp = dict()
+    print("weszlo")
+    tmp["namespace"] = cmt.namespace
+    return tmp
+
+def cmtstrarray_to_list(arr):
+    """Converts C *metric_t to Python list"""
+    result_list = []
+    for i in count(0):
+        if arr[i] is None:
+            break
+        result_list.append(cmtToDict(arr[i]))
+
+    return result_list
+
 
 class MapElement(Structure):
     _fields_ = [

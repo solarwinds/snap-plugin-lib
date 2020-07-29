@@ -2,7 +2,7 @@ import time
 
 from snap_plugin_lib_py import BasePublisher, start_publisher, LOGLEVEL_INFO
 from snap_plugin_lib_py.exceptions import PluginLibException
-
+import pprint
 
 
 class ExamplePublisherPlugin(BasePublisher):
@@ -10,12 +10,13 @@ class ExamplePublisherPlugin(BasePublisher):
         print(' define: 1')
 
     def publish(self, ctx):
-        print(' publish: 2i count:')
-        print (ctx.count())
-        print(' po count count:')
+        print(' publish: 2 count:')
+        print(ctx.count())
         ctx.log(LOGLEVEL_INFO, "Plugin is publishing", {
             "name": "py-example"
         })
+        print("test")
+        pprint.pprint(ctx.list_all_metrics())
 
     def load(self, ctx):
         print('load: 3')
