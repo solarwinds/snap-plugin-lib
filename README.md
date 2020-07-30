@@ -8,6 +8,13 @@ The library natively supports Go language, although writing Python plugins is al
 
 Currently, the active and maintained version is v2.
 
+## Development setup
+
+For a simple development setup, you don't need any dependencies outside this repository.
+Please refer to  [Testing](/v2/tutorial/02-testing/README.md) for more information.
+
+For a complete development setup please refer to [AppOptics Knowledge Base](https://documentation.solarwinds.com/en/Success_Center/appoptics/Content/kb/host_infrastructure/host_agent.htm)
+
 ## Example
 
 Writing a simple plugin code in Go is very straightforward:
@@ -72,16 +79,6 @@ Covered topics:
   * [Handle configuration](/v2/tutorial/09-config/README.md)
 - [FAQ](/v2/tutorial/faq/README.md)
 
-## Version 1
-
-The repository contains a legacy version of Plugin Library (v1) which is no longer supported either by SolarWinds or Intel (which is originally forked from). New defects raised for v1 won't be fixed by maintainers.
-
-Please use v2 for new development.
-
-Links:
-* [Documentation of Ver. 1](/v1/README.md)
-* [Community plugins list](https://github.com/intelsdi-x/snap/blob/master/docs/PLUGIN_CATALOG.md) (no longer maintained)
-
 ## Contributing Guide
 
 ### Issue Reporting Guidelines
@@ -104,9 +101,12 @@ Links:
 * For a new development:
     * provide a convincing reason to add this feature.
 
-## Development setup
+## Version 1
 
-For a simple development setup, you don't need any dependencies outside this repository.
-Please refer to  [Testing](/v2/tutorial/02-testing/README.md) for more information.
+The repository contains a legacy version of Plugin Library (v1) which is no longer supported either by SolarWinds or Intel (which is originally forked from). New defects raised for v1 won't be fixed by maintainers.
 
-For a complete development setup please refer to [AppOptics Knowledge Base](https://documentation.solarwinds.com/en/Success_Center/appoptics/Content/kb/host_infrastructure/host_agent.htm)
+Please use v2 for new development.
+
+Links:
+* [Documentation of Ver. 1](/v1/README.md)
+* [Community plugins list](https://github.com/intelsdi-x/snap/blob/master/docs/PLUGIN_CATALOG.md) (no longer maintained)
