@@ -111,6 +111,10 @@ _go_race() {
   go test -race ./...
 }
 
+_copyrights() {
+  for f in $(_test_files); do echo $f; grep "Copyright (c) $(date +"%Y") SolarWinds Worldwide, LLC" $f 1> /dev/null || echo "ERROR: Wrong copyright header: $f" && false ; done
+}
+
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
   # Standard go tooling behavior is to ignore dirs with leading underscors
