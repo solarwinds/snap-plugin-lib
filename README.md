@@ -6,11 +6,11 @@ Snap Plugin Library helps developers writing plugins (like collectors and publis
 
 The library natively supports Go language, although writing Python plugins is also supported via Cgo integration. There is a plan for supporting other programming languages as well.
 
-Currently, the active and maintained version is v2.
+The currently active and maintained version is v2.
 
 ## Development setup
 
-For a simple development setup, you don't need any dependencies outside this repository.
+For a simple development setup you don't need any dependencies outside this repository.
 Please refer to  [Testing](/v2/tutorial/02-testing/README.md) for more information.
 
 For a complete development setup please refer to [AppOptics Knowledge Base](https://documentation.solarwinds.com/en/Success_Center/appoptics/Content/kb/host_infrastructure/host_agent.htm)
@@ -84,7 +84,7 @@ Covered topics:
 ### Issue Reporting Guidelines
 
 * Always check if the problem wasn't already reported by other developers. 
-* Please fill in [Issue submission form](https://github.com/librato/snap-plugin-lib-go/issues/new]).
+* Please fill in [Issue submission form](https://github.com/librato/snap-plugin-lib-go/issues/new).
 
 ### Pull Request Guidelines
 
@@ -92,14 +92,14 @@ Covered topics:
     * Make sure that the library is compiling without errors,
     * Make sure that *ALL* unit tests pass, 
     * Try to add the accompanying test case,
-    * It's OK to have multiple small commits as you work on the PR - there will be squashed before merging,
+    * It's OK to have multiple small commits as you work on the PR - they will be squashed before merging,
     * Provide meaningful commit messages.
 
 * For issues:
-    * add issue number to your PR title for a better release log.
+    * Add issue number to your PR title for a better release log.
 
 * For a new development:
-    * provide a convincing reason to add this feature.
+    * Provide a convincing reason to add this feature.
 
 ## Version 1
 
