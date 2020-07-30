@@ -19,19 +19,22 @@ class Metric(Structure):
 
 def cmtToDict(cmt):
     tmp = dict()
-    print("weszlo")
     tmp["namespace"] = cmt.namespace
+    print(tmp["namespace"])
     return tmp
 
 def cmtstrarray_to_list(arr):
-    """Converts C *metric_t to Python list"""
-    result_list = []
-    for i in count(0):
-        if arr[i] is None:
-            break
-        result_list.append(cmtToDict(arr[i]))
-
-    return result_list
+    """Converts C **metric_t to Python list"""
+    print("maslyk cmtstrarray_to_list")
+    print(arr[0][0].namespace) #
+    print(type(arr))
+    #    FIXME 
+    #for i in count(0):
+    #    if arr[i] is None:
+     #       break
+     #   result_list.append(cmtToDict(arr[i]))
+    return None
+    #return result_list
 
 
 class MapElement(Structure):

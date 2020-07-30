@@ -24,7 +24,6 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
-
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
 typedef void (define_callback_t)(); // used for DefineCallback
@@ -61,17 +60,29 @@ typedef struct {
     char * namespace;
 } metric_t;
 
-// FIXME
-static inline metric_t* alloc_metric_pointer_array(int size) {
-    return  malloc(sizeof(metric_t) * size);
+
+static inline metric_t** alloc_metric_pointer_array(int size) {
+    metric_t * mtPtrArr = malloc(sizeof(metric_t*) * size);
+    metric_t **arrPtr = &mtPtrArr;
+    return arrPtr;
 }
 
 
-static inline void set_metric_pointer_array_element(metric_t* mt_array, int index, metric_t* element) {
-    mt_array[index] = *element;
+static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
+    FILE * fPtr;
+       fPtr = fopen("inmetric_pointer", "w");
+
+
+fprintf(fPtr, "index: %d", index);
+ fclose(fPtr);
+    mt_array[index] = element;
 }
 
 static inline metric_t* alloc_metric_struct(char * namespaceString) {
+    FILE * fPtr;
+       fPtr = fopen("inalloc_metric_struct", "w");
+       fprintf(fPtr, "index: %s", namespaceString);
+       fclose(fPtr);
     metric_t* mt_struct = malloc(sizeof(metric_t));
     mt_struct->namespace = namespaceString;
     return mt_struct;
@@ -226,7 +237,7 @@ extern char** ctx_requested_metrics(char* p0);
 
 extern GoInt ctx_count(char* p0);
 
-extern metric_t* ctx_list_all_metrics(char* p0);
+extern metric_t** ctx_list_all_metrics(char* p0);
 
 extern char* ctx_config(char* p0, char* p1);
 

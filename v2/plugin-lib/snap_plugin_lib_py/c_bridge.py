@@ -1,7 +1,6 @@
 from collections import defaultdict
 from ctypes import c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, cast
-
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, \
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, Metric, \
     time_to_ctimewithns, cmtstrarray_to_list
 from .dynamic_lib import PLUGIN_LIB_OBJ
 from .exceptions import throw_exception_if_error, throw_exception_if_null
@@ -13,6 +12,8 @@ storedObjectMap = defaultdict(dict)
 global plugin_py
 ###############################################################################
 # C functions metadata
+
+PLUGIN_LIB_OBJ.ctx_list_all_metrics.restype = POINTER(POINTER(Metric))
 
 PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_always_apply.restype = POINTER(CError)
@@ -44,7 +45,7 @@ class DefineContext:
 
     @staticmethod
     def define_group(name, description):
-        PstLUGIN_LIB_OBJ.define_group(string_to_bytes(name),
+        PLUGIN_LIB_OBJ.define_group(string_to_bytes(name),
                                     string_to_bytes(description))
 
     @staticmethod
@@ -119,8 +120,8 @@ class Context:
 
 class PublishContext(Context):
     def list_all_metrics(self):
-        _mts = PLUGIN_LIB_OBJ.ctx_list_all_metrics(self._ctx_id())
-        return cmtstrarray_to_list()
+        _mts_ptr = PLUGIN_LIB_OBJ.ctx_list_all_metrics(self._ctx_id())
+        return cmtstrarray_to_list(_mts_ptr)
 
 
     def count(self):
