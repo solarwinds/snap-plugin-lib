@@ -24,11 +24,14 @@ As a basic rule, if you cannot provide enough information to continue addressing
 **What you expected to happen**:
 
 
-**Steps to reproduce it** (as minimally and precisely as possible):
+**Steps to reproduce it** (as minimal and precise as possible):
 
 1. 
 2. 
 3. 
 
 
-**Anything else do we need to know** (e.g. issue happens only occasionally):
+**Logs** (as minimal and precise as possible):
+
+
+**Anything else we need to know** (e.g. issue happens only occasionally):
