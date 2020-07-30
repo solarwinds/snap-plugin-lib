@@ -1,12 +1,12 @@
 # Snap Plugin Library
 
 Snap Plugin Library helps developers writing plugins (like collectors and publishers) that are able to work in Snap environment:
-* collector is a small application which role is to gather metrics from a monitored system (like CPU usage, db metrics, etc.)
-* publisher is a small application which role is to send metrics to a specific backend 
+* a collector is a small application whose role is to gather metrics from a monitored system (like CPU usage, db metrics, etc.)
+* a publisher is a small application whose role is to send metrics to a specific backend 
 
 The library natively supports Go language, although writing Python plugins is also supported via Cgo integration. There is a plan for supporting other programming languages as well.
 
-Currenlty active and maintained version is v2.
+Currently, the active and maintained version is v2.
 
 ## Example
 
@@ -55,7 +55,7 @@ More complicated examples can be found in:
 
 ## Documentation
 
-Plugin Library contains comprehensive tutorial describing how to write custom plugins.
+Plugin Library contains a comprehensive tutorial describing how to write custom plugins.
 
 Covered topics:
 - [Overview](/v2/README.md)
@@ -74,9 +74,9 @@ Covered topics:
 
 ## Version 1
 
-The repository contains legacy version of Plugin Library (v1) which is no longer supported neither by SolarWinds nor Intel (which is originally forked from). New defects raised for v1 won't be fixed by maintainers.
+The repository contains a legacy version of Plugin Library (v1) which is no longer supported either by SolarWinds or Intel (which is originally forked from). New defects raised for v1 won't be fixed by maintainers.
 
-Please use only v2 for new development.
+Please use v2 for new development.
 
 Links:
 * [Documentation of Ver. 1](/v1/README.md)
@@ -86,27 +86,27 @@ Links:
 
 ### Issue Reporting Guidelines
 
-* Always check if problem wasn't already reported by other developers. 
+* Always check if the problem wasn't already reported by other developers. 
 * Please fill in [Issue submission form](https://github.com/librato/snap-plugin-lib-go/issues/new]).
 
 ### Pull Request Guidelines
 
 * General:
-    * Make sure that library is compiling without errors
+    * Make sure that the library is compiling without errors,
     * Make sure that *ALL* unit tests pass, 
-    * Try to add accompanying test case.
-    * It's OK to have multiple small commits as you work on the PR - there will be squashed before merging.
-    * Provide meaningful commit messages
+    * Try to add the accompanying test case,
+    * It's OK to have multiple small commits as you work on the PR - there will be squashed before merging,
+    * Provide meaningful commit messages.
 
 * For issues:
-    * add issue number to your PR title for a better release log
+    * add issue number to your PR title for a better release log.
 
 * For a new development:
     * provide a convincing reason to add this feature.
 
 ## Development setup
 
-For a simple development setup you don't need any dependencies outside this repository.
+For a simple development setup, you don't need any dependencies outside this repository.
 Please refer to  [Testing](/v2/tutorial/02-testing/README.md) for more information.
 
 For a complete development setup please refer to [AppOptics Knowledge Base](https://documentation.solarwinds.com/en/Success_Center/appoptics/Content/kb/host_infrastructure/host_agent.htm)
