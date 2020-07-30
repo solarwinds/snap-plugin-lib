@@ -55,7 +55,58 @@ More complicated examples can be found in:
 
 ## Documentation
 
+Plugin Library contains comprehensive tutorial describing how to write custom plugins.
 
+Covered topics:
+- [Overview](/v2/README.md)
+- Simple example - Date/Time collector:
+  * [Introduction](/v2/tutorial/01-simple/README.md)
+  * [Testing](/v2/tutorial/02-testing/README.md)
+  * [Configuration and state](/v2/tutorial/03-concepts/README.md)
+  * [Metrics - filters, definition, tags](/v2/tutorial/04-metrics/README.md)
+  * [Useful tools](/v2/tutorial/05-tools/README.md)
+- Advanced example - System collector:
+  * [Overview](/v2/tutorial/06-overview/README.md)
+  * [Gathering data (Proxy)](/v2/tutorial/07-proxy/README.md)
+  * [Collector](/v2/tutorial/08-collector/README.md)
+  * [Handle configuration](/v2/tutorial/09-config/README.md)
+- [FAQ](/v2/tutorial/faq/README.md)
 
+## Version 1
+
+The repository contains legacy version of Plugin Library (v1) which is no longer supported neither by SolarWinds nor Intel (which is originally forked from). New defects raised for v1 won't be fixed by maintainers.
+
+Please use only v2 for new development.
+
+Links:
 * [Documentation of Ver. 1](/v1/README.md)
-* [Documentation of Ver. 2](/v2/README.md)
+* [Community plugins list](https://github.com/intelsdi-x/snap/blob/master/docs/PLUGIN_CATALOG.md) (no longer maintained)
+
+## Contributing Guide
+
+### Issue Reporting Guidelines
+
+* Always check if problem wasn't already reported by other developers. 
+* Please fill in [Issue submission form](https://github.com/librato/snap-plugin-lib-go/issues/new]).
+
+### Pull Request Guidelines
+
+* General:
+    * Make sure that library is compiling without errors
+    * Make sure that *ALL* unit tests pass, 
+    * Try to add accompanying test case.
+    * It's OK to have multiple small commits as you work on the PR - there will be squashed before merging.
+    * Provide meaningful commit messages
+
+* For issues:
+    * add issue number to your PR title for a better release log
+
+* For a new development:
+    * provide a convincing reason to add this feature.
+
+## Development setup
+
+For a simple development setup you don't need any dependencies outside this repository.
+Please refer to  [Testing](/v2/tutorial/02-testing/README.md) for more information.
+
+For a complete development setup please refer to [AppOptics Knowledge Base](https://documentation.solarwinds.com/en/Success_Center/appoptics/Content/kb/host_infrastructure/host_agent.htm)
