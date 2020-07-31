@@ -1,1 +1,0 @@
-*  @tomekkolo @lootek @adamiklukasz
