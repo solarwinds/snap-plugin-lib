@@ -15,7 +15,7 @@ from datetime import datetime
 
 from .exceptions import PluginLibException
 
-min_int = -9223372036854775807
+min_int = -9223372036854775808
 max_int = 9223372036854775807
 max_uint = 18446744073709551615
 
@@ -71,10 +71,21 @@ class ValueUnion(Union):
 class CValue(Structure):
     _fields_ = [("value", ValueUnion), ("v_type", c_int)]
 
+class CNamespaceElement(Structure):
+    _fields = [("name", c_char_p),
+    ("value", c_char_p),
+    ("description", c_char_p),
+    ("is_dynamic", int)]
+
+class CNamespace(Structure):
+    _fields_ = [("elements", POINTER(CNamespaceElement)),
+    ("length", c_int),
+    ("string", c_char_p)]
+
 
 class CMetricStruct(Structure):
     _fields_ = [
-        ("namespace", c_char_p),
+        ("namespace", POINTER(CNamespace)),
         ("description", c_char_p),
         ("value", POINTER(CValue)),
         ("timestamp", POINTER(TimeWithNs)),
@@ -110,6 +121,14 @@ def dict_to_cmap(d):
 
     return pointer(cmap)
 
+def cmap_to_dict(cmap_ptr):
+    map_len = cmap_ptr.contents.length
+    _map = {}
+    if map_len != 0:
+        for i in range(map_len):
+            el = cmap_ptr.contents.elements[i]
+            _map[el.key] = el.value
+    return _map
 
 def cstrarray_to_list(arr):
     """Converts C **char to Python list"""
@@ -175,13 +194,71 @@ def unpackCValue(val_ptr):
         unit = int
     return (value, unit)
 
+def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
+    """Converts C **metric_t to list of python managed objects of Metric class"""
+    result_list = []
+    for i in range(mt_arr_size):
+        if mt_arr_ptr[i] is None:
+            break
+        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
+        result_list.append(mt)
+    return result_list
+
+
+class NamespaceElement:
+    def __init__(self, value, name, description, is_dynamic):
+        self.value = value
+        self.name = name
+        self.description = description
+        self.is_dynamic = is_dynamic
+
+    def name(self):
+        pass
+
+    def value(self):
+        pass
+
+    def description(self): pass
+
+    def is_dynamic(self): pass
+
+
+    @classmethod
+    def unpack_from_ne_struct(cls, nm_element_struct):
+        return cls(nm_element_struct.value.decode(encoding="utf-8"), nm_element_struct.name.decode(encoding="utf-8"), nm_element_struct.description.decode(encoding="utf-8"), m_element_struct.is_dynamic)
+
+class Namespace:
+    def __init__(self, namespace_elements, length, string):
+        self.length = length 
+        self.namespace_elements = namespace_elements
+        self.string = string
+
+   
+    @classmethod
+    def unpack_from_nm_struct(cls, namespace_struct):
+        _lenght = namespace_struct.length
+        _str = namespace_struct.string.decode(encoding="utf-8")
+        _ne_arr = []
+ #       for i in range(_lenght):
+#            _el = NamespaceElement.unpack_from_ne_struct(namespace_struct.elements[i])
+  #          _ne_arr.append(_el)
+        return cls(_ne_arr, _lenght, _str)
+
+    def __repr__(self):
+        return self.string
+
+    def string(self):
+        pass
+    def len(self):
+        pass
+    def at(self, index):
+        pass
+    def has_element(self, element):
+        pass
+    def has_element_on(self, element, index ): pass
 
 class Metric:
-    """class representing metric struct
-    to be managed python, while manually allocated C struct could be safely freed from memory
-    """
-
-    def __init__(self, namespace="", description="", value="", value_type=None, timestamp = ""):
+    def __init__(self, namespace="", description="", value="", value_type=None, timestamp = "", tags = ""):
         self.namespace = namespace
         self.description = description
 
@@ -196,14 +273,18 @@ class Metric:
 
     @classmethod
     def unpack_from_metric_struct(cls, mt_struct):
+        _namespace = Namespace.unpack_from_nm_struct(mt_struct.namespace.contents)
+        _desc = mt_struct.description.decode(encoding="utf-8")
         _value, _unit = unpackCValue(mt_struct.value)
         _time = ctimewithns_to_time(mt_struct.timestamp) 
+        _tags = cmap_to_dict(mt_struct.tags) 
         return cls(
-            mt_struct.namespace.decode(encoding="utf-8"),
-            mt_struct.description.decode(encoding="utf-8"),
+            _namespace,
+            _desc,
             _value,
             _unit,
             _time,
+            _tags,
         )
 
     def namespace(self):
@@ -214,22 +295,14 @@ class Metric:
     
     def tags(self):
         pass
+
     def description(self):
         pass
+
     def unit(self):
         pass
+
     def timestamp(self):
         pass
 
 
-def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
-    """Converts C **metric_t to list of python managed objects of Metric class"""
-    print("maslyk cmtstrarray_to_list")
-    result_list = []
-    for i in range(mt_arr_size):
-        if mt_arr_ptr[i] is None:
-            break
-        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
-        print(mt)
-        result_list.append(mt)
-    return result_list

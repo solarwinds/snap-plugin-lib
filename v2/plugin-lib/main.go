@@ -159,9 +159,52 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
     str_array[index] = element;
 }
 
+typedef struct {
+    char * el_name;
+    char * value;
+    char * description;
+    int is_dynamic;
+} namespace_element_t;
+
+
+static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
+    namespace_element_t** ne_ptr = malloc(sizeof(namespace_element_t*) * size);
+    int i = 0;
+    for(i=0; i < size; i++) {
+        ne_ptr[i] = malloc(sizeof(namespace_element_t)); 
+    }
+    return ne_ptr;
+}
+
+static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
+    arr[index]->el_name = el_name;
+    arr[index]->value = value;
+    arr[index]->description = description;
+    arr[index]->is_dynamic = is_dynamic;
+}
+
 
 typedef struct {
-    char * mt_namespace; // FIXME na pointer na liste strukturek
+    namespace_element_t * nm_elements;
+    int nm_length;
+    char * nm_string;
+} namespace_t;
+
+
+static inline namespace_t * alloc_namespace_t() {
+    namespace_t* nm_ptr = malloc(sizeof(namespace_t));
+    return nm_ptr;
+}
+
+static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t ** ne_arr, int nm_length, char * nm_string) {
+    namespace_element_t * ne_arr_ptr = *ne_arr;
+    nm_ptr->nm_elements = ne_arr_ptr;
+    nm_ptr->nm_length = nm_length;
+    nm_ptr->nm_string= nm_string;
+}
+
+typedef struct {
+    namespace_t * mt_namespace; // FIXME na pointer na liste strukturek
     char * mt_description;
     value_t *mt_value; // FIXME free
     time_with_ns_t * timestamp; // FIXME timestampwithns and free
@@ -182,15 +225,16 @@ static inline void set_metric_pointer_array_element(metric_t** mt_array, int ind
     mt_array[index] = element;
 }
 
-static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val, time_with_ns_t * timestamp, map_t * tags) {
-    mt_array[index]->mt_namespace = namespace_string;
-    mt_array[index]->mt_description = descritpion_string;
+static inline void set_metric_values(metric_t** mt_array, int index, namespace_t* mt_namespace, char* desc, value_t* val, time_with_ns_t* timestamp, map_t* tags) {
+    mt_array[index]->mt_namespace = mt_namespace;
+    mt_array[index]->mt_description = desc;
     mt_array[index]->mt_value = val;
     mt_array[index]->timestamp = timestamp;
     mt_array[index]->tags = tags;
 }
 
 static inline void free_metric_arr(metric_t** mtArray, int size) {
+// FIXME free
     if (mtArray == NULL) return;
     int i;
     for (i=0; i< size; i++) {
@@ -221,7 +265,6 @@ import "C"
 var contextMap = sync.Map{}
 var pluginDef plugin.Definition
 var collectorDef plugin.CollectorDefinition
-var publisherDef plugin.PublisherDefinition
 
 /*****************************************************************************/
 // ctx helpers
@@ -295,8 +338,8 @@ func boolToInt(v bool) int {
 func toCmap_t(gomap map[string]string) *C.map_t {
     cMapPtr := C.alloc_map_t()
     // FIXME
-//    map_len := len(gomap)
-//    C.set_map_lenght(cMapPtr, C.int(map_len))
+    map_len := len(gomap)
+    C.set_map_lenght(cMapPtr, C.int(map_len))
 //    if (map_len == 0) {
 //       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
 //       return cMapPtr
@@ -346,6 +389,24 @@ func toCStrArray(arr []string) **C.char {
 
 	return cStrArr
 }
+
+
+
+func toCNamespace_t(nm plugin.Namespace) *C.namespace_t {
+    nm_ptr := C.alloc_namespace_t()
+    ne_arr := C.alloc_namespace_elem_arr(C.int(nm.Len()))
+    for i := 0; i < nm.Len(); i++ {
+        el := nm.At(i);
+        isDynamic := int(0)
+        if el.IsDynamic(){
+            isDynamic = 1
+        }
+        C.set_namespace_element(ne_arr, C.int(i), (*C.char)(C.CString(el.Name())), (*C.char)(C.CString(el.Value())), (*C.char)(C.CString(el.Description())), C.int(isDynamic))
+    }
+    C.set_namespace_fields(nm_ptr, ne_arr, C.int(nm.Len()), (*C.char)(C.CString(nm.String())))
+    return nm_ptr
+}
+
 
 func toCvalue_t(v interface{}) *C.value_t {
 	switch v.(type) {
@@ -485,12 +546,12 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-		_mt_string := (*C.char)(C.CString(el.Namespace().String())) // FIXME
+        _mt_namespace := toCNamespace_t(el.Namespace())
 		_mt_desc := (*C.char)(C.CString(el.Description()))
 		_mt_value := toCvalue_t(el.Value())
 		_mt_timestamp := time_to_ctimewithns(el.Timestamp())
         _mt_tags := toCmap_t(el.Tags())
-		C.set_metric_values(mtPtArr, C.int(i), _mt_string, _mt_desc, _mt_value, _mt_timestamp, _mt_tags)
+		C.set_metric_values(mtPtArr, C.int(i), _mt_namespace, _mt_desc, _mt_value, _mt_timestamp, _mt_tags)
 	}
 	return mtPtArr
 }
@@ -615,7 +676,6 @@ func (bp *bridgePublisher) Publish(ctx plugin.PublishContext) error {
 
 func (bp *bridgePublisher) PluginDefinition(def plugin.PublisherDefinition) error {
 	pluginDef = def
-	publisherDef = def
 	C.call_c_define_callback(bp.defineCallback)
 
 	return nil

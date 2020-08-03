@@ -179,9 +179,52 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
     str_array[index] = element;
 }
 
+typedef struct {
+    char * el_name;
+    char * value;
+    char * description;
+    int is_dynamic;
+} namespace_element_t;
+
+
+static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
+    namespace_element_t** ne_ptr = malloc(sizeof(namespace_element_t*) * size);
+    int i = 0;
+    for(i=0; i < size; i++) {
+        ne_ptr[i] = malloc(sizeof(namespace_element_t)); 
+    }
+    return ne_ptr;
+}
+
+static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
+    arr[index]->el_name = el_name;
+    arr[index]->value = value;
+    arr[index]->description = description;
+    arr[index]->is_dynamic = is_dynamic;
+}
+
 
 typedef struct {
-    char * mt_namespace; // FIXME na pointer na liste strukturek
+    namespace_element_t * nm_elements;
+    int nm_length;
+    char * nm_string;
+} namespace_t;
+
+
+static inline namespace_t * alloc_namespace_t() {
+    namespace_t* nm_ptr = malloc(sizeof(namespace_t));
+    return nm_ptr;
+}
+
+static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t ** ne_arr, int nm_length, char * nm_string) {
+    namespace_element_t * ne_arr_ptr = *ne_arr;
+    nm_ptr->nm_elements = ne_arr_ptr;
+    nm_ptr->nm_length = nm_length;
+    nm_ptr->nm_string= nm_string;
+}
+
+typedef struct {
+    namespace_t * mt_namespace; // FIXME na pointer na liste strukturek
     char * mt_description;
     value_t *mt_value; // FIXME free
     time_with_ns_t * timestamp; // FIXME timestampwithns and free
@@ -202,15 +245,16 @@ static inline void set_metric_pointer_array_element(metric_t** mt_array, int ind
     mt_array[index] = element;
 }
 
-static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val, time_with_ns_t * timestamp, map_t * tags) {
-    mt_array[index]->mt_namespace = namespace_string;
-    mt_array[index]->mt_description = descritpion_string;
+static inline void set_metric_values(metric_t** mt_array, int index, namespace_t* mt_namespace, char* desc, value_t* val, time_with_ns_t* timestamp, map_t* tags) {
+    mt_array[index]->mt_namespace = mt_namespace;
+    mt_array[index]->mt_description = desc;
     mt_array[index]->mt_value = val;
     mt_array[index]->timestamp = timestamp;
     mt_array[index]->tags = tags;
 }
 
 static inline void free_metric_arr(metric_t** mtArray, int size) {
+// FIXME free
     if (mtArray == NULL) return;
     int i;
     for (i=0; i< size; i++) {
