@@ -31,19 +31,41 @@ typedef struct {
     int vtype; // value_type_t;
 } value_t;
 
+static inline value_t * alloc_value_t(enum value_type_t t) {
+    value_t * valPtr = malloc(sizeof(value_t));
+    valPtr->vtype = t;
+    return valPtr;
+}
+
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
 static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
+static inline void set_long_long_value_t(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
+static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
+static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
+
 typedef struct {
-    char * namespace;
+    char * mt_namespace;
+    // mt_namespace -> na pointer na liste strukturek ??
+    char * mt_description;
+    value_t *mt_value;
+//    int mt_version;
+// timestamp
+//config
+//tags
+
 } metric_t;
 
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
-    metric_t * mtPtrArr = malloc(sizeof(metric_t*) * size);
-    metric_t **arrPtr = &mtPtrArr;
+    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
+    int i;
+    for(i=0; i< size; i++) {
+        arrPtr[i] = malloc(sizeof(metric_t));
+    }
     return arrPtr;
 }
 
@@ -52,15 +74,21 @@ static inline void set_metric_pointer_array_element(metric_t** mt_array, int ind
     mt_array[index] = element;
 }
 
-static inline metric_t* alloc_metric_struct(char * namespaceString) {
-    metric_t* mt_struct = malloc(sizeof(metric_t));
-    mt_struct->namespace = namespaceString;
-    return mt_struct;
+static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val) {
+    mt_array[index]->mt_namespace = namespace_string;
+    mt_array[index]->mt_description = descritpion_string;
+    mt_array[index]->mt_value = val;
 }
 
-static inline void free_metric_struct(metric_t* mtArray) {
+static inline void free_metric_arr(metric_t** mtArray, int size) {
     if (mtArray == NULL) return;
-    free(mtArray);
+    int i;
+    for (i=0; i< size; i++) {
+       if (mtArray[i] != NULL ) {
+           free(mtArray[i]);
+       }
+   }
+   free(mtArray);
 }
 
 typedef struct {
@@ -80,6 +108,7 @@ static inline int get_map_length(map_t * map) { return map->length; }
 typedef struct {
     char * msg;
 } error_t;
+
 
 static inline error_t * alloc_error_msg(char * msg) {
     error_t * errMsg = malloc(sizeof(error_t));
@@ -145,9 +174,9 @@ import (
 	"time"
 	"unsafe"
 
-	collectorproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	commonproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	publisherproxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
+	collectorProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
+	publisherProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
@@ -161,54 +190,54 @@ var publisherDef plugin.PublisherDefinition
 
 /*****************************************************************************/
 // ctx helpers
-func contextObject(ctxId *C.char) *commonproxy.Context {
+func commonContextObject(ctxId *C.char) *commonProxy.Context {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
 	if !ok {
-		panic(fmt.Sprintf("can't aquire context object with id %v", id))
+		panic(fmt.Sprintf("Can't aquire context object with id %v", id))
 	}
 	switch v := ctx.(type) {
-	case *collectorproxy.PluginContext:
-		ctxObj, okType := ctx.(*collectorproxy.PluginContext)
-
+	case *collectorProxy.PluginContext:
+ctxObj, okType := ctx.(*collectorProxy.PluginContext)
 		if !okType {
 			panic("Invalid concrete type of context object")
 		}
 		return ctxObj.Context
-	case *publisherproxy.PluginContext:
-		ctxObj, okType := ctx.(*publisherproxy.PluginContext)
+	case *publisherProxy.PluginContext:
+		ctxObj, okType := ctx.(*publisherProxy.PluginContext)
 		if !okType {
 			panic("Invalid concrete type of context object")
 		}
 		return ctxObj.Context
 	default:
-		panic(fmt.Sprintf("%s not supported plugin Cntext type", v))
+		panic(fmt.Sprintf("%s not supported plugin context type", v))
 	}
+
 
 }
 
-func publContextObject(ctxId *C.char) *publisherproxy.PluginContext {
+func publContextObject(ctxId *C.char) *publisherProxy.PluginContext {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
 	if !ok {
 		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 
-	ctxObj, okType := ctx.(*publisherproxy.PluginContext)
+	ctxObj, okType := ctx.(*publisherProxy.PluginContext)
 	if !okType {
 		panic("Invalid concrete type of context object")
 	}
 	return ctxObj
 }
 
-func collContextObject(ctxId *C.char) *collectorproxy.PluginContext {
+func collContextObject(ctxId *C.char) *collectorProxy.PluginContext {
 	id := C.GoString(ctxId)
 	ctx, ok := contextMap.Load(id)
 	if !ok {
 		panic(fmt.Sprintf("can't aquire context object with id %v", id))
 	}
 
-	ctxObj, okType := ctx.(*collectorproxy.PluginContext)
+	ctxObj, okType := ctx.(*collectorProxy.PluginContext)
 	if !okType {
 		panic("Invalid concrete type of context object")
 	}
@@ -256,6 +285,29 @@ func toCStrArray(arr []string) **C.char {
 	C.set_str_array_element(cStrArr, C.int(len(arr)), (*C.char)(C.NULL)) // last element of array is always None (NULL)
 
 	return cStrArr
+}
+
+func toCvalue_t(v interface{}) *C.value_t {
+    switch v.(type) {
+    	case int64:
+            cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT64)
+            C.set_long_long_value_t(cvalue_t_ptr, C.longlong(v.(int64)))
+    		return cvalue_t_ptr
+    	case uint64:
+            cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
+            C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(v.(uint64)))
+    		return cvalue_t_ptr
+    	case float64:
+            cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
+            C.set_double_value_t(cvalue_t_ptr, C.double(v.(float64)))
+    		return cvalue_t_ptr
+    	case bool:
+            cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
+            C.set_bool_value_t(cvalue_t_ptr, C.int(v.(int)))
+    		return cvalue_t_ptr
+        default:
+    	    panic(fmt.Sprintf("Invalid type %#v", v))
+    	}
 }
 
 func toGoValue(v *C.value_t) interface{} {
@@ -320,6 +372,10 @@ func dealloc_error(p *C.error_t) {
 	C.free_error_msg(p)
 }
 
+//export dealloc_metric_array
+func dealloc_metric_array(p **C.metric_t, size int) {
+    C.free_metric_arr(p, C.int(size))
+}
 /*****************************************************************************/
 // C API - Collect related functions
 
@@ -365,15 +421,14 @@ func ctx_count(ctxID *C.char) int {
 //export ctx_list_all_metrics
 func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mts := publContextObject(ctxID).ListAllMetrics()
-    // FIXME
-
-	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts) + 1))
+	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-		cmt := C.alloc_metric_struct((*C.char)(C.CString(el.Namespace().String())))
-		C.set_metric_pointer_array_element(mtPtArr, C.int(i), cmt)
+        _mn_string := (*C.char)(C.CString(el.Namespace().String()))
+        _mn_desc := (*C.char)(C.CString(el.Description()))
+        _mn_value := toCvalue_t(el.Value())
+		C.set_metric_values(mtPtArr, C.int(i), _mn_string, _mn_desc, _mn_value)
 	}
-	C.set_metric_pointer_array_element(mtPtArr, C.int(len(mts)), (*C.metric_t)(C.NULL)) // last element of array is always None (NULL)
 	return mtPtArr
 }
 
@@ -381,7 +436,7 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 
 //export ctx_config
 func ctx_config(ctxID *C.char, key *C.char) *C.char {
-	v, ok := contextObject(ctxID).Config(C.GoString(key))
+	v, ok := commonContextObject(ctxID).Config(C.GoString(key))
 	if !ok {
 		return (*C.char)(C.NULL)
 	}
@@ -391,28 +446,28 @@ func ctx_config(ctxID *C.char, key *C.char) *C.char {
 
 //export ctx_config_keys
 func ctx_config_keys(ctxID *C.char) **C.char {
-	return toCStrArray(contextObject(ctxID).ConfigKeys())
+	return toCStrArray(commonContextObject(ctxID).ConfigKeys())
 }
 
 //export ctx_raw_config
 func ctx_raw_config(ctxID *C.char) *C.char {
-	rc := string(contextObject(ctxID).RawConfig())
+	rc := string(commonContextObject(ctxID).RawConfig())
 	return C.CString(rc)
 }
 
 //export ctx_add_warning
 func ctx_add_warning(ctxID *C.char, message *C.char) {
-	contextObject(ctxID).AddWarning(C.GoString(message))
+	commonContextObject(ctxID).AddWarning(C.GoString(message))
 }
 
 //export ctx_is_done
 func ctx_is_done(ctxID *C.char) int {
-	return boolToInt(contextObject(ctxID).IsDone())
+	return boolToInt(commonContextObject(ctxID).IsDone())
 }
 
 //export ctx_log
 func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
-	logF := contextObject(ctxID).Logger()
+	logF := commonContextObject(ctxID).Logger()
 	for i := 0; i < int(C.get_map_length(fields)); i++ {
 		k := C.get_map_key(fields, C.int(i))
 		v := C.get_map_value(fields, C.int(i))
@@ -512,7 +567,7 @@ func (bp *bridgePublisher) Unload(ctx plugin.Context) error {
 }
 
 func (bp *bridgePublisher) callC(ctx plugin.Context, callback *C.callback_t) error {
-	ctxAsType := ctx.(*publisherproxy.PluginContext)
+	ctxAsType := ctx.(*publisherProxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
@@ -553,7 +608,7 @@ func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
 
 func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) error {
 
-	ctxAsType := ctx.(*collectorproxy.PluginContext)
+	ctxAsType := ctx.(*collectorProxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 
 	contextMap.Store(taskID, ctxAsType)

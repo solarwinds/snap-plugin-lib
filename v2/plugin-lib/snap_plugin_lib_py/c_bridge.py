@@ -1,7 +1,7 @@
 from collections import defaultdict
 from ctypes import c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, cast
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, Metric, \
-    time_to_ctimewithns, cmtstrarray_to_list
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers,CMetricStruct, \
+    time_to_ctimewithns, c_mtstrarray_to_list
 from .dynamic_lib import PLUGIN_LIB_OBJ
 from .exceptions import throw_exception_if_error, throw_exception_if_null
 
@@ -13,7 +13,7 @@ global plugin_py
 ###############################################################################
 # C functions metadata
 
-PLUGIN_LIB_OBJ.ctx_list_all_metrics.restype = POINTER(POINTER(Metric))
+PLUGIN_LIB_OBJ.ctx_list_all_metrics.restype = POINTER(POINTER(CMetricStruct))
 
 PLUGIN_LIB_OBJ.ctx_add_metric.restype = POINTER(CError)
 PLUGIN_LIB_OBJ.ctx_always_apply.restype = POINTER(CError)
@@ -121,10 +121,13 @@ class Context:
 class PublishContext(Context):
     def list_all_metrics(self):
         _mts_ptr = PLUGIN_LIB_OBJ.ctx_list_all_metrics(self._ctx_id())
-        return cmtstrarray_to_list(_mts_ptr)
+
+        _mt_list = c_mtstrarray_to_list(_mts_ptr, self.count())
+        PLUGIN_LIB_OBJ.dealloc_metric_array(_mts_ptr, self.count())
+        return _mt_list
 
 
-    def count(self):
+    def count(self) -> int:
         return PLUGIN_LIB_OBJ.ctx_count(self._ctx_id())
 
 
@@ -175,10 +178,9 @@ def define_handler():
 
 @CFUNCTYPE(None, c_char_p)
 def plugin_handler(ctx_id):
-#FIXME
     if hasattr(plugin_py, "publish"):
         plugin_py.publish(PublishContext(ctx_id))
-    elif plugin_py.collect:
+    elif hasattr(plugin_py, "collect"):
         plugin_py.collect(CollectContext(ctx_id))
 
 

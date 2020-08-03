@@ -51,47 +51,64 @@ typedef struct {
     int vtype; // value_type_t;
 } value_t;
 
+static inline value_t * alloc_value_t(enum value_type_t t) {
+    value_t * valPtr = malloc(sizeof(value_t));
+    valPtr->vtype = t;
+    return valPtr;
+}
+
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
 static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
+static inline void set_long_long_value_t(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
+static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
+static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
+
 typedef struct {
-    char * namespace;
+    char * mt_namespace;
+    // mt_namespace -> na pointer na liste strukturek ??
+    char * mt_description;
+    value_t *mt_value;
+//    int mt_version;
+// timestamp
+//config
+//tags
+
 } metric_t;
 
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
-    metric_t * mtPtrArr = malloc(sizeof(metric_t*) * size);
-    metric_t **arrPtr = &mtPtrArr;
+    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
+    int i;
+    for(i=0; i< size; i++) {
+        arrPtr[i] = malloc(sizeof(metric_t));
+    }
     return arrPtr;
 }
 
 
 static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
-    FILE * fPtr;
-       fPtr = fopen("inmetric_pointer", "w");
-
-
-fprintf(fPtr, "index: %d", index);
- fclose(fPtr);
     mt_array[index] = element;
 }
 
-static inline metric_t* alloc_metric_struct(char * namespaceString) {
-    FILE * fPtr;
-       fPtr = fopen("inalloc_metric_struct", "w");
-       fprintf(fPtr, "index: %s", namespaceString);
-       fclose(fPtr);
-    metric_t* mt_struct = malloc(sizeof(metric_t));
-    mt_struct->namespace = namespaceString;
-    return mt_struct;
+static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val) {
+    mt_array[index]->mt_namespace = namespace_string;
+    mt_array[index]->mt_description = descritpion_string;
+    mt_array[index]->mt_value = val;
 }
 
-static inline void free_metric_struct(metric_t* mtArray) {
+static inline void free_metric_arr(metric_t** mtArray, int size) {
     if (mtArray == NULL) return;
-
-    free(mtArray);
+    int i;
+    for (i=0; i< size; i++) {
+       if (mtArray[i] != NULL ) {
+           free(mtArray[i]);
+       }
+   }
+   free(mtArray);
 }
 
 typedef struct {
@@ -111,6 +128,7 @@ static inline int get_map_length(map_t * map) { return map->length; }
 typedef struct {
     char * msg;
 } error_t;
+
 
 static inline error_t * alloc_error_msg(char * msg) {
     error_t * errMsg = malloc(sizeof(error_t));
@@ -224,6 +242,8 @@ extern void dealloc_charp(char* p0);
 extern void dealloc_str_array(char** p0);
 
 extern void dealloc_error(error_t* p0);
+
+extern void dealloc_metric_array(metric_t** p0, GoInt p1);
 
 extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
 

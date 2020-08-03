@@ -1,7 +1,18 @@
 import math
-from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER, pointer
+from ctypes import (
+    Structure,
+    Union,
+    c_char_p,
+    c_longlong,
+    c_ulonglong,
+    c_double,
+    c_int,
+    POINTER,
+    pointer,
+)
 from itertools import count
 
+from .metric import Metric
 from .exceptions import PluginLibException
 
 min_int = -9223372036854775807
@@ -9,53 +20,43 @@ max_int = 9223372036854775807
 max_uint = 18446744073709551615
 
 _, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
-_, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
-    LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
+(
+    _,
+    LOGLEVEL_PANIC,
+    LOGLEVEL_FATAL,
+    LOGLEVEL_ERROR,
+    LOGLEVEL_WARN,
+    LOGLEVEL_INFO,
+    LOGLEVEL_DEBUG,
+    LOGLEVEL_TRACE,
+) = range(8)
 
-class Metric(Structure):
-    _fields_ = [("namespace", c_char_p),
 
-    ]
 
-def cmtToDict(cmt):
-    tmp = dict()
-    tmp["namespace"] = cmt.namespace
-    print(tmp["namespace"])
-    return tmp
 
-def cmtstrarray_to_list(arr):
-    """Converts C **metric_t to Python list"""
+def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
+    """Converts C **metric_t to list of python managed objects of Metric class"""
     print("maslyk cmtstrarray_to_list")
-    print(arr[0][0].namespace) #
-    print(type(arr))
-    #    FIXME 
-    #for i in count(0):
-    #    if arr[i] is None:
-     #       break
-     #   result_list.append(cmtToDict(arr[i]))
-    return None
-    #return result_list
+    result_list = []
+    for i in range(mt_arr_size):
+        if mt_arr_ptr[i] is None:
+            break
+        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
+        print(mt)
+        result_list.append(mt)
+    return result_list
 
 
 class MapElement(Structure):
-    _fields_ = [
-        ("key", c_char_p),
-        ("value", c_char_p)
-    ]
+    _fields_ = [("key", c_char_p), ("value", c_char_p)]
 
 
 class Map(Structure):
-    _fields_ = [
-        ("elements", POINTER(MapElement)),
-        ("length", c_int)
-    ]
+    _fields_ = [("elements", POINTER(MapElement)), ("length", c_int)]
 
 
 class TimeWithNs(Structure):
-    _fields_ = [
-        ("sec", c_int),
-        ("nsec", c_int)
-    ]
+    _fields_ = [("sec", c_int), ("nsec", c_int)]
 
 
 class Modifiers(Structure):
@@ -64,14 +65,12 @@ class Modifiers(Structure):
         ("tags_to_remove", POINTER(Map)),
         ("timestamp", POINTER(TimeWithNs)),
         ("description", c_char_p),
-        ("unit", c_char_p)
+        ("unit", c_char_p),
     ]
 
 
 class CError(Structure):
-    _fields_ = [
-        ("msg", c_char_p)
-    ]
+    _fields_ = [("msg", c_char_p)]
 
 
 class ValueUnion(Union):
@@ -84,9 +83,14 @@ class ValueUnion(Union):
 
 
 class CValue(Structure):
+    _fields_ = [("value", ValueUnion), ("v_type", c_int)]
+
+
+class CMetricStruct(Structure):
     _fields_ = [
-        ("value", ValueUnion),
-        ("v_type", c_int)
+        ("namespace", c_char_p),
+        ("description", c_char_p),
+        ("value", POINTER(CValue)),
     ]
 
 
@@ -98,7 +102,7 @@ def string_to_bytes(s):
     """
 
     if isinstance(s, type("")):
-        return bytes(s, 'utf-8')
+        return bytes(s, "utf-8")
     elif isinstance(s, type(b"")):
         return s
     else:
@@ -125,7 +129,7 @@ def cstrarray_to_list(arr):
     for i in count(0):
         if arr[i] is None:
             break
-        result_list.append(arr[i].decode(encoding='utf-8'))
+        result_list.append(arr[i].decode(encoding="utf-8"))
 
     return result_list
 
