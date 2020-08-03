@@ -52,7 +52,7 @@ const (
 
 type Options struct {
 	PluginIP           string
-	PluginPort         int
+	CollectorPort      int
 	PublisherPort      int
 	CollectInterval    time.Duration
 	PingInterval       time.Duration
@@ -91,8 +91,8 @@ func parseCmdLine() *Options {
 		"plugin-ip", defaultGRPCIP,
 		"IP Address of GRPC Server run by plugin")
 
-	flag.IntVar(&opt.PluginPort,
-		"plugin-port", defaultGRPCPort,
+	flag.IntVar(&opt.CollectorPort,
+		"collector-port", defaultGRPCPort,
 		"Port of GRPC Server run by plugin")
 
 	flag.IntVar(&opt.PublisherPort,
@@ -157,36 +157,47 @@ func main() {
 
 	opt := parseCmdLine()
 
-	grpcServer2Addr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PublisherPort)
-	clpub, err := grpc.Dial(grpcServer2Addr, grpc.WithInsecure())
-	if err != nil {
-		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServer2Addr, err)
-		os.Exit(1)
+	usePublisher := false
+	if opt.PublisherPort != defaultGRPCPort {
+		usePublisher = true
 	}
-	defer func() { _ = clpub.Close() }()
-
 	// Create connection
-	grpcServerAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PluginPort)
-	cl, err := grpc.Dial(grpcServerAddr, grpc.WithInsecure())
+	grpcServerCollAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.CollectorPort)
+	clColl, err := grpc.Dial(grpcServerCollAddr, grpc.WithInsecure())
 	if err != nil {
-		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerAddr, err)
+		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerCollAddr, err)
 		os.Exit(1)
 	}
-	defer func() { _ = cl.Close() }()
+	defer func() { _ = clColl.Close() }()
+
+	var clPub *grpc.ClientConn
+	if usePublisher {
+		grpcServerPubAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PublisherPort)
+		clPub, err = grpc.Dial(grpcServerPubAddr, grpc.WithInsecure())
+		if err != nil {
+			fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerPubAddr, err)
+			os.Exit(1)
+		}
+		defer func() { _ = clPub.Close() }()
+	}
 	// Load, collect, publish, unload routine
 	go func() {
-		publishClient := pluginrpc.NewPublisherClient(clpub)
-		errPub := doPubLoadRequest(publishClient, opt)
-		if errPub != nil {
-			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
-		}
-		collClient := pluginrpc.NewCollectorClient(cl)
+
+		collClient := pluginrpc.NewCollectorClient(clColl)
 
 		err := doLoadRequest(collClient, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
 		}
 
+		var publishClient pluginrpc.PublisherClient
+		if usePublisher {
+			publishClient = pluginrpc.NewPublisherClient(clPub)
+			errPub := doPubLoadRequest(publishClient, opt)
+			if errPub != nil {
+				doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
+			}
+		}
 		// Handle ctrl+C
 		notifyCh := make(chan os.Signal, 1)
 		signal.Notify(notifyCh, os.Interrupt)
@@ -204,15 +215,17 @@ func main() {
 
 				break
 			}
-			for i := 0; i < unloadMaxRetry; i++ {
-				err := doPubUnloadRequest(publishClient, opt)
-				if err != nil {
-					fmt.Printf("!! Can't unload plugin (%v), will retry (%d/%d)...\n", err, i+1, unloadMaxRetry)
-					time.Sleep(unloadRetryDelay)
-					continue
-				}
+			if usePublisher {
+				for i := 0; i < unloadMaxRetry; i++ {
+					err := doPubUnloadRequest(publishClient, opt)
+					if err != nil {
+						fmt.Printf("!! Can't unload plugin (%v), will retry (%d/%d)...\n", err, i+1, unloadMaxRetry)
+						time.Sleep(unloadRetryDelay)
+						continue
+					}
 
-				break
+					break
+				}
 			}
 			os.Exit(stoppedByUser)
 		}()
@@ -255,13 +268,12 @@ func main() {
 
 				mtsChunks = append(mtsChunks, chunk.mts)
 			}
-
-			err := doPublishRequest(publishClient, mtsChunks, opt) // fixme
-			if err != nil {
-				fmt.Printf("Not good")
+			if usePublisher {
+				err := doPublishRequest(publishClient, mtsChunks, opt)
+				if err != nil {
+					fmt.Printf("Not good")
+				}
 			}
-
-			// FIXME What?
 			if opt.RequestInfo {
 				info, err := doInfoRequest(collClient, opt)
 				if err != nil {
@@ -290,8 +302,13 @@ func main() {
 	}()
 
 	// ping routine
-	contClient := pluginrpc.NewControllerClient(cl)
-	contPubClient := pluginrpc.NewControllerClient(clpub)
+	contClient := pluginrpc.NewControllerClient(clColl)
+
+	var contPubClient pluginrpc.ControllerClient
+
+	if usePublisher {
+		contPubClient = pluginrpc.NewControllerClient(clPub)
+	}
 
 	go func() {
 		for {
@@ -300,9 +317,11 @@ func main() {
 			if err != nil {
 				doneCh <- fmt.Errorf("can't start: %v", err)
 			}
-			_, err2 := contPubClient.Ping(context.Background(), req)
-			if err2 != nil {
-				doneCh <- fmt.Errorf("can't start: %v", err)
+			if usePublisher {
+				_, err2 := contPubClient.Ping(context.Background(), req)
+				if err2 != nil {
+					doneCh <- fmt.Errorf("can't start: %v", err2)
+				}
 			}
 			time.Sleep(opt.PingInterval)
 		}
@@ -470,10 +489,7 @@ func doCollectRequest(cc pluginrpc.CollectorClient, opt *Options) chan collectCh
 				return
 			}
 
-			for _, mt := range resp.MetricSet {
-				//recvMts = append(recvMts, grpcMetricToString(mt))
-				recvMts = append(recvMts, mt)
-			}
+			recvMts = append(recvMts, resp.MetricSet...)
 
 			for _, warns := range resp.Warnings {
 				recvWarns = append(recvWarns, grpcWarningToString(warns))

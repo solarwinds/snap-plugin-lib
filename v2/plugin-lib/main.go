@@ -204,11 +204,11 @@ static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t
 }
 
 typedef struct {
-    namespace_t * mt_namespace; // FIXME na pointer na liste strukturek
-    char * mt_description;
+    namespace_t * mt_namespace; // FIXME free
+    char * mt_description; // free?
     value_t *mt_value; // FIXME free
-    time_with_ns_t * timestamp; // FIXME timestampwithns and free
-    map_t * tags;
+    time_with_ns_t * timestamp; // FIXME free
+    map_t * tags; // free
 } metric_t;
 
 
@@ -340,17 +340,17 @@ func toCmap_t(gomap map[string]string) *C.map_t {
     // FIXME
     map_len := len(gomap)
     C.set_map_lenght(cMapPtr, C.int(map_len))
-//    if (map_len == 0) {
-//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
-//       return cMapPtr
-//    }
-//    tagArrPtr := C.map_element_t_array(C.int(map_len))
-//    i := 0
-//    for key, val := range gomap {
-//        C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
-//        i++
-//    }
-//    C.set_map_elements(cMapPtr, tagArrPtr)
+    if (map_len == 0) {
+       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
+       return cMapPtr
+    }
+    tagArrPtr := C.map_element_t_array(C.int(map_len))
+    i := 0
+    for key, val := range gomap {
+        C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
+        i++
+    }
+    C.set_map_elements(cMapPtr, tagArrPtr)
     return cMapPtr
 }
 
@@ -409,18 +409,18 @@ func toCNamespace_t(nm plugin.Namespace) *C.namespace_t {
 
 
 func toCvalue_t(v interface{}) *C.value_t {
-	switch v.(type) {
+	switch n := v.(type) {
 	case int64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT64)
-		C.set_long_long_value_t(cvalue_t_ptr, C.longlong(v.(int64)))
+		C.set_long_long_value_t(cvalue_t_ptr, C.longlong(n))
 		return cvalue_t_ptr
 	case uint64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
-		C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(v.(uint64)))
+		C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(n))
 		return cvalue_t_ptr
 	case float64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
-		C.set_double_value_t(cvalue_t_ptr, C.double(v.(float64)))
+		C.set_double_value_t(cvalue_t_ptr, C.double(n))
 		return cvalue_t_ptr
 	case bool:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)

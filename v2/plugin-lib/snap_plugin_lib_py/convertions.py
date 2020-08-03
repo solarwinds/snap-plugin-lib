@@ -1,3 +1,4 @@
+import pprint
 import math
 from ctypes import (
     Structure,
@@ -123,11 +124,11 @@ def dict_to_cmap(d):
 
 def cmap_to_dict(cmap_ptr):
     map_len = cmap_ptr.contents.length
-    _map = {}
+    _map = dict()
     if map_len != 0:
         for i in range(map_len):
             el = cmap_ptr.contents.elements[i]
-            _map[el.key] = el.value
+            _map[el.key.decode(encoding="utf-8")] = el.value.decode(encoding="utf-8")
     return _map
 
 def cstrarray_to_list(arr):
@@ -265,11 +266,17 @@ class Metric:
         self.value = value
         self.unit = value_type
         self.timestamp = timestamp
-
+        self.tags = tags
 
 
     def __repr__(self):
-        return "{} desc: {} val: {} unit: {} timestamp: {}".format(self.namespace, self.description, self.value, self.unit, datetime.utcfromtimestamp(self.timestamp))
+        _repr = "{} desc: {} val: {} unit: {} timestamp: {}".format(self.namespace, self.description, self.value, self.unit, datetime.utcfromtimestamp(self.timestamp))
+        if self.tags:
+            for k, v in self.tags.items():
+                print(k,v)
+
+            #//_repr = " ".join(_repr, pprint.pformat(self.tags))
+        return _repr
 
     @classmethod
     def unpack_from_metric_struct(cls, mt_struct):
@@ -287,22 +294,20 @@ class Metric:
             _tags,
         )
 
-    def namespace(self):
+#    def namespace(self):
+#        pass
+#
+#    def value(self):
+#        pass
+#    
+#    def tags(self):
+#        pass
+#
+#    def description(self):
+#        pass
+#
+#    def unit(self):
+#        pass
+#
+#    def timestamp(self):
         pass
-
-    def value(self):
-        pass
-    
-    def tags(self):
-        pass
-
-    def description(self):
-        pass
-
-    def unit(self):
-        pass
-
-    def timestamp(self):
-        pass
-
-
