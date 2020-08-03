@@ -197,6 +197,12 @@ static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
 }
 
 static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
+
+//FIXME
+FILE *f = fopen("nem.txt", "w");
+fprintf(f, "Some text: %s\n", el_name);
+fclose(f);
+
     arr[index]->el_name = el_name;
     arr[index]->value = value;
     arr[index]->description = description;
@@ -224,11 +230,11 @@ static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t
 }
 
 typedef struct {
-    namespace_t * mt_namespace; // FIXME na pointer na liste strukturek
-    char * mt_description;
+    namespace_t * mt_namespace; // FIXME free
+    char * mt_description; // free?
     value_t *mt_value; // FIXME free
-    time_with_ns_t * timestamp; // FIXME timestampwithns and free
-    map_t * tags;
+    time_with_ns_t * timestamp; // FIXME free
+    map_t * tags; // free
 } metric_t;
 
 

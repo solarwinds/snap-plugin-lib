@@ -64,7 +64,3 @@ func (pc *PluginContext) Count() int {
 func (pc *PluginContext) TaskID() string {
 	return pc.taskID
 }
-
-func (pc *PluginContext) getCommonProxyPtr() *proxy.Context {
-    return pc.Context
-}

@@ -177,6 +177,12 @@ static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
 }
 
 static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
+
+//FIXME
+FILE *f = fopen("nem.txt", "w");
+fprintf(f, "Some text: %s\n", el_name);
+fclose(f);
+
     arr[index]->el_name = el_name;
     arr[index]->value = value;
     arr[index]->description = description;
@@ -252,7 +258,6 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-
 	collectorProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	publisherProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
@@ -337,13 +342,12 @@ func boolToInt(v bool) int {
 
 func toCmap_t(gomap map[string]string) *C.map_t {
     cMapPtr := C.alloc_map_t()
-    // FIXME
     map_len := len(gomap)
     C.set_map_lenght(cMapPtr, C.int(map_len))
-    if (map_len == 0) {
-       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
-       return cMapPtr
-    }
+//    if (map_len == 0) {
+//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
+//       return cMapPtr
+//   }
     tagArrPtr := C.map_element_t_array(C.int(map_len))
     i := 0
     for key, val := range gomap {

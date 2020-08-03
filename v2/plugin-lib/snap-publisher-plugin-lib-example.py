@@ -7,15 +7,13 @@ import pprint
 
 class ExamplePublisherPlugin(BasePublisher):
     def define_plugin(self, ctx):
-        ctx.log(LOGLEVEL_INFO, "Define publisher", {
-            "name": "py-example"
-        })
+        pass
 
     def publish(self, ctx):
         ctx.log(LOGLEVEL_INFO, "Plugin is publishing", {
             "name": "py-example"
         })
-        pprint.pprint("Number of recieved metrics: {}".format(ctx.count()))
+        pprint.pprint("Number of received metrics: {}".format(ctx.count()))
         pprint.pprint(ctx.list_all_metrics())
 
     def load(self, ctx):
