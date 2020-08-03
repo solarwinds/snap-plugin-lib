@@ -67,63 +67,48 @@ static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint
 static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
-typedef struct {
-    char * mt_namespace;
-    // mt_namespace -> na pointer na liste strukturek ??
-    char * mt_description;
-    value_t *mt_value;
-//    int mt_version;
-// timestamp
-//config
-//tags
-
-} metric_t;
-
-
-static inline metric_t** alloc_metric_pointer_array(int size) {
-    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-    int i;
-    for(i=0; i< size; i++) {
-        arrPtr[i] = malloc(sizeof(metric_t));
-    }
-    return arrPtr;
-}
-
-
-static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
-    mt_array[index] = element;
-}
-
-static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val) {
-    mt_array[index]->mt_namespace = namespace_string;
-    mt_array[index]->mt_description = descritpion_string;
-    mt_array[index]->mt_value = val;
-}
-
-static inline void free_metric_arr(metric_t** mtArray, int size) {
-    if (mtArray == NULL) return;
-    int i;
-    for (i=0; i< size; i++) {
-       if (mtArray[i] != NULL ) {
-           free(mtArray[i]);
-       }
-   }
-   free(mtArray);
-}
 
 typedef struct {
     char * key;
     char * value;
 } map_element_t;
 
+
+static inline map_element_t ** map_element_t_array(int size) {
+    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size);
+    int i;
+    for(i=0; i<size; i++){
+        arrPtr[i] = malloc(sizeof(map_element_t));
+    }
+    return arrPtr;
+ }
+
+static inline void set_tag_values(map_element_t ** tag_arr, int index, char * key, char * value) {
+    tag_arr[index]->key = key;
+    tag_arr[index]->value = value;
+}
+
 typedef struct {
     map_element_t * elements;
     int length;
 } map_t;
 
+static inline map_t * alloc_map_t() {
+    map_t * map = malloc(sizeof(map_t));
+    return map;
+}
+
+static inline void set_map_elements(map_t * mapptr, map_element_t** elements) {
+    mapptr->elements = *elements;
+}
+
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
 static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
 static inline int get_map_length(map_t * map) { return map->length; }
+
+
+static inline void set_map_lenght(map_t * map, int length) { map->length = length; }
+
 
 typedef struct {
     char * msg;
@@ -151,6 +136,15 @@ typedef struct {
     int sec;
     int nsec;
 } time_with_ns_t;
+
+static inline time_with_ns_t* alloc_time_with_ns_t() {
+    return malloc(sizeof(time_with_ns_t));
+}
+
+static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nsec) {
+    time_ptr->sec = sec;
+    time_ptr->nsec = nsec;
+}
 
 typedef struct {
     map_t * tags_to_add;
@@ -185,6 +179,47 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
     str_array[index] = element;
 }
 
+
+typedef struct {
+    char * mt_namespace; // FIXME na pointer na liste strukturek
+    char * mt_description;
+    value_t *mt_value; // FIXME free
+    time_with_ns_t * timestamp; // FIXME timestampwithns and free
+    map_t * tags;
+} metric_t;
+
+
+static inline metric_t** alloc_metric_pointer_array(int size) {
+    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
+    int i;
+    for(i=0; i< size; i++) {
+        arrPtr[i] = malloc(sizeof(metric_t));
+    }
+    return arrPtr;
+}
+
+static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
+    mt_array[index] = element;
+}
+
+static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val, time_with_ns_t * timestamp, map_t * tags) {
+    mt_array[index]->mt_namespace = namespace_string;
+    mt_array[index]->mt_description = descritpion_string;
+    mt_array[index]->mt_value = val;
+    mt_array[index]->timestamp = timestamp;
+    mt_array[index]->tags = tags;
+}
+
+static inline void free_metric_arr(metric_t** mtArray, int size) {
+    if (mtArray == NULL) return;
+    int i;
+    for (i=0; i< size; i++) {
+       if (mtArray[i] != NULL ) {
+           free(mtArray[i]);
+       }
+   }
+   free(mtArray);
+}
 
 #line 1 "cgo-generated-wrapper"
 

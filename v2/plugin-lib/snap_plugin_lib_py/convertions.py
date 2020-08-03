@@ -11,8 +11,8 @@ from ctypes import (
     pointer,
 )
 from itertools import count
+from datetime import datetime
 
-from .metric import Metric
 from .exceptions import PluginLibException
 
 min_int = -9223372036854775807
@@ -31,20 +31,6 @@ _, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
     LOGLEVEL_TRACE,
 ) = range(8)
 
-
-
-
-def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
-    """Converts C **metric_t to list of python managed objects of Metric class"""
-    print("maslyk cmtstrarray_to_list")
-    result_list = []
-    for i in range(mt_arr_size):
-        if mt_arr_ptr[i] is None:
-            break
-        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
-        print(mt)
-        result_list.append(mt)
-    return result_list
 
 
 class MapElement(Structure):
@@ -91,6 +77,8 @@ class CMetricStruct(Structure):
         ("namespace", c_char_p),
         ("description", c_char_p),
         ("value", POINTER(CValue)),
+        ("timestamp", POINTER(TimeWithNs)),
+        ("tags", POINTER(Map)),
     ]
 
 
@@ -139,6 +127,10 @@ def time_to_ctimewithns(timestamp):
     nsec = int(math.floor(timestamp - sec) * 1e9)
     return pointer(TimeWithNs(sec, nsec))
 
+def ctimewithns_to_time(ctime_ptr):
+    sec = ctime_ptr.contents.sec
+    nsec = ctime_ptr.contents.nsec / 1e9
+    return sec + nsec 
 
 def to_value_t(v):
     val_ptr = (CValue * 1)()
@@ -165,3 +157,79 @@ def to_value_t(v):
         raise PluginLibException("invalid metric value type")
 
     return val_ptr
+
+
+def unpackCValue(val_ptr):
+    v_type = val_ptr.contents.v_type
+    if v_type == TYPE_DOUBLE:
+        value = val_ptr.contents.value.v_double
+        unit = float
+    elif v_type == TYPE_BOOL:
+        value = val_ptr.contents.value.v_bool
+        unit = bool
+    elif v_type == TYPE_INT64:
+        value = val_ptr.contents.value.v_int64
+        unit = int
+    elif v_type == TYPE_UINT64:
+        value = val_ptr.contents.value.v_uint64
+        unit = int
+    return (value, unit)
+
+
+class Metric:
+    """class representing metric struct
+    to be managed python, while manually allocated C struct could be safely freed from memory
+    """
+
+    def __init__(self, namespace="", description="", value="", value_type=None, timestamp = ""):
+        self.namespace = namespace
+        self.description = description
+
+        self.value = value
+        self.unit = value_type
+        self.timestamp = timestamp
+
+
+
+    def __repr__(self):
+        return "{} desc: {} val: {} unit: {} timestamp: {}".format(self.namespace, self.description, self.value, self.unit, datetime.utcfromtimestamp(self.timestamp))
+
+    @classmethod
+    def unpack_from_metric_struct(cls, mt_struct):
+        _value, _unit = unpackCValue(mt_struct.value)
+        _time = ctimewithns_to_time(mt_struct.timestamp) 
+        return cls(
+            mt_struct.namespace.decode(encoding="utf-8"),
+            mt_struct.description.decode(encoding="utf-8"),
+            _value,
+            _unit,
+            _time,
+        )
+
+    def namespace(self):
+        pass
+
+    def value(self):
+        pass
+    
+    def tags(self):
+        pass
+    def description(self):
+        pass
+    def unit(self):
+        pass
+    def timestamp(self):
+        pass
+
+
+def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
+    """Converts C **metric_t to list of python managed objects of Metric class"""
+    print("maslyk cmtstrarray_to_list")
+    result_list = []
+    for i in range(mt_arr_size):
+        if mt_arr_ptr[i] is None:
+            break
+        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
+        print(mt)
+        result_list.append(mt)
+    return result_list

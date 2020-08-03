@@ -1,6 +1,6 @@
 from collections import defaultdict
 from ctypes import c_char_p, c_void_p, c_longlong, POINTER, CFUNCTYPE, pointer, cast
-from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers,CMetricStruct, \
+from .convertions import string_to_bytes, dict_to_cmap, CError, to_value_t, cstrarray_to_list, Modifiers, CMetricStruct, \
     time_to_ctimewithns, c_mtstrarray_to_list
 from .dynamic_lib import PLUGIN_LIB_OBJ
 from .exceptions import throw_exception_if_error, throw_exception_if_null

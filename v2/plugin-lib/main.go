@@ -47,63 +47,48 @@ static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint
 static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
-typedef struct {
-    char * mt_namespace;
-    // mt_namespace -> na pointer na liste strukturek ??
-    char * mt_description;
-    value_t *mt_value;
-//    int mt_version;
-// timestamp
-//config
-//tags
-
-} metric_t;
-
-
-static inline metric_t** alloc_metric_pointer_array(int size) {
-    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-    int i;
-    for(i=0; i< size; i++) {
-        arrPtr[i] = malloc(sizeof(metric_t));
-    }
-    return arrPtr;
-}
-
-
-static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
-    mt_array[index] = element;
-}
-
-static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val) {
-    mt_array[index]->mt_namespace = namespace_string;
-    mt_array[index]->mt_description = descritpion_string;
-    mt_array[index]->mt_value = val;
-}
-
-static inline void free_metric_arr(metric_t** mtArray, int size) {
-    if (mtArray == NULL) return;
-    int i;
-    for (i=0; i< size; i++) {
-       if (mtArray[i] != NULL ) {
-           free(mtArray[i]);
-       }
-   }
-   free(mtArray);
-}
 
 typedef struct {
     char * key;
     char * value;
 } map_element_t;
 
+
+static inline map_element_t ** map_element_t_array(int size) {
+    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size);
+    int i;
+    for(i=0; i<size; i++){
+        arrPtr[i] = malloc(sizeof(map_element_t));
+    }
+    return arrPtr;
+ }
+
+static inline void set_tag_values(map_element_t ** tag_arr, int index, char * key, char * value) {
+    tag_arr[index]->key = key;
+    tag_arr[index]->value = value;
+}
+
 typedef struct {
     map_element_t * elements;
     int length;
 } map_t;
 
+static inline map_t * alloc_map_t() {
+    map_t * map = malloc(sizeof(map_t));
+    return map;
+}
+
+static inline void set_map_elements(map_t * mapptr, map_element_t** elements) {
+    mapptr->elements = *elements;
+}
+
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
 static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
 static inline int get_map_length(map_t * map) { return map->length; }
+
+
+static inline void set_map_lenght(map_t * map, int length) { map->length = length; }
+
 
 typedef struct {
     char * msg;
@@ -131,6 +116,15 @@ typedef struct {
     int sec;
     int nsec;
 } time_with_ns_t;
+
+static inline time_with_ns_t* alloc_time_with_ns_t() {
+    return malloc(sizeof(time_with_ns_t));
+}
+
+static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nsec) {
+    time_ptr->sec = sec;
+    time_ptr->nsec = nsec;
+}
 
 typedef struct {
     map_t * tags_to_add;
@@ -165,6 +159,47 @@ static inline void set_str_array_element(char **str_array, int index, char *elem
     str_array[index] = element;
 }
 
+
+typedef struct {
+    char * mt_namespace; // FIXME na pointer na liste strukturek
+    char * mt_description;
+    value_t *mt_value; // FIXME free
+    time_with_ns_t * timestamp; // FIXME timestampwithns and free
+    map_t * tags;
+} metric_t;
+
+
+static inline metric_t** alloc_metric_pointer_array(int size) {
+    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
+    int i;
+    for(i=0; i< size; i++) {
+        arrPtr[i] = malloc(sizeof(metric_t));
+    }
+    return arrPtr;
+}
+
+static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
+    mt_array[index] = element;
+}
+
+static inline void set_metric_values(metric_t** mt_array, int index, char *namespace_string, char *descritpion_string, value_t * val, time_with_ns_t * timestamp, map_t * tags) {
+    mt_array[index]->mt_namespace = namespace_string;
+    mt_array[index]->mt_description = descritpion_string;
+    mt_array[index]->mt_value = val;
+    mt_array[index]->timestamp = timestamp;
+    mt_array[index]->tags = tags;
+}
+
+static inline void free_metric_arr(metric_t** mtArray, int size) {
+    if (mtArray == NULL) return;
+    int i;
+    for (i=0; i< size; i++) {
+       if (mtArray[i] != NULL ) {
+           free(mtArray[i]);
+       }
+   }
+   free(mtArray);
+}
 */
 import "C"
 
@@ -198,7 +233,7 @@ func commonContextObject(ctxId *C.char) *commonProxy.Context {
 	}
 	switch v := ctx.(type) {
 	case *collectorProxy.PluginContext:
-ctxObj, okType := ctx.(*collectorProxy.PluginContext)
+		ctxObj, okType := ctx.(*collectorProxy.PluginContext)
 		if !okType {
 			panic("Invalid concrete type of context object")
 		}
@@ -212,7 +247,6 @@ ctxObj, okType := ctx.(*collectorProxy.PluginContext)
 	default:
 		panic(fmt.Sprintf("%s not supported plugin context type", v))
 	}
-
 
 }
 
@@ -258,6 +292,25 @@ func boolToInt(v bool) int {
 	return 1
 }
 
+func toCmap_t(gomap map[string]string) *C.map_t {
+    cMapPtr := C.alloc_map_t()
+    // FIXME
+//    map_len := len(gomap)
+//    C.set_map_lenght(cMapPtr, C.int(map_len))
+//    if (map_len == 0) {
+//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
+//       return cMapPtr
+//    }
+//    tagArrPtr := C.map_element_t_array(C.int(map_len))
+//    i := 0
+//    for key, val := range gomap {
+//        C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
+//        i++
+//    }
+//    C.set_map_elements(cMapPtr, tagArrPtr)
+    return cMapPtr
+}
+
 func toGoMap(m *C.map_t) map[string]string {
 	tagsMap := map[string]string{}
 	for i := 0; i < int(C.get_map_length(m)); i++ {
@@ -276,6 +329,13 @@ func toCError(err error) *C.error_t {
 	return C.alloc_error_msg((*C.char)(errMsg))
 }
 
+func time_to_ctimewithns(timestamp time.Time) *C.time_with_ns_t {
+	time_struct_ptr := C.alloc_time_with_ns_t()
+	sec := timestamp.Unix()
+	nsec := timestamp.UnixNano() - (timestamp.Unix() * 1e9)
+	C.set_time_with_ns_t(time_struct_ptr, C.int(sec), C.int(nsec))
+	return time_struct_ptr
+}
 
 func toCStrArray(arr []string) **C.char {
 	cStrArr := C.alloc_str_array(C.int(len(arr) + 1))
@@ -288,26 +348,26 @@ func toCStrArray(arr []string) **C.char {
 }
 
 func toCvalue_t(v interface{}) *C.value_t {
-    switch v.(type) {
-    	case int64:
-            cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT64)
-            C.set_long_long_value_t(cvalue_t_ptr, C.longlong(v.(int64)))
-    		return cvalue_t_ptr
-    	case uint64:
-            cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
-            C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(v.(uint64)))
-    		return cvalue_t_ptr
-    	case float64:
-            cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
-            C.set_double_value_t(cvalue_t_ptr, C.double(v.(float64)))
-    		return cvalue_t_ptr
-    	case bool:
-            cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
-            C.set_bool_value_t(cvalue_t_ptr, C.int(v.(int)))
-    		return cvalue_t_ptr
-        default:
-    	    panic(fmt.Sprintf("Invalid type %#v", v))
-    	}
+	switch v.(type) {
+	case int64:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT64)
+		C.set_long_long_value_t(cvalue_t_ptr, C.longlong(v.(int64)))
+		return cvalue_t_ptr
+	case uint64:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
+		C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(v.(uint64)))
+		return cvalue_t_ptr
+	case float64:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
+		C.set_double_value_t(cvalue_t_ptr, C.double(v.(float64)))
+		return cvalue_t_ptr
+	case bool:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
+		C.set_bool_value_t(cvalue_t_ptr, C.int(v.(int)))
+		return cvalue_t_ptr
+	default:
+		panic(fmt.Sprintf("Invalid type %T", v))
+	}
 }
 
 func toGoValue(v *C.value_t) interface{} {
@@ -374,8 +434,9 @@ func dealloc_error(p *C.error_t) {
 
 //export dealloc_metric_array
 func dealloc_metric_array(p **C.metric_t, size int) {
-    C.free_metric_arr(p, C.int(size))
+	C.free_metric_arr(p, C.int(size))
 }
+
 /*****************************************************************************/
 // C API - Collect related functions
 
@@ -424,10 +485,12 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-        _mn_string := (*C.char)(C.CString(el.Namespace().String()))
-        _mn_desc := (*C.char)(C.CString(el.Description()))
-        _mn_value := toCvalue_t(el.Value())
-		C.set_metric_values(mtPtArr, C.int(i), _mn_string, _mn_desc, _mn_value)
+		_mt_string := (*C.char)(C.CString(el.Namespace().String())) // FIXME
+		_mt_desc := (*C.char)(C.CString(el.Description()))
+		_mt_value := toCvalue_t(el.Value())
+		_mt_timestamp := time_to_ctimewithns(el.Timestamp())
+        _mt_tags := toCmap_t(el.Tags())
+		C.set_metric_values(mtPtArr, C.int(i), _mt_string, _mt_desc, _mt_value, _mt_timestamp, _mt_tags)
 	}
 	return mtPtArr
 }
