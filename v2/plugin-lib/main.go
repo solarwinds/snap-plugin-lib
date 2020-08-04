@@ -185,7 +185,7 @@ static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
     namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
     int i = 0;
     for(i=0; i < size; i++) {
-        ne_ptr[i] = &ne_arr[i]; 
+        ne_ptr[i] = &ne_arr[i];
     }
     return ne_ptr;
 }
@@ -274,15 +274,15 @@ import "C"
 
 import (
 	"fmt"
-	"sync"
-	"time"
-	"unsafe"
 	collectorProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	publisherProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
+	"sync"
+	"time"
+	"unsafe"
 )
 import "C"
 
@@ -360,22 +360,22 @@ func boolToInt(v bool) int {
 }
 
 func toCmap_t(gomap map[string]string) *C.map_t {
-    cMapPtr := C.alloc_map_t()
-    map_len := len(gomap)
-    C.set_map_lenght(cMapPtr, C.int(map_len))
-// FIXME ?
-//    if (map_len == 0) {
-//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
-//       return cMapPtr
-//    }
-    tagArrPtr := C.alloc_map_element_t_array(C.int(map_len))
-    i := 0
-    for key, val := range gomap {
-        C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
-        i++
-    }
-    C.set_map_elements(cMapPtr, tagArrPtr)
-    return cMapPtr
+	cMapPtr := C.alloc_map_t()
+	map_len := len(gomap)
+	C.set_map_lenght(cMapPtr, C.int(map_len))
+	// FIXME ?
+	//    if (map_len == 0) {
+	//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
+	//       return cMapPtr
+	//    }
+	tagArrPtr := C.alloc_map_element_t_array(C.int(map_len))
+	i := 0
+	for key, val := range gomap {
+		C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
+		i++
+	}
+	C.set_map_elements(cMapPtr, tagArrPtr)
+	return cMapPtr
 }
 
 func toGoMap(m *C.map_t) map[string]string {
@@ -414,23 +414,20 @@ func toCStrArray(arr []string) **C.char {
 	return cStrArr
 }
 
-
-
 func toCNamespace_t(nm plugin.Namespace) *C.namespace_t {
-    nm_ptr := C.alloc_namespace_t()
-    ne_arr := C.alloc_namespace_elem_arr(C.int(nm.Len()))
-    for i := 0; i < nm.Len(); i++ {
-        el := nm.At(i);
-        isDynamic := int(0)
-        if el.IsDynamic(){
-            isDynamic = 1
-        }
-        C.set_namespace_element(ne_arr, C.int(i), (*C.char)(C.CString(el.Name())), (*C.char)(C.CString(el.Value())), (*C.char)(C.CString(el.Description())), C.int(isDynamic))
-    }
-    C.set_namespace_fields(nm_ptr, ne_arr, C.int(nm.Len()), (*C.char)(C.CString(nm.String())))
-    return nm_ptr
+	nm_ptr := C.alloc_namespace_t()
+	ne_arr := C.alloc_namespace_elem_arr(C.int(nm.Len()))
+	for i := 0; i < nm.Len(); i++ {
+		el := nm.At(i)
+		isDynamic := int(0)
+		if el.IsDynamic() {
+			isDynamic = 1
+		}
+		C.set_namespace_element(ne_arr, C.int(i), (*C.char)(C.CString(el.Name())), (*C.char)(C.CString(el.Value())), (*C.char)(C.CString(el.Description())), C.int(isDynamic))
+	}
+	C.set_namespace_fields(nm_ptr, ne_arr, C.int(nm.Len()), (*C.char)(C.CString(nm.String())))
+	return nm_ptr
 }
-
 
 func toCvalue_t(v interface{}) *C.value_t {
 	switch n := v.(type) {
@@ -448,10 +445,10 @@ func toCvalue_t(v interface{}) *C.value_t {
 		return cvalue_t_ptr
 	case bool:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_BOOL)
-        boolint := 0
-        if n {
-            boolint = 1
-        }
+		boolint := 0
+		if n {
+			boolint = 1
+		}
 		C.set_bool_value_t(cvalue_t_ptr, C.int(boolint))
 		return cvalue_t_ptr
 	default:
@@ -574,11 +571,11 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-        _mt_namespace := toCNamespace_t(el.Namespace())
+		_mt_namespace := toCNamespace_t(el.Namespace())
 		_mt_desc := (*C.char)(C.CString(el.Description()))
 		_mt_value := toCvalue_t(el.Value())
 		_mt_timestamp := time_to_ctimewithns(el.Timestamp())
-        _mt_tags := toCmap_t(el.Tags())
+		_mt_tags := toCmap_t(el.Tags())
 		C.set_metric_values(mtPtArr, C.int(i), _mt_namespace, _mt_desc, _mt_value, _mt_timestamp, _mt_tags)
 	}
 	return mtPtArr
