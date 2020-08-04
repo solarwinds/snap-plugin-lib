@@ -41,14 +41,28 @@ var log = logrus.WithFields(logrus.Fields{
 })
 
 var exampleConfig = `
-# Random value used to calculate metric4
-crand: 40
+---
+version: 2
 
-# other tree-like configuration
-credentials:
-  user: admin
-  password: secure1
-  token: abcd-1234
+schedule:
+  type: simple
+  interval: "60s"
+
+plugins:
+  - plugin_name: example
+
+    config:
+        # Random value used to calculate metric4
+        crand: 40
+        
+        # other tree-like configuration
+        credentials:
+            user: admin
+            password: secure1
+            token: abcd-1234
+
+    publish:
+      - plugin_name: publisher-appoptics
 `
 
 type myCollector struct {

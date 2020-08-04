@@ -25,6 +25,7 @@ import (
 
 type inProcessPlugin interface {
 	plugin.InProcessPlugin
+	Unwrap() interface{}
 
 	Options() *plugin.Options
 	GRPCChannel() chan<- grpchan.Channel
