@@ -367,7 +367,7 @@ func doLoadRequest(cc pluginrpc.CollectorClient, opt *Options) error {
 func doPubLoadRequest(cc pluginrpc.PublisherClient, opt *Options) error {
 	reqLoad := &pluginrpc.LoadPublisherRequest{
 		TaskId:     opt.TaskId,
-		JsonConfig: []byte(opt.PluginConfig), // FIXME
+		JsonConfig: []byte(opt.PluginConfig),
 	}
 
 	ctx, fn := context.WithTimeout(context.Background(), grpcRequestTimeout)
