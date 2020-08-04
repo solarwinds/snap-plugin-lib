@@ -5,25 +5,25 @@
         protected string Name;
         protected string Version;
 
-        PluginBase(string name, string version)
+        protected PluginBase(string name, string version)
         {
             Name = name;
             Version = version;
         }
 
-        public void DefinePlugin()
+        public virtual void DefinePlugin()
         {
         }
 
-        public void Collect()
+        public virtual void Collect()
         {
         }
 
-        public void Load()
+        public virtual void Load()
         {
         }
 
-        public void Unload()
+        public virtual void Unload()
         {
         }
     }

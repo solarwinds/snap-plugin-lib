@@ -4,7 +4,7 @@ namespace SnapPluginLib
 {
     public static class Runner
     {
-        public static void StartCollector()
+        public static void StartCollector(PluginBase collector)
         {
         }
     }
