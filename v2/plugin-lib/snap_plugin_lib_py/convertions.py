@@ -1,4 +1,3 @@
-import pprint
 import math
 from ctypes import (
     Structure,
@@ -129,6 +128,7 @@ def dict_to_cmap(d):
 
 
 def cmap_to_dict(cmap_ptr):
+    """Converts C map pointer to python dict"""
     map_len = cmap_ptr.contents.length
     _map = dict()
     if map_len != 0:
@@ -242,7 +242,6 @@ class Namespace:
     @classmethod
     def unpack_from_nm_struct(cls, namespace_struct):
         _length = namespace_struct.length
-        print("debug {} len".format(_length))
         _str = namespace_struct.string.decode(encoding="utf-8")
         elements = namespace_struct.elements
         _ne_arr = []
@@ -253,6 +252,7 @@ class Namespace:
 
     def __repr__(self):
         return self.string
+
 
 class Metric:
     def __init__(
@@ -273,18 +273,19 @@ class Metric:
         self.tags = tags
 
     def __repr__(self):
-        _repr = "{} desc: {} val: {} unit: {} timestamp: {}".format(
+        _repr = "{} {} {} unit: {} timestamp: {}".format(
             self.namespace,
-            self.description,
-            self.value,
             self.unit,
+            self.value,
+            self.description,
             datetime.utcfromtimestamp(self.timestamp),
         )
+        all_tags = ""
         if self.tags:
             for k, v in self.tags.items():
-                print(k, v)
-                # FIXME
-            # //_repr = " ".join(_repr, pprint.pformat(self.tags))
+                _tags = ":".join([str(k), str(v)])
+                all_tags = " ".join([all_tags, _tags])
+        _repr = " ".join([_repr, all_tags])
         return _repr
 
     @classmethod
@@ -295,20 +296,3 @@ class Metric:
         _time = ctimewithns_to_time(mt_struct.timestamp)
         _tags = cmap_to_dict(mt_struct.tags)
         return cls(_namespace, _desc, _value, _unit, _time, _tags,)
-
-        #    def namespace(self):
-        #        pass
-        #
-        #    def value(self):
-        #        pass
-        #
-        #    def tags(self):
-        #        pass
-        #
-        #    def description(self):
-        #        pass
-        #
-        #    def unit(self):
-        #        pass
-        #
-        #    def timestamp(self):

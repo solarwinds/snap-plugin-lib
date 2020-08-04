@@ -197,7 +197,6 @@ def unload_handler(ctx_id):
 ###############################################################################
 # Collector setup
 
-# Merge?
 def start_c_collector(collector):
     global plugin_py
 
