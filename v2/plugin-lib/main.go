@@ -37,6 +37,10 @@ static inline value_t * alloc_value_t(enum value_type_t t) {
     return valPtr;
 }
 
+static inline void free_value_t(value_t * v) {
+    free(v);
+}
+
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
 static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
@@ -47,21 +51,24 @@ static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint
 static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
-
 typedef struct {
     char * key;
     char * value;
 } map_element_t;
 
-
-static inline map_element_t ** map_element_t_array(int size) {
-    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size);
+static inline map_element_t ** alloc_map_element_t_array(int size) {
+    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size); // FIXME not free
+    map_element_t * mapArr = malloc(sizeof(map_element_t) * size);
     int i;
     for(i=0; i<size; i++){
-        arrPtr[i] = malloc(sizeof(map_element_t));
+        arrPtr[i] = &mapArr[i];
     }
     return arrPtr;
- }
+}
+
+static inline void free_map_element_t_array(map_element_t* m) {
+    free(m);
+}
 
 static inline void set_tag_values(map_element_t ** tag_arr, int index, char * key, char * value) {
     tag_arr[index]->key = key;
@@ -78,6 +85,11 @@ static inline map_t * alloc_map_t() {
     return map;
 }
 
+static inline void free_map_t(map_t * m) {
+    free_map_element_t_array(m->elements);
+    free(m);
+}
+
 static inline void set_map_elements(map_t * mapptr, map_element_t** elements) {
     mapptr->elements = *elements;
 }
@@ -86,14 +98,11 @@ static inline char * get_map_key(map_t * map, int index) { return map->elements[
 static inline char * get_map_value(map_t * map, int index) { return map->elements[index].value; }
 static inline int get_map_length(map_t * map) { return map->length; }
 
-
 static inline void set_map_lenght(map_t * map, int length) { map->length = length; }
-
 
 typedef struct {
     char * msg;
 } error_t;
-
 
 static inline error_t * alloc_error_msg(char * msg) {
     error_t * errMsg = malloc(sizeof(error_t));
@@ -119,6 +128,10 @@ typedef struct {
 
 static inline time_with_ns_t* alloc_time_with_ns_t() {
     return malloc(sizeof(time_with_ns_t));
+}
+
+static inline void free_time_with_ns_t(time_with_ns_t* t) {
+    free(t);
 }
 
 static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nsec) {
@@ -168,21 +181,20 @@ typedef struct {
 
 
 static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
-    namespace_element_t** ne_ptr = malloc(sizeof(namespace_element_t*) * size);
+    namespace_element_t ** ne_ptr = malloc(sizeof(namespace_element_t*) * size); // FIXME not free
+    namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
     int i = 0;
     for(i=0; i < size; i++) {
-        ne_ptr[i] = malloc(sizeof(namespace_element_t)); 
+        ne_ptr[i] = &ne_arr[i]; 
     }
     return ne_ptr;
 }
 
+static inline void free_namespace_elem_arr(namespace_element_t * nm_array) {
+    free(nm_array);
+}
+
 static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
-
-//FIXME
-FILE *f = fopen("nem.txt", "w");
-fprintf(f, "Some text: %s\n", el_name);
-fclose(f);
-
     arr[index]->el_name = el_name;
     arr[index]->value = value;
     arr[index]->description = description;
@@ -202,6 +214,10 @@ static inline namespace_t * alloc_namespace_t() {
     return nm_ptr;
 }
 
+static inline void free_namespace_t(namespace_t * namespace_ptr) {
+    free_namespace_elem_arr(namespace_ptr->nm_elements);
+    free(namespace_ptr);
+}
 static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t ** ne_arr, int nm_length, char * nm_string) {
     namespace_element_t * ne_arr_ptr = *ne_arr;
     nm_ptr->nm_elements = ne_arr_ptr;
@@ -210,10 +226,10 @@ static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t
 }
 
 typedef struct {
-    namespace_t * mt_namespace; // FIXME free
-    char * mt_description; // free?
-    value_t *mt_value; // FIXME free
-    time_with_ns_t * timestamp; // FIXME free
+    namespace_t * mt_namespace;
+    char * mt_description;
+    value_t *mt_value;
+    time_with_ns_t * timestamp;
     map_t * tags; // free
 } metric_t;
 
@@ -239,16 +255,19 @@ static inline void set_metric_values(metric_t** mt_array, int index, namespace_t
     mt_array[index]->tags = tags;
 }
 
-static inline void free_metric_arr(metric_t** mtArray, int size) {
-// FIXME free
-    if (mtArray == NULL) return;
+static inline void free_metric_arr(metric_t** mt_array, int size) {
+    if (mt_array == NULL) return;
     int i;
     for (i=0; i< size; i++) {
-       if (mtArray[i] != NULL ) {
-           free(mtArray[i]);
+        if (mt_array[i] != NULL ) {
+            free_namespace_t(mt_array[i]->mt_namespace);
+            free_value_t(mt_array[i]->mt_value);
+            free_time_with_ns_t(mt_array[i]->timestamp);
+            free_map_t(mt_array[i]->tags);
+            free(mt_array[i]);
        }
    }
-   free(mtArray);
+   free(mt_array);
 }
 */
 import "C"
@@ -344,11 +363,12 @@ func toCmap_t(gomap map[string]string) *C.map_t {
     cMapPtr := C.alloc_map_t()
     map_len := len(gomap)
     C.set_map_lenght(cMapPtr, C.int(map_len))
+// FIXME ?
 //    if (map_len == 0) {
 //       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
 //       return cMapPtr
-//   }
-    tagArrPtr := C.map_element_t_array(C.int(map_len))
+//    }
+    tagArrPtr := C.alloc_map_element_t_array(C.int(map_len))
     i := 0
     for key, val := range gomap {
         C.set_tag_values(tagArrPtr, C.int(i), (*C.char)(C.CString(key)), (*C.char)(C.CString(val)))
@@ -427,8 +447,12 @@ func toCvalue_t(v interface{}) *C.value_t {
 		C.set_double_value_t(cvalue_t_ptr, C.double(n))
 		return cvalue_t_ptr
 	case bool:
-		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
-		C.set_bool_value_t(cvalue_t_ptr, C.int(v.(int)))
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_BOOL)
+        boolint := 0
+        if n {
+            boolint = 1
+        }
+		C.set_bool_value_t(cvalue_t_ptr, C.int(boolint))
 		return cvalue_t_ptr
 	default:
 		panic(fmt.Sprintf("Invalid type %T", v))

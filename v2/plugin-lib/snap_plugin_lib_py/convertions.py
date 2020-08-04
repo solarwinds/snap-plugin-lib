@@ -283,7 +283,7 @@ class Metric:
         if self.tags:
             for k, v in self.tags.items():
                 print(k, v)
-
+                # FIXME
             # //_repr = " ".join(_repr, pprint.pformat(self.tags))
         return _repr
 
