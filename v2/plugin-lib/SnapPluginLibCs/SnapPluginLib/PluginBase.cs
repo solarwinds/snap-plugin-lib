@@ -2,8 +2,8 @@
 {
     public abstract class PluginBase
     {
-        protected string Name;
-        protected string Version;
+        public string Name { get; }
+        public string Version { get; }
 
         protected PluginBase(string name, string version)
         {

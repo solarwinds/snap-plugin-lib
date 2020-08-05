@@ -11,22 +11,22 @@ namespace CollectorExample
 
         public override void DefinePlugin()
         {
-            Console.WriteLine("Define plugin");
+            Console.WriteLine("C# Define plugin");
         }
 
         public override void Collect()
         {
-            Console.WriteLine("Collect executed");
+            Console.WriteLine("C# Collect executed");
         }
 
         public override void Load()
         {
-            Console.WriteLine("Load executed");
+            Console.WriteLine("C# Load executed");
         }
 
         public override void Unload()
         {
-            Console.WriteLine("Unload executed");
+            Console.WriteLine("C# Unload executed");
         }
     }
 }
