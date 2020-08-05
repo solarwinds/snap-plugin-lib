@@ -1,101 +1,15 @@
 import math
 from ctypes import (
-    Structure,
-    Union,
-    c_char_p,
     c_longlong,
     c_ulonglong,
     c_double,
     c_int,
-    POINTER,
     pointer,
 )
 from itertools import count
-from datetime import datetime
+from .snap_ctypes import Map, MapElement, TimeWithNs, CValue, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL, max_int, max_uint, min_int
 
 from .exceptions import PluginLibException
-
-min_int = -9223372036854775808
-max_int = 9223372036854775807
-max_uint = 18446744073709551615
-
-_, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
-(
-    _,
-    LOGLEVEL_PANIC,
-    LOGLEVEL_FATAL,
-    LOGLEVEL_ERROR,
-    LOGLEVEL_WARN,
-    LOGLEVEL_INFO,
-    LOGLEVEL_DEBUG,
-    LOGLEVEL_TRACE,
-) = range(8)
-
-
-class MapElement(Structure):
-    _fields_ = [("key", c_char_p), ("value", c_char_p)]
-
-
-class Map(Structure):
-    _fields_ = [("elements", POINTER(MapElement)), ("length", c_int)]
-
-
-class TimeWithNs(Structure):
-    _fields_ = [("sec", c_int), ("nsec", c_int)]
-
-
-class Modifiers(Structure):
-    _fields_ = [
-        ("tags_to_add", POINTER(Map)),
-        ("tags_to_remove", POINTER(Map)),
-        ("timestamp", POINTER(TimeWithNs)),
-        ("description", c_char_p),
-        ("unit", c_char_p),
-    ]
-
-
-class CError(Structure):
-    _fields_ = [("msg", c_char_p)]
-
-
-class ValueUnion(Union):
-    _fields_ = [
-        ("v_int64", c_longlong),
-        ("v_uint64", c_ulonglong),
-        ("v_double", c_double),
-        ("v_bool", c_int),
-    ]
-
-
-class CValue(Structure):
-    _fields_ = [("value", ValueUnion), ("v_type", c_int)]
-
-
-class CNamespaceElement(Structure):
-    _fields_ = [
-        ("name", c_char_p),
-        ("value", c_char_p),
-        ("description", c_char_p),
-        ("is_dynamic", c_int),
-    ]
-
-
-class CNamespace(Structure):
-    _fields_ = [
-        ("elements", POINTER(CNamespaceElement)),
-        ("length", c_int),
-        ("string", c_char_p),
-    ]
-
-
-class CMetricStruct(Structure):
-    _fields_ = [
-        ("namespace", POINTER(CNamespace)),
-        ("description", c_char_p),
-        ("value", POINTER(CValue)),
-        ("timestamp", POINTER(TimeWithNs)),
-        ("tags", POINTER(Map)),
-    ]
 
 
 def string_to_bytes(s):
@@ -188,7 +102,7 @@ def to_value_t(v):
     return val_ptr
 
 
-def unpackCValue(val_ptr):
+def unpack_value_t(val_ptr):
     v_type = val_ptr.contents.v_type
     if v_type == TYPE_DOUBLE:
         value = val_ptr.contents.value.v_double
@@ -203,96 +117,3 @@ def unpackCValue(val_ptr):
         value = val_ptr.contents.value.v_uint64
         unit = int
     return (value, unit)
-
-
-def c_mtstrarray_to_list(mt_arr_ptr, mt_arr_size: int):
-    """Converts C **metric_t to list of python managed objects of Metric class"""
-    result_list = []
-    for i in range(mt_arr_size):
-        if mt_arr_ptr[i] is None:
-            break
-        mt = Metric.unpack_from_metric_struct(mt_arr_ptr[i].contents)
-        result_list.append(mt)
-    return result_list
-
-
-class NamespaceElement:
-    def __init__(self, value, name, description, is_dynamic):
-        self.value = value
-        self.name = name
-        self.description = description
-        self.is_dynamic = is_dynamic
-
-    @classmethod
-    def unpack_from_ne_struct(cls, nm_element_struct):
-        return cls(
-            nm_element_struct.value.decode(encoding="utf-8"),
-            nm_element_struct.name.decode(encoding="utf-8"),
-            nm_element_struct.description.decode(encoding="utf-8"),
-            nm_element_struct.is_dynamic,
-        )
-
-
-class Namespace:
-    def __init__(self, namespace_elements, length, string):
-        self.length = length
-        self.namespace_elements = namespace_elements
-        self.string = string
-
-    @classmethod
-    def unpack_from_nm_struct(cls, namespace_struct):
-        _length = namespace_struct.length
-        _str = namespace_struct.string.decode(encoding="utf-8")
-        elements = namespace_struct.elements
-        _ne_arr = []
-        for i in range(_length):
-            _el = NamespaceElement.unpack_from_ne_struct(elements[i])
-            _ne_arr.append(_el)
-        return cls(_ne_arr, _length, _str)
-
-    def __repr__(self):
-        return self.string
-
-
-class Metric:
-    def __init__(
-        self,
-        namespace="",
-        description="",
-        value="",
-        value_type=None,
-        timestamp="",
-        tags="",
-    ):
-        self.namespace = namespace
-        self.description = description
-
-        self.value = value
-        self.unit = value_type
-        self.timestamp = timestamp
-        self.tags = tags
-
-    def __repr__(self):
-        _repr = "{} {} {} unit: {} timestamp: {}".format(
-            self.namespace,
-            self.unit,
-            self.value,
-            self.description,
-            datetime.utcfromtimestamp(self.timestamp),
-        )
-        all_tags = ""
-        if self.tags:
-            for k, v in self.tags.items():
-                _tags = ":".join([str(k), str(v)])
-                all_tags = " ".join([all_tags, _tags])
-        _repr = " ".join([_repr, all_tags])
-        return _repr
-
-    @classmethod
-    def unpack_from_metric_struct(cls, mt_struct):
-        _namespace = Namespace.unpack_from_nm_struct(mt_struct.namespace.contents)
-        _desc = mt_struct.description.decode(encoding="utf-8")
-        _value, _unit = unpackCValue(mt_struct.value)
-        _time = ctimewithns_to_time(mt_struct.timestamp)
-        _tags = cmap_to_dict(mt_struct.tags)
-        return cls(_namespace, _desc, _value, _unit, _time, _tags,)

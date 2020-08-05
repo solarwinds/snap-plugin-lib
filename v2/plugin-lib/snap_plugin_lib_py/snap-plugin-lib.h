@@ -52,9 +52,9 @@ typedef struct {
 } value_t;
 
 static inline value_t * alloc_value_t(enum value_type_t t) {
-    value_t * valPtr = malloc(sizeof(value_t));
-    valPtr->vtype = t;
-    return valPtr;
+    value_t * val_ptr = malloc(sizeof(value_t));
+    val_ptr->vtype = t;
+    return val_ptr;
 }
 
 static inline void free_value_t(value_t * v) {
@@ -66,33 +66,32 @@ static inline unsigned long long value_t_ulong_long(value_t * v) { return v->val
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
-static inline void set_long_long_value_t(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
-static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
-static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
-static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
+static inline void set_value_t_long_long(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
+static inline void set_value_t_ulong_long(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_value_t_double(value_t * v, double v_double) { v->value.v_double = v_double; }
+static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
 typedef struct {
     char * key;
     char * value;
 } map_element_t;
 
-static inline map_element_t ** alloc_map_element_t_array(int size) {
-    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size); // FIXME not free
-    map_element_t * mapArr = malloc(sizeof(map_element_t) * size);
-    int i;
-    for(i=0; i<size; i++){
-        arrPtr[i] = &mapArr[i];
-    }
-    return arrPtr;
+static inline map_element_t * alloc_map_element_t_array(int size) {
+    map_element_t * map_arr = malloc(sizeof(map_element_t) * size);
+    return map_arr;
 }
 
-static inline void free_map_element_t_array(map_element_t* m) {
+static inline void free_map_element_t_array(map_element_t* m, int size) {
+    for(int i = 0; i < size; i++) {
+        free(m[i].key);
+        free(m[i].value);
+    }
     free(m);
 }
 
-static inline void set_tag_values(map_element_t ** tag_arr, int index, char * key, char * value) {
-    tag_arr[index]->key = key;
-    tag_arr[index]->value = value;
+static inline void set_tag_values(map_element_t * tag_arr, int index, char * key, char * value) {
+    tag_arr[index].key = key;
+    tag_arr[index].value = value;
 }
 
 typedef struct {
@@ -106,12 +105,12 @@ static inline map_t * alloc_map_t() {
 }
 
 static inline void free_map_t(map_t * m) {
-    free_map_element_t_array(m->elements);
+    free_map_element_t_array(m->elements, m->length);
     free(m);
 }
 
-static inline void set_map_elements(map_t * mapptr, map_element_t** elements) {
-    mapptr->elements = *elements;
+static inline void set_map_elements(map_t * map_ptr, map_element_t * elements) {
+    map_ptr->elements = elements;
 }
 
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
@@ -196,29 +195,27 @@ typedef struct {
     char * el_name;
     char * value;
     char * description;
-    int is_dynamic;
 } namespace_element_t;
 
 
-static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
-    namespace_element_t ** ne_ptr = malloc(sizeof(namespace_element_t*) * size); // FIXME not free
+static inline namespace_element_t * alloc_namespace_elem_arr(int size) {
     namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
-    int i = 0;
-    for(i=0; i < size; i++) {
-        ne_ptr[i] = &ne_arr[i]; 
-    }
-    return ne_ptr;
+    return ne_arr;
 }
 
-static inline void free_namespace_elem_arr(namespace_element_t * nm_array) {
+static inline void free_namespace_elem_arr(namespace_element_t * nm_array, int size) {
+    for(int i=0; i < size; i++){
+        free(nm_array[i].el_name);
+        free(nm_array[i].value);
+        free(nm_array[i].description);
+    }
     free(nm_array);
 }
 
-static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
-    arr[index]->el_name = el_name;
-    arr[index]->value = value;
-    arr[index]->description = description;
-    arr[index]->is_dynamic = is_dynamic;
+static inline void set_namespace_element(namespace_element_t * ne_arr, int index, char * el_name, char * value, char * description) {
+    ne_arr[index].el_name = el_name;
+    ne_arr[index].value = value;
+    ne_arr[index].description = description;
 }
 
 
@@ -235,12 +232,11 @@ static inline namespace_t * alloc_namespace_t() {
 }
 
 static inline void free_namespace_t(namespace_t * namespace_ptr) {
-    free_namespace_elem_arr(namespace_ptr->nm_elements);
+    free_namespace_elem_arr(namespace_ptr->nm_elements, namespace_ptr->nm_length);
     free(namespace_ptr);
 }
-static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t ** ne_arr, int nm_length, char * nm_string) {
-    namespace_element_t * ne_arr_ptr = *ne_arr;
-    nm_ptr->nm_elements = ne_arr_ptr;
+static inline void set_namespace_fields(namespace_t * nm_ptr, namespace_element_t * ne_arr, int nm_length, char * nm_string) {
+    nm_ptr->nm_elements = ne_arr;
     nm_ptr->nm_length = nm_length;
     nm_ptr->nm_string= nm_string;
 }
@@ -256,8 +252,7 @@ typedef struct {
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
     metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-    int i;
-    for(i=0; i< size; i++) {
+    for(int i=0; i< size; i++) {
         arrPtr[i] = malloc(sizeof(metric_t));
     }
     return arrPtr;
@@ -277,8 +272,7 @@ static inline void set_metric_values(metric_t** mt_array, int index, namespace_t
 
 static inline void free_metric_arr(metric_t** mt_array, int size) {
     if (mt_array == NULL) return;
-    int i;
-    for (i=0; i< size; i++) {
+    for (int i=0; i< size; i++) {
         if (mt_array[i] != NULL ) {
             free_namespace_t(mt_array[i]->mt_namespace);
             free_value_t(mt_array[i]->mt_value);

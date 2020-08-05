@@ -32,9 +32,9 @@ typedef struct {
 } value_t;
 
 static inline value_t * alloc_value_t(enum value_type_t t) {
-    value_t * valPtr = malloc(sizeof(value_t));
-    valPtr->vtype = t;
-    return valPtr;
+    value_t * val_ptr = malloc(sizeof(value_t));
+    val_ptr->vtype = t;
+    return val_ptr;
 }
 
 static inline void free_value_t(value_t * v) {
@@ -46,33 +46,32 @@ static inline unsigned long long value_t_ulong_long(value_t * v) { return v->val
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
-static inline void set_long_long_value_t(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
-static inline void set_ulong_long_value_t(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
-static inline void set_double_value_t(value_t * v, double v_double) { v->value.v_double = v_double; }
-static inline void set_bool_value_t(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
+static inline void set_value_t_long_long(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
+static inline void set_value_t_ulong_long(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_value_t_double(value_t * v, double v_double) { v->value.v_double = v_double; }
+static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
 typedef struct {
     char * key;
     char * value;
 } map_element_t;
 
-static inline map_element_t ** alloc_map_element_t_array(int size) {
-    map_element_t ** arrPtr = malloc(sizeof(map_element_t*) * size); // FIXME not free
-    map_element_t * mapArr = malloc(sizeof(map_element_t) * size);
-    int i;
-    for(i=0; i<size; i++){
-        arrPtr[i] = &mapArr[i];
-    }
-    return arrPtr;
+static inline map_element_t * alloc_map_element_t_array(int size) {
+    map_element_t * map_arr = malloc(sizeof(map_element_t) * size);
+    return map_arr;
 }
 
-static inline void free_map_element_t_array(map_element_t* m) {
+static inline void free_map_element_t_array(map_element_t* m, int size) {
+    for(int i = 0; i < size; i++) {
+        free(m[i].key);
+        free(m[i].value);
+    }
     free(m);
 }
 
-static inline void set_tag_values(map_element_t ** tag_arr, int index, char * key, char * value) {
-    tag_arr[index]->key = key;
-    tag_arr[index]->value = value;
+static inline void set_tag_values(map_element_t * tag_arr, int index, char * key, char * value) {
+    tag_arr[index].key = key;
+    tag_arr[index].value = value;
 }
 
 typedef struct {
@@ -86,12 +85,12 @@ static inline map_t * alloc_map_t() {
 }
 
 static inline void free_map_t(map_t * m) {
-    free_map_element_t_array(m->elements);
+    free_map_element_t_array(m->elements, m->length);
     free(m);
 }
 
-static inline void set_map_elements(map_t * mapptr, map_element_t** elements) {
-    mapptr->elements = *elements;
+static inline void set_map_elements(map_t * map_ptr, map_element_t * elements) {
+    map_ptr->elements = elements;
 }
 
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
@@ -176,29 +175,27 @@ typedef struct {
     char * el_name;
     char * value;
     char * description;
-    int is_dynamic;
 } namespace_element_t;
 
 
-static inline namespace_element_t ** alloc_namespace_elem_arr(int size) {
-    namespace_element_t ** ne_ptr = malloc(sizeof(namespace_element_t*) * size); // FIXME not free
+static inline namespace_element_t * alloc_namespace_elem_arr(int size) {
     namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
-    int i = 0;
-    for(i=0; i < size; i++) {
-        ne_ptr[i] = &ne_arr[i];
-    }
-    return ne_ptr;
+    return ne_arr;
 }
 
-static inline void free_namespace_elem_arr(namespace_element_t * nm_array) {
+static inline void free_namespace_elem_arr(namespace_element_t * nm_array, int size) {
+    for(int i=0; i < size; i++){
+        free(nm_array[i].el_name);
+        free(nm_array[i].value);
+        free(nm_array[i].description);
+    }
     free(nm_array);
 }
 
-static inline void set_namespace_element(namespace_element_t ** arr, int index, char * el_name, char * value, char * description, int is_dynamic) {
-    arr[index]->el_name = el_name;
-    arr[index]->value = value;
-    arr[index]->description = description;
-    arr[index]->is_dynamic = is_dynamic;
+static inline void set_namespace_element(namespace_element_t * ne_arr, int index, char * el_name, char * value, char * description) {
+    ne_arr[index].el_name = el_name;
+    ne_arr[index].value = value;
+    ne_arr[index].description = description;
 }
 
 
@@ -215,12 +212,11 @@ static inline namespace_t * alloc_namespace_t() {
 }
 
 static inline void free_namespace_t(namespace_t * namespace_ptr) {
-    free_namespace_elem_arr(namespace_ptr->nm_elements);
+    free_namespace_elem_arr(namespace_ptr->nm_elements, namespace_ptr->nm_length);
     free(namespace_ptr);
 }
-static inline void set_namespace_fields(namespace_t* nm_ptr, namespace_element_t ** ne_arr, int nm_length, char * nm_string) {
-    namespace_element_t * ne_arr_ptr = *ne_arr;
-    nm_ptr->nm_elements = ne_arr_ptr;
+static inline void set_namespace_fields(namespace_t * nm_ptr, namespace_element_t * ne_arr, int nm_length, char * nm_string) {
+    nm_ptr->nm_elements = ne_arr;
     nm_ptr->nm_length = nm_length;
     nm_ptr->nm_string= nm_string;
 }
@@ -236,8 +232,7 @@ typedef struct {
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
     metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-    int i;
-    for(i=0; i< size; i++) {
+    for(int i=0; i< size; i++) {
         arrPtr[i] = malloc(sizeof(metric_t));
     }
     return arrPtr;
@@ -257,8 +252,7 @@ static inline void set_metric_values(metric_t** mt_array, int index, namespace_t
 
 static inline void free_metric_arr(metric_t** mt_array, int size) {
     if (mt_array == NULL) return;
-    int i;
-    for (i=0; i< size; i++) {
+    for (int i=0; i< size; i++) {
         if (mt_array[i] != NULL ) {
             free_namespace_t(mt_array[i]->mt_namespace);
             free_value_t(mt_array[i]->mt_value);
@@ -419,11 +413,7 @@ func toCNamespace_t(nm plugin.Namespace) *C.namespace_t {
 	ne_arr := C.alloc_namespace_elem_arr(C.int(nm.Len()))
 	for i := 0; i < nm.Len(); i++ {
 		el := nm.At(i)
-		isDynamic := int(0)
-		if el.IsDynamic() {
-			isDynamic = 1
-		}
-		C.set_namespace_element(ne_arr, C.int(i), (*C.char)(C.CString(el.Name())), (*C.char)(C.CString(el.Value())), (*C.char)(C.CString(el.Description())), C.int(isDynamic))
+		C.set_namespace_element(ne_arr, C.int(i), (*C.char)(C.CString(el.Name())), (*C.char)(C.CString(el.Value())), (*C.char)(C.CString(el.Description())))
 	}
 	C.set_namespace_fields(nm_ptr, ne_arr, C.int(nm.Len()), (*C.char)(C.CString(nm.String())))
 	return nm_ptr
@@ -433,15 +423,15 @@ func toCvalue_t(v interface{}) *C.value_t {
 	switch n := v.(type) {
 	case int64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT64)
-		C.set_long_long_value_t(cvalue_t_ptr, C.longlong(n))
+		C.set_value_t_long_long(cvalue_t_ptr, C.longlong(n))
 		return cvalue_t_ptr
 	case uint64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
-		C.set_ulong_long_value_t(cvalue_t_ptr, C.ulonglong(n))
+		C.set_value_t_ulong_long(cvalue_t_ptr, C.ulonglong(n))
 		return cvalue_t_ptr
 	case float64:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_DOUBLE)
-		C.set_double_value_t(cvalue_t_ptr, C.double(n))
+		C.set_value_t_double(cvalue_t_ptr, C.double(n))
 		return cvalue_t_ptr
 	case bool:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_BOOL)
@@ -449,7 +439,7 @@ func toCvalue_t(v interface{}) *C.value_t {
 		if n {
 			boolint = 1
 		}
-		C.set_bool_value_t(cvalue_t_ptr, C.int(boolint))
+		C.set_value_t_bool(cvalue_t_ptr, C.int(boolint))
 		return cvalue_t_ptr
 	default:
 		panic(fmt.Sprintf("Invalid type %T", v))
@@ -571,12 +561,12 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-		_mt_namespace := toCNamespace_t(el.Namespace())
-		_mt_desc := (*C.char)(C.CString(el.Description()))
-		_mt_value := toCvalue_t(el.Value())
-		_mt_timestamp := time_to_ctimewithns(el.Timestamp())
-		_mt_tags := toCmap_t(el.Tags())
-		C.set_metric_values(mtPtArr, C.int(i), _mt_namespace, _mt_desc, _mt_value, _mt_timestamp, _mt_tags)
+		mt_namespace := toCNamespace_t(el.Namespace())
+		mt_desc := (*C.char)(C.CString(el.Description()))
+		mt_value := toCvalue_t(el.Value())
+		mt_timestamp := time_to_ctimewithns(el.Timestamp())
+		mt_tags := toCmap_t(el.Tags())
+		C.set_metric_values(mtPtArr, C.int(i), mt_namespace, mt_desc, mt_value, mt_timestamp, mt_tags)
 	}
 	return mtPtArr
 }
