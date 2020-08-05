@@ -11,7 +11,7 @@
             Version = version;
         }
 
-        public virtual void DefinePlugin()
+        public virtual void DefinePlugin(IDefineContext ctx)
         {
         }
 

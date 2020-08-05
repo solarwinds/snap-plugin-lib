@@ -17,7 +17,7 @@ namespace SnapPluginLib
 
         private static void DefineHandlerFn()
         {
-            _collector.DefinePlugin();
+            _collector.DefinePlugin(new DefineContext());
         }
 
         private static void CollectHandlerFn(string taskId)
