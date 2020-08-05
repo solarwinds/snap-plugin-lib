@@ -76,7 +76,7 @@ const (
 )
 
 type collectChunk struct {
-	mts []*pluginrpc.Metric
+	mts      []*pluginrpc.Metric
 	warnings []string
 	err      error
 }
@@ -437,9 +437,9 @@ func doPublishRequest(pc pluginrpc.PublisherClient, mts [][]*pluginrpc.Metric, o
 			MetricSet: chunk,
 		}
 		err := stream.Send(reqPubl)
-        if err != nil {
-            return err
-        }
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err := stream.CloseAndRecv()
