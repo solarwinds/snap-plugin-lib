@@ -25,8 +25,14 @@ namespace CollectorExample
             Console.WriteLine("C# Collect executed");
 
             var cTest = ctx.Config("test");
-            Console.WriteLine(cTest);
-            
+            Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
+
+            var rCfg = ctx.RawConfig();
+            Console.WriteLine($"Raw confgi: {rCfg}");
+
+            var keys = ctx.ConfigKeys();
+            Console.WriteLine($"Config keys: {keys}");
+
             ctx.AddWarning("Warning from C#");
         }
 

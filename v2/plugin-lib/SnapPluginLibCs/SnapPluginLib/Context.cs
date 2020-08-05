@@ -4,6 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public class S
+    {
+    }
+
     public class Context : IContext
     {
         private string _taskId;
@@ -14,14 +19,14 @@ namespace SnapPluginLib
         }
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_config(string taskId, string key);
+        private static extern IntPtr ctx_config(string taskId, string key);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern string ctx_config_keys(string taskId);
-        
+        private static extern IntPtr ctx_config_keys(string taskId);
+
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern string ctx_raw_config(string taskId);
-        
+        private static extern IntPtr ctx_raw_config(string taskId);
+
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern string ctx_add_warning(string taskId, string message);
 
@@ -30,20 +35,37 @@ namespace SnapPluginLib
 
         public string Config(string key)
         {
-            ctx_config(_taskId, key); // todo: adamik: fix return value
+            var ptr = ctx_config(_taskId, key);
+
+            if (ptr != IntPtr.Zero)
+                return Marshal.PtrToStringAnsi(ptr);
+
             return "";
         }
 
-        public IList<string> ConfigKeys()
+        public  IList<string> ConfigKeys()
         {
-            ctx_config_keys(_taskId);
-            var val = new List<string>();
-            return val;
+            var ptr = ctx_config_keys(_taskId);
+
+            // var p0 = Marshal.PtrToStringAnsi(ptr[0]);
+            // var p1 = Marshal.PtrToStringAnsi(ptr[1]);
+            // var p2 = Marshal.PtrToStringAnsi(ptr[2]);
+
+
+            // Console.WriteLine($"p0={p0}");
+            // Console.WriteLine($"p1={p1}");
+            // Console.WriteLine($"p2={p2}");
+            //
+            return new List<string>();
         }
 
         public string RawConfig()
         {
-            ctx_raw_config(_taskId);
+            var ptr = ctx_raw_config(_taskId);
+
+            if (ptr != IntPtr.Zero)
+                return Marshal.PtrToStringAnsi(ptr);
+
             return "";
         }
 
@@ -65,7 +87,6 @@ namespace SnapPluginLib
 
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
-            
         }
     }
 }

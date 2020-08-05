@@ -289,11 +289,15 @@ func ctx_requested_metrics(ctxID *C.char) **C.char {
 
 //export ctx_config
 func ctx_config(ctxID *C.char, key *C.char) *C.char {
+	fmt.Printf("CtxConfig=%#v\n", C.GoString(ctxID))
+
 	v, ok := contextObject(ctxID).Config(C.GoString(key))
 	if !ok {
+		fmt.Printf("Return NULL\n")
 		return (*C.char)(C.NULL)
 	}
 
+	fmt.Printf("Return =%#v\n", v)
 	return C.CString(v)
 }
 
@@ -305,6 +309,7 @@ func ctx_config_keys(ctxID *C.char) **C.char {
 //export ctx_raw_config
 func ctx_raw_config(ctxID *C.char) *C.char {
 	rc := string(contextObject(ctxID).RawConfig())
+	fmt.Printf("ctx_raw_cofngi=%#v\n", string(rc))
 	return C.CString(rc)
 }
 
@@ -409,11 +414,16 @@ func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) err
 	ctxAsType := ctx.(*proxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 
+	fmt.Printf("Storing taskID=%#v\n", taskID)
+
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
 
 	taskIDasPtr := C.CString(taskID)
+	fmt.Printf("Calling callback\n")
 	C.call_c_callback(callback, taskIDasPtr)
+	fmt.Printf("Calling callback END\n")
+
 	dealloc_charp(taskIDasPtr)
 
 	return nil
