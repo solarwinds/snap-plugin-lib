@@ -229,11 +229,12 @@ def define_handler():
 
 
 @CFUNCTYPE(None, c_char_p)
-def plugin_handler(ctx_id):
-    if hasattr(plugin_py, "publish"):
-        plugin_py.publish(PublishContext(ctx_id))
-    elif hasattr(plugin_py, "collect"):
-        plugin_py.collect(CollectContext(ctx_id))
+def collector_handler(ctx_id):
+    plugin_py.collect(CollectContext(ctx_id))
+
+@CFUNCTYPE(None, c_char_p)
+def publisher_handler(ctx_id):
+    plugin_py.publish(PublishContext(ctx_id))
 
 
 @CFUNCTYPE(None, c_char_p)
@@ -258,7 +259,7 @@ def start_c_collector(collector):
     plugin_py = collector
 
     PLUGIN_LIB_OBJ.start_collector(
-        plugin_handler,
+        collector_handler,
         load_handler,
         unload_handler,
         define_handler,
@@ -275,7 +276,7 @@ def start_c_publisher(publisher):
     plugin_py = publisher
 
     PLUGIN_LIB_OBJ.start_publisher(
-        plugin_handler,
+        publisher_handler,
         load_handler,
         unload_handler,
         define_handler,

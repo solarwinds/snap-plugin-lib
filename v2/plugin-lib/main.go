@@ -1,4 +1,4 @@
-package main
+ackage main
 
 /*
 #include <stdlib.h>
@@ -357,11 +357,6 @@ func toCmap_t(gomap map[string]string) *C.map_t {
 	cMapPtr := C.alloc_map_t()
 	map_len := len(gomap)
 	C.set_map_lenght(cMapPtr, C.int(map_len))
-	// FIXME ?
-	//    if (map_len == 0) {
-	//       C.set_map_elements(cMapPtr, (**C.map_element_t)(C.NULL))
-	//       return cMapPtr
-	//    }
 	tagArrPtr := C.alloc_map_element_t_array(C.int(map_len))
 	i := 0
 	for key, val := range gomap {

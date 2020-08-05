@@ -7,7 +7,19 @@ from ctypes import (
     pointer,
 )
 from itertools import count
-from .snap_ctypes import Map, MapElement, TimeWithNs, CValue, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL, max_int, max_uint, min_int
+from .snap_ctypes import (
+    Map,
+    MapElement,
+    TimeWithNs,
+    CValue,
+    TYPE_INT64,
+    TYPE_UINT64,
+    TYPE_DOUBLE,
+    TYPE_BOOL,
+    max_int,
+    max_uint,
+    min_int,
+)
 
 from .exceptions import PluginLibException
 

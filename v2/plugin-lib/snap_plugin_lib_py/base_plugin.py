@@ -27,6 +27,7 @@ class BaseCollector(BasePlugin):
     def collect(self, ctx: CollectContext):
         pass
 
+
 class BasePublisher(BasePlugin):
     def publish(self, ctx: PublishContext):
         pass

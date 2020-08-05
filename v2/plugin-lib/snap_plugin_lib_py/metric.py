@@ -43,12 +43,13 @@ class Namespace:
     def __iter__(self):
         for element in self.namespace_elements:
             yield element
-        
-    def __len__(self)->int:
+
+    def __len__(self) -> int:
         return len(self.namespace_elements)
 
-    def __getitem__(self, index: int)->NamespaceElement:
+    def __getitem__(self, index: int) -> NamespaceElement:
         return self.namespace_elements[index]
+
 
 class Metric:
     def __init__(

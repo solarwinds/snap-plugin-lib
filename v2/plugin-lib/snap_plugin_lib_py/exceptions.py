@@ -12,7 +12,7 @@ def throw_exception_if_error(func):
         if err.contents.msg is None:
             return None
 
-        err_msg = str(err.contents.msg.decode(encoding='utf-8'))
+        err_msg = str(err.contents.msg.decode(encoding="utf-8"))
         if err_msg is not None:
             PLUGIN_LIB_OBJ.dealloc_error(err)
             raise PluginLibException(err_msg)
