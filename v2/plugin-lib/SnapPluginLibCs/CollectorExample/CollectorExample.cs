@@ -20,9 +20,14 @@ namespace CollectorExample
             def.DefineTaskPerInstanceLimit(10);
         }
 
-        public override void Collect()
+        public override void Collect(IContext ctx)
         {
             Console.WriteLine("C# Collect executed");
+
+            var cTest = ctx.Config("test");
+            Console.WriteLine(cTest);
+            
+            ctx.AddWarning("Warning from C#");
         }
 
         public override void Load()

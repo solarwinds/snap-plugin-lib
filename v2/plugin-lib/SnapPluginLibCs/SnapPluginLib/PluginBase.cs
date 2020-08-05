@@ -15,7 +15,7 @@
         {
         }
 
-        public virtual void Collect()
+        public virtual void Collect(IContext ctx)
         {
         }
 

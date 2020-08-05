@@ -22,7 +22,8 @@ namespace SnapPluginLib
 
         private static void CollectHandlerFn(string taskId)
         {
-            _collector.Collect();
+            Console.WriteLine($"*() {taskId}");
+            _collector.Collect(new Context(taskId));;
         }
 
         private static void LoadHandlerFn(string taskId)
