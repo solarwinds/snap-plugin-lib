@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public class S
-    {
-    }
-
     public class Context : IContext
     {
         private string _taskId;
@@ -31,7 +27,8 @@ namespace SnapPluginLib
         private static extern string ctx_add_warning(string taskId, string message);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern string ctx_log(string taskId, int level, string message); // todo: adamik: map
+        private static extern string
+            ctx_log(string taskId, int level, string message, LogMap fields); // todo: adamik: map
 
         public string Config(string key)
         {
@@ -43,20 +40,10 @@ namespace SnapPluginLib
             return "";
         }
 
-        public  IList<string> ConfigKeys()
+        public IList<string> ConfigKeys()
         {
             var ptr = ctx_config_keys(_taskId);
-
-            // var p0 = Marshal.PtrToStringAnsi(ptr[0]);
-            // var p1 = Marshal.PtrToStringAnsi(ptr[1]);
-            // var p2 = Marshal.PtrToStringAnsi(ptr[2]);
-
-
-            // Console.WriteLine($"p0={p0}");
-            // Console.WriteLine($"p1={p1}");
-            // Console.WriteLine($"p2={p2}");
-            //
-            return new List<string>();
+            return new List<string>(); // todo: how to process char **
         }
 
         public string RawConfig()
@@ -87,6 +74,27 @@ namespace SnapPluginLib
 
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
+            var m = new LogMap();
+            m.length = 2;
+            m.elements = new LogMapElements();
+            m.elements.key = "field1";
+            m.elements.value = "value1";
+
+            ctx_log(_taskId, 1, message, m);
         }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public class LogMap
+    {
+        public LogMapElements elements;
+        public int length;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public class LogMapElements
+    {
+        public string key;
+        public string value;
     }
 }

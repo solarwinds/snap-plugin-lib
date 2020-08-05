@@ -326,10 +326,13 @@ func ctx_is_done(ctxID *C.char) int {
 //export ctx_log
 func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 	logF := contextObject(ctxID).Logger()
-	for i := 0; i < int(C.get_map_length(fields)); i++ {
-		k := C.get_map_key(fields, C.int(i))
-		v := C.get_map_value(fields, C.int(i))
-		logF = logF.WithField(C.GoString(k), C.GoString(v))
+
+	if fields != nil {
+		for i := 0; i < int(C.get_map_length(fields)); i++ {
+			k := C.get_map_key(fields, C.int(i))
+			v := C.get_map_value(fields, C.int(i))
+			logF = logF.WithField(C.GoString(k), C.GoString(v))
+		}
 	}
 
 	if logObj, ok := logF.(*logrus.Entry); ok {

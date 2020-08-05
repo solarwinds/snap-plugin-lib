@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SnapPluginLib;
 
 namespace CollectorExample
@@ -34,6 +35,13 @@ namespace CollectorExample
             Console.WriteLine($"Config keys: {keys}");
 
             ctx.AddWarning("Warning from C#");
+            
+          
+            var d = new Dictionary<string, string>();
+            d["field1"] = "value1";
+            d["field2"] = "value2";
+            
+            ctx.Log(0, "Log message from C#", d);
         }
 
         public override void Load()
