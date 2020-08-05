@@ -77,7 +77,6 @@ const (
 
 type collectChunk struct {
 	mts []*pluginrpc.Metric
-	//mts      []string
 	warnings []string
 	err      error
 }
@@ -184,13 +183,13 @@ func main() {
 	go func() {
 
 		collClient := pluginrpc.NewCollectorClient(clColl)
+		var publishClient pluginrpc.PublisherClient
 
 		err := doLoadRequest(collClient, opt)
 		if err != nil {
 			doneCh <- fmt.Errorf("can't send load request to plugin: %v", err)
 		}
 
-		var publishClient pluginrpc.PublisherClient
 		if usePublisher {
 			publishClient = pluginrpc.NewPublisherClient(clPub)
 			errPub := doPubLoadRequest(publishClient, opt)
@@ -271,7 +270,7 @@ func main() {
 			if usePublisher {
 				err := doPublishRequest(publishClient, mtsChunks, opt)
 				if err != nil {
-					fmt.Printf("Not good")
+					fmt.Printf("Publish request failed")
 				}
 			}
 			if opt.RequestInfo {
@@ -315,12 +314,12 @@ func main() {
 			req := &pluginrpc.PingRequest{}
 			_, err := contClient.Ping(context.Background(), req)
 			if err != nil {
-				doneCh <- fmt.Errorf("can't start: %v", err)
+				doneCh <- fmt.Errorf("ping response error: %v", err)
 			}
 			if usePublisher {
-				_, err2 := contPubClient.Ping(context.Background(), req)
-				if err2 != nil {
-					doneCh <- fmt.Errorf("can't start: %v", err2)
+				_, err := contPubClient.Ping(context.Background(), req)
+				if err != nil {
+					doneCh <- fmt.Errorf("ping response error: %v", err)
 				}
 			}
 			time.Sleep(opt.PingInterval)
@@ -437,7 +436,10 @@ func doPublishRequest(pc pluginrpc.PublisherClient, mts [][]*pluginrpc.Metric, o
 			TaskId:    opt.TaskId,
 			MetricSet: chunk,
 		}
-		stream.Send(reqPubl)
+		err := stream.Send(reqPubl)
+        if err != nil {
+            return err
+        }
 	}
 
 	_, err := stream.CloseAndRecv()
