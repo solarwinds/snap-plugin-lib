@@ -1,7 +1,6 @@
 import time
 
-from snap_plugin_lib_py import BasePublisher, start_publisher, LOGLEVEL_INFO
-from snap_plugin_lib_py.exceptions import PluginLibException
+from swisnap_plugin_lib_py import BasePublisher, start_publisher, LOGLEVEL_INFO
 import pprint
 
 

@@ -42,7 +42,7 @@ func main() {
 The same functionality in Python:
 
 ```python
-from snap_plugin_lib_py import BaseCollector, start_collector
+from swisnap_plugin_lib_py import BaseCollector, start_collector
 
 
 class ExamplePlugin(BaseCollector):
@@ -58,7 +58,8 @@ if __name__ == '__main__':
 More complicated examples can be found in:
 * (Go) [Examples folder](examples/v2)
 * (Go) [Tutorial](v2/tutorial/09-config/collector)
-* (Python) [Example](v2/plugin-lib/snap-plugin-lib-example.py)
+* (Python) [Collector Example](v2/plugin-lib/swisnap-collector-plugin-lib-example.py)
+* (Python) [Publisher Example](v2/plugin-lib/swisnap-publisher-plugin-lib-example.py)
 
 ## Documentation
 
