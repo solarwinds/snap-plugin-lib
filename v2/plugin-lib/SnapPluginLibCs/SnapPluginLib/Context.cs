@@ -72,14 +72,27 @@ namespace SnapPluginLib
             ctx_add_warning(_taskId, message);
         }
 
+        
+        
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
+            Console.WriteLine("############## C# Log");
+            
             var m = new LogMap();
-            m.length = 2;
-            m.elements = new LogMapElements();
-            m.elements.key = "field1";
-            m.elements.value = "value1";
+            m.length = fields.Count;
+            
+            LogMapElements[] nativeElements = new LogMapElements[fields.Count];
+            var i = 0;
+            foreach (KeyValuePair<string,string> entry in fields)
+            {
+                nativeElements[i] = new LogMapElements();
+                nativeElements[i].key = entry.Key;
+                nativeElements[i].value = entry.Value;
+                i++;
+            }
 
+            Console.WriteLine($"C# ADDR {m.elements}");
+            
             ctx_log(_taskId, 1, message, m);
         }
     }
@@ -87,7 +100,7 @@ namespace SnapPluginLib
     [StructLayout(LayoutKind.Sequential)]
     public class LogMap
     {
-        public LogMapElements elements;
+        public IntPtr elements;
         public int length;
     }
 

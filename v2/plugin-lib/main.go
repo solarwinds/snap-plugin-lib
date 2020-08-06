@@ -325,17 +325,29 @@ func ctx_is_done(ctxID *C.char) int {
 
 //export ctx_log
 func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
+	fmt.Printf("GO:CTX_LOG\n")
+
 	logF := contextObject(ctxID).Logger()
+
+	fmt.Printf("GO:CTX_LOG 1\n")
 
 	if fields != nil {
 		for i := 0; i < int(C.get_map_length(fields)); i++ {
+			fmt.Printf("GO:CTX_LOG 2.1 %p\n", fields)
+
 			k := C.get_map_key(fields, C.int(i))
 			v := C.get_map_value(fields, C.int(i))
+			fmt.Printf("GO:CTX_LOG 2.2\n")
+
 			logF = logF.WithField(C.GoString(k), C.GoString(v))
 		}
 	}
 
+	fmt.Printf("GO:CTX_LOG 3\n")
+
 	if logObj, ok := logF.(*logrus.Entry); ok {
+		fmt.Printf("GO:CTX_LOG 4\n")
+
 		logObj.Log(logrus.Level(int(level)), C.GoString(message))
 	}
 }
