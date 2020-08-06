@@ -557,12 +557,12 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 	mtPtArr := C.alloc_metric_pointer_array(C.int(len(mts)))
 
 	for i, el := range mts {
-		mt_namespace := toCNamespace_t(el.Namespace())
-		mt_desc := (*C.char)(C.CString(el.Description()))
-		mt_value := toCvalue_t(el.Value())
-		mt_timestamp := time_to_ctimewithns(el.Timestamp())
-		mt_tags := toCmap_t(el.Tags())
-		C.set_metric_values(mtPtArr, C.int(i), mt_namespace, mt_desc, mt_value, mt_timestamp, mt_tags)
+		mtNamespace := toCNamespace_t(el.Namespace())
+		mtDesc := (*C.char)(C.CString(el.Description()))
+		mtValue := toCvalue_t(el.Value())
+		mtTimestamp := time_to_ctimewithns(el.Timestamp())
+		mtTags := toCmap_t(el.Tags())
+		C.set_metric_values(mtPtArr, C.int(i), mtNamespace, mtDesc, mtValue, mtTimestamp, mtTags)
 	}
 	return mtPtArr
 }
