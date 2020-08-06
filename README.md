@@ -42,10 +42,10 @@ func main() {
 The same functionality in Python:
 
 ```python
-from snap_plugin_lib_py import BasePlugin, start_collector
+from snap_plugin_lib_py import BaseCollector, start_collector
 
 
-class ExamplePlugin(BasePlugin):
+class ExamplePlugin(BaseCollector):
 
     def collect(self, ctx):
         ctx.add_metric("/example/metric/value", 45)
