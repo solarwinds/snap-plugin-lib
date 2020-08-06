@@ -35,13 +35,9 @@ namespace CollectorExample
             Console.WriteLine($"Config keys: {keys}");
 
             ctx.AddWarning("Warning from C#");
-            
-          
-            var d = new Dictionary<string, string>();
-            d["field1"] = "value1";
-            d["field2"] = "value2";
-            
-            ctx.Log(0, "Log message from C#", d);
+
+            ctx.Log(0, "Log message from C#", new Dictionary<string, string>()
+                {{"language", "c#"}, {"function", "Collect"}});
         }
 
         public override void Load()

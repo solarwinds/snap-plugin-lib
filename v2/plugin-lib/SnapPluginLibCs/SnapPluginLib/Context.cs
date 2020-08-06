@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
@@ -72,28 +71,29 @@ namespace SnapPluginLib
             ctx_add_warning(_taskId, message);
         }
 
-        
-        
+
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
-            Console.WriteLine("############## C# Log");
-            
             var m = new LogMap();
             m.length = fields.Count;
-            
-            LogMapElements[] nativeElements = new LogMapElements[fields.Count];
+            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LogMapElements)) * fields.Count);
+
             var i = 0;
-            foreach (KeyValuePair<string,string> entry in fields)
+            foreach (KeyValuePair<string, string> entry in fields)
             {
-                nativeElements[i] = new LogMapElements();
-                nativeElements[i].key = entry.Key;
-                nativeElements[i].value = entry.Value;
+                var nativeMapElem = new LogMapElements();
+                nativeMapElem.key = entry.Key;
+                nativeMapElem.value = entry.Value;
+
+                Marshal.StructureToPtr(nativeMapElem,
+                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(LogMapElements)), false);
+
                 i++;
             }
 
-            Console.WriteLine($"C# ADDR {m.elements}");
-            
             ctx_log(_taskId, 1, message, m);
+
+            Marshal.FreeHGlobal(m.elements);
         }
     }
 
