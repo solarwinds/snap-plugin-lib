@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="snap_plugin_lib_py",
-    description="Python module for SolarWinds host Agent plugins",
-    packages=["snap_plugin_lib_py"],
+    name="swisnap_plugin_lib_py",
+    description="Python module for SolarWinds Host Agent plugins",
+    packages=["swisnap_plugin_lib_py"],
 )
