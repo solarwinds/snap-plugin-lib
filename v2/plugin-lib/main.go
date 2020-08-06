@@ -268,15 +268,16 @@ import "C"
 
 import (
 	"fmt"
+	"sync"
+	"time"
+	"unsafe"
+
 	collectorProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
 	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
 	publisherProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
 	"github.com/librato/snap-plugin-lib-go/v2/plugin"
 	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
-	"sync"
-	"time"
-	"unsafe"
 )
 import "C"
 
@@ -740,7 +741,6 @@ func (bc *bridgeCollector) Unload(ctx plugin.Context) error {
 }
 
 func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) error {
-
 	ctxAsType := ctx.(*collectorProxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 

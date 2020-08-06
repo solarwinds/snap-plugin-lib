@@ -43,7 +43,17 @@ PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 # Load, store are exceptions since it's safer to keep Python references on Python side
 
 
-class DefineContext:
+class DefineCommonContext:
+    @staticmethod
+    def define_tasks_per_instance_limit(limit):
+        PLUGIN_LIB_OBJ.define_tasks_per_instance_limit(limit)
+
+    @staticmethod
+    def define_instances_limit(limit):
+        PLUGIN_LIB_OBJ.define_instances_limit(limit)
+
+
+class DefineCollectorContext(DefineCommonContext):
     @staticmethod
     def define_metric(namespace, unit, is_default, description):
         PLUGIN_LIB_OBJ.define_metric(
@@ -61,14 +71,6 @@ class DefineContext:
     @throw_exception_if_error
     def define_example_config(config):
         return PLUGIN_LIB_OBJ.define_example_config(string_to_bytes(config))
-
-    @staticmethod
-    def define_tasks_per_instance_limit(limit):
-        PLUGIN_LIB_OBJ.define_tasks_per_instance_limit(limit)
-
-    @staticmethod
-    def define_instances_limit(limit):
-        PLUGIN_LIB_OBJ.define_instances_limit(limit)
 
 
 class Context:
@@ -224,13 +226,19 @@ class CollectContext(Context):
 
 
 @CFUNCTYPE(None)
-def define_handler():
-    plugin_py.define_plugin(DefineContext())
+def define_publisher_handler():
+    plugin_py.define_plugin(DefineCommonContext())
+
+
+@CFUNCTYPE(None)
+def define_collector_handler():
+    plugin_py.define_plugin(DefineCollectorContext())
 
 
 @CFUNCTYPE(None, c_char_p)
 def collector_handler(ctx_id):
     plugin_py.collect(CollectContext(ctx_id))
+
 
 @CFUNCTYPE(None, c_char_p)
 def publisher_handler(ctx_id):
@@ -262,7 +270,7 @@ def start_c_collector(collector):
         collector_handler,
         load_handler,
         unload_handler,
-        define_handler,
+        define_collector_handler,
         string_to_bytes(name),
         string_to_bytes(version),
     )
@@ -279,7 +287,7 @@ def start_c_publisher(publisher):
         publisher_handler,
         load_handler,
         unload_handler,
-        define_handler,
+        define_publisher_handler,
         string_to_bytes(name),
         string_to_bytes(version),
     )
