@@ -32,10 +32,10 @@ namespace SnapPluginLib
         }
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_add_metric(string taskId, string ns, Value value, Modifiers modifiers);
+        private static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue, NativeModifiers nativeModifiers);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_always_apply(string taskId, string ns, Modifiers modifiers);
+        private static extern void ctx_always_apply(string taskId, string ns, NativeModifiers nativeModifiers);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern void ctx_dismiss_all_modifiers(string taskId);

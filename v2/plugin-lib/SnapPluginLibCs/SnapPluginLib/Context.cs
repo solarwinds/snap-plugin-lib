@@ -59,19 +59,19 @@ namespace SnapPluginLib
 
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
-            var m = new LogMap();
+            var m = new NativeMap();
             m.length = fields.Count;
-            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LogMapElements)) * fields.Count);
+            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * fields.Count);
 
             var i = 0;
             foreach (KeyValuePair<string, string> entry in fields)
             {
-                var nativeMapElem = new LogMapElements();
+                var nativeMapElem = new NativeMapElements();
                 nativeMapElem.key = entry.Key;
                 nativeMapElem.value = entry.Value;
 
                 Marshal.StructureToPtr(nativeMapElem,
-                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(LogMapElements)), false);
+                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(NativeMapElements)), false);
 
                 i++;
             }
@@ -95,7 +95,7 @@ namespace SnapPluginLib
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern string
-            ctx_log(string taskId, int level, string message, LogMap fields);
+            ctx_log(string taskId, int level, string message, NativeMap fields);
     }
 
     
