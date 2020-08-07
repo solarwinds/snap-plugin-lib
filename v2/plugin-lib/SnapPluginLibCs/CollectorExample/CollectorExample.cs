@@ -24,20 +24,22 @@ namespace CollectorExample
         public override void Collect(IContext ctx)
         {
             Console.WriteLine("C# Collect executed");
+            
+            
 
-            var cTest = ctx.Config("test");
-            Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
-
-            var rCfg = ctx.RawConfig();
-            Console.WriteLine($"Raw confgi: {rCfg}");
-
-            var keys = ctx.ConfigKeys();
-            Console.WriteLine($"Config keys: {keys}");
-
-            ctx.AddWarning("Warning from C#");
-
-            ctx.Log(0, "Log message from C#", new Dictionary<string, string>()
-                {{"language", "c#"}, {"function", "Collect"}});
+            // var cTest = ctx.Config("test");
+            // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
+            //
+            // var rCfg = ctx.RawConfig();
+            // Console.WriteLine($"Raw confgi: {rCfg}");
+            //
+            // var keys = ctx.ConfigKeys();
+            // Console.WriteLine($"Config keys: {keys}");
+            //
+            // ctx.AddWarning("Warning from C#");
+            //
+            // ctx.Log(0, "Log message from C#", new Dictionary<string, string>()
+            //     {{"language", "c#"}, {"function", "Collect"}});
         }
 
         public override void Load()

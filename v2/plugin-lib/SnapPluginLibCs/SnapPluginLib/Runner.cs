@@ -1,11 +1,10 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
     public static class Runner
     {
-        public static PluginBase _collector;
+        private static PluginBase _collector;
 
         private delegate void DefineHandler();
 
@@ -22,8 +21,7 @@ namespace SnapPluginLib
 
         private static void CollectHandlerFn(string taskId)
         {
-            Console.WriteLine($"*() {taskId}");
-            _collector.Collect(new Context(taskId));;
+            _collector.Collect(new CollectContext(taskId));
         }
 
         private static void LoadHandlerFn(string taskId)
