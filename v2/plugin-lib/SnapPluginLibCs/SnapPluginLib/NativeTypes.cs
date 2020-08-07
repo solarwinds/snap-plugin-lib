@@ -20,11 +20,12 @@ namespace SnapPluginLib
     [StructLayout(LayoutKind.Sequential)]
     internal class NativeModifiers
     {
-        public NativeMap tagsToAdd;
+        public IntPtr tagsToAdd;
         public NativeMap tagsToRemove;
         public NativeTimeWithNs timestamp;
-        public string description;
-        public string unit;
+        
+        [MarshalAs(UnmanagedType.LPStr)] public string description;
+        [MarshalAs(UnmanagedType.LPStr)] public string unit;
     }
 
     [StructLayout(LayoutKind.Sequential)]

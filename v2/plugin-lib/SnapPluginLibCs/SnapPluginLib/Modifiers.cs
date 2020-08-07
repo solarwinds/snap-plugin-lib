@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
@@ -10,47 +12,79 @@ namespace SnapPluginLib
     {
         public static IPublicModifier Tags(Dictionary<string, string> tags)
         {
-            return null;
+            return new MetricTags(tags);
         }
 
         public static IPublicModifier TagsToRemove(Dictionary<string, string> tags)
         {
-            return null;
+            return new MetricRemoveTags(tags);
         }
 
         public static IPublicModifier Timestamp()
         {
-            return null;
+            return new MetricTimestamp();
         }
 
         public static IPublicModifier Description(string description)
         {
-            return null;
+            return new MetricDescription(description);
         }
 
         public static IPublicModifier Unit(string unit)
         {
-            return null;
+            return new MetricUnit(unit);
         }
     }
 
 
     internal class MetricTags : IModifier, IPublicModifier
     {
-        private Dictionary<string, string> _tagsToAdd;
+        public MetricTags(Dictionary<string, string> tags)
+        {
+            _tagsToAdd = tags;
+        }
 
         public void Apply(NativeModifiers nModifier)
         {
+            Console.WriteLine("MODIFIER APPLY");
+
+            var m = new NativeMap();
+            m.length = _tagsToAdd.Count;
+            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * _tagsToAdd.Count);
+
+            var i = 0;
+            foreach (KeyValuePair<string, string> entry in _tagsToAdd)
+            {
+                var nativeMapElem = new NativeMapElements();
+                nativeMapElem.key = entry.Key;
+                nativeMapElem.value = entry.Value;
+
+                Marshal.StructureToPtr(nativeMapElem,
+                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(NativeMapElements)), false);
+
+                i++;
+            }
+
+            var all = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMap)));
+            Marshal.StructureToPtr(m, all, false);
+            nModifier.tagsToAdd = all;
         }
+
+        private Dictionary<string, string> _tagsToAdd;
     }
 
     internal class MetricRemoveTags : IModifier, IPublicModifier
     {
-        private Dictionary<string, string> _tagsToRemove;
+        public MetricRemoveTags(Dictionary<string, string> tags)
+        {
+            _tags = tags;
+        }
 
         public void Apply(NativeModifiers nModifier)
         {
         }
+
+        private Dictionary<string, string> _tags;
     }
 
     internal class MetricTimestamp : IModifier, IPublicModifier
@@ -62,19 +96,32 @@ namespace SnapPluginLib
 
     internal class MetricDescription : IModifier, IPublicModifier
     {
-        private string _description;
+        public MetricDescription(string description)
+        {
+            _description = description;
+        }
 
         public void Apply(NativeModifiers nModifier)
         {
+            Console.WriteLine("MODIFIER DESCRIPTIOTN");
+
+            nModifier.description = _description;
         }
+
+        private string _description;
     }
 
     internal class MetricUnit : IModifier, IPublicModifier
     {
-        private string _unit;
+        public MetricUnit(string unit)
+        {
+            _unit = unit;
+        }
 
         public void Apply(NativeModifiers nModifier)
         {
         }
+
+        private string _unit;
     }
 }

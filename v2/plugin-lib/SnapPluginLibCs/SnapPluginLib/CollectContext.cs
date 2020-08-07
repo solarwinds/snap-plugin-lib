@@ -12,11 +12,20 @@ namespace SnapPluginLib
 
         public void AddMetric(string ns, double value, params IPublicModifier[] modifiers)
         {
-            NativeValue nativeValue = new NativeValue();
+            var nativeValue = new NativeValue();
             nativeValue.v_double = value;
             nativeValue.vtype = 3; // todo: adamik: make enums
             
-            ctx_add_metric(TaskId, ns, nativeValue, new NativeModifiers());
+            var nativeModifiers = new NativeModifiers();
+
+            foreach (var m in modifiers)
+            {
+                ((IModifier) m).Apply(nativeModifiers);
+            }
+
+            Console.WriteLine($"%%%%%%%%%%%%% DESC: {nativeModifiers.description}");
+            
+            ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
         }
 
         public void AlwaysApply(string ns)
