@@ -5,7 +5,7 @@ namespace SnapPluginLib
 {
     public interface ICollectContext : IContext
     {
-        void AddMetric(string ns, double value);
+        void AddMetric(string ns, double value, params IPublicModifier[] modifiers);
         void AlwaysApply(string ns);
         void DismissAllModifiers();
         void ShouldProcess(string ns);

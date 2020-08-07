@@ -10,8 +10,13 @@ namespace SnapPluginLib
         {
         }
 
-        public void AddMetric(string ns, double value)
+        public void AddMetric(string ns, double value, params IPublicModifier[] modifiers)
         {
+            NativeValue nativeValue = new NativeValue();
+            nativeValue.v_double = value;
+            nativeValue.vtype = 3; // todo: adamik: make enums
+            
+            ctx_add_metric(TaskId, ns, nativeValue, new NativeModifiers());
         }
 
         public void AlwaysApply(string ns)
@@ -32,7 +37,8 @@ namespace SnapPluginLib
         }
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue, NativeModifiers nativeModifiers);
+        private static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue,
+            NativeModifiers nativeModifiers);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         private static extern void ctx_always_apply(string taskId, string ns, NativeModifiers nativeModifiers);

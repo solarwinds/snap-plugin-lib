@@ -14,19 +14,27 @@ namespace CollectorExample
         {
             Console.WriteLine("C# Define plugin");
 
-            def.DefineMetric("/example/group1/metric1", "o", false, "metric description");
-            def.DefineGroup("dynGroup", "dyn group description");
-            def.DefineExampleConfig("{\"test\": \"a\"}");
-            def.DefineInstancesLimit(5);
-            def.DefineTaskPerInstanceLimit(10);
+            // def.DefineMetric("/example/group1/metric1", "o", false, "metric description");
+            // def.DefineGroup("dynGroup", "dyn group description");
+            // def.DefineExampleConfig("{\"test\": \"a\"}");
+            // def.DefineInstancesLimit(5);
+            // def.DefineTaskPerInstanceLimit(10);
         }
 
-        public override void Collect(IContext ctx)
+        public override void Collect(ICollectContext ctx)
         {
             Console.WriteLine("C# Collect executed");
-            
-            
 
+            ctx.AddMetric("/example/group1/metric", 12.4,
+                Modifiers.Tags(new Dictionary<string, string>
+                {
+                    {"origin", "C# lang"},
+                    {"system", "Windows"}
+                }),
+                Modifiers.Description("new custom description"));
+            
+            Console.WriteLine("C# Collect completed");
+            
             // var cTest = ctx.Config("test");
             // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
             //
