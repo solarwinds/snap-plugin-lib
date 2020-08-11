@@ -2,6 +2,7 @@ import math
 from ctypes import (
     c_longlong,
     c_ulonglong,
+    c_float,
     c_double,
     c_int,
     pointer,
@@ -14,6 +15,7 @@ from .snap_ctypes import (
     CValue,
     TYPE_INT64,
     TYPE_UINT64,
+    TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_BOOL,
     max_int,
@@ -118,6 +120,9 @@ def unpack_value_t(val_ptr):
     v_type = val_ptr.contents.v_type
     if v_type == TYPE_DOUBLE:
         value = val_ptr.contents.value.v_double
+        unit = float
+    elif v_type == TYPE_FLOAT:
+        value = val_ptr.contents.value.v_float
         unit = float
     elif v_type == TYPE_BOOL:
         value = val_ptr.contents.value.v_bool

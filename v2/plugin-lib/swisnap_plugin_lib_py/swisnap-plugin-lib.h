@@ -37,6 +37,7 @@ enum value_type_t {
     TYPE_INVALID,
     TYPE_INT64,
     TYPE_UINT64,
+    TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_BOOL,
 };
@@ -45,6 +46,7 @@ typedef struct {
     union  {
         long long v_int64;
         unsigned long long v_uint64;
+        float v_float;
         double v_double;
         int v_bool;
     } value;
@@ -63,11 +65,13 @@ static inline void free_value_t(value_t * v) {
 
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
 static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
+static inline float value_t_float(value_t * v) { return v->value.v_float; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 
 static inline void set_value_t_long_long(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
 static inline void set_value_t_ulong_long(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_value_t_float(value_t * v, float v_float) { v->value.v_float = v_float; }
 static inline void set_value_t_double(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 
