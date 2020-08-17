@@ -31,7 +31,14 @@ namespace CollectorExample
                     {"origin", "C# lang"},
                     {"system", "Windows"}
                 }),
-                Modifiers.Description("new custom description"));
+                Modifiers.TagsToRemove(new Dictionary<string, string>
+                {
+                    {"origin", "C# lang"}
+                }),
+                Modifiers.Description("new custom description"),
+                Modifiers.Unit(("new custom unit")),
+                Modifiers.Timestamp()
+                );
             
             Console.WriteLine("C# Collect completed");
             

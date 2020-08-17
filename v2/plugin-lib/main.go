@@ -212,42 +212,34 @@ func toGoValue(v *C.value_t) interface{} {
 func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	var appliedModifiers []plugin.MetricModifier
 
-
-	fmt.Printf("GO: toGoModifiers 1\n")
-
 	if modifiers == nil {
 		return appliedModifiers
 	}
-
-	fmt.Printf("GO: toGoModifiers 2\n")
 
 	if modifiers.tags_to_add != nil {
 		fmt.Printf("toGoMap(modifiers.tags_to_add)=%#v\n", toGoMap(modifiers.tags_to_add))
 		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_add)))
 	}
 
-	fmt.Printf("GO: toGoModifiers 3\n")
-
+	if modifiers.tags_to_remove != nil {
+		fmt.Printf("toGoMap(modifiers.tags_to_remove)=%#v\n", toGoMap(modifiers.tags_to_remove))
+		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_remove)))
+	}
 
 	if modifiers.timestamp != nil {
 		appliedModifiers = append(appliedModifiers,
 			plugin.MetricTimestamp(time.Unix(int64(modifiers.timestamp.sec), int64(modifiers.timestamp.nsec))))
 	}
 
-	fmt.Printf("GO: toGoModifiers 4\n")
-
 	if modifiers.description != nil {
 		fmt.Printf("C.GoString(modifiers.description)=%#v\n", C.GoString(modifiers.description))
 		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(modifiers.description)))
 	}
 
-	fmt.Printf("GO: toGoModifiers 5\n")
-
 	if modifiers.unit != nil {
 		fmt.Printf("C.GoString(modifiers.unit)=%#v\n", C.GoString(modifiers.unit))
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(modifiers.unit)))
 	}
-	fmt.Printf("GO: toGoModifiers 6\n")
 
 	return appliedModifiers
 }

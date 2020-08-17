@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
@@ -8,7 +6,7 @@ namespace SnapPluginLib
     {
     }
 
-    public class Modifiers
+    public static class Modifiers
     {
         public static IPublicModifier Tags(Dictionary<string, string> tags)
         {
@@ -36,7 +34,6 @@ namespace SnapPluginLib
         }
     }
 
-
     internal class MetricTags : IModifier, IPublicModifier
     {
         public MetricTags(Dictionary<string, string> tags)
@@ -46,31 +43,10 @@ namespace SnapPluginLib
 
         public void Apply(NativeModifiers nModifier)
         {
-            Console.WriteLine("MODIFIER APPLY");
-
-            var m = new NativeMap();
-            m.length = _tagsToAdd.Count;
-            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * _tagsToAdd.Count);
-
-            var i = 0;
-            foreach (KeyValuePair<string, string> entry in _tagsToAdd)
-            {
-                var nativeMapElem = new NativeMapElements();
-                nativeMapElem.key = entry.Key;
-                nativeMapElem.value = entry.Value;
-
-                Marshal.StructureToPtr(nativeMapElem,
-                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(NativeMapElements)), false);
-
-                i++;
-            }
-
-            var all = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMap)));
-            Marshal.StructureToPtr(m, all, false);
-            nModifier.tagsToAdd = all;
+            nModifier.tagsToAdd = Convertions.DictionaryToNativeMapMem(_tagsToAdd);
         }
 
-        private Dictionary<string, string> _tagsToAdd;
+        private readonly Dictionary<string, string> _tagsToAdd;
     }
 
     internal class MetricRemoveTags : IModifier, IPublicModifier
@@ -82,9 +58,10 @@ namespace SnapPluginLib
 
         public void Apply(NativeModifiers nModifier)
         {
+            nModifier.tagsToRemove = Convertions.DictionaryToNativeMapMem(_tags);
         }
 
-        private Dictionary<string, string> _tags;
+        private readonly Dictionary<string, string> _tags;
     }
 
     internal class MetricTimestamp : IModifier, IPublicModifier
@@ -103,12 +80,10 @@ namespace SnapPluginLib
 
         public void Apply(NativeModifiers nModifier)
         {
-            Console.WriteLine("MODIFIER DESCRIPTIOTN");
-
             nModifier.description = _description;
         }
 
-        private string _description;
+        private readonly string _description;
     }
 
     internal class MetricUnit : IModifier, IPublicModifier
@@ -120,8 +95,9 @@ namespace SnapPluginLib
 
         public void Apply(NativeModifiers nModifier)
         {
+            nModifier.unit = _unit;
         }
 
-        private string _unit;
+        private readonly string _unit;
     }
 }
