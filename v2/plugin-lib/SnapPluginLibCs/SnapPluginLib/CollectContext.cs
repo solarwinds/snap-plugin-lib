@@ -71,6 +71,21 @@ namespace SnapPluginLib
             CBridge.ctx_always_apply(TaskId, ns, ToNativeModifiers(modifiers));
         }
 
+        public void DismissAllModifiers()
+        {
+            CBridge.ctx_dismiss_all_modifiers(TaskId);
+        }
+
+        public bool ShouldProcess(string ns)
+        {
+            return CBridge.ctx_should_process(TaskId, ns) > 0;
+        }
+
+        public IList<string> RequestedMetrics()
+        {
+            return new List<string>();
+        }
+        
         private NativeModifiers ToNativeModifiers(params IPublicModifier[] modifiers)
         {
             var nativeModifiers = new NativeModifiers();
@@ -81,19 +96,6 @@ namespace SnapPluginLib
             }
 
             return nativeModifiers;
-        }
-
-        public void DismissAllModifiers()
-        {
-        }
-
-        public void ShouldProcess(string ns)
-        {
-        }
-
-        public IList<string> RequestedMetrics()
-        {
-            return new List<string>();
         }
     }
 }

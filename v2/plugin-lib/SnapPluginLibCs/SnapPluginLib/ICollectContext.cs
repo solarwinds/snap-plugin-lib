@@ -11,7 +11,7 @@ namespace SnapPluginLib
         void AddMetric(string ns, bool value, params IPublicModifier[] modifiers);
         void AlwaysApply(string ns, params IPublicModifier[] modifiers);
         void DismissAllModifiers();
-        void ShouldProcess(string ns);
+        bool ShouldProcess(string ns);
         IList<string> RequestedMetrics();
     }
 }

@@ -27,7 +27,7 @@ namespace CollectorExample
             {
                 {"virtualization", "VirtualBox"}
             }));
-            
+
             ctx.AddMetric("/example/group1/metric", 12.4,
                 Modifiers.Tags(new Dictionary<string, string>
                 {
@@ -45,7 +45,11 @@ namespace CollectorExample
 
             ctx.AddMetric("/example/group1/m2", 20);
             ctx.AddMetric("/example/group1/m3", (uint) 30);
-            ctx.AddMetric("/example/group2/m4", true);
+
+            if (ctx.ShouldProcess("/example/group2/m4"))
+            {
+                ctx.AddMetric("/example/group2/m4", true);
+            }
 
             // var cTest = ctx.Config("test");
             // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
