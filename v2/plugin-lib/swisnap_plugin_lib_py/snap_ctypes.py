@@ -5,6 +5,7 @@ from ctypes import (
     c_longlong,
     c_ulonglong,
     c_double,
+    c_float,
     c_int,
     POINTER,
 )
@@ -13,7 +14,7 @@ min_int = -9223372036854775808
 max_int = 9223372036854775807
 max_uint = 18446744073709551615
 
-_, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
+_, TYPE_INT64, TYPE_UINT64, TYPE_FLOAT, TYPE_DOUBLE, TYPE_BOOL = range(6)
 (
     _,
     LOGLEVEL_PANIC,
@@ -56,6 +57,7 @@ class ValueUnion(Union):
     _fields_ = [
         ("v_int64", c_longlong),
         ("v_uint64", c_ulonglong),
+        ("v_float", c_float),
         ("v_double", c_double),
         ("v_bool", c_int),
     ]
