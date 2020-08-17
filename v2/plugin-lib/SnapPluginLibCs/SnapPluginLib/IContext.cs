@@ -13,6 +13,6 @@ namespace SnapPluginLib
         Object Load(string key);
 
         void AddWarning(string message);
-        void Log(int level, string message, Dictionary<string, string> fields);
+        void Log(LogLevel level, string message, Dictionary<string, string> fields);
     }
 }

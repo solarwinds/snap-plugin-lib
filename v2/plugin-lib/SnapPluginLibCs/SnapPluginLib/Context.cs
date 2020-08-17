@@ -56,33 +56,9 @@ namespace SnapPluginLib
         }
 
 
-        public void Log(int level, string message, Dictionary<string, string> fields)
+        public void Log(LogLevel level, string message, Dictionary<string, string> fields)
         {
-            // todo: adamik: make more common with conversion function
-            var m = new NativeMap();
-            m.length = fields.Count;
-            m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * fields.Count);
-
-            var i = 0;
-            foreach (KeyValuePair<string, string> entry in fields)
-            {
-                var nativeMapElem = new NativeMapElements();
-                nativeMapElem.key = entry.Key;
-                nativeMapElem.value = entry.Value;
-
-                Marshal.StructureToPtr(nativeMapElem,
-                    (IntPtr) m.elements.ToInt64() + i * Marshal.SizeOf(typeof(NativeMapElements)), false);
-
-                i++;
-            }
-
-            CBridge.ctx_log(TaskId, 1, message, m);
-
-            Marshal.FreeHGlobal(m.elements);
+            CBridge.ctx_log(TaskId, (int) level, message, Convertions.DictionaryToNativeMapMem(fields));
         }
-
-
     }
-
-    
 }

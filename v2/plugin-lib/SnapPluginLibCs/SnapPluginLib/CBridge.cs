@@ -12,7 +12,7 @@ namespace SnapPluginLib
         private const string PluginLibDllPath = "plugin-lib.dll";
 
         // Collect context related functions
-        
+
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue,
             NativeModifiers nativeModifiers);
@@ -28,9 +28,9 @@ namespace SnapPluginLib
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr ctx_requested_metrics(string taskId);
-        
+
         // Context related functions
-        
+
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr ctx_config(string taskId, string key);
 
@@ -44,11 +44,10 @@ namespace SnapPluginLib
         internal static extern string ctx_add_warning(string taskId, string message);
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern string
-            ctx_log(string taskId, int level, string message, NativeMap fields);
-        
+        internal static extern string ctx_log(string taskId, int level, string message, IntPtr /* NativeMap */ fields);
+
         // DefinePlugin related functions 
-        
+
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_metric(string ns, string unit, int idDefault, string description);
 

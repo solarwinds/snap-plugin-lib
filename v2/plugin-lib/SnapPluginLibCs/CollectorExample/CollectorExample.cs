@@ -23,7 +23,7 @@ namespace CollectorExample
         {
             ctx.AddWarning("Warning from C#");
 
-            ctx.Log(0, "Log message from C#", new Dictionary<string, string>
+            ctx.Log(LogLevel.Info, "Log message from C#", new Dictionary<string, string>
             {
                 {"language", "c#"}, {"function", "Collect"}
             });
