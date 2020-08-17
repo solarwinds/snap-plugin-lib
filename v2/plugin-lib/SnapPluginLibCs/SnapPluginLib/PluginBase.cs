@@ -19,11 +19,11 @@
         {
         }
 
-        public virtual void Load()
+        public virtual void Load(IContext ctx)
         {
         }
 
-        public virtual void Unload()
+        public virtual void Unload(IContext ctx)
         {
         }
     }

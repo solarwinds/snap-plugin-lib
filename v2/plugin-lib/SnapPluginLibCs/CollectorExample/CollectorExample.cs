@@ -12,8 +12,6 @@ namespace CollectorExample
 
         public override void DefinePlugin(IDefineContext def)
         {
-            Console.WriteLine("C# Define plugin");
-
             // def.DefineMetric("/example/group1/metric1", "o", false, "metric description");
             // def.DefineGroup("dynGroup", "dyn group description");
             // def.DefineExampleConfig("{\"test\": \"a\"}");
@@ -23,6 +21,13 @@ namespace CollectorExample
 
         public override void Collect(ICollectContext ctx)
         {
+            ctx.AddWarning("Warning from C#");
+
+            ctx.Log(0, "Log message from C#", new Dictionary<string, string>
+            {
+                {"language", "c#"}, {"function", "Collect"}
+            });
+
             ctx.AlwaysApply("/example/group1/*", Modifiers.Tags(new Dictionary<string, string>
             {
                 {"virtualization", "VirtualBox"}
@@ -51,35 +56,35 @@ namespace CollectorExample
                 ctx.AddMetric("/example/group2/m4", true);
             }
 
-            foreach (var el in ctx.RequestedMetrics())
+            var reqMts = ctx.RequestedMetrics();
+            if (reqMts.Count > 0)
             {
-                Console.WriteLine(el);
+                Console.WriteLine("Requested metrics: ");
+                foreach (var mt in reqMts)
+                {
+                    Console.WriteLine($"- {mt}");
+                }
             }
-
-
-            // var cTest = ctx.Config("test");
-            // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
-            //
-            // var rCfg = ctx.RawConfig();
-            // Console.WriteLine($"Raw confgi: {rCfg}");
-            //
-            // var keys = ctx.ConfigKeys();
-            // Console.WriteLine($"Config keys: {keys}");
-            //
-            // ctx.AddWarning("Warning from C#");
-            //
-            // ctx.Log(0, "Log message from C#", new Dictionary<string, string>()
-            //     {{"language", "c#"}, {"function", "Collect"}});
         }
 
-        public override void Load()
+        public override void Load(IContext ctx)
         {
-            Console.WriteLine("C# Load executed");
-        }
+            // Raw Config
+            var rCfg = ctx.RawConfig();
+            Console.WriteLine($"Raw config: {rCfg}");
 
-        public override void Unload()
-        {
-            Console.WriteLine("C# Unload executed");
+            // List config keys
+            var keys = ctx.ConfigKeys();
+            if (keys.Count > 0)
+            {
+                Console.WriteLine($"Config keys:");
+                foreach (var k in keys)
+                {
+                    Console.WriteLine($"- {k}");
+                }
+
+                Console.WriteLine();
+            }
         }
     }
 }

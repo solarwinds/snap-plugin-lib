@@ -26,12 +26,12 @@ namespace SnapPluginLib
 
         private static void LoadHandlerFn(string taskId)
         {
-            _collector.Load();
+            _collector.Load(new Context(taskId));
         }
 
         private static void UnloadHandlerFn(string taskId)
         {
-            _collector.Unload();
+            _collector.Unload(new Context(taskId));
         }
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]

@@ -26,8 +26,7 @@ namespace SnapPluginLib
 
         public IList<string> ConfigKeys()
         {
-            var ptr = CBridge.ctx_config_keys(TaskId);
-            return new List<string>(); // todo: how to process char **
+            return Convertions.NativeStringArrayToList(CBridge.ctx_config_keys(TaskId));
         }
 
         public string RawConfig()

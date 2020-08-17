@@ -6,6 +6,7 @@ namespace SnapPluginLib
 {
     internal static class Convertions
     {
+        // Conversion: Dictionary<string, string> -> map_t* (NativeMap)
         public static IntPtr DictionaryToNativeMapMem(Dictionary<string, string> dictionary)
         {
             var nativeMap = new NativeMap
@@ -31,6 +32,23 @@ namespace SnapPluginLib
             Marshal.StructureToPtr(nativeMap, nativeMapAsMemBlock, false);
 
             return nativeMapAsMemBlock;
+        }
+        
+        // Conversion: char** -> List<string>
+        public static List<string> NativeStringArrayToList(IntPtr arrPtr)
+        {
+            var requestedMetrics = new List<string>();
+
+            for (int offset = 0;; offset += 8)
+            {
+                var charPtr = Marshal.ReadIntPtr(arrPtr + offset);
+                if (charPtr == IntPtr.Zero)
+                    break;
+
+                requestedMetrics.Add(Marshal.PtrToStringAnsi(charPtr));
+            }
+            
+            return requestedMetrics;
         }
     }
 }
