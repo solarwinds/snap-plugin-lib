@@ -27,7 +27,7 @@ namespace SnapPluginLib
         internal static extern int ctx_should_process(string taskId, string ns);
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern IList<string> ctx_requested_metrics(string taskId);
+        internal static extern IntPtr ctx_requested_metrics(string taskId);
         
         // Context related functions
         

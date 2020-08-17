@@ -28,7 +28,7 @@ namespace CollectorExample
                 {"virtualization", "VirtualBox"}
             }));
 
-            ctx.AddMetric("/example/group1/metric", 12.4,
+            ctx.AddMetric("/example/group1/metric1", 12.4,
                 Modifiers.Tags(new Dictionary<string, string>
                 {
                     {"origin", "C# lang"},
@@ -50,6 +50,12 @@ namespace CollectorExample
             {
                 ctx.AddMetric("/example/group2/m4", true);
             }
+
+            foreach (var el in ctx.RequestedMetrics())
+            {
+                Console.WriteLine(el);
+            }
+
 
             // var cTest = ctx.Config("test");
             // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");

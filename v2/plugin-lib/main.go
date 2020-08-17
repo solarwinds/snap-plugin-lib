@@ -159,18 +159,10 @@ func boolToInt(v bool) int {
 }
 
 func toGoMap(m *C.map_t) map[string]string {
-	fmt.Printf("toGoMap\n")
-
 	tagsMap := map[string]string{}
 	for i := 0; i < int(C.get_map_length(m)); i++ {
-		fmt.Printf("toGoMap %v\n", i)
-
 		k := C.GoString(C.get_map_key(m, C.int(i)))
-		fmt.Printf("toGoMap %v\n", k)
-
 		v := C.GoString(C.get_map_value(m, C.int(i)))
-		fmt.Printf("toGoMap %v\n", v)
-
 		tagsMap[k] = v
 	}
 	return tagsMap
@@ -217,12 +209,10 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	}
 
 	if modifiers.tags_to_add != nil {
-		fmt.Printf("toGoMap(modifiers.tags_to_add)=%#v\n", toGoMap(modifiers.tags_to_add))
 		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_add)))
 	}
 
 	if modifiers.tags_to_remove != nil {
-		fmt.Printf("toGoMap(modifiers.tags_to_remove)=%#v\n", toGoMap(modifiers.tags_to_remove))
 		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_remove)))
 	}
 
@@ -232,12 +222,10 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 	}
 
 	if modifiers.description != nil {
-		fmt.Printf("C.GoString(modifiers.description)=%#v\n", C.GoString(modifiers.description))
 		appliedModifiers = append(appliedModifiers, plugin.MetricDescription(C.GoString(modifiers.description)))
 	}
 
 	if modifiers.unit != nil {
-		fmt.Printf("C.GoString(modifiers.unit)=%#v\n", C.GoString(modifiers.unit))
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(modifiers.unit)))
 	}
 
@@ -276,9 +264,6 @@ func dealloc_error(p *C.error_t) {
 
 //export ctx_add_metric
 func ctx_add_metric(ctxID *C.char, ns *C.char, v *C.value_t, modifiers *C.modifiers_t) *C.error_t {
-	fmt.Printf("GO: ctx_add_metric\n")
-	fmt.Printf("val=%#v\n", toGoValue(v));
-
 	err := contextObject(ctxID).AddMetric(C.GoString(ns), toGoValue(v), toGoModifiers(modifiers)...)
 	return toCError(err)
 }
@@ -431,15 +416,11 @@ func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) err
 	ctxAsType := ctx.(*proxy.PluginContext)
 	taskID := ctxAsType.TaskID()
 
-	fmt.Printf("Storing taskID=%#v\n", taskID)
-
 	contextMap.Store(taskID, ctxAsType)
 	defer contextMap.Delete(taskID)
 
 	taskIDasPtr := C.CString(taskID)
-	fmt.Printf("Calling callback\n")
 	C.call_c_callback(callback, taskIDasPtr)
-	fmt.Printf("Calling callback END\n")
 
 	dealloc_charp(taskIDasPtr)
 
