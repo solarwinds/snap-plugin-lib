@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace SnapPluginLib
 {
@@ -85,21 +84,21 @@ namespace SnapPluginLib
 
         public IList<string> RequestedMetrics()
         {
-            var ptr = CBridge.ctx_requested_metrics(TaskId);
-            
-            var ptr2 = Marshal.ReadIntPtr(ptr);
+            var requestedMetrics = new List<string>();
+            IntPtr arrPtr = CBridge.ctx_requested_metrics(TaskId);
 
-            var f1 = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(ptr));
-            var f2 = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(ptr+8));
-            var f3 = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(ptr+16));
+            for (int offset = 0;; offset += 8)
+            {
+                var charPtr = Marshal.ReadIntPtr(arrPtr + offset);
+                if (charPtr == IntPtr.Zero)
+                    break;
 
-            Console.WriteLine(f1);
-            Console.WriteLine(f2);
-            Console.WriteLine(f3);
-            
-            return new List<string>();
+                requestedMetrics.Add(Marshal.PtrToStringAnsi(charPtr));
+            }
+
+            return requestedMetrics;
         }
-        
+
         private NativeModifiers ToNativeModifiers(params IPublicModifier[] modifiers)
         {
             var nativeModifiers = new NativeModifiers();
