@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SnapPluginLib
 {
@@ -62,6 +63,16 @@ namespace SnapPluginLib
 
         private void AddMetric(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
         {
+            CBridge.ctx_add_metric(TaskId, ns, nativeValue, ToNativeModifiers(modifiers));
+        }
+
+        public void AlwaysApply(string ns, params IPublicModifier[] modifiers)
+        {
+            CBridge.ctx_always_apply(TaskId, ns, ToNativeModifiers(modifiers));
+        }
+
+        private NativeModifiers ToNativeModifiers(params IPublicModifier[] modifiers)
+        {
             var nativeModifiers = new NativeModifiers();
 
             foreach (var m in modifiers)
@@ -69,11 +80,7 @@ namespace SnapPluginLib
                 ((IModifier) m).Apply(nativeModifiers);
             }
 
-            CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
-        }
-
-        public void AlwaysApply(string ns)
-        {
+            return nativeModifiers;
         }
 
         public void DismissAllModifiers()

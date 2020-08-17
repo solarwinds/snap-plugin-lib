@@ -9,7 +9,7 @@ namespace SnapPluginLib
         void AddMetric(string ns, int value, params IPublicModifier[] modifiers);
         void AddMetric(string ns, uint value, params IPublicModifier[] modifiers);
         void AddMetric(string ns, bool value, params IPublicModifier[] modifiers);
-        void AlwaysApply(string ns);
+        void AlwaysApply(string ns, params IPublicModifier[] modifiers);
         void DismissAllModifiers();
         void ShouldProcess(string ns);
         IList<string> RequestedMetrics();

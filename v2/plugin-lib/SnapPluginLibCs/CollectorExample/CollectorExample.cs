@@ -23,8 +23,11 @@ namespace CollectorExample
 
         public override void Collect(ICollectContext ctx)
         {
-            Console.WriteLine("C# Collect executed");
-
+            ctx.AlwaysApply("/example/group1/*", Modifiers.Tags(new Dictionary<string, string>
+            {
+                {"virtualization", "VirtualBox"}
+            }));
+            
             ctx.AddMetric("/example/group1/metric", 12.4,
                 Modifiers.Tags(new Dictionary<string, string>
                 {
@@ -34,7 +37,7 @@ namespace CollectorExample
                 Modifiers.TagsToRemove(new Dictionary<string, string>
                 {
                     {"origin", "C# lang"}
-                }),
+                }), // todo: adamik: why lib can't remove it
                 Modifiers.Description("new custom description"),
                 Modifiers.Unit("new custom unit")
                 // Modifiers.Timestamp(DateTime.Now) // todo: adamik: doesn't work - why
@@ -42,8 +45,8 @@ namespace CollectorExample
 
             ctx.AddMetric("/example/group1/m2", 20);
             ctx.AddMetric("/example/group1/m3", (uint) 30);
-            ctx.AddMetric("/example/group1/m4", true);
-            
+            ctx.AddMetric("/example/group2/m4", true);
+
             // var cTest = ctx.Config("test");
             // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");
             //
