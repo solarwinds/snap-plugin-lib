@@ -47,4 +47,10 @@ namespace SnapPluginLib
         // Std values
         [FieldOffset(8)] public int vtype;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal class NativeError
+    {
+        public string errorMessage;
+    }
 }

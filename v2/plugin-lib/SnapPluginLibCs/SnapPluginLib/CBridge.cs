@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
@@ -14,11 +13,12 @@ namespace SnapPluginLib
         // Collect context related functions
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue,
-            NativeModifiers nativeModifiers);
+        internal static extern IntPtr /* NativeError */
+            ctx_add_metric(string taskId, string ns, NativeValue nativeValue, NativeModifiers nativeModifiers);
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern void ctx_always_apply(string taskId, string ns, NativeModifiers nativeModifiers);
+        internal static extern IntPtr /* NativeError */
+            ctx_always_apply(string taskId, string ns, NativeModifiers nativeModifiers);
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void ctx_dismiss_all_modifiers(string taskId);
@@ -55,7 +55,7 @@ namespace SnapPluginLib
         internal static extern void define_group(string name, string description);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern void define_example_config(string config); // todo: adamik: handle return error
+        internal static extern IntPtr /* NativeError */ define_example_config(string config);
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_tasks_per_instance_limit(int limit);

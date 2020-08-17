@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
@@ -16,7 +17,8 @@ namespace SnapPluginLib
 
         public void DefineExampleConfig(string config)
         {
-            CBridge.define_example_config(config);
+            var errPtr = CBridge.define_example_config(config);
+            Exceptions.ThrowExceptionIfError(errPtr);
         }
 
         public void DefineTaskPerInstanceLimit(int limit)

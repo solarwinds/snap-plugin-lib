@@ -62,12 +62,14 @@ namespace SnapPluginLib
 
         private void AddMetric(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
         {
-            CBridge.ctx_add_metric(TaskId, ns, nativeValue, ToNativeModifiers(modifiers));
+            var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, ToNativeModifiers(modifiers));
+            Exceptions.ThrowExceptionIfError(errPtr);
         }
 
         public void AlwaysApply(string ns, params IPublicModifier[] modifiers)
         {
-            CBridge.ctx_always_apply(TaskId, ns, ToNativeModifiers(modifiers));
+            var errPtr = CBridge.ctx_always_apply(TaskId, ns, ToNativeModifiers(modifiers));
+            Exceptions.ThrowExceptionIfError(errPtr);
         }
 
         public void DismissAllModifiers()
