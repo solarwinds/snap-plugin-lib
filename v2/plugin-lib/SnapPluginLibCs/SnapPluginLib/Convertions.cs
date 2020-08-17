@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
-    public class Convertions
+    internal static class Convertions
     {
         public static IntPtr DictionaryToNativeMapMem(Dictionary<string, string> dictionary)
         {

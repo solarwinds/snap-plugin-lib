@@ -16,7 +16,7 @@ namespace SnapPluginLib
 
         public string Config(string key)
         {
-            var ptr = ctx_config(TaskId, key);
+            var ptr = CBridge.ctx_config(TaskId, key);
 
             if (ptr != IntPtr.Zero)
                 return Marshal.PtrToStringAnsi(ptr);
@@ -26,13 +26,13 @@ namespace SnapPluginLib
 
         public IList<string> ConfigKeys()
         {
-            var ptr = ctx_config_keys(TaskId);
+            var ptr = CBridge.ctx_config_keys(TaskId);
             return new List<string>(); // todo: how to process char **
         }
 
         public string RawConfig()
         {
-            var ptr = ctx_raw_config(TaskId);
+            var ptr = CBridge.ctx_raw_config(TaskId);
 
             if (ptr != IntPtr.Zero)
                 return Marshal.PtrToStringAnsi(ptr);
@@ -53,12 +53,13 @@ namespace SnapPluginLib
 
         public void AddWarning(string message)
         {
-            ctx_add_warning(TaskId, message);
+            CBridge.ctx_add_warning(TaskId, message);
         }
 
 
         public void Log(int level, string message, Dictionary<string, string> fields)
         {
+            // todo: adamik: make more common with conversion function
             var m = new NativeMap();
             m.length = fields.Count;
             m.elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * fields.Count);
@@ -76,26 +77,12 @@ namespace SnapPluginLib
                 i++;
             }
 
-            ctx_log(TaskId, 1, message, m);
+            CBridge.ctx_log(TaskId, 1, message, m);
 
             Marshal.FreeHGlobal(m.elements);
         }
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr ctx_config(string taskId, string key);
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr ctx_config_keys(string taskId);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr ctx_raw_config(string taskId);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern string ctx_add_warning(string taskId, string message);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern string
-            ctx_log(string taskId, int level, string message, NativeMap fields);
     }
 
     

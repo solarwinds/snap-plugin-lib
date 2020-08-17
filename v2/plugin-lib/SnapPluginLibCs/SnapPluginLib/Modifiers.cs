@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
@@ -18,9 +19,9 @@ namespace SnapPluginLib
             return new MetricRemoveTags(tags);
         }
 
-        public static IPublicModifier Timestamp()
+        public static IPublicModifier Timestamp(DateTime dt)
         {
-            return new MetricTimestamp();
+            return new MetricTimestamp(dt);
         }
 
         public static IPublicModifier Description(string description)
@@ -66,9 +67,23 @@ namespace SnapPluginLib
 
     internal class MetricTimestamp : IModifier, IPublicModifier
     {
+        const int MilliToNanoFactor = (int) 1e6;
+
+        public MetricTimestamp(DateTime timestamp)
+        {
+            _timestamp = timestamp;
+        }
+
         public void Apply(NativeModifiers nModifier)
         {
+            nModifier.timestamp = new NativeTimeWithNs
+            {
+                sec = _timestamp.Second,
+                nsec = _timestamp.Millisecond * MilliToNanoFactor
+            };
         }
+
+        private readonly DateTime _timestamp;
     }
 
     internal class MetricDescription : IModifier, IPublicModifier

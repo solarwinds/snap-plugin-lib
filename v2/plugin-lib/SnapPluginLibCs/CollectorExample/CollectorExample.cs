@@ -36,11 +36,13 @@ namespace CollectorExample
                     {"origin", "C# lang"}
                 }),
                 Modifiers.Description("new custom description"),
-                Modifiers.Unit(("new custom unit")),
-                Modifiers.Timestamp()
-                );
-            
-            Console.WriteLine("C# Collect completed");
+                Modifiers.Unit("new custom unit")
+                // Modifiers.Timestamp(DateTime.Now) // todo: adamik: doesn't work - why
+            );
+
+            ctx.AddMetric("/example/group1/m2", 20);
+            ctx.AddMetric("/example/group1/m3", (uint) 30);
+            ctx.AddMetric("/example/group1/m4", true);
             
             // var cTest = ctx.Config("test");
             // Console.WriteLine($"USERCOLLECT:ctxConfig : {cTest}");

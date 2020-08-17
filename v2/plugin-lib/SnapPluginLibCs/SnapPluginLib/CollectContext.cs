@@ -1,21 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
     internal class CollectContext : Context, ICollectContext
     {
+        private enum ValueType
+        {
+            TypeInt64 = 1,
+            TypeUint64,
+            TypeDouble,
+            TypeBool,
+        }
+
         public CollectContext(string taskId) : base(taskId)
         {
         }
 
+        public void AddMetric(string ns, int value, params IPublicModifier[] modifiers)
+        {
+            var nativeValue = new NativeValue
+            {
+                v_int64 = value,
+                vtype = (int) ValueType.TypeInt64
+            };
+
+            AddMetric(ns, nativeValue, modifiers);
+        }
+
+        public void AddMetric(string ns, uint value, params IPublicModifier[] modifiers)
+        {
+            var nativeValue = new NativeValue
+            {
+                v_uint64 = value,
+                vtype = (int) ValueType.TypeUint64
+            };
+
+            AddMetric(ns, nativeValue, modifiers);
+        }
+
         public void AddMetric(string ns, double value, params IPublicModifier[] modifiers)
         {
-            var nativeValue = new NativeValue();
-            nativeValue.v_double = value;
-            nativeValue.vtype = 3; // todo: adamik: make enums
-            
+            var nativeValue = new NativeValue
+            {
+                v_double = value,
+                vtype = (int) ValueType.TypeDouble
+            };
+
+            AddMetric(ns, nativeValue, modifiers);
+        }
+
+        public void AddMetric(string ns, bool value, params IPublicModifier[] modifiers)
+        {
+            var nativeValue = new NativeValue
+            {
+                v_bool = value ? 1 : 0,
+                vtype = (int) ValueType.TypeBool
+            };
+
+            AddMetric(ns, nativeValue, modifiers);
+        }
+
+        private void AddMetric(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
+        {
             var nativeModifiers = new NativeModifiers();
 
             foreach (var m in modifiers)
@@ -23,9 +69,7 @@ namespace SnapPluginLib
                 ((IModifier) m).Apply(nativeModifiers);
             }
 
-            Console.WriteLine($"%%%%%%%%%%%%% DESC: {nativeModifiers.description}");
-            
-            ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
+            CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
         }
 
         public void AlwaysApply(string ns)
@@ -44,21 +88,5 @@ namespace SnapPluginLib
         {
             return new List<string>();
         }
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_add_metric(string taskId, string ns, NativeValue nativeValue,
-            NativeModifiers nativeModifiers);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_always_apply(string taskId, string ns, NativeModifiers nativeModifiers);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern void ctx_dismiss_all_modifiers(string taskId);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern int ctx_should_process(string taskId, string ns);
-
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IList<string> ctx_requested_metrics(string taskId);
     }
 }
