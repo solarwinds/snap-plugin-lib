@@ -7,12 +7,13 @@ namespace SnapPluginLib
     public class Context : IContext
     {
         protected string TaskId { get; }
+        private Dictionary<string, object> _storedObjects;
 
         public Context(string taskId)
         {
             TaskId = taskId;
+            _storedObjects = new Dictionary<string, object>();
         }
-
 
         public string Config(string key)
         {
@@ -41,13 +42,24 @@ namespace SnapPluginLib
 
         public void Store(string key, object obj)
         {
-            // todo: adamik: implement
+            if (_storedObjects.ContainsKey(key))
+            {
+                _storedObjects.Remove(key);
+            }
+            
+            _storedObjects.Add(key, obj);
         }
 
-        public object Load(string key)
+        public T Load<T>(string key)
         {
-            // todo: adamik: implement
-            return null;
+            try
+            {
+                return (T) _storedObjects[key];
+            }
+            catch (Exception e)
+            {
+                throw new PluginLibException($"Can't load object ({key}): " + e.Message);
+            }
         }
 
         public void AddWarning(string message)

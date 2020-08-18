@@ -23,13 +23,32 @@ namespace CollectorExample
 
         public override void Collect(ICollectContext ctx)
         {
-            ctx.AddWarning("Warning from C#");
-
+            
+            // Load object from memory
+            var obj = ctx.Load<Dictionary<string, int>>("stored_object");
+            obj["counter"]++;
+            ctx.Store("stored_object", obj);
+            
+            // Log messages with information from stored object
             ctx.Log(LogLevel.Info, "Log message from C#", new Dictionary<string, string>
             {
-                {"language", "c#"}, {"function", "Collect"}
+                {"language", "c#"}, 
+                {"counter", $"{obj["counter"]}"}
             });
+            ctx.AddWarning("Warning from C#");
+            
+            // List requested metrics
+            var reqMts = ctx.RequestedMetrics();
+            if (reqMts.Count > 0)
+            {
+                Console.WriteLine("Requested metrics: ");
+                foreach (var mt in reqMts)
+                {
+                    Console.WriteLine($"- {mt}");
+                }
+            }
 
+            // Add metrics
             ctx.AlwaysApply("/example/group1/*", Modifiers.Tags(new Dictionary<string, string>
             {
                 {"virtualization", "VirtualBox"}
@@ -41,31 +60,15 @@ namespace CollectorExample
                     {"origin", "C# lang"},
                     {"system", "Windows"}
                 }),
-                Modifiers.TagsToRemove(new Dictionary<string, string>
-                {
-                    {"origin", "C# lang"}
-                }), // todo: adamik: why lib can't remove it
-                Modifiers.Description("new custom description"),
-                Modifiers.Unit("new custom unit")
-                // Modifiers.Timestamp(DateTime.Now) // todo: adamik: doesn't work - why
+                Modifiers.Description("new custom description")
             );
 
-            ctx.AddMetric("/example/group1/m2", 20);
-            ctx.AddMetric("/example/group1/m3", (uint) 30);
+            ctx.AddMetric("/example/group1/metric2", 20);
+            ctx.AddMetric("/example/group1/metric3", (uint) 30);
 
-            if (ctx.ShouldProcess("/example/group2/m4"))
+            if (ctx.ShouldProcess("/example/group2/metric4"))
             {
-                ctx.AddMetric("/example/group2/m4", true);
-            }
-
-            var reqMts = ctx.RequestedMetrics();
-            if (reqMts.Count > 0)
-            {
-                Console.WriteLine("Requested metrics: ");
-                foreach (var mt in reqMts)
-                {
-                    Console.WriteLine($"- {mt}");
-                }
+                ctx.AddMetric("/example/group2/metric4", true);
             }
         }
 
@@ -87,6 +90,14 @@ namespace CollectorExample
 
                 Console.WriteLine();
             }
+
+            // Store object for a later use
+            var obj = new Dictionary<string, int>
+            {
+                {"iteration", 20},
+                {"counter", 0}
+            };
+            ctx.Store("stored_object", obj);
         }
     }
 }

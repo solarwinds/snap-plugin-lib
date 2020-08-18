@@ -10,7 +10,7 @@ namespace SnapPluginLib
         string RawConfig();
 
         void Store(string key, Object obj);
-        Object Load(string key);
+        T Load<T>(string key);
 
         void AddWarning(string message);
         void Log(LogLevel level, string message, Dictionary<string, string> fields);
