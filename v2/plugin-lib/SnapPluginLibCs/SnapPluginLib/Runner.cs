@@ -21,17 +21,17 @@ namespace SnapPluginLib
 
         private static void CollectHandlerFn(string taskId)
         {
-            _collector.Collect(new CollectContext(taskId));
+            _collector.Collect(ContextMemory.Get(taskId));
         }
 
         private static void LoadHandlerFn(string taskId)
         {
-            _collector.Load(new Context(taskId));
+            _collector.Load(ContextMemory.Get(taskId));
         }
 
         private static void UnloadHandlerFn(string taskId)
         {
-            _collector.Unload(new Context(taskId));
+            _collector.Unload(ContextMemory.Get(taskId));
         }
 
         [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
@@ -47,7 +47,7 @@ namespace SnapPluginLib
         public static void StartCollector(PluginBase collector)
         {
             _collector = collector;
-
+            
             start_collector(
                 CollectHandlerFn, LoadHandlerFn, UnloadHandlerFn, DefineHandlerFn,
                 collector.Name, collector.Version);
