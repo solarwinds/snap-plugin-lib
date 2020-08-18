@@ -13,17 +13,18 @@ namespace CollectorExample
         public override void DefinePlugin(IDefineContext def)
         {
             var exampleConfigYaml = "value: 113\nother: 142";
-
-            // def.DefineMetric("/example/group1/metric1", "o", false, "metric description");
-            // def.DefineGroup("dynGroup", "dyn group description");
             def.DefineExampleConfig(exampleConfigYaml);
-            // def.DefineInstancesLimit(5);
-            // def.DefineTaskPerInstanceLimit(10);
+            def.DefineInstancesLimit(5);
+            def.DefineTaskPerInstanceLimit(10);
+            
+            def.DefineMetric("/example/group1/metric1", "b", false, "metric1 description");
+            def.DefineMetric("/example/group1/metric2", "b", false, "metric2 description");
+            def.DefineMetric("/example/group1/metric3", "b", false, "metric3 description");
+            def.DefineMetric("/example/group2/metric4", "b", false, "metric4 description");
         }
 
         public override void Collect(ICollectContext ctx)
         {
-            
             // Load object from memory
             var obj = ctx.Load<Dictionary<string, int>>("stored_object");
             obj["counter"]++;
