@@ -70,7 +70,9 @@ namespace SnapPluginLib
 
         public void Log(LogLevel level, string message, Dictionary<string, string> fields)
         {
-            CBridge.ctx_log(TaskId, (int) level, message, Convertions.DictionaryToNativeMapMem(fields));
+            var nativeMapPtr = Convertions.DictionaryToNativeMapMem(fields);
+            CBridge.ctx_log(TaskId, (int) level, message, nativeMapPtr);
+            Memory.FreeNativeMap(nativeMapPtr);
         }
     }
 }

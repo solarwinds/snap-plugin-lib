@@ -10,6 +10,18 @@ namespace SnapPluginLib
     {
         private const string PluginLibDllPath = "plugin-lib.dll";
 
+        // Runner
+        
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
+        internal static extern void start_collector(
+            Runner.CollectHandler collectHandler,
+            Runner.LoadHandler loadHandler,
+            Runner.UnloadHandler unloadHandler,
+            Runner.DefineHandler defineHandler,
+            string name,
+            string version
+        );
+        
         // Collect context related functions
 
         [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
@@ -48,19 +60,19 @@ namespace SnapPluginLib
 
         // DefinePlugin related functions 
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_metric(string ns, string unit, int idDefault, string description);
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_group(string name, string description);
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr /* NativeError */ define_example_config(string config);
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_tasks_per_instance_limit(int limit);
 
-        [DllImport("plugin-lib.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport(PluginLibDllPath, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_instances_limit(int limit);
     }
 }
