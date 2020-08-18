@@ -1,69 +1,29 @@
 import math
-from ctypes import Structure, Union, c_char_p, c_longlong, c_ulonglong, c_double, c_int, POINTER, pointer
+from ctypes import (
+    c_longlong,
+    c_ulonglong,
+    c_float,
+    c_double,
+    c_int,
+    pointer,
+)
 from itertools import count
+from .snap_ctypes import (
+    Map,
+    MapElement,
+    TimeWithNs,
+    CValue,
+    TYPE_INT64,
+    TYPE_UINT64,
+    TYPE_FLOAT,
+    TYPE_DOUBLE,
+    TYPE_BOOL,
+    max_int,
+    max_uint,
+    min_int,
+)
 
 from .exceptions import PluginLibException
-
-min_int = -9223372036854775807
-max_int = 9223372036854775807
-max_uint = 18446744073709551615
-
-_, TYPE_INT64, TYPE_UINT64, TYPE_DOUBLE, TYPE_BOOL = range(5)
-_, LOGLEVEL_PANIC, LOGLEVEL_FATAL, LOGLEVEL_ERROR, LOGLEVEL_WARN, \
-    LOGLEVEL_INFO, LOGLEVEL_DEBUG, LOGLEVEL_TRACE = range(8)
-
-
-class MapElement(Structure):
-    _fields_ = [
-        ("key", c_char_p),
-        ("value", c_char_p)
-    ]
-
-
-class Map(Structure):
-    _fields_ = [
-        ("elements", POINTER(MapElement)),
-        ("length", c_int)
-    ]
-
-
-class TimeWithNs(Structure):
-    _fields_ = [
-        ("sec", c_int),
-        ("nsec", c_int)
-    ]
-
-
-class Modifiers(Structure):
-    _fields_ = [
-        ("tags_to_add", POINTER(Map)),
-        ("tags_to_remove", POINTER(Map)),
-        ("timestamp", POINTER(TimeWithNs)),
-        ("description", c_char_p),
-        ("unit", c_char_p)
-    ]
-
-
-class CError(Structure):
-    _fields_ = [
-        ("msg", c_char_p)
-    ]
-
-
-class ValueUnion(Union):
-    _fields_ = [
-        ("v_int64", c_longlong),
-        ("v_uint64", c_ulonglong),
-        ("v_double", c_double),
-        ("v_bool", c_int),
-    ]
-
-
-class CValue(Structure):
-    _fields_ = [
-        ("value", ValueUnion),
-        ("v_type", c_int)
-    ]
 
 
 def string_to_bytes(s):
@@ -74,7 +34,7 @@ def string_to_bytes(s):
     """
 
     if isinstance(s, type("")):
-        return bytes(s, 'utf-8')
+        return bytes(s, "utf-8")
     elif isinstance(s, type(b"")):
         return s
     else:
@@ -95,13 +55,24 @@ def dict_to_cmap(d):
     return pointer(cmap)
 
 
+def cmap_to_dict(cmap_ptr):
+    """Converts C map pointer to python dict"""
+    map_len = cmap_ptr.contents.length
+    _map = dict()
+    if map_len != 0:
+        for i in range(map_len):
+            el = cmap_ptr.contents.elements[i]
+            _map[el.key.decode(encoding="utf-8")] = el.value.decode(encoding="utf-8")
+    return _map
+
+
 def cstrarray_to_list(arr):
     """Converts C **char to Python list"""
     result_list = []
     for i in count(0):
         if arr[i] is None:
             break
-        result_list.append(arr[i].decode(encoding='utf-8'))
+        result_list.append(arr[i].decode(encoding="utf-8"))
 
     return result_list
 
@@ -110,6 +81,12 @@ def time_to_ctimewithns(timestamp):
     sec = int(math.floor(timestamp))
     nsec = int(math.floor(timestamp - sec) * 1e9)
     return pointer(TimeWithNs(sec, nsec))
+
+
+def ctimewithns_to_time(ctime_ptr):
+    sec = ctime_ptr.contents.sec
+    nsec = ctime_ptr.contents.nsec / 1e9
+    return sec + nsec
 
 
 def to_value_t(v):
@@ -137,3 +114,23 @@ def to_value_t(v):
         raise PluginLibException("invalid metric value type")
 
     return val_ptr
+
+
+def unpack_value_t(val_ptr):
+    v_type = val_ptr.contents.v_type
+    if v_type == TYPE_DOUBLE:
+        value = val_ptr.contents.value.v_double
+        unit = float
+    elif v_type == TYPE_FLOAT:
+        value = val_ptr.contents.value.v_float
+        unit = float
+    elif v_type == TYPE_BOOL:
+        value = val_ptr.contents.value.v_bool
+        unit = bool
+    elif v_type == TYPE_INT64:
+        value = val_ptr.contents.value.v_int64
+        unit = int
+    elif v_type == TYPE_UINT64:
+        value = val_ptr.contents.value.v_uint64
+        unit = int
+    return (value, unit)
