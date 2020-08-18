@@ -112,7 +112,17 @@ _go_race() {
 }
 
 _copyrights() {
-  for f in $(_test_files); do echo $f; grep "Copyright (c) $(date +"%Y") SolarWinds Worldwide, LLC" $f 1> /dev/null || echo "ERROR: Wrong copyright header: $f" && false ; done
+  copyright_error=0
+  for f in $(_test_files); 
+  do 
+    # echo "Testing $f"
+    lastmod=$(git log -1 --pretty="format:%ci" $f)
+    year=${lastmod:0:4}
+    # grep -q "Copyright (c) ${year} SolarWinds Worldwide, LLC" $f | tee /dev/stderr || echo "ERROR: Wrong copyright header: $f" && false
+    grep -q "Copyright (c) ${year} SolarWinds Worldwide, LLC" $f | tee /dev/stderr || echo "ERROR: Wrong copyright header: $f" && copyright_error=1
+  done;
+
+  if [[ $copyright_error -eq 1 ]]; then echo "Wrong copyrights"; false; fi
 }
 
 _go_test() {
