@@ -8,7 +8,11 @@ namespace SnapPluginLib
      */
     internal static class CBridge
     {
+        #if _WINDOWS
         private const string PluginLibDllName = "plugin-lib.dll";
+        #else
+        private const string PluginLibDllName = "plugin-lib.so";
+        #endif        
 
         // Runner
         
