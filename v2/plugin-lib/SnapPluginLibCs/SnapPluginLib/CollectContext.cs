@@ -16,7 +16,7 @@ namespace SnapPluginLib
         {
         }
 
-        public void AddMetric(string ns, int value, params IPublicModifier[] modifiers)
+        public void AddMetric(string ns, int value, params Modifier[] modifiers)
         {
             var nativeValue = new NativeValue
             {
@@ -27,7 +27,7 @@ namespace SnapPluginLib
             AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
-        public void AddMetric(string ns, uint value, params IPublicModifier[] modifiers)
+        public void AddMetric(string ns, uint value, params Modifier[] modifiers)
         {
             var nativeValue = new NativeValue
             {
@@ -38,7 +38,7 @@ namespace SnapPluginLib
             AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
-        public void AddMetric(string ns, double value, params IPublicModifier[] modifiers)
+        public void AddMetric(string ns, double value, params Modifier[] modifiers)
         {
             var nativeValue = new NativeValue
             {
@@ -49,7 +49,7 @@ namespace SnapPluginLib
             AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
-        public void AddMetric(string ns, bool value, params IPublicModifier[] modifiers)
+        public void AddMetric(string ns, bool value, params Modifier[] modifiers)
         {
             var nativeValue = new NativeValue
             {
@@ -60,7 +60,7 @@ namespace SnapPluginLib
             AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
-        public void AlwaysApply(string ns, params IPublicModifier[] modifiers)
+        public void AlwaysApply(string ns, params Modifier[] modifiers)
         {
             var nativeModifiers = ToNativeModifiers(modifiers);
             var errPtr = CBridge.ctx_always_apply(TaskId, ns, nativeModifiers);
@@ -84,7 +84,7 @@ namespace SnapPluginLib
             return Convertions.NativeStringArrayToList(CBridge.ctx_requested_metrics(TaskId));
         }
         
-        private void AddMetricWithNativeValue(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
+        private void AddMetricWithNativeValue(string ns, NativeValue nativeValue, params Modifier[] modifiers)
         {
             var nativeModifiers = ToNativeModifiers(modifiers);
             var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
@@ -93,7 +93,7 @@ namespace SnapPluginLib
             Exceptions.ThrowExceptionIfError(errPtr);
         }
 
-        private NativeModifiers ToNativeModifiers(params IPublicModifier[] modifiers)
+        private NativeModifiers ToNativeModifiers(params Modifier[] modifiers)
         {
             var nativeModifiers = new NativeModifiers();
 

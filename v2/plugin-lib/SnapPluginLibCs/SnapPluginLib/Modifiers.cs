@@ -3,39 +3,40 @@ using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
-    public interface IPublicModifier
+    public abstract class Modifier
     {
+        internal Modifier() {}
     }
 
     public static class Modifiers
     {
-        public static IPublicModifier Tags(Dictionary<string, string> tags)
+        public static Modifier Tags(Dictionary<string, string> tags)
         {
             return new MetricTags(tags);
         }
 
-        public static IPublicModifier TagsToRemove(Dictionary<string, string> tags)
+        public static Modifier TagsToRemove(Dictionary<string, string> tags)
         {
             return new MetricRemoveTags(tags);
         }
 
-        public static IPublicModifier Timestamp(DateTime dt)
+        public static Modifier Timestamp(DateTime dt)
         {
             return new MetricTimestamp(dt);
         }
 
-        public static IPublicModifier Description(string description)
+        public static Modifier Description(string description)
         {
             return new MetricDescription(description);
         }
 
-        public static IPublicModifier Unit(string unit)
+        public static Modifier Unit(string unit)
         {
             return new MetricUnit(unit);
         }
     }
 
-    internal class MetricTags : IModifier, IPublicModifier
+    internal class MetricTags : Modifier, IModifier 
     {
         public MetricTags(Dictionary<string, string> tags)
         {
@@ -50,7 +51,7 @@ namespace SnapPluginLib
         private readonly Dictionary<string, string> _tagsToAdd;
     }
 
-    internal class MetricRemoveTags : IModifier, IPublicModifier
+    internal class MetricRemoveTags : Modifier, IModifier 
     {
         public MetricRemoveTags(Dictionary<string, string> tags)
         {
@@ -65,7 +66,7 @@ namespace SnapPluginLib
         private readonly Dictionary<string, string> _tags;
     }
 
-    internal class MetricTimestamp : IModifier, IPublicModifier
+    internal class MetricTimestamp : Modifier, IModifier 
     {
         const int MilliToNanoFactor = (int) 1e6;
 
@@ -86,7 +87,7 @@ namespace SnapPluginLib
         private readonly DateTime _timestamp;
     }
 
-    internal class MetricDescription : IModifier, IPublicModifier
+    internal class MetricDescription : Modifier, IModifier 
     {
         public MetricDescription(string description)
         {
@@ -101,7 +102,7 @@ namespace SnapPluginLib
         private readonly string _description;
     }
 
-    internal class MetricUnit : IModifier, IPublicModifier
+    internal class MetricUnit : Modifier, IModifier 
     {
         public MetricUnit(string unit)
         {
