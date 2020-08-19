@@ -24,7 +24,7 @@ namespace SnapPluginLib
                 vtype = (int) ValueType.TypeInt64
             };
 
-            AddMetric(ns, nativeValue, modifiers);
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
         public void AddMetric(string ns, uint value, params IPublicModifier[] modifiers)
@@ -35,7 +35,7 @@ namespace SnapPluginLib
                 vtype = (int) ValueType.TypeUint64
             };
 
-            AddMetric(ns, nativeValue, modifiers);
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
         public void AddMetric(string ns, double value, params IPublicModifier[] modifiers)
@@ -46,7 +46,7 @@ namespace SnapPluginLib
                 vtype = (int) ValueType.TypeDouble
             };
 
-            AddMetric(ns, nativeValue, modifiers);
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
         public void AddMetric(string ns, bool value, params IPublicModifier[] modifiers)
@@ -57,16 +57,7 @@ namespace SnapPluginLib
                 vtype = (int) ValueType.TypeBool
             };
 
-            AddMetric(ns, nativeValue, modifiers);
-        }
-
-        private void AddMetric(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
-        {
-            var nativeModifiers = ToNativeModifiers(modifiers);
-            var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
-            Memory.FreeNativeModifiers(nativeModifiers);
-            
-            Exceptions.ThrowExceptionIfError(errPtr);
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
         public void AlwaysApply(string ns, params IPublicModifier[] modifiers)
@@ -91,6 +82,15 @@ namespace SnapPluginLib
         public IList<string> RequestedMetrics()
         {
             return Convertions.NativeStringArrayToList(CBridge.ctx_requested_metrics(TaskId));
+        }
+        
+        private void AddMetricWithNativeValue(string ns, NativeValue nativeValue, params IPublicModifier[] modifiers)
+        {
+            var nativeModifiers = ToNativeModifiers(modifiers);
+            var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
+            Memory.FreeNativeModifiers(nativeModifiers);
+            
+            Exceptions.ThrowExceptionIfError(errPtr);
         }
 
         private NativeModifiers ToNativeModifiers(params IPublicModifier[] modifiers)
