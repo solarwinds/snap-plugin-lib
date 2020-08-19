@@ -15,9 +15,9 @@ namespace SnapPluginLib
             _storedObjects = new Dictionary<string, object>();
         }
 
-        public string Config(string key)
+        public string Config(string configKey)
         {
-            var ptr = CBridge.ctx_config(TaskId, key);
+            var ptr = CBridge.ctx_config(TaskId, configKey);
 
             if (ptr != IntPtr.Zero)
                 return Marshal.PtrToStringAnsi(ptr);
@@ -40,25 +40,25 @@ namespace SnapPluginLib
             return "";
         }
 
-        public void Store(string key, object obj)
+        public void Store(string objectKey, object obj)
         {
-            if (_storedObjects.ContainsKey(key))
+            if (_storedObjects.ContainsKey(objectKey))
             {
-                _storedObjects.Remove(key);
+                _storedObjects.Remove(objectKey);
             }
             
-            _storedObjects.Add(key, obj);
+            _storedObjects.Add(objectKey, obj);
         }
 
-        public T Load<T>(string key)
+        public T Load<T>(string objectKey)
         {
             try
             {
-                return (T) _storedObjects[key];
+                return (T) _storedObjects[objectKey];
             }
             catch (Exception e)
             {
-                throw new PluginLibException($"Can't load object ({key}): " + e.Message);
+                throw new PluginLibException($"Can't load object ({objectKey}): " + e.Message);
             }
         }
 
