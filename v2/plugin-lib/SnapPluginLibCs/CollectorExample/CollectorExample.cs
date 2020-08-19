@@ -4,7 +4,7 @@ using SnapPluginLib;
 
 namespace CollectorExample
 {
-    public class CollectorExample : PluginBase
+    public class CollectorExample : CollectorPluginBase
     {
         public CollectorExample(string name, string version) : base(name, version)
         {

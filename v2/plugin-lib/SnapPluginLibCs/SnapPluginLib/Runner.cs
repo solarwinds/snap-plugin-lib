@@ -4,7 +4,7 @@ namespace SnapPluginLib
 {
     public static class Runner
     {
-        private static PluginBase _collector;
+        private static CollectorPluginBase _collector;
 
         internal delegate void DefineHandler();
 
@@ -34,7 +34,7 @@ namespace SnapPluginLib
             _collector.Unload(ContextMemory.Get(taskId));
         }
 
-        public static void StartCollector(PluginBase collector)
+        public static void StartCollector(CollectorPluginBase collector)
         {
             _collector = collector;
 
