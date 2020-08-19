@@ -120,7 +120,7 @@ _copyrights() {
     
     wrong_header=0
     head -n 50 $f | grep -q "Copyright (c) ${year} SolarWinds Worldwide, LLC" || wrong_header=1
-    if [[ $wrong_header -eq 1 ]]; then 
+    if head -n 50 $f | grep -q "Copyright (c) ${year} SolarWinds Worldwide, LLC"; then 
         echo "ERROR: Wrong copyright header: $f" 
         copyright_error=1
     fi
