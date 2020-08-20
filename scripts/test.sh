@@ -60,7 +60,7 @@ lint() {
   # 3. golint        (https://github.com/golang/lint)
   # 4. go vet        (http://golang.org/cmd/vet)
   local go_analyzers
-  go_analyzers=(gofmt goimports golint go_vet)
+  go_analyzers=(gofmt goimports golint go_vet copyrights)
 
   ((n_elements=${#go_analyzers[@]}, max=n_elements - 1))
   for ((i = 0; i <= max; i++)); do

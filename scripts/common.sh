@@ -111,6 +111,22 @@ _go_race() {
   go test -race ./...
 }
 
+_copyrights() {
+  copyright_error=0
+  for f in $(_test_files)
+  do 
+    last_mod_time=$(git log -1 --pretty="format:%ci" $f)
+    year=${last_mod_time:0:4}
+    
+    if ! head -n 50 $f | grep -q "Copyright (c) ${year} SolarWinds Worldwide, LLC"; then 
+        echo "ERROR: Wrong copyright header: $f" 
+        copyright_error=1
+    fi
+  done
+
+  if [[ $copyright_error -eq 1 ]]; then _error "Wrong Copyright(s)"; fi
+}
+
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
   # Standard go tooling behavior is to ignore dirs with leading underscors
