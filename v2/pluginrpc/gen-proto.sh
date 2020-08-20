@@ -58,6 +58,7 @@ if ! which "protoc${ext}" &> /dev/null ; then
     curl -o protoc.zip -L $protoc_path -s
     unzip -p protoc.zip "bin/protoc${ext}" > "protoc${ext}"
     mv "protoc${ext}" $GOPATH/bin
+    chmod u+x $GOPATH/bin/"protoc${ext}"
     rm -f protoc.zip
 fi
 
@@ -75,6 +76,10 @@ fi
 
 echo "Generating pb.go files"
 protoc --go_out=plugins=grpc:. --grpchan_out=. "${proto_name}".proto
+if [[ $? -ne 0 ]]; then
+    echo "Can't generate pb.go files"
+    exit 1
+fi
 
 echo "Applying licence and modifications"
 echo -e "${licence}\n${linter_ignore}\n"  | cat - "${proto_name}.pb.go" > temp && mv temp "${proto_name}.pb.go"
