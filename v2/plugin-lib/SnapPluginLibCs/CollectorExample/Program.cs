@@ -8,7 +8,7 @@ namespace CollectorExample
     {
         static void Main(string[] args)
         {
-            Runner.StartCollector(new CollectorExample("collector-example", "v0.0.1"));
+            Runner.StartCollector(new CollectorExample("collector-example", new Version(0, 0, 1)));
         }
     }
 }

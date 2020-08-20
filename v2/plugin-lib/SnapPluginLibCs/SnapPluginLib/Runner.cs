@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
@@ -40,7 +41,7 @@ namespace SnapPluginLib
 
             CBridge.start_collector(
                 CollectHandlerFn, LoadHandlerFn, UnloadHandlerFn, DefineHandlerFn,
-                collector.Name, collector.Version);
+                collector.Name, Convertions.ToSemanticVersion(collector.Version));
         }
     }
 }

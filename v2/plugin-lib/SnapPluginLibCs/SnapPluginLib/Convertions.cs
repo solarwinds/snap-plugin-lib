@@ -33,7 +33,7 @@ namespace SnapPluginLib
 
             return nativeMapAsMemBlock;
         }
-        
+
         // Conversion: char** -> List<string>
         public static List<string> NativeStringArrayToList(IntPtr arrPtr)
         {
@@ -47,8 +47,16 @@ namespace SnapPluginLib
 
                 requestedMetrics.Add(Marshal.PtrToStringAnsi(charPtr));
             }
-            
+
             return requestedMetrics;
+        }
+
+        public static string ToSemanticVersion(Version version)
+        {
+            var buildVer = version.Build != -1 ? version.Build : 0;
+            var semanticVersion = $"{version.Major}.{version.Minor}.{buildVer}";
+
+            return semanticVersion;
         }
     }
 }

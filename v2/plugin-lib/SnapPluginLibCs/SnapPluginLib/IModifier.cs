@@ -6,6 +6,4 @@ namespace SnapPluginLib
     {
         void Apply(NativeModifiers nModifier);
     }
-
-
 }

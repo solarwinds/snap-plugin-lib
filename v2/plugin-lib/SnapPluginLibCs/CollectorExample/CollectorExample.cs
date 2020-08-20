@@ -6,7 +6,7 @@ namespace CollectorExample
 {
     public class CollectorExample : CollectorPluginBase
     {
-        public CollectorExample(string name, string version) : base(name, version)
+        public CollectorExample(string name, Version version) : base(name, version)
         {
         }
 

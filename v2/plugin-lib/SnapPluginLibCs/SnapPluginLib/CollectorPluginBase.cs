@@ -1,11 +1,13 @@
-﻿namespace SnapPluginLib
+﻿using System;
+
+namespace SnapPluginLib
 {
     public abstract class CollectorPluginBase
     {
         public string Name { get; }
-        public string Version { get; }
+        public Version Version { get; }
 
-        protected CollectorPluginBase(string name, string version)
+        protected CollectorPluginBase(string name, Version version)
         {
             Name = name;
             Version = version;
