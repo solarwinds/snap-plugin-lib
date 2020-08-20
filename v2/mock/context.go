@@ -27,7 +27,7 @@ type Context struct {
 	mock.Mock
 }
 
-func (m *Context) Config(key string) (string, bool) {
+func (m *Context) ConfigValue(key string) (string, bool) {
 	args := m.Called(key)
 	return args.String(0), args.Bool(1)
 }

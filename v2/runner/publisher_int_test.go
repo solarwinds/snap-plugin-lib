@@ -261,15 +261,15 @@ func (p *configurablePublisher) Load(ctx plugin.Context) error {
 	ctx.Store("intValue", 10)
 
 	Convey("Validate that Publisher has access to context features in Load method", p.t, func() {
-		cInterval, ok := ctx.Config("config.interval")
+		cInterval, ok := ctx.ConfigValue("config.interval")
 		So(cInterval, ShouldEqual, "10s")
 		So(ok, ShouldBeTrue)
 
-		cDuration, ok := ctx.Config("config.duration")
+		cDuration, ok := ctx.ConfigValue("config.duration")
 		So(cDuration, ShouldEqual, "20s")
 		So(ok, ShouldBeTrue)
 
-		_, ok = ctx.Config("config.timeout")
+		_, ok = ctx.ConfigValue("config.timeout")
 		So(ok, ShouldBeFalse)
 	})
 
@@ -311,15 +311,15 @@ func (p *configurablePublisher) Publish(ctx plugin.PublishContext) error {
 		})
 
 		Convey("Config API", func() {
-			cInterval, ok := ctx.Config("config.interval")
+			cInterval, ok := ctx.ConfigValue("config.interval")
 			So(cInterval, ShouldEqual, "10s")
 			So(ok, ShouldBeTrue)
 
-			cDuration, ok := ctx.Config("config.duration")
+			cDuration, ok := ctx.ConfigValue("config.duration")
 			So(cDuration, ShouldEqual, "20s")
 			So(ok, ShouldBeTrue)
 
-			_, ok = ctx.Config("config.timeout")
+			_, ok = ctx.ConfigValue("config.timeout")
 			So(ok, ShouldBeFalse)
 		})
 

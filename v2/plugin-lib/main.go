@@ -494,6 +494,10 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_add)))
 	}
 
+	if modifiers.tags_to_remove != nil {
+		appliedModifiers = append(appliedModifiers, plugin.MetricTags(toGoMap(modifiers.tags_to_remove)))
+	}
+
 	if modifiers.timestamp != nil {
 		appliedModifiers = append(appliedModifiers,
 			plugin.MetricTimestamp(time.Unix(int64(modifiers.timestamp.sec), int64(modifiers.timestamp.nsec))))
@@ -595,9 +599,10 @@ func ctx_list_all_metrics(ctxID *C.char) **C.metric_t {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//export ctx_config
-func ctx_config(ctxID *C.char, key *C.char) *C.char {
-	v, ok := commonContextObject(ctxID).Config(C.GoString(key))
+//export ctx_config_value
+func ctx_config_value(ctxID *C.char, key *C.char) *C.char {
+	v, ok := commonContextObject(ctxID).ConfigValue(C.GoString(key))
+
 	if !ok {
 		return (*C.char)(C.NULL)
 	}
@@ -629,10 +634,13 @@ func ctx_is_done(ctxID *C.char) int {
 //export ctx_log
 func ctx_log(ctxID *C.char, level C.int, message *C.char, fields *C.map_t) {
 	logF := commonContextObject(ctxID).Logger()
-	for i := 0; i < int(C.get_map_length(fields)); i++ {
-		k := C.get_map_key(fields, C.int(i))
-		v := C.get_map_value(fields, C.int(i))
-		logF = logF.WithField(C.GoString(k), C.GoString(v))
+
+	if fields != nil {
+		for i := 0; i < int(C.get_map_length(fields)); i++ {
+			k := C.get_map_key(fields, C.int(i))
+			v := C.get_map_value(fields, C.int(i))
+			logF = logF.WithField(C.GoString(k), C.GoString(v))
+		}
 	}
 
 	if logObj, ok := logF.(*logrus.Entry); ok {
@@ -775,6 +783,7 @@ func (bc *bridgeCollector) callC(ctx plugin.Context, callback *C.callback_t) err
 
 	taskIDasPtr := C.CString(taskID)
 	C.call_c_callback(callback, taskIDasPtr)
+
 	dealloc_charp(taskIDasPtr)
 
 	return nil

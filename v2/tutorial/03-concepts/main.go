@@ -27,7 +27,7 @@ import (
 type simpleCollector struct{}
 
 func (s simpleCollector) format(ctx plugin.Context) string {
-	fm, _ := ctx.Config("format")
+	fm, _ := ctx.ConfigValue("format")
 	if fm == "short" {
 		return fm
 	}

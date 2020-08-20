@@ -430,9 +430,9 @@ func (cc *configurableCollector) Collect(ctx plugin.CollectContext) error {
 
 	Convey("Validate collector can access configuration fields", cc.t, func() {
 		// Act
-		ip, okIp := ctx.Config("address.ip")
-		port, okPort := ctx.Config("address.port")
-		user, okUser := ctx.Config("user")
+		ip, okIp := ctx.ConfigValue("address.ip")
+		port, okPort := ctx.ConfigValue("address.port")
+		user, okUser := ctx.ConfigValue("user")
 
 		// Assert
 		So(okIp, ShouldBeTrue)

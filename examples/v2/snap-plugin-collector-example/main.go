@@ -132,7 +132,7 @@ func (*myCollector) Load(ctx plugin.Context) error {
 
 	ctx.Store("random", rand.Intn(50))
 
-	v, ok := ctx.Config("crand")
+	v, ok := ctx.ConfigValue("crand")
 	if ok {
 		intV, err := strconv.Atoi(v)
 		if err == nil {

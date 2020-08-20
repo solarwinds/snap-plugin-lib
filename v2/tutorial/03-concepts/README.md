@@ -79,7 +79,7 @@ First method will be introduced in this chapter. Alternative will be presented i
 Let's create a helper method which reads `format` field:
 ```go
 func (s simpleCollector) format(ctx plugin.Context) string {
-	fm, _ := ctx.Config("format")
+	fm, _ := ctx.ConfigValue("format")
 	if fm == "short" {
 		return fm
 	}
@@ -89,7 +89,7 @@ func (s simpleCollector) format(ctx plugin.Context) string {
 `ctx.Config` returns two values: field associated string and a bool flag indicating that the field was present in configuration.
 If `format` field had value `short` we will return it, otherwise default `long` is returned in other situations.
 
-> Notice, that `ctx.Config()` always return a string even if different data type was provided in JSON, for example int or bool.
+> Notice, that `ctx.ConfigValue()` always return a string even if different data type was provided in JSON, for example int or bool.
 > If you want strict type control use `ctx.RawConfig()`.
 
 Modified version of `Collect` method:
@@ -233,7 +233,7 @@ func (s simpleCollector) format(ctx plugin.Context) string {
 }
   
 func (s simpleCollector) Load(ctx plugin.Context) error {
-    fm, _ := ctx.Config("format")
+    fm, _ := ctx.ConfigValue("format")
     if fm == "short" {
         ctx.Store("configFormat", "short")
     } else {

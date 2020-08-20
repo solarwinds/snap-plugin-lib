@@ -70,7 +70,7 @@ func NewContext(rawConfig []byte) (*Context, error) {
 	}, nil
 }
 
-func (c *Context) Config(key string) (string, bool) {
+func (c *Context) ConfigValue(key string) (string, bool) {
 	v, ok := c.flattenedConfig[key]
 	return v, ok
 }

@@ -28,13 +28,12 @@ PLUGIN_LIB_OBJ.ctx_dismiss_all_modifiers.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_should_process.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_requested_metrics.restype = POINTER(c_char_p)
 
-PLUGIN_LIB_OBJ.ctx_config.restype = c_void_p  # -> string
+PLUGIN_LIB_OBJ.ctx_config_value.restype = c_void_p  # -> string
 PLUGIN_LIB_OBJ.ctx_config_keys.restype = POINTER(c_char_p)
 PLUGIN_LIB_OBJ.ctx_raw_config.restype = c_void_p  # -> string
 PLUGIN_LIB_OBJ.ctx_add_warning.restype = c_void_p
 PLUGIN_LIB_OBJ.ctx_is_done.restype = c_longlong
 PLUGIN_LIB_OBJ.ctx_log.restype = c_void_p
-
 PLUGIN_LIB_OBJ.define_example_config.restype = POINTER(CError)
 
 
@@ -78,8 +77,8 @@ class Context:
         self.__ctx_id = ctx_id
 
     # @throw_exception_if_null("object with given key doesn't exist")
-    def config(self, key: str):
-        ret_ptr = PLUGIN_LIB_OBJ.ctx_config(self._ctx_id(), string_to_bytes(key))
+    def config_value(self, key: str):
+        ret_ptr = PLUGIN_LIB_OBJ.ctx_config_value(self._ctx_id(), string_to_bytes(key))
 
         ret_char_ptr = cast(ret_ptr, c_char_p)
         ret_str = ret_char_ptr.value.decode(encoding="utf-8")
