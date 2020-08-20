@@ -48,7 +48,7 @@ namespace SnapPluginLib
         // Context related functions
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
-        internal static extern IntPtr ctx_config(string taskId, string key);
+        internal static extern IntPtr ctx_config_value(string taskId, string key);
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr ctx_config_keys(string taskId);

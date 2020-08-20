@@ -5,7 +5,7 @@ namespace SnapPluginLib
 {
     public interface IContext
     {
-        string Config(string configKey);
+        string GetConfigValue(string configKey);
         IList<string> ConfigKeys();
         string RawConfig();
 

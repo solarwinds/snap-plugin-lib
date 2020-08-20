@@ -291,9 +291,9 @@ func ctx_requested_metrics(ctxID *C.char) **C.char {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//export ctx_config
-func ctx_config(ctxID *C.char, key *C.char) *C.char {
-	v, ok := contextObject(ctxID).Config(C.GoString(key))
+//export ctx_config_value
+func ctx_config_value(ctxID *C.char, key *C.char) *C.char {
+	v, ok := contextObject(ctxID).ConfigValue(C.GoString(key))
 	if !ok {
 		return (*C.char)(C.NULL)
 	}

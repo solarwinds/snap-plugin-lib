@@ -15,9 +15,9 @@ namespace SnapPluginLib
             _storedObjects = new Dictionary<string, object>();
         }
 
-        public string Config(string configKey)
+        public string GetConfigValue(string configKey)
         {
-            var ptr = CBridge.ctx_config(TaskId, configKey);
+            var ptr = CBridge.ctx_config_value(TaskId, configKey);
 
             if (ptr != IntPtr.Zero)
                 return Marshal.PtrToStringAnsi(ptr);

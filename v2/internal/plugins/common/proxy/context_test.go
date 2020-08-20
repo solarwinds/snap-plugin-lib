@@ -56,7 +56,7 @@ func TestContextAPI_Config(t *testing.T) {
 			Convey("User can read correct configuration field", func() {
 
 				// Act
-				val, ok := ctx.Config("address.ip")
+				val, ok := ctx.ConfigValue("address.ip")
 
 				// Assert
 				So(ok, ShouldBeTrue)
@@ -67,7 +67,7 @@ func TestContextAPI_Config(t *testing.T) {
 			Convey("User can read incorrect configuration field", func() {
 
 				// Act
-				_, ok := ctx.Config("address.protocol")
+				_, ok := ctx.ConfigValue("address.protocol")
 
 				// Assert
 				So(ok, ShouldBeFalse)
@@ -77,7 +77,7 @@ func TestContextAPI_Config(t *testing.T) {
 			Convey("User can read correct configuration field (2)", func() {
 
 				// Act
-				val, ok := ctx.Config("address.port")
+				val, ok := ctx.ConfigValue("address.port")
 
 				// Assert
 				So(ok, ShouldBeTrue)
@@ -107,7 +107,7 @@ func TestContextAPI_Config(t *testing.T) {
 
 				// Assert
 				for _, k := range keyList {
-					_, ok := ctx.Config(k)
+					_, ok := ctx.ConfigValue(k)
 					So(ok, ShouldBeTrue)
 				}
 

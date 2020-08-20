@@ -74,7 +74,7 @@ class ExamplePlugin(BasePlugin):
 
         print("Config keys:", ctx.config_keys())
         print("Config: ", ctx.raw_config())
-        print("Config a", ctx.config("a"))
+        print("Config a", ctx.config_value("a"))
 
     def unload(self, ctx):
         ctx.log(LOGLEVEL_INFO, "Plugin is being unloaded", {
