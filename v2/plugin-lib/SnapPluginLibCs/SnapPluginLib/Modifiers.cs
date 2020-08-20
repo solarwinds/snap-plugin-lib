@@ -3,9 +3,18 @@ using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
-    public abstract class Modifier
+    public abstract class Modifier : IModifier
     {
-        internal Modifier() {}
+        internal Modifier()
+        {
+        }
+
+        void IModifier.Apply(NativeModifiers nModifier)
+        {
+            Apply(nModifier);
+        }
+
+        internal abstract void Apply(NativeModifiers nModifier);
     }
 
     public static class Modifiers
@@ -36,14 +45,14 @@ namespace SnapPluginLib
         }
     }
 
-    internal class MetricTags : Modifier, IModifier 
+    internal class MetricTags : Modifier
     {
         public MetricTags(Dictionary<string, string> tags)
         {
             _tagsToAdd = tags;
         }
 
-        public void Apply(NativeModifiers nModifier)
+        internal override void Apply(NativeModifiers nModifier)
         {
             nModifier.tagsToAdd = Convertions.DictionaryToNativeMapMem(_tagsToAdd);
         }
@@ -51,14 +60,14 @@ namespace SnapPluginLib
         private readonly Dictionary<string, string> _tagsToAdd;
     }
 
-    internal class MetricRemoveTags : Modifier, IModifier 
+    internal class MetricRemoveTags : Modifier
     {
         public MetricRemoveTags(Dictionary<string, string> tags)
         {
             _tags = tags;
         }
 
-        public void Apply(NativeModifiers nModifier)
+        internal override void Apply(NativeModifiers nModifier)
         {
             nModifier.tagsToRemove = Convertions.DictionaryToNativeMapMem(_tags);
         }
@@ -66,7 +75,7 @@ namespace SnapPluginLib
         private readonly Dictionary<string, string> _tags;
     }
 
-    internal class MetricTimestamp : Modifier, IModifier 
+    internal class MetricTimestamp : Modifier
     {
         const int MilliToNanoFactor = (int) 1e6;
 
@@ -75,7 +84,7 @@ namespace SnapPluginLib
             _timestamp = timestamp;
         }
 
-        public void Apply(NativeModifiers nModifier)
+        internal override void Apply(NativeModifiers nModifier)
         {
             nModifier.timestamp = new NativeTimeWithNs
             {
@@ -87,14 +96,14 @@ namespace SnapPluginLib
         private readonly DateTime _timestamp;
     }
 
-    internal class MetricDescription : Modifier, IModifier 
+    internal class MetricDescription : Modifier
     {
         public MetricDescription(string description)
         {
             _description = description;
         }
 
-        public void Apply(NativeModifiers nModifier)
+        internal override void Apply(NativeModifiers nModifier)
         {
             nModifier.description = _description;
         }
@@ -102,14 +111,14 @@ namespace SnapPluginLib
         private readonly string _description;
     }
 
-    internal class MetricUnit : Modifier, IModifier 
+    internal class MetricUnit : Modifier
     {
         public MetricUnit(string unit)
         {
             _unit = unit;
         }
 
-        public void Apply(NativeModifiers nModifier)
+        internal override void Apply(NativeModifiers nModifier)
         {
             nModifier.unit = _unit;
         }
