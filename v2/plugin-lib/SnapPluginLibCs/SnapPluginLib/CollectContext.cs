@@ -8,10 +8,11 @@ namespace SnapPluginLib
         {
             TypeInt64 = 1,
             TypeUint64,
+            TypeFloat,
             TypeDouble,
             TypeBool,
         }
-
+        
         public CollectContext(string taskId) : base(taskId)
         {
         }
