@@ -36,7 +36,7 @@ class ExampleCollectorPlugin(BaseCollector):
             ),
             (
                 "/python/group1/metric2",
-                20,
+                "string 34",
                 {"untransferred": "27", "cupolaman": "7"},
                 "Chastacosta Entoprocta",
                 "octocotyloid lexicon",

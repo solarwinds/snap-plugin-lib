@@ -110,7 +110,7 @@ def to_value_t(v):
         val.value.v_double = c_double(v)
         val.v_type = TYPE_DOUBLE
     elif isinstance(v, str):
-        val.value.v_cstring = c_char_p(v)
+        val.value.v_cstring = string_to_bytes(v)
         val.v_type = TYPE_CSTRING
     else:
         raise PluginLibException("invalid metric value type")

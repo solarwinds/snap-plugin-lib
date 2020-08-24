@@ -73,7 +73,7 @@ class ValueUnion(Union):
         ("v_float", c_float),
         ("v_double", c_double),
         ("v_bool", c_int),
-        ("v_string", c_char_p)
+        ("v_cstring", c_char_p)
     ]
 
 
