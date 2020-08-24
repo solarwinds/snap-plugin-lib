@@ -40,4 +40,4 @@ There are several ways to achieve that at different levels:
 ----
 
 * [Table of contents](/v2/tutorial/README.md)
-- Previous Chapter: [Handle configuration](/v2/tutorial/09-config/README.md)
+- Previous Chapter: [Writing plugins in Python and C#](/v2/tutorial/other-languages/README.md)

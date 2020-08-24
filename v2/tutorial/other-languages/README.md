@@ -172,3 +172,10 @@ On Linux:
 ```bash
 go build --buildmode=c-shared -o swisnap-plugin-lib.so
 ```
+
+
+----
+
+* [Table of contents](/v2/README.md)
+- Previous Chapter: [Handle configuration](/v2/tutorial/09-config/README.md)
+- Next Chapter: [FAQ](/v2/tutorial/faq/README.md)
