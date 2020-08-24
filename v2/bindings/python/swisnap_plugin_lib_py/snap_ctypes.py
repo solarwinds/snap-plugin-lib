@@ -7,7 +7,7 @@ from ctypes import (
     c_double,
     c_float,
     c_int,
-    POINTER,
+    POINTER, c_uint,
 )
 
 min_int = -9223372036854775808
@@ -57,9 +57,12 @@ class ValueUnion(Union):
     _fields_ = [
         ("v_int64", c_longlong),
         ("v_uint64", c_ulonglong),
+        ("v_int32", c_int),
+        ("v_uint32", c_uint),
         ("v_float", c_float),
         ("v_double", c_double),
         ("v_bool", c_int),
+        ("v_string", c_char_p)
     ]
 
 

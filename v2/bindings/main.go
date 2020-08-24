@@ -20,6 +20,7 @@ package main
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
+
 // c types for callbacks
 typedef void (callback_t)(char *);  // used for Collect, Load and Unload
 typedef void (define_callback_t)(); // used for DefineCallback
@@ -33,18 +34,24 @@ enum value_type_t {
     TYPE_INVALID,
     TYPE_INT64,
     TYPE_UINT64,
+	TYPE_INT32,
+	TYPE_UINT32,
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_BOOL,
+	TYPE_CSTRING,
 };
 
 typedef struct {
     union  {
         long long v_int64;
         unsigned long long v_uint64;
+		int v_int32;
+		unsigned int v_uint32;
         float v_float;
         double v_double;
         int v_bool;
+		char * v_cstring;
     } value;
     int vtype; // value_type_t;
 } value_t;
@@ -61,15 +68,21 @@ static inline void free_value_t(value_t * v) {
 
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
 static inline unsigned long long value_t_ulong_long(value_t * v) { return v->value.v_uint64; }
+static inline int value_t_int(value_t * v) { return v->value.v_int32; }
+static inline unsigned int value_t_uint(value_t * v) { return v->value.v_uint32; }
 static inline float value_t_float(value_t * v) { return v->value.v_float; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
+static inline char * value_t_cstring(value_t * v) { return v->value.v_cstring; }
 
 static inline void set_value_t_long_long(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
 static inline void set_value_t_ulong_long(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
+static inline void set_value_t_int(value_t * v, int v_int32) { v->value.v_int32 = v_int32; }
+static inline void set_value_t_uint(value_t * v, unsigned int v_uint32) { v->value.v_uint32 = v_uint32; }
 static inline void set_value_t_float(value_t * v, float v_float) { v->value.v_float = v_float; }
 static inline void set_value_t_double(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
+static inline void set_value_t_cstring(value_t * v, char * v_cstring) { v->value.v_cstring = v_cstring; }
 
 typedef struct {
     char * key;
@@ -445,6 +458,14 @@ func toCvalue_t(v interface{}) *C.value_t {
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT64)
 		C.set_value_t_ulong_long(cvalue_t_ptr, C.ulonglong(n))
 		return cvalue_t_ptr
+	case int32:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT32)
+		C.set_value_t_int(cvalue_t_ptr, C.int(n))
+		return cvalue_t_ptr
+	case uint32:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT32)
+		C.set_value_t_uint(cvalue_t_ptr, C.uint(n))
+		return cvalue_t_ptr
 	case float32:
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_FLOAT)
 		C.set_value_t_float(cvalue_t_ptr, C.float(n))
@@ -461,6 +482,10 @@ func toCvalue_t(v interface{}) *C.value_t {
 		}
 		C.set_value_t_bool(cvalue_t_ptr, C.int(boolint))
 		return cvalue_t_ptr
+	case string:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_CSTRING)
+		C.set_value_t_cstring(cvalue_t_ptr, C.CString(n))
+		return cvalue_t_ptr
 	default:
 		panic(fmt.Sprintf("Not supported metric type %T", v))
 	}
@@ -472,12 +497,18 @@ func toGoValue(v *C.value_t) interface{} {
 		return int(C.value_t_long_long(v))
 	case C.TYPE_UINT64:
 		return uint(C.value_t_ulong_long(v))
+	case C.TYPE_INT32:
+		return int32(C.value_t_int(v))
+	case C.TYPE_UINT32:
+		return uint32(C.value_t_uint(v))
 	case C.TYPE_FLOAT:
 		return float32(C.value_t_float(v))
 	case C.TYPE_DOUBLE:
 		return float64(C.value_t_double(v))
 	case C.TYPE_BOOL:
 		return intToBool(int(C.value_t_bool(v)))
+	case C.TYPE_CSTRING:
+		return C.GoString(C.value_t_cstring(v))
 	}
 
 	panic(fmt.Sprintf("Invalid type %v", (*v).vtype))
