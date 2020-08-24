@@ -78,6 +78,8 @@ Covered topics:
   * [Gathering data (Proxy)](/v2/tutorial/07-proxy/README.md)
   * [Collector](/v2/tutorial/08-collector/README.md)
   * [Handle configuration](/v2/tutorial/09-config/README.md)
+- Other:
+  * [Writing plugins in Python and C#](/v2/tutorial/other-languages/README.md)
 - [FAQ](/v2/tutorial/faq/README.md)
 
 ## Contributing Guide
