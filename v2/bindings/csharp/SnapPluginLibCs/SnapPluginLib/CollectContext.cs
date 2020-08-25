@@ -94,7 +94,12 @@ namespace SnapPluginLib
         {
             var nativeModifiers = ToNativeModifiers(modifiers);
             var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
+            
             Memory.FreeNativeModifiers(nativeModifiers);
+            if (nativeValue.vtype == (int) ValueType.TypeCString)
+            {
+                Marshal.FreeHGlobal(nativeValue.v_cstring);
+            }
             
             Exceptions.ThrowExceptionIfError(errPtr);
         }
