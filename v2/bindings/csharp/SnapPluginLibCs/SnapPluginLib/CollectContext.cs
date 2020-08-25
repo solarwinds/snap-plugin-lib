@@ -1,17 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
     internal class CollectContext : Context, ICollectContext
     {
-        private enum ValueType
-        {
-            TypeInt64 = 1,
-            TypeUint64,
-            TypeFloat,
-            TypeDouble,
-            TypeBool,
-        }
+        
         
         public CollectContext(string taskId) : base(taskId)
         {
@@ -56,6 +50,17 @@ namespace SnapPluginLib
             {
                 v_bool = value ? 1 : 0,
                 vtype = (int) ValueType.TypeBool
+            };
+
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
+        }
+
+        public void AddMetric(string ns, string value, params Modifier[] modifiers)
+        {
+            var nativeValue = new NativeValue
+            {
+                v_cstring = Marshal.StringToHGlobalAnsi(value),
+                vtype = (int) ValueType.TypeCString
             };
 
             AddMetricWithNativeValue(ns, nativeValue, modifiers);

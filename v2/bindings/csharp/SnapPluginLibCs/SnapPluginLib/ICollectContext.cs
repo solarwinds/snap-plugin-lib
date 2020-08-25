@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SnapPluginLib
 {
@@ -9,6 +8,7 @@ namespace SnapPluginLib
         void AddMetric(string ns, int value, params Modifier[] modifiers);
         void AddMetric(string ns, uint value, params Modifier[] modifiers);
         void AddMetric(string ns, bool value, params Modifier[] modifiers);
+        void AddMetric(string ns, string value, params Modifier[] modifiers);
         void AlwaysApply(string ns, params Modifier[] modifiers);
         void DismissAllModifiers();
         bool ShouldProcess(string ns);

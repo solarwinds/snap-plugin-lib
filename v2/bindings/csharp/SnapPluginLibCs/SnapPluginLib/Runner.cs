@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace SnapPluginLib
+﻿namespace SnapPluginLib
 {
     public static class Runner
     {

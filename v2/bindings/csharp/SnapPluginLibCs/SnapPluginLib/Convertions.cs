@@ -12,7 +12,7 @@ namespace SnapPluginLib
             var nativeMap = new NativeMap
             {
                 length = dictionary.Count,
-                elements = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMapElements)) * dictionary.Count)
+                elements = Marshal.AllocHGlobal(Marshal.SizeOf(new NativeMapElements()) * dictionary.Count)
             };
 
             var i = 0;
@@ -23,12 +23,12 @@ namespace SnapPluginLib
                 nativeMapElem.value = entry.Value;
 
                 Marshal.StructureToPtr(nativeMapElem,
-                    (IntPtr) nativeMap.elements.ToInt64() + i * Marshal.SizeOf(typeof(NativeMapElements)), false);
+                    (IntPtr) nativeMap.elements.ToInt64() + i * Marshal.SizeOf(new NativeMapElements()), false);
 
                 i++;
             }
 
-            var nativeMapAsMemBlock = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMap)));
+            var nativeMapAsMemBlock = Marshal.AllocHGlobal(Marshal.SizeOf(new NativeMap()));
             Marshal.StructureToPtr(nativeMap, nativeMapAsMemBlock, false);
 
             return nativeMapAsMemBlock;

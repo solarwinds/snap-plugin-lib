@@ -34,6 +34,18 @@ namespace SnapPluginLib
         public int sec;
         public int nsec;
     }
+    
+    internal enum ValueType
+    {
+        TypeInt64 = 1,
+        TypeUint64,
+        TypeInt32,
+        TypeUint32,
+        TypeFloat,
+        TypeDouble,
+        TypeBool,
+        TypeCString,
+    }
 
     [StructLayout(LayoutKind.Explicit)]
     internal class NativeValue
@@ -41,8 +53,12 @@ namespace SnapPluginLib
         // Union
         [FieldOffset(0)] public Int64 v_int64;
         [FieldOffset(0)] public UInt64 v_uint64;
+        [FieldOffset(0)] public Int32 v_int32;
+        [FieldOffset(0)] public UInt32 v_uint32;
+        [FieldOffset(0)] public float v_float;
         [FieldOffset(0)] public Double v_double;
         [FieldOffset(0)] public int v_bool;
+        [FieldOffset(0)] public IntPtr v_cstring;
 
         // Std values
         [FieldOffset(8)] public int vtype;
