@@ -10,7 +10,7 @@ Language | Location                                   | Collector API | Publishe
 Python   | [/v2/bindings/python](/v2/bindings/python) | Yes           | Yes
 C#       | [/v2/bindings/csharp](/v2/bindings/csharp) | Yes           | No
 
-The bindings have as similar API as possible to one provided by Go. 
+The bindings have API as similar as possible to one provided by Go. 
 Thereby, the majority of the tutorial for Go language should be easily translated to the language of your choice.
 Differences (very often related to language syntax) are presented in the further chapters.
 Each language binding contains at least one example, based on which you can learn how to properly use the API.
@@ -110,17 +110,17 @@ In Python and C# ``Logger()`` method contains that information as parameters.
 
 Go:
 ```go
-log.WithFields(logrus.Fields{"language": "Go"}).Error("Log message")
+log.WithFields(logrus.Fields{"language": "Go"}).Info("Log message")
 ```
 
 Python:
 ```python
-ctx.log(LOGLEVEL_ERROR, "Log message from Python", {"lanuage": "python"})
+ctx.log(LOGLEVEL_INFO, "Log message from Python", {"language": "python"})
 ```
 
 C#:
 ```csharp
-ctx.Log(LogLevel.Error, "Log message from C#", new Dictionary<string, string>
+ctx.Log(LogLevel.Info, "Log message from C#", new Dictionary<string, string>
 {
     {"language", "c#"}, 
 });
@@ -157,11 +157,11 @@ ctx.AddMetric("/example/group/metric1", 12.4,
 ```
 
 #### **(6)** 
-In Python and C# ``AlwaysApply()`` doesn't return any object (used to dismiss only given modification).
+In Python and C# ``AlwaysApply()`` doesn't return an object (used to dismiss only given modification).
 
 ## Manual compilation of CGo dependency
 
-In order to manually build library required by bindings you need to execute the following command in ``v2/bindings`` (requires ``gcc`` installed in the system):
+In order to manually build library required by bindings you need to execute the following command in ``v2/bindings`` (requires ``gcc`` installed on the system):
 
 On Windows:
 ```bash
