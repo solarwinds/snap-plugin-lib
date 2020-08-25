@@ -1,17 +1,17 @@
 /*
  Copyright (c) 2020 SolarWinds Worldwide, LLC
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+	  http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 */
 
 package main
@@ -31,39 +31,39 @@ static inline void call_c_define_callback(define_callback_t callback) { callback
 
 // some helpers to manage C/Go memory/access interactions
 enum value_type_t {
-    TYPE_INVALID,
-    TYPE_INT64,
-    TYPE_UINT64,
+	TYPE_INVALID,
+	TYPE_INT64,
+	TYPE_UINT64,
 	TYPE_INT32,
 	TYPE_UINT32,
-    TYPE_FLOAT,
-    TYPE_DOUBLE,
-    TYPE_BOOL,
+	TYPE_FLOAT,
+	TYPE_DOUBLE,
+	TYPE_BOOL,
 	TYPE_CSTRING,
 };
 
 typedef struct {
-    union  {
-        long long v_int64;
-        unsigned long long v_uint64;
+	union  {
+		long long v_int64;
+		unsigned long long v_uint64;
 		int v_int32;
 		unsigned int v_uint32;
-        float v_float;
-        double v_double;
-        int v_bool;
+		float v_float;
+		double v_double;
+		int v_bool;
 		char * v_cstring;
-    } value;
-    int vtype; // value_type_t;
+	} value;
+	int vtype; // value_type_t;
 } value_t;
 
 static inline value_t * alloc_value_t(enum value_type_t t) {
-    value_t * val_ptr = malloc(sizeof(value_t));
-    val_ptr->vtype = t;
-    return val_ptr;
+	value_t * val_ptr = malloc(sizeof(value_t));
+	val_ptr->vtype = t;
+	return val_ptr;
 }
 
 static inline void free_value_t(value_t * v) {
-    free(v);
+	free(v);
 }
 
 static inline long long value_t_long_long(value_t * v) { return v->value.v_int64; }
@@ -85,45 +85,45 @@ static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool =
 static inline void set_value_t_cstring(value_t * v, char * v_cstring) { v->value.v_cstring = v_cstring; }
 
 typedef struct {
-    char * key;
-    char * value;
+	char * key;
+	char * value;
 } map_element_t;
 
 static inline map_element_t * alloc_map_element_t_array(int size) {
-    map_element_t * map_arr = malloc(sizeof(map_element_t) * size);
-    return map_arr;
+	map_element_t * map_arr = malloc(sizeof(map_element_t) * size);
+	return map_arr;
 }
 
 static inline void free_map_element_t_array(map_element_t* m, int size) {
-    for(int i = 0; i < size; i++) {
-        free(m[i].key);
-        free(m[i].value);
-    }
-    free(m);
+	for(int i = 0; i < size; i++) {
+		free(m[i].key);
+		free(m[i].value);
+	}
+	free(m);
 }
 
 static inline void set_tag_values(map_element_t * tag_arr, int index, char * key, char * value) {
-    tag_arr[index].key = key;
-    tag_arr[index].value = value;
+	tag_arr[index].key = key;
+	tag_arr[index].value = value;
 }
 
 typedef struct {
-    map_element_t * elements;
-    int length;
+	map_element_t * elements;
+	int length;
 } map_t;
 
 static inline map_t * alloc_map_t() {
-    map_t * map = malloc(sizeof(map_t));
-    return map;
+	map_t * map = malloc(sizeof(map_t));
+	return map;
 }
 
 static inline void free_map_t(map_t * m) {
-    free_map_element_t_array(m->elements, m->length);
-    free(m);
+	free_map_element_t_array(m->elements, m->length);
+	free(m);
 }
 
 static inline void set_map_elements(map_t * map_ptr, map_element_t * elements) {
-    map_ptr->elements = elements;
+	map_ptr->elements = elements;
 }
 
 static inline char * get_map_key(map_t * map, int index) { return map->elements[index].key; }
@@ -133,55 +133,55 @@ static inline int get_map_length(map_t * map) { return map->length; }
 static inline void set_map_lenght(map_t * map, int length) { map->length = length; }
 
 typedef struct {
-    char * msg;
+	char * msg;
 } error_t;
 
 static inline error_t * alloc_error_msg(char * msg) {
-    error_t * errMsg = malloc(sizeof(error_t));
-    errMsg->msg = msg;
-    return errMsg;
+	error_t * errMsg = malloc(sizeof(error_t));
+	errMsg->msg = msg;
+	return errMsg;
 }
 
 static inline void free_error_msg(error_t * err) {
-    if (err == NULL) return;
+	if (err == NULL) return;
 
-    if (err->msg != NULL) {
-        free(err->msg);
+	if (err->msg != NULL) {
+		free(err->msg);
 		err->msg = NULL;
-    }
+	}
 
 	free(err);
 }
 
 typedef struct {
-    int sec;
-    int nsec;
+	int sec;
+	int nsec;
 } time_with_ns_t;
 
 static inline time_with_ns_t* alloc_time_with_ns_t() {
-    return malloc(sizeof(time_with_ns_t));
+	return malloc(sizeof(time_with_ns_t));
 }
 
 static inline void free_time_with_ns_t(time_with_ns_t* t) {
-    free(t);
+	free(t);
 }
 
 static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nsec) {
-    time_ptr->sec = sec;
-    time_ptr->nsec = nsec;
+	time_ptr->sec = sec;
+	time_ptr->nsec = nsec;
 }
 
 typedef struct {
-    map_t * tags_to_add;
-    map_t * tags_to_remove;
-    time_with_ns_t * timestamp;
-    char * description;
-    char * unit;
+	map_t * tags_to_add;
+	map_t * tags_to_remove;
+	time_with_ns_t * timestamp;
+	char * description;
+	char * unit;
 } modifiers_t;
 
 
 static inline char** alloc_str_array(int size) {
-    return malloc(sizeof(char*) * size);
+	return malloc(sizeof(char*) * size);
 }
 
 static inline void free_str_array(char **arr) {
@@ -201,98 +201,98 @@ static inline void free_str_array(char **arr) {
 }
 
 static inline void set_str_array_element(char **str_array, int index, char *element) {
-    str_array[index] = element;
+	str_array[index] = element;
 }
 
 typedef struct {
-    char * el_name;
-    char * value;
-    char * description;
+	char * el_name;
+	char * value;
+	char * description;
 } namespace_element_t;
 
 
 static inline namespace_element_t * alloc_namespace_elem_arr(int size) {
-    namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
-    return ne_arr;
+	namespace_element_t * ne_arr = malloc(sizeof(namespace_element_t) * size);
+	return ne_arr;
 }
 
 static inline void free_namespace_elem_arr(namespace_element_t * nm_array, int size) {
-    for(int i=0; i < size; i++){
-        free(nm_array[i].el_name);
-        free(nm_array[i].value);
-        free(nm_array[i].description);
-    }
-    free(nm_array);
+	for(int i=0; i < size; i++){
+		free(nm_array[i].el_name);
+		free(nm_array[i].value);
+		free(nm_array[i].description);
+	}
+	free(nm_array);
 }
 
 static inline void set_namespace_element(namespace_element_t * ne_arr, int index, char * el_name, char * value, char * description) {
-    ne_arr[index].el_name = el_name;
-    ne_arr[index].value = value;
-    ne_arr[index].description = description;
+	ne_arr[index].el_name = el_name;
+	ne_arr[index].value = value;
+	ne_arr[index].description = description;
 }
 
 
 typedef struct {
-    namespace_element_t * nm_elements;
-    int nm_length;
-    char * nm_string;
+	namespace_element_t * nm_elements;
+	int nm_length;
+	char * nm_string;
 } namespace_t;
 
 
 static inline namespace_t * alloc_namespace_t() {
-    namespace_t* nm_ptr = malloc(sizeof(namespace_t));
-    return nm_ptr;
+	namespace_t* nm_ptr = malloc(sizeof(namespace_t));
+	return nm_ptr;
 }
 
 static inline void free_namespace_t(namespace_t * namespace_ptr) {
-    free_namespace_elem_arr(namespace_ptr->nm_elements, namespace_ptr->nm_length);
-    free(namespace_ptr);
+	free_namespace_elem_arr(namespace_ptr->nm_elements, namespace_ptr->nm_length);
+	free(namespace_ptr);
 }
 static inline void set_namespace_fields(namespace_t * nm_ptr, namespace_element_t * ne_arr, int nm_length, char * nm_string) {
-    nm_ptr->nm_elements = ne_arr;
-    nm_ptr->nm_length = nm_length;
-    nm_ptr->nm_string= nm_string;
+	nm_ptr->nm_elements = ne_arr;
+	nm_ptr->nm_length = nm_length;
+	nm_ptr->nm_string= nm_string;
 }
 
 typedef struct {
-    namespace_t * mt_namespace;
-    char * mt_description;
-    value_t *mt_value;
-    time_with_ns_t * timestamp;
-    map_t * tags; // free
+	namespace_t * mt_namespace;
+	char * mt_description;
+	value_t *mt_value;
+	time_with_ns_t * timestamp;
+	map_t * tags; // free
 } metric_t;
 
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
-    metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-    for(int i=0; i< size; i++) {
-        arrPtr[i] = malloc(sizeof(metric_t));
-    }
-    return arrPtr;
+	metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
+	for(int i=0; i< size; i++) {
+		arrPtr[i] = malloc(sizeof(metric_t));
+	}
+	return arrPtr;
 }
 
 static inline void set_metric_pointer_array_element(metric_t** mt_array, int index, metric_t* element) {
-    mt_array[index] = element;
+	mt_array[index] = element;
 }
 
 static inline void set_metric_values(metric_t** mt_array, int index, namespace_t* mt_namespace, char* desc, value_t* val, time_with_ns_t* timestamp, map_t* tags) {
-    mt_array[index]->mt_namespace = mt_namespace;
-    mt_array[index]->mt_description = desc;
-    mt_array[index]->mt_value = val;
-    mt_array[index]->timestamp = timestamp;
-    mt_array[index]->tags = tags;
+	mt_array[index]->mt_namespace = mt_namespace;
+	mt_array[index]->mt_description = desc;
+	mt_array[index]->mt_value = val;
+	mt_array[index]->timestamp = timestamp;
+	mt_array[index]->tags = tags;
 }
 
 static inline void free_metric_arr(metric_t** mt_array, int size) {
-    if (mt_array == NULL) return;
-    for (int i=0; i< size; i++) {
-        if (mt_array[i] != NULL ) {
-            free_namespace_t(mt_array[i]->mt_namespace);
-            free_value_t(mt_array[i]->mt_value);
-            free_time_with_ns_t(mt_array[i]->timestamp);
-            free_map_t(mt_array[i]->tags);
-            free(mt_array[i]);
-       }
+	if (mt_array == NULL) return;
+	for (int i=0; i< size; i++) {
+		if (mt_array[i] != NULL ) {
+			free_namespace_t(mt_array[i]->mt_namespace);
+			free_value_t(mt_array[i]->mt_value);
+			free_time_with_ns_t(mt_array[i]->timestamp);
+			free_map_t(mt_array[i]->tags);
+			free(mt_array[i]);
+	   }
    }
    free(mt_array);
 }
