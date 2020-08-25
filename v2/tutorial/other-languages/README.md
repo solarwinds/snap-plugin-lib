@@ -26,7 +26,7 @@ from swisnap_plugin_lib_py import BaseCollector, start_collector
 class ExampleCollectorPlugin(BaseCollector):
     def collect(self, ctx):
         # Collect metrics 
-        pass
+        ctx.add_metric("/example/group/metric", 10)
 
 
 if __name__ == "__main__":
@@ -52,6 +52,7 @@ namespace CollectorExample
         public override void Collect(ICollectContext ctx)
         {
             // Collect metrics 
+            ctx.AddMetric("/example/group/metric", 10);
         }
 
         static void Main(string[] args)
