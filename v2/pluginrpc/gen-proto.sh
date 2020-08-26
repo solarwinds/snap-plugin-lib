@@ -22,12 +22,26 @@ Copyright (c) '"$(date +"%Y")"' SolarWinds Worldwide, LLC
 
 linter_ignore='//lint:file-ignore SA1019 Ignore deprecated. Should be fixed by protoc generator.'
 
+while getopts c o 
+do
+    case "$o" in
+        c) clean_install=1;;
+        [?]) echo "Usage: $0 [-c]"; exit 1;;
+    esac
+done
+
 if [[ $OS == "Windows_NT" ]]; then
     protoc_os="win64"
     ext=".exe"
 else
     protoc_os="linux-x86_64"
     ext=""
+fi
+
+if [[ $clean_install -eq 1 ]]; then
+    echo "Cleaning"
+    rm -f "${GOPATH}/bin/protoc"*
+    rm -f "${GOPATH}/bin/goimports"
 fi
 
 echo "Checking for goimports"
