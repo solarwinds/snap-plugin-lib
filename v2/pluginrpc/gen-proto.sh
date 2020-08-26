@@ -30,6 +30,12 @@ else
     ext=""
 fi
 
+echo "Checking for goimports"
+if ! which "goimports" &> /dev/null ; then
+    echo "Installing goimports"
+    go get golang.org/x/tools/cmd/goimports
+fi
+
 echo "Checking for protoc"
 if ! which "protoc${ext}" &> /dev/null ; then
     protoc_path="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_ver}/protoc-${protoc_ver}-${protoc_os}.zip"
@@ -38,24 +44,26 @@ if ! which "protoc${ext}" &> /dev/null ; then
     curl -o protoc.zip -L $protoc_path -s
     unzip -p protoc.zip "bin/protoc${ext}" > "protoc${ext}"
     mv "protoc${ext}" $GOPATH/bin
+    rm -f protoc.zip
 fi
 
 echo "Checking for protoc-gen-go"
 if ! which "protoc-gen-go${ext}" &> /dev/null ; then
     echo "Installing protoc-gen-go"
-    go get github.com/golang/protobuf/protoc-gen-go
+    GO111MODULE=on go get "github.com/golang/protobuf/protoc-gen-go@v${protoc_gen_go_ver}"
 fi
 
 echo "Checking for protoc-gen-grpchan"
 if ! which "protoc-gen-grpchan${ext}" &> /dev/null ; then
     echo "Installing protoc-gen-grpchan"
-    GO111MODULE=on get "github.com/golang/protobuf/protoc-gen-go@v${protoc_gen_go_ver}"
+    go get github.com/librato/grpchan/cmd/protoc-gen-grpchan
 fi
 
 echo "Generating pb.go files"
 protoc --go_out=plugins=grpc:. --grpchan_out=. "${proto_name}".proto
 
-echo "Applying licence and linter entry"
+echo "Applying licence and modifications"
 echo -e "${licence}\n${linter_ignore}\n"  | cat - "${proto_name}.pb.go" > temp && mv temp "${proto_name}.pb.go"
 echo -e "${licence}\n" | cat - "${proto_name}.pb.grpchan.go" > temp && mv temp "${proto_name}.pb.grpchan.go"
-
+goimports -w "${proto_name}.pb.go"
+goimports -w "${proto_name}.pb.grpchan.go"

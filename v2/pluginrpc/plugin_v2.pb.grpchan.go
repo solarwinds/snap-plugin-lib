@@ -19,9 +19,11 @@ Copyright (c) 2020 SolarWinds Worldwide, LLC
 
 package pluginrpc
 
-import "github.com/librato/grpchan"
-import "golang.org/x/net/context"
-import "google.golang.org/grpc"
+import (
+	"github.com/librato/grpchan"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+)
 
 func RegisterHandlerController(reg grpchan.ServiceRegistry, srv ControllerServer) {
 	reg.RegisterService(&_Controller_serviceDesc, srv)
