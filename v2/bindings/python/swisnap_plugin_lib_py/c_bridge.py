@@ -84,7 +84,7 @@ class Context:
         ret_str = ret_char_ptr.value
         PLUGIN_LIB_OBJ.dealloc_charp(ret_char_ptr)
 
-        return ret_str.decode(encoding="utf-8") if ret_str is not None else None
+        return ret_str.decode(encoding="utf-8") if ret_str else None
 
     def config_keys(self):
         config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())

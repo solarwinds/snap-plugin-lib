@@ -7,7 +7,8 @@ from ctypes import (
     c_double,
     c_float,
     c_int,
-    POINTER, c_uint,
+    POINTER,
+    c_uint,
 )
 
 min_int = -9223372036854775808
@@ -23,7 +24,7 @@ max_uint = 18446744073709551615
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_BOOL,
-    TYPE_CSTRING
+    TYPE_CSTRING,
 ) = range(9)
 
 (
@@ -73,7 +74,7 @@ class ValueUnion(Union):
         ("v_float", c_float),
         ("v_double", c_double),
         ("v_bool", c_int),
-        ("v_cstring", c_char_p)
+        ("v_cstring", c_char_p),
     ]
 
 

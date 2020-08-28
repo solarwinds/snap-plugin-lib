@@ -4,7 +4,8 @@ from ctypes import (
     c_ulonglong,
     c_double,
     c_int,
-    pointer, c_char_p,
+    pointer,
+    c_char_p,
 )
 from itertools import count
 from .snap_ctypes import (
@@ -19,7 +20,10 @@ from .snap_ctypes import (
     TYPE_BOOL,
     max_int,
     max_uint,
-    min_int, TYPE_CSTRING, TYPE_INT32, TYPE_UINT32,
+    min_int,
+    TYPE_CSTRING,
+    TYPE_INT32,
+    TYPE_UINT32,
 )
 
 from .exceptions import PluginLibException

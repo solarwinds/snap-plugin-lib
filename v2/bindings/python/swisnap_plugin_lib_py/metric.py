@@ -96,4 +96,11 @@ class Metric:
         _value, _unit = unpack_value_t(mt_struct.value)
         _time = ctimewithns_to_time(mt_struct.timestamp)
         _tags = cmap_to_dict(mt_struct.tags)
-        return cls(_namespace, _desc, _value, _unit, _time, _tags,)
+        return cls(
+            _namespace,
+            _desc,
+            _value,
+            _unit,
+            _time,
+            _tags,
+        )
