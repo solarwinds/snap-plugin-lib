@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SnapPluginLib
+﻿namespace SnapPluginLib
 {
     internal interface IModifier
     {

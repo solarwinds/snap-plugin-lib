@@ -2,10 +2,10 @@ import math
 from ctypes import (
     c_longlong,
     c_ulonglong,
-    c_float,
     c_double,
     c_int,
     pointer,
+    c_char_p,
 )
 from itertools import count
 from .snap_ctypes import (
@@ -21,6 +21,9 @@ from .snap_ctypes import (
     max_int,
     max_uint,
     min_int,
+    TYPE_CSTRING,
+    TYPE_INT32,
+    TYPE_UINT32,
 )
 
 from .exceptions import PluginLibException
@@ -110,6 +113,9 @@ def to_value_t(v):
     elif isinstance(v, float):
         val.value.v_double = c_double(v)
         val.v_type = TYPE_DOUBLE
+    elif isinstance(v, str):
+        val.value.v_cstring = string_to_bytes(v)
+        val.v_type = TYPE_CSTRING
     else:
         raise PluginLibException("invalid metric value type")
 
@@ -133,4 +139,14 @@ def unpack_value_t(val_ptr):
     elif v_type == TYPE_UINT64:
         value = val_ptr.contents.value.v_uint64
         unit = int
+    elif v_type == TYPE_INT32:
+        value = val_ptr.contents.value.v_int32
+        unit = int
+    elif v_type == TYPE_UINT32:
+        value = val_ptr.contents.value.v_uint32
+        unit = int
+    elif v_type == TYPE_CSTRING:
+        value = val_ptr.contents.value.v_cstring
+        unit = str
+
     return (value, unit)

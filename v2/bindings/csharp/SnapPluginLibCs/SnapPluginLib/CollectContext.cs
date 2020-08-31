@@ -1,17 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SnapPluginLib
 {
     internal class CollectContext : Context, ICollectContext
     {
-        private enum ValueType
-        {
-            TypeInt64 = 1,
-            TypeUint64,
-            TypeFloat,
-            TypeDouble,
-            TypeBool,
-        }
+        
         
         public CollectContext(string taskId) : base(taskId)
         {
@@ -61,6 +55,17 @@ namespace SnapPluginLib
             AddMetricWithNativeValue(ns, nativeValue, modifiers);
         }
 
+        public void AddMetric(string ns, string value, params Modifier[] modifiers)
+        {
+            var nativeValue = new NativeValue
+            {
+                v_cstring = Marshal.StringToHGlobalAnsi(value),
+                vtype = (int) ValueType.TypeCString
+            };
+
+            AddMetricWithNativeValue(ns, nativeValue, modifiers);
+        }
+
         public void AlwaysApply(string ns, params Modifier[] modifiers)
         {
             var nativeModifiers = ToNativeModifiers(modifiers);
@@ -89,7 +94,12 @@ namespace SnapPluginLib
         {
             var nativeModifiers = ToNativeModifiers(modifiers);
             var errPtr = CBridge.ctx_add_metric(TaskId, ns, nativeValue, nativeModifiers);
+            
             Memory.FreeNativeModifiers(nativeModifiers);
+            if (nativeValue.vtype == (int) ValueType.TypeCString)
+            {
+                Marshal.FreeHGlobal(nativeValue.v_cstring);
+            }
             
             Exceptions.ThrowExceptionIfError(errPtr);
         }

@@ -36,7 +36,7 @@ class ExampleCollectorPlugin(BaseCollector):
             ),
             (
                 "/python/group1/metric2",
-                20,
+                "string 34",
                 {"untransferred": "27", "cupolaman": "7"},
                 "Chastacosta Entoprocta",
                 "octocotyloid lexicon",
@@ -112,7 +112,11 @@ class ExampleCollectorPlugin(BaseCollector):
 
         print("Config keys:", ctx.config_keys())
         print("Config: ", ctx.raw_config())
-        print("Config a", ctx.config("a"))
+
+        try:
+            print("Config a", ctx.config_value("a"))
+        except PluginLibException as e:
+            print("Exception: ", e)
 
     def unload(self, ctx):
         ctx.log(LOGLEVEL_INFO, "Plugin is being unloaded", {"name": self._name})

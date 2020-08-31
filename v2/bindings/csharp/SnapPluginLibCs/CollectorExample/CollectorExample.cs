@@ -21,6 +21,7 @@ namespace CollectorExample
             def.DefineMetric("/example/group1/metric2", "b", false, "metric2 description");
             def.DefineMetric("/example/group1/metric3", "b", false, "metric3 description");
             def.DefineMetric("/example/group2/metric4", "b", false, "metric4 description");
+            def.DefineMetric("/example/group2/metric5", "b", false, "metric5 description");
         }
 
         public override void Collect(ICollectContext ctx)
@@ -71,6 +72,8 @@ namespace CollectorExample
             {
                 ctx.AddMetric("/example/group2/metric4", true);
             }
+
+            ctx.AddMetric("/example/group2/metric5", "string value");
         }
 
         public override void Load(IContext ctx)

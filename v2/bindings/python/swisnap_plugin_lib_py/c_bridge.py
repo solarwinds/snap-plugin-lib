@@ -10,7 +10,7 @@ from .convertions import (
 from .metric import Metric
 from .snap_ctypes import CMetricStruct, CError, Modifiers
 from .dynamic_lib import PLUGIN_LIB_OBJ
-from .exceptions import throw_exception_if_error
+from .exceptions import throw_exception_if_error, throw_exception_if_null
 
 # Used to store object for a given context. Access example: storedObjectMap[ctx_id][key]
 storedObjectMap = defaultdict(dict)
@@ -76,15 +76,15 @@ class Context:
     def __init__(self, ctx_id):
         self.__ctx_id = ctx_id
 
-    # @throw_exception_if_null("object with given key doesn't exist")
+    @throw_exception_if_null("object with given key doesn't exist")
     def config_value(self, key: str):
         ret_ptr = PLUGIN_LIB_OBJ.ctx_config_value(self._ctx_id(), string_to_bytes(key))
 
         ret_char_ptr = cast(ret_ptr, c_char_p)
-        ret_str = ret_char_ptr.value.decode(encoding="utf-8")
+        ret_str = ret_char_ptr.value
         PLUGIN_LIB_OBJ.dealloc_charp(ret_char_ptr)
 
-        return ret_str
+        return ret_str.decode(encoding="utf-8") if ret_str else None
 
     def config_keys(self):
         config_list_c = PLUGIN_LIB_OBJ.ctx_config_keys(self._ctx_id())
