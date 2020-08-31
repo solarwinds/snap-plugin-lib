@@ -63,6 +63,9 @@ static inline value_t * alloc_value_t(enum value_type_t t) {
 }
 
 static inline void free_value_t(value_t * v) {
+	if (v->vtype == TYPE_CSTRING) {
+		free(v->value.v_cstring);
+	}
 	free(v);
 }
 
