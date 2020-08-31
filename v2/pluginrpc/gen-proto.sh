@@ -26,7 +26,7 @@ while getopts c o
 do
     case "$o" in
         c) clean_install=1;;
-        [?]) echo "Usage: $0 [-c]"; exit 1;;
+        *) echo "Usage: $0 [-c]"; exit 1;;
     esac
 done
 
@@ -38,6 +38,11 @@ else
     ext=""
 fi
 
+if [[ -z ${GOPATH} ]]; then
+    echo "GOPATH environment variable must be set"
+    exit 1
+fi
+
 if [[ $clean_install -eq 1 ]]; then
     echo "Cleaning"
     rm -f "${GOPATH}/bin/protoc"*
@@ -45,13 +50,13 @@ if [[ $clean_install -eq 1 ]]; then
 fi
 
 echo "Checking for goimports"
-if ! which "goimports" &> /dev/null ; then
+if ! command -v "goimports" &> /dev/null ; then
     echo "Installing goimports"
     go get golang.org/x/tools/cmd/goimports
 fi
 
 echo "Checking for protoc"
-if ! which "protoc${ext}" &> /dev/null ; then
+if ! command -v "protoc${ext}" &> /dev/null ; then
     protoc_path="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_ver}/protoc-${protoc_ver}-${protoc_os}.zip"
     
     echo "Installing protoc from ${protoc_path}"
@@ -63,13 +68,13 @@ if ! which "protoc${ext}" &> /dev/null ; then
 fi
 
 echo "Checking for protoc-gen-go"
-if ! which "protoc-gen-go${ext}" &> /dev/null ; then
+if ! command -v "protoc-gen-go${ext}" &> /dev/null ; then
     echo "Installing protoc-gen-go"
     GO111MODULE=on go get "github.com/golang/protobuf/protoc-gen-go@v${protoc_gen_go_ver}"
 fi
 
 echo "Checking for protoc-gen-grpchan"
-if ! which "protoc-gen-grpchan${ext}" &> /dev/null ; then
+if ! command -v "protoc-gen-grpchan${ext}" &> /dev/null ; then
     echo "Installing protoc-gen-grpchan"
     go get github.com/librato/grpchan/cmd/protoc-gen-grpchan
 fi
@@ -82,7 +87,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 echo "Applying licence and modifications"
-echo -e "${licence}\n${linter_ignore}\n"  | cat - "${proto_name}.pb.go" > temp && mv temp "${proto_name}.pb.go"
+echo -e "${licence}\n${linter_ignore}\n" | cat - "${proto_name}.pb.go" > temp && mv temp "${proto_name}.pb.go"
 echo -e "${licence}\n" | cat - "${proto_name}.pb.grpchan.go" > temp && mv temp "${proto_name}.pb.grpchan.go"
 goimports -w "${proto_name}.pb.go"
 goimports -w "${proto_name}.pb.grpchan.go"
