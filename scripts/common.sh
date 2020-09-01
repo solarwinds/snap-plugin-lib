@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 #
 # Copyright 2016 Intel Corporation
 #
@@ -132,17 +130,19 @@ _go_test() {
   # Standard go tooling behavior is to ignore dirs with leading underscors
   for dir in $(_test_dirs);
   do
+    pushd ${dir}
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
-      go test -v --tags="${TEST_TYPE}" -covermode=count -coverprofile="${dir}/profile.tmp" "${dir}"
-      if [ -f "${dir}/profile.tmp" ]; then
-        tail -n +2 "${dir}/profile.tmp" >> profile.cov
-        rm "${dir}/profile.tmp"
+      go test -v --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" ./... 
+      if [ -f "profile.tmp" ]; then
+        tail -n +2 "profile.tmp" >> profile.cov
+        rm "profile.tmp"
       fi
     else
       _debug "running go test without cover in ${dir}"
-      go test -v --tags="${TEST_TYPE}" "${dir}"
+      go test -v --tags="${TEST_TYPE}" ./... 
     fi
+    popd ${dir}
   done
 }
 
