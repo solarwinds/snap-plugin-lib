@@ -68,7 +68,7 @@ func startPprofServer(ctx context.Context, ln net.Listener) {
 
 func startStatsServer(ctx context.Context, ln net.Listener, stats stats.Controller) {
 	logF := log.WithCtx(ctx).WithFields(moduleFields)
-	logF.Infof("Running stats server on address")
+	logF.Infof("Running stats server on address %s", ln.Addr())
 
 	h := http.NewServeMux()
 
