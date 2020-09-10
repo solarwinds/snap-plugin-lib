@@ -32,4 +32,4 @@ _info "Building swisnap-plugin-lib.so"
 
 # Build CGO for windows
 _info "Building swisnap-plugin-lib.dll"
-(export GOOS=windows && export CGO_ENABLED=1 && export CXX=x86_64-w64-mingw32-g++ && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.dll")
+(export GOOS=windows && export CGO_ENABLED=1 && export CXX=x86_64-w64-mingw32-g++ && export CC=x86_64-w64-mingw32-gcc && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.dll")
