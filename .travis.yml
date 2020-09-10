@@ -16,9 +16,6 @@ cache:
 
 before_install:
   - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"
-  - apt-get update
-  - apt-get install gcc-multilib
-  - apt-get install gcc-mingw-w64
 
 install:
   - cd $SNAP_PLUGIN_SOURCE
@@ -37,6 +34,9 @@ jobs:
       - staticcheck ./...
   - stage: build
     script:
+      - sudo apt-get update
+      - sudo apt-get install gcc-multilib
+      - sudo apt-get install gcc-mingw-w64
       - make build 2>&1
   - stage: test
     env: TEST_TYPE=small
