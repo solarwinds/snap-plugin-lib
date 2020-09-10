@@ -28,7 +28,7 @@ __proj_dir="$(dirname "$__dir")"
 
 # Build CGO for linux
 _info "Building swisnap-plugin-lib.so"
-(GOOS=linux && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.so")
+(export GOOS=linux && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.so")
 
 # Build CGO for windows
 _info "Building swisnap-plugin-lib.dll"
