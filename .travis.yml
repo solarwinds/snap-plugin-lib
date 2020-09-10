@@ -32,6 +32,9 @@ jobs:
       - make check 2>&1
       - go install ./vendor/honnef.co/go/tools/cmd/staticcheck
       - staticcheck ./...
+  - stage: build
+    script:
+      - make build 2>&1
   - stage: test
     env: TEST_TYPE=small
   - stage: test
