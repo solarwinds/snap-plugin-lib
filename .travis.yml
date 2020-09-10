@@ -3,7 +3,7 @@ sudo: false
 language: go
 
 go:
-  - 1.11.x
+  - 1.14.x
 
 env:
   global:
@@ -16,6 +16,9 @@ cache:
 
 before_install:
   - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"
+  - apt-get update
+  - apt-get install gcc-multilib
+  - apt-get install gcc-mingw-w64
 
 install:
   - cd $SNAP_PLUGIN_SOURCE
@@ -42,4 +45,5 @@ jobs:
 
 stages:
 - lint
+- build
 - test
