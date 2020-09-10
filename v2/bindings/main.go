@@ -14,6 +14,7 @@
 	limitations under the License.
 */
 
+//go:generate goversioninfo -64
 package main
 
 /*

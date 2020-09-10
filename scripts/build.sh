@@ -23,6 +23,10 @@ set -o pipefail
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __proj_dir="$(dirname "$__dir")"
 
+version=${TRAVIS_TAG:-250.0.1}
+readarray -d . -t versionarr < <(printf '%s' ${version})
+commit=${TRAVIS_COMMIT:-0}
+
 # shellcheck source=scripts/common.sh
 . "${__dir}/common.sh"
 
@@ -30,6 +34,14 @@ __proj_dir="$(dirname "$__dir")"
 _info "Building swisnap-plugin-lib.so"
 (export GOOS=linux && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.so")
 
-# Build CGO for windows
+# Build CGO for windows 
 _info "Building swisnap-plugin-lib.dll"
+_go_get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+(cd "${__proj_dir}/v2/bindings" && cp versioninfo.template versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && sed -i 's/{major_version}/'${versionarr[0]}'/g' versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && sed -i 's/{minor_version}/'${versionarr[1]}'/g' versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && sed -i 's/{patch_version}/'${versionarr[2]}'/g' versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && sed -i 's/{version}/'${version}'/g' versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && sed -i 's/$TRAVIS_COMMIT/'${commit}'/g' versioninfo.json)
+(cd "${__proj_dir}/v2/bindings" && go generate)
 (export GOOS=windows && export CGO_ENABLED=1 && export CXX=x86_64-w64-mingw32-g++ && export CC=x86_64-w64-mingw32-gcc && cd "${__proj_dir}/v2/bindings" && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.dll")
