@@ -292,7 +292,8 @@ static inline void set_metric_values(metric_t** mt_array, int index, namespace_t
 
 static inline void free_metric_arr(metric_t** mt_array, int size) {
 	if (mt_array == NULL) return;
-	for (int i=0; i< size; i++) {
+	int i;
+	for (i=0; i< size; i++) {
 		if (mt_array[i] != NULL ) {
 			free_namespace_t(mt_array[i]->mt_namespace);
 			free_value_t(mt_array[i]->mt_value);
