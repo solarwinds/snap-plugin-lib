@@ -51,7 +51,7 @@ go generate
 
 # Building .Net 
 pushd csharp/SnapPluginLibCs
-dotnet build SnapPluginLibCs.sln -c Release
+dotnet build SnapPluginLibCs.sln -c Release -p:Version=${version}
 
 popd
 popd
