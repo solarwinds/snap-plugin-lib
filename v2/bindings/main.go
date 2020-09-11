@@ -14,6 +14,7 @@
 	limitations under the License.
 */
 
+//go:generate goversioninfo -64
 package main
 
 /*
@@ -98,7 +99,8 @@ static inline map_element_t * alloc_map_element_t_array(int size) {
 }
 
 static inline void free_map_element_t_array(map_element_t* m, int size) {
-	for(int i = 0; i < size; i++) {
+	int i;
+	for(i = 0; i < size; i++) {
 		free(m[i].key);
 		free(m[i].value);
 	}
@@ -220,7 +222,8 @@ static inline namespace_element_t * alloc_namespace_elem_arr(int size) {
 }
 
 static inline void free_namespace_elem_arr(namespace_element_t * nm_array, int size) {
-	for(int i=0; i < size; i++){
+	int i;
+	for(i=0; i < size; i++){
 		free(nm_array[i].el_name);
 		free(nm_array[i].value);
 		free(nm_array[i].description);
@@ -268,7 +271,8 @@ typedef struct {
 
 static inline metric_t** alloc_metric_pointer_array(int size) {
 	metric_t ** arrPtr = malloc(sizeof(metric_t*) * size);
-	for(int i=0; i< size; i++) {
+	int i;
+	for(i=0; i < size; i++) {
 		arrPtr[i] = malloc(sizeof(metric_t));
 	}
 	return arrPtr;
@@ -288,7 +292,8 @@ static inline void set_metric_values(metric_t** mt_array, int index, namespace_t
 
 static inline void free_metric_arr(metric_t** mt_array, int size) {
 	if (mt_array == NULL) return;
-	for (int i=0; i< size; i++) {
+	int i;
+	for (i=0; i< size; i++) {
 		if (mt_array[i] != NULL ) {
 			free_namespace_t(mt_array[i]->mt_namespace);
 			free_value_t(mt_array[i]->mt_value);

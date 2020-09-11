@@ -46,3 +46,8 @@ test-all:
 	$(MAKE) test-medium
 check:
 	$(MAKE) test
+
+build:
+	$(MAKE) deps
+	bash -c "./scripts/build.sh"
+

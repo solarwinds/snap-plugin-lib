@@ -1,0 +1,43 @@
+{
+    "FixedFileInfo": {
+        "FileVersion": {
+            "Major": {major_version},
+            "Minor": {minor_version},
+            "Patch": {patch_version},
+            "Build": 0
+        },
+        "ProductVersion": {
+            "Major": {major_version},
+            "Minor": {minor_version},
+            "Patch": {patch_version},
+            "Build": 0
+        },
+        "FileFlagsMask": "3f",
+        "FileFlags ": "00",
+        "FileOS": "040004",
+        "FileType": "01",
+        "FileSubType": "00"
+    },
+    "StringFileInfo": {
+        "Comments": "",
+        "CompanyName": "SolarWinds",
+        "FileDescription": "",
+        "FileVersion": "{version}",
+        "InternalName": "swisnap-plugin-lib.dll",
+        "LegalCopyright": "Copyright 2020 SolarWinds, LLC",
+        "LegalTrademarks": "",
+        "OriginalFilename": "swisnap-plugin-lib.dll",
+        "PrivateBuild": "$TRAVIS_COMMIT",
+        "ProductName": "SolarWinds Snap Agent plugin",
+        "ProductVersion": "{version}",
+        "SpecialBuild": ""
+    },
+    "VarFileInfo": {
+        "Translation": {
+            "LangID": "0409",
+            "CharsetID": "04B0"
+        }
+    },
+    "IconPath": "",
+    "ManifestPath": ""
+}

@@ -1,8 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.0</TargetFramework>
+        <Authors>SolarWinds Worldwide, LLC</Authors>
+        <Company>SolarWinds Worldwide, LLC</Company>
+        <Copyright>Copyright (c) 2020 SolarWinds Worldwide, LLC</Copyright>
+        <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/solarwinds/snap-plugin-lib-go</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/solarwinds/snap-plugin-lib-go</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

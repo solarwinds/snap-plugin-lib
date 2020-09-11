@@ -146,6 +146,13 @@ _go_test() {
   done
 }
 
+_go_build() {
+  build_flags=$1
+  output=$2
+
+  go build -v $build_flags -o $output
+}
+
 _go_cover() {
   go tool cover -func profile.cov
 }
