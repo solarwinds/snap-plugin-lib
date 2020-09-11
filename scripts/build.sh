@@ -26,6 +26,7 @@ __proj_dir="$(dirname "$__dir")"
 version=${TRAVIS_TAG:-250.0.0}
 versionarr=($(echo $version | tr "." "\n"))
 commit=${TRAVIS_COMMIT:-0}
+ubuntu_release=(lsb_release -rs)
 
 # shellcheck source=scripts/common.sh
 . "${__dir}/common.sh"
@@ -48,4 +49,9 @@ go generate
 (export GOOS=windows && export CGO_ENABLED=1 && export CXX=x86_64-w64-mingw32-g++ && export CC=x86_64-w64-mingw32-gcc  \
  && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.dll")
 
+# Building .Net 
+pushd csharp/SnapPluginLibCs
+dotnet build SnapPluginLibCs.sln -c Release
+
+popd
 popd
