@@ -116,7 +116,7 @@ func (c *Context) LoadTo(key string, dest interface{}) error {
 		return fmt.Errorf("passed variable should be a non-nill pointer")
 	}
 	if reflect.TypeOf(dest).Elem() != reflect.TypeOf(obj) {
-		return fmt.Errorf("type of destination variable don't match to type of stored value")
+		return fmt.Errorf("type of destination variable (%+v) don't match to type of stored value (%+v)", reflect.TypeOf(dest).Elem(), reflect.TypeOf(obj))
 	}
 
 	vDest.Elem().Set(reflect.ValueOf(obj))
