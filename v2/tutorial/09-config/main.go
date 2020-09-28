@@ -19,9 +19,9 @@ package main
 import (
 	"context"
 
-	"github.com/librato/snap-plugin-lib-go/v2/runner"
-	"github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector"
-	"github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/runner"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/09-config/collector"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/09-config/collector/proxy"
 )
 
 /*****************************************************************************/

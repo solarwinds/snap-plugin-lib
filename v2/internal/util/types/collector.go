@@ -17,7 +17,7 @@
 package types
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
 // Simple wrapper which enables using common code for collector and streaming collector.

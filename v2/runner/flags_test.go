@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

@@ -112,7 +112,7 @@
 [[projects]]
   branch = "master"
   digest = "1:4826632a21ff151176096f4c034e1c53d489cd29ac9ed1fe1ecf001b71400e47"
-  name = "github.com/librato/grpchan"
+  name = "github.com/solarwinds/grpchan"
   packages = [
     ".",
     "inprocgrpc",
@@ -468,8 +468,8 @@
   input-imports = [
     "github.com/golang/protobuf/proto",
     "github.com/julienschmidt/httprouter",
-    "github.com/librato/grpchan",
-    "github.com/librato/grpchan/inprocgrpc",
+    "github.com/solarwinds/grpchan",
+    "github.com/solarwinds/grpchan/inprocgrpc",
     "github.com/shirou/gopsutil/cpu",
     "github.com/shirou/gopsutil/mem",
     "github.com/shirou/gopsutil/process",

@@ -19,7 +19,7 @@ package runner
 import (
 	"fmt"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/collector/proxy"
 	"gopkg.in/yaml.v3"
 )
 

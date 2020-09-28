@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
 )
 

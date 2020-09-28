@@ -20,10 +20,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 
-	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
-	"github.com/librato/snap-plugin-lib-go/v2/tutorial/09-config/collector/data"
+	pluginMock "github.com/solarwinds/snap-plugin-lib/v2/mock"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/09-config/collector/data"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

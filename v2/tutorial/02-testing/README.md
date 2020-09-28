@@ -15,7 +15,7 @@ go build -o binaryName
 
  Instead of compiling your own code, you can reuse tutorial example(s):
 ```bash
-cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/tutorial/02-testing
+cd $GOPATH/src/github.com/solarwinds/snap-plugin-lib/tutorial/02-testing
 go build
 ```
 
@@ -134,7 +134,7 @@ By providing `-grpc-ping-max-missed=0`, plugin will not exit when 3 pings are no
 Now, in other console, you should locate snap-mock, compile it and execute:
 
 ```bash
-cd $GOPATH/src/github.com/librato/snap-plugin-lib-go/v2/snap-mock
+cd $GOPATH/src/github.com/solarwinds/snap-plugin-lib/v2/snap-mock
 go build
 ./snap-mock -plugin-port=50123 -max-collect-requests=3 -collect-interval=5s -send-kill=1
 ```

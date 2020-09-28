@@ -35,12 +35,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	commonProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/metrictree"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
 var moduleFields = logrus.Fields{"layer": "lib", "module": "collector-proxy"}

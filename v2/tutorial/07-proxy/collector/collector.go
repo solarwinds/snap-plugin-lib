@@ -17,8 +17,8 @@
 package collector
 
 import (
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/tutorial/07-proxy/collector/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/07-proxy/collector/proxy"
 )
 
 type systemCollector struct {

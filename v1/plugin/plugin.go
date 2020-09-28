@@ -48,7 +48,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
@@ -64,7 +64,7 @@ var (
 		opts    []MetaOpt
 	}
 	// Flags required by the plugin lib flags - plugin authors can provide their
-	// own flags.  Checkout https://github.com/librato/snap-plugin-lib-go/blob/master/examples/snap-plugin-collector-rand/rand/rand.go
+	// own flags.  Checkout https://github.com/solarwinds/snap-plugin-lib/blob/master/examples/snap-plugin-collector-rand/rand/rand.go
 	// for an example of a plugin adding a custom flag.
 	Flags []cli.Flag = []cli.Flag{
 		flConfig,

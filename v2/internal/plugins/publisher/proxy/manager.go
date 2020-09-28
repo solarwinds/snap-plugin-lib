@@ -23,10 +23,10 @@ import (
 	"sync"
 	"time"
 
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	commonProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/sirupsen/logrus"
 )
 

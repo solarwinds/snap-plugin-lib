@@ -8,7 +8,7 @@ To get these example plugins to build properly and work with Snap you will need 
 To test these plugins with Snap, you will need to have [Snap](https://github.com/librato/snap) installed, check out these docs for [Snap setup details](https://github.com/librato/snap/blob/master/docs/BUILD_AND_TEST.md#getting-started).
 
 ### 1. Get the plugin library repo:
-`go get github.com/librato/snap-plugin-lib-go/...` will add the repo to your $GOPATH
+`go get github.com/solarwinds/snap-plugin-lib/...` will add the repo to your $GOPATH
 
 ### 2. Go to the snap-plugin-lib-go folder and update to the newest versions of the package with `glide up`:
 

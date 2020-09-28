@@ -25,9 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/service"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/sirupsen/logrus"
 )
 

@@ -23,8 +23,8 @@ Writing a simple plugin code in Go is very straightforward:
 package main
 
 import (
-    "github.com/librato/snap-plugin-lib-go/v2/plugin"
-    "github.com/librato/snap-plugin-lib-go/v2/runner"
+    "github.com/solarwinds/snap-plugin-lib/v2/plugin"
+    "github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
 
 type myCollector struct {}
@@ -87,7 +87,7 @@ Covered topics:
 ### Issue Reporting Guidelines
 
 * Always check if the problem wasn't already reported by other developers. 
-* Please fill in [Issue submission form](https://github.com/librato/snap-plugin-lib-go/issues/new).
+* Please fill in [Issue submission form](https://github.com/solarwinds/snap-plugin-lib/issues/new).
 
 ### Pull Request Guidelines
 
