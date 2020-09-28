@@ -35,7 +35,7 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 }
 
 func main() {
-    runner.StartCollector(&myCollector{}, "example-collector", "v1.0.0")
+    runner.StartCollector(&myCollector{}, "example-collector", "1.0.0")
 }
 ```
 

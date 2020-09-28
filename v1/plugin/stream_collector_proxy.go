@@ -37,8 +37,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"google.golang.org/grpc/metadata"
 )
 

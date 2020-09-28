@@ -27,13 +27,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/collector/proxy"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/service"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 const (

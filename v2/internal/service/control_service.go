@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
-	"github.com/sirupsen/logrus"
 )
 
 const (

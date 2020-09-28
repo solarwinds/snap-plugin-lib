@@ -48,8 +48,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	log "github.com/sirupsen/logrus"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

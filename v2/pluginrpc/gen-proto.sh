@@ -76,7 +76,7 @@ fi
 echo "Checking for protoc-gen-grpchan"
 if ! command -v "protoc-gen-grpchan${ext}" &> /dev/null ; then
     echo "Installing protoc-gen-grpchan"
-    go get github.com/solarwinds/grpchan/cmd/protoc-gen-grpchan
+    go get github.com/librato/grpchan/cmd/protoc-gen-grpchan
 fi
 
 echo "Generating pb.go files"

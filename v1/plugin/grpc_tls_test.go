@@ -47,8 +47,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

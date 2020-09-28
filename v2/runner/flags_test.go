@@ -23,8 +23,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

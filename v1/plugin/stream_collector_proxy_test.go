@@ -38,8 +38,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"google.golang.org/grpc"
 )
 

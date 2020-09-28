@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/07-proxy/collector/data"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/07-proxy/collector/data"
 )
 
 const defaultCPUMeasurementTime = 1 * time.Second

@@ -20,7 +20,7 @@ Copyright (c) 2020 SolarWinds Worldwide, LLC
 package pluginrpc
 
 import (
-	"github.com/solarwinds/grpchan"
+	"github.com/librato/grpchan"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )

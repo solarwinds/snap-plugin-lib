@@ -23,9 +23,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/runner"
-	"github.com/sirupsen/logrus"
 )
 
 const (

@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	. "github.com/smartystreets/goconvey/convey"
 	collProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/collector/proxy"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
 	pubProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/publisher/proxy"
@@ -33,8 +35,6 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
-	"github.com/sirupsen/logrus"
-	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 )
