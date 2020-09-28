@@ -80,7 +80,7 @@ package proxy
 
 import (
     "fmt"
-    "github.com/librato/snap-plugin-lib-go/v2/tutorial/07-proxy/collector/data"
+    "github.com/solarwinds/snap-plugin-lib/v2/tutorial/07-proxy/collector/data"
     "github.com/shirou/gopsutil/cpu"
     "github.com/shirou/gopsutil/mem"
     "github.com/shirou/gopsutil/process"

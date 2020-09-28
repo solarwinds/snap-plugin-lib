@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
+	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"google.golang.org/grpc"
 )
 

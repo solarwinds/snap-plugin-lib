@@ -37,7 +37,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/librato/snap-plugin-lib-go/v1/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin"
 )
 
 // FPublisher is a testing publisher.

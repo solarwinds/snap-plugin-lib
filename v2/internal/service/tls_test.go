@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

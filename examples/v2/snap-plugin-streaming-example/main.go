@@ -21,9 +21,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
 
 const (

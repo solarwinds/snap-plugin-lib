@@ -37,8 +37,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 )
 
 func TestProcessor(t *testing.T) {

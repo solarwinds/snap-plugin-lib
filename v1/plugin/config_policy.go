@@ -34,7 +34,7 @@ package plugin
 import (
 	"strings"
 
-	"github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 )
 
 type ConfigPolicy struct {

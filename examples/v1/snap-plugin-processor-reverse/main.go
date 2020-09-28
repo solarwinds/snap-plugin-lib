@@ -32,8 +32,8 @@
 package main
 
 import (
-	"github.com/librato/snap-plugin-lib-go/examples/v1/snap-plugin-processor-reverse/reverse"
-	"github.com/librato/snap-plugin-lib-go/v1/plugin"
+	"github.com/solarwinds/snap-plugin-lib/examples/v1/snap-plugin-processor-reverse/reverse"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin"
 )
 
 const (

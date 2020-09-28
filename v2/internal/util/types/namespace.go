@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
 type Namespace []NamespaceElement
