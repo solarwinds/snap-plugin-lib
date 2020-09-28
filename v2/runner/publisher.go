@@ -22,12 +22,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/stats"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/service"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/publisher/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/service"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
 func StartPublisher(publisher plugin.Publisher, name string, version string) {

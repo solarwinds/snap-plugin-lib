@@ -10,8 +10,8 @@ package main
 import (
     "context"
 
-    "github.com/librato/snap-plugin-lib-go/v2/plugin"
-    "github.com/librato/snap-plugin-lib-go/v2/runner"
+    "github.com/solarwinds/snap-plugin-lib/v2/plugin"
+    "github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
 
 type simpleCollector struct{}
@@ -36,8 +36,8 @@ This instruction will instruct go compiler that it should build executable file 
 
 ```go
 import (
-    "github.com/librato/snap-plugin-lib-go/v2/plugin"
-    "github.com/librato/snap-plugin-lib-go/v2/runner"
+    "github.com/solarwinds/snap-plugin-lib/v2/plugin"
+    "github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
 ```
 

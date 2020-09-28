@@ -37,7 +37,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/librato/snap-plugin-lib-go/v1/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v1/plugin"
 
 	. "github.com/smartystreets/goconvey/convey"
 )

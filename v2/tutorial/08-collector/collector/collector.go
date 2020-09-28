@@ -21,8 +21,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/tutorial/08-collector/collector/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/tutorial/08-collector/collector/proxy"
 )
 
 var sanitizeRegex = regexp.MustCompile(`[()[\]{}<> ,./?;':"|^!\-_+\\]+`)

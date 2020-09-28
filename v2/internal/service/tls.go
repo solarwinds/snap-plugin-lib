@@ -25,8 +25,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"google.golang.org/grpc/credentials"
 )
 

@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
-	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/publisher/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 )
 
 type publishingService struct {

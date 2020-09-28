@@ -29,10 +29,10 @@ import (
 	"time"
 
 	"github.com/librato/grpchan"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/pluginrpc"
 	"github.com/sirupsen/logrus"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"google.golang.org/grpc"
 )
 

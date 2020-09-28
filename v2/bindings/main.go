@@ -313,12 +313,12 @@ import (
 	"time"
 	"unsafe"
 
-	collectorProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/collector/proxy"
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	publisherProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/publisher/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
-	"github.com/librato/snap-plugin-lib-go/v2/runner"
 	"github.com/sirupsen/logrus"
+	collectorProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/collector/proxy"
+	commonProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/proxy"
+	publisherProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/publisher/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
 import "C"
 

@@ -26,12 +26,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/librato/snap-plugin-lib-go/v2/plugin"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 
-	commonProxy "github.com/librato/snap-plugin-lib-go/v2/internal/plugins/common/proxy"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/metrictree"
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+	commonProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/metrictree"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	mtMeta := pc.metricMeta(nsDescKey)
 
 	// if performance would suffer at some point in future proposed solution (indefinite chan) may be introduced
-	// https://github.com/librato/snap-plugin-lib-go/pull/49/files#r390325795
+	// https://github.com/solarwinds/snap-plugin-lib/pull/49/files#r390325795
 	// https://medium.com/capital-one-tech/building-an-unbounded-channel-in-go-789e175cd2cd
 	pc.sessionMtsMutex.Lock()
 	defer pc.sessionMtsMutex.Unlock()

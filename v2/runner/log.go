@@ -21,7 +21,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/librato/snap-plugin-lib-go/v2/internal/util/log"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
 )
 
 var moduleFields = logrus.Fields{"layer": "lib", "module": "plugin-runner"}

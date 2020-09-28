@@ -16,7 +16,7 @@
 
 package service
 
-import "github.com/librato/snap-plugin-lib-go/v2/internal/util/types"
+import "github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 
 type CollectorProxy interface {
 	RequestCollect(id string) <-chan types.CollectChunk

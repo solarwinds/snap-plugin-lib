@@ -31,7 +31,7 @@
 
 package plugin
 
-import "github.com/librato/snap-plugin-lib-go/v1/plugin/rpc"
+import "github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 
 type boolRuleOpt func(*rpc.BoolRule)
 

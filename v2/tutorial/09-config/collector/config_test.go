@@ -19,7 +19,7 @@ package collector
 import (
 	"testing"
 
-	pluginMock "github.com/librato/snap-plugin-lib-go/v2/mock"
+	pluginMock "github.com/solarwinds/snap-plugin-lib/v2/mock"
 	"github.com/stretchr/testify/require"
 )
 
