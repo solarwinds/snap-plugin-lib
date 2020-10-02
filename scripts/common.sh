@@ -104,7 +104,7 @@ _golint() {
 }
 
 _go_vet() {
-  for d in "$(_test_dirs)"
+  for d in $(_test_dirs)
   do 
     pushd "$d"
     go vet .
