@@ -46,6 +46,7 @@ detect_go_dep() {
   [[ -f "${__proj_dir}/glide.yaml" ]] && _dep='glide'
   [[ -f "${__proj_dir}/vendor/vendor.json" ]] && _dep='govendor'
   [[ -f "${__proj_dir}/Gopkg.toml" ]] && _dep='dep'
+  [[ -f "${__proj_dir}/go.mod" ]] && _dep='gomod'
   _info "golang dependency tool: ${_dep}"
   echo "${_dep}"
 }
@@ -84,6 +85,9 @@ restore_go_dep() {
       ;;
     dep)
       (cd "${__proj_dir}" && dep ensure -v -vendor-only)
+      ;;
+    gomod)
+      (cd "${__proj_dir}" && go mod vendor)
       ;;
   esac
 }
