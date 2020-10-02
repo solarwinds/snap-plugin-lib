@@ -104,9 +104,9 @@ _golint() {
 }
 
 _go_vet() {
-  for d in $(_test_dirs)
+  for d in "$(_test_dirs)"
   do 
-    pushd $d
+    pushd "$d"
     go vet .
     popd
   done
@@ -137,7 +137,7 @@ _go_test() {
   # Standard go tooling behavior is to ignore dirs with leading underscors
   for dir in $(_test_dirs);
   do
-    pushd ${dir}
+    pushd "${dir}"
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
       go test -v --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" ./...
