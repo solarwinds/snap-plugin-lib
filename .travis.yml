@@ -14,7 +14,7 @@ env:
 
 cache:
   directories:
-  - $GOPATH/pkg/dep/sources
+  - $GOPATH/pkg/mod
 
 before_install:
   - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"
