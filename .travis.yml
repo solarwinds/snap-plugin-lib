@@ -32,7 +32,7 @@ jobs:
       - TEST_TYPE=lint
     script:
       - make check 2>&1
-      - go install ./vendor/honnef.co/go/tools/cmd/staticcheck
+      - go get honnef.co/go/tools/cmd/staticcheck
       - staticcheck ./...
   - stage: build
     script:
