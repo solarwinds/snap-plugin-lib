@@ -32,7 +32,7 @@ ubuntu_release=(lsb_release -rs)
 . "${__dir}/common.sh"
 
 # Build examples for v1 and v2
-for f in `find ./examples/ -name "main.go"`; do (cd ${f%\/*} && echo "Building $PWD" && go build) ; done
+for f in $(find ./examples/ -name "main.go"); do (cd $(dirname $f) && echo "Building $PWD" && go build) ; done
 
 pushd "${__proj_dir}/v2/bindings"
 # Build CGO for linux
