@@ -14,7 +14,7 @@ env:
 
 cache:
   directories:
-  - $GOPATH/pkg/dep/sources
+  - $GOPATH/pkg/mod
 
 before_install:
   - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"
@@ -32,7 +32,7 @@ jobs:
       - TEST_TYPE=lint
     script:
       - make check 2>&1
-      - go install ./vendor/honnef.co/go/tools/cmd/staticcheck
+      - go get honnef.co/go/tools/cmd/staticcheck@v0.0.1-2020.1.5
       - staticcheck ./...
   - stage: build
     script:
