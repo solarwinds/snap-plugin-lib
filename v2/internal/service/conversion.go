@@ -133,6 +133,10 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VBytes{VBytes: t}
 	case bool:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VBool{VBool: t}
+	case int16:
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt16{VInt16: int32(t)}
+	case uint16:
+		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint16{VUint16: uint32(t)}
 	case nil:
 		grpcValue.DataVariant = nil
 	default:
@@ -162,6 +166,10 @@ func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
 		return v.GetVBytes(), nil
 	case *pluginrpc.MetricValue_VBool:
 		return v.GetVBool(), nil
+	case *pluginrpc.MetricValue_VInt16:
+		return int16(v.GetVInt16()), nil
+	case *pluginrpc.MetricValue_VUint16:
+		return uint16(v.GetVUint16()), nil
 	}
 
 	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
