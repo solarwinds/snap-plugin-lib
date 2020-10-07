@@ -19,7 +19,7 @@ package service
 import (
 	"net"
 
-	"github.com/librato/grpchan/inprocgrpc"
+	"github.com/solarwinds/grpchan/inprocgrpc"
 )
 
 type Channel struct {

@@ -17,8 +17,8 @@
 package runner
 
 import (
-	"github.com/librato/grpchan"
 	"github.com/sirupsen/logrus"
+	"github.com/solarwinds/grpchan"
 
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
