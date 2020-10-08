@@ -27,8 +27,11 @@ type Channel struct {
 }
 
 func NewChannel() *Channel {
+	inprocCh := &inprocgrpc.Channel{}
+	inprocCh.SetHandlersExpectations(2)
+
 	return &Channel{
-		&inprocgrpc.Channel{},
+		inprocCh,
 	}
 }
 
