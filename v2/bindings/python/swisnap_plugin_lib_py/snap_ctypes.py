@@ -25,7 +25,9 @@ max_uint = 18446744073709551615
     TYPE_DOUBLE,
     TYPE_BOOL,
     TYPE_CSTRING,
-) = range(9)
+    TYPE_INT16,
+    TYPE_UINT16
+) = range(11)
 
 (
     _,

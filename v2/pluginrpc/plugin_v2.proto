@@ -139,6 +139,8 @@ message MetricValue {
         bool v_bool = 7;
         bytes v_bytes = 8;
         string v_string = 9;
+        int32 v_int16 = 10; // there is no int16 protobuf type, will be packed in int32
+        uint32 v_uint16 = 11; // there is no uint16 protobuf type, will be packed in uint32
     }
 }
 

@@ -41,6 +41,8 @@ enum value_type_t {
 	TYPE_DOUBLE,
 	TYPE_BOOL,
 	TYPE_CSTRING,
+	TYPE_INT16,
+	TYPE_UINT16
 };
 
 typedef struct {
@@ -53,6 +55,8 @@ typedef struct {
 		double v_double;
 		int v_bool;
 		char * v_cstring;
+		short int v_int16;
+		unsigned short int v_uint16;
 	} value;
 	int vtype; // value_type_t;
 } value_t;
@@ -78,6 +82,8 @@ static inline float value_t_float(value_t * v) { return v->value.v_float; }
 static inline double value_t_double(value_t * v) { return v->value.v_double; }
 static inline int value_t_bool(value_t * v) { return v->value.v_bool; }
 static inline char * value_t_cstring(value_t * v) { return v->value.v_cstring; }
+static inline short int value_t_shortint(value_t * v) { return v->value.v_int16; }
+static inline short int value_t_ushortint(value_t * v) { return v->value.v_uint16; }
 
 static inline void set_value_t_long_long(value_t * v, long long v_int64) { v->value.v_int64 = v_int64; }
 static inline void set_value_t_ulong_long(value_t * v, unsigned long long v_uint64) { v->value.v_uint64 = v_uint64; }
@@ -87,6 +93,8 @@ static inline void set_value_t_float(value_t * v, float v_float) { v->value.v_fl
 static inline void set_value_t_double(value_t * v, double v_double) { v->value.v_double = v_double; }
 static inline void set_value_t_bool(value_t * v, int v_bool) { v->value.v_bool = v_bool; }
 static inline void set_value_t_cstring(value_t * v, char * v_cstring) { v->value.v_cstring = v_cstring; }
+static inline void set_value_t_shortint(value_t * v, short int v_int16) { v->value.v_int16 = v_int16; }
+static inline void set_value_t_ushortint(value_t * v, unsigned short int v_uint16) { v->value.v_uint16 = v_uint16; }
 
 typedef struct {
 	char * key;
@@ -494,6 +502,14 @@ func toCvalue_t(v interface{}) *C.value_t {
 		cvalue_t_ptr := C.alloc_value_t(C.TYPE_CSTRING)
 		C.set_value_t_cstring(cvalue_t_ptr, C.CString(n))
 		return cvalue_t_ptr
+	case int16:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_INT16)
+		C.set_value_t_shortint(cvalue_t_ptr, C.short(n))
+		return cvalue_t_ptr
+	case uint16:
+		cvalue_t_ptr := C.alloc_value_t(C.TYPE_UINT16)
+		C.set_value_t_ushortint(cvalue_t_ptr, C.ushort(n))
+		return cvalue_t_ptr
 	default:
 		panic(fmt.Sprintf("Not supported metric type %T", v))
 	}
@@ -517,6 +533,10 @@ func toGoValue(v *C.value_t) interface{} {
 		return intToBool(int(C.value_t_bool(v)))
 	case C.TYPE_CSTRING:
 		return C.GoString(C.value_t_cstring(v))
+	case C.TYPE_INT16:
+		return int16(C.value_t_shortint(v))
+	case C.TYPE_UINT16:
+		return uint16(C.value_t_ushortint(v))
 	}
 
 	panic(fmt.Sprintf("Invalid type %v", (*v).vtype))

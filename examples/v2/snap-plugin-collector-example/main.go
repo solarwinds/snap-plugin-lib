@@ -67,13 +67,13 @@ plugins:
 
 type myCollector struct {
 	random1History map[int]int
-	random2History map[int]int
+	random2History map[int16]int
 }
 
 func newMyCollector() *myCollector {
 	return &myCollector{
 		random1History: map[int]int{},
-		random2History: map[int]int{},
+		random2History: map[int16]int{},
 	}
 }
 
@@ -100,7 +100,7 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 	time.Sleep(time.Duration(rand.Intn(int(maxCollectDuration))))
 
 	random1 := rand.Intn(10)
-	random2 := rand.Intn(20)
+	random2 := int16(rand.Intn(20))
 
 	c.random1History[random1]++
 	c.random2History[random2]++
