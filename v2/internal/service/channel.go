@@ -28,6 +28,8 @@ type Channel struct {
 
 func NewChannel() *Channel {
 	inprocCh := &inprocgrpc.Channel{}
+
+	// wait for binding controller and collector/publisher services handlers
 	inprocCh.SetHandlersExpectations(2)
 
 	return &Channel{
