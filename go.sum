@@ -54,6 +54,8 @@ github.com/smartystreets/goconvey v1.6.4 h1:fv0U8FUIMPNf1L9lnHLvLhgicrIVChEkdzIK
 github.com/smartystreets/goconvey v1.6.4/go.mod h1:syvi0/a8iFYH4r/RixwvyeAJjdLS9QV7WQ/tjFTllLA=
 github.com/solarwinds/grpchan v1.1.0 h1:TULlx2MHtX2fYwIDhcY1Ki8tCfBHpnHn/H6jNoas4S0=
 github.com/solarwinds/grpchan v1.1.0/go.mod h1:VJKlEspw0whjwg0jQZWzTbXnZ8ijLhze5nRnGiJBx7Q=
+github.com/solarwinds/grpchan v1.1.1-0.20201009132539-a2c6e0d00272 h1:Ai2VuiKoIaHQkab5osn1AhFdJdDORI+B52VIUnggNOw=
+github.com/solarwinds/grpchan v1.1.1-0.20201009132539-a2c6e0d00272/go.mod h1:3P8EIJEBXZPJFy6LQdLUNBBWopmJREByaDZmVgDqB14=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/urfave/cli v1.22.4 h1:u7tSpNPPswAFymm8IehJhy4uJMlUuU/GmqSkvJ1InXA=
