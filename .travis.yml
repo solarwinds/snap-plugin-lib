@@ -13,6 +13,7 @@ env:
   global:
     - ORG_PATH=/home/travis/gopath/src/github.com/librato
     - SNAP_PLUGIN_SOURCE=/home/travis/gopath/src/github.com/${TRAVIS_REPO_SLUG}    
+    - GOMODCACHE=${GOPATH}/pkg/mod
   jobs:
     - TEST_TYPE=lint
     - TEST_TYPE=build
@@ -21,7 +22,8 @@ env:
   
 cache:
   directories:
-  - $GOPATH/pkg/mod
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
 
 before_install:
   - "[[ -d $SNAP_PLUGIN_SOURCE ]] || mkdir -p $ORG_PATH && ln -s $TRAVIS_BUILD_DIR $SNAP_PLUGIN_SOURCE"

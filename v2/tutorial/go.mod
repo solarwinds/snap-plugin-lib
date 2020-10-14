@@ -1,4 +1,4 @@
-module github.com/solarwinds/snap-plugin-lib/tutorial/v2
+module github.com/solarwinds/snap-plugin-lib/v2/tutorial
 
 go 1.13
 
