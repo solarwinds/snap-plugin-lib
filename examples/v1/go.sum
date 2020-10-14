@@ -48,6 +48,8 @@ github.com/smartystreets/goconvey v1.6.4 h1:fv0U8FUIMPNf1L9lnHLvLhgicrIVChEkdzIK
 github.com/smartystreets/goconvey v1.6.4/go.mod h1:syvi0/a8iFYH4r/RixwvyeAJjdLS9QV7WQ/tjFTllLA=
 github.com/solarwinds/snap-plugin-lib v1.0.0-beta h1:EIT/t6bQlJVzCUs3ieri/3M38MH6KF9an/sO/N+OSbw=
 github.com/solarwinds/snap-plugin-lib v1.0.0-beta/go.mod h1:wEiP82wGzHDrTVS7ofe3uENRwHHFSICwEa9HCSrR29o=
+github.com/solarwinds/snap-plugin-lib v1.0.0-beta-2 h1:/3j8nAcPUiTCYK8Z9bhQHGroA/TRo5Vu5zNYqyi0SPA=
+github.com/solarwinds/snap-plugin-lib v1.0.0-beta-2/go.mod h1:OIpSt7XcqEuW3pfL0nzwL3/k1rvNgwVvLoEDbMQBl90=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/urfave/cli v1.22.4 h1:u7tSpNPPswAFymm8IehJhy4uJMlUuU/GmqSkvJ1InXA=
