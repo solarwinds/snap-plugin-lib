@@ -92,7 +92,7 @@ func NewStatsController(ctx context.Context, pluginName string, pluginVersion st
 			PluginInfo: pluginInfo{
 				Name:    pluginName,
 				Version: pluginVersion,
-				Type:    string(pluginType),
+				Type:    pluginType.String(),
 				Started: eventTimes{
 					Time: time.Now(),
 				},

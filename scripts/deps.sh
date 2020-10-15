@@ -87,7 +87,7 @@ restore_go_dep() {
       (cd "${__proj_dir}" && dep ensure -v -vendor-only)
       ;;
     gomod)
-      (cd "${__proj_dir}" && go mod vendor)
+      (cd "${__proj_dir}" && go mod download)
       ;;
   esac
 }
