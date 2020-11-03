@@ -36,17 +36,22 @@ func StartPublisher(publisher plugin.Publisher, name string, version string) {
 
 func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, name string, version string) {
 	var err error
-
 	var opt *plugin.Options
+	var ctxLog logrus.FieldLogger
+
 	inprocPlugin, inProc := publisher.(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
-
-		logger := inprocPlugin.Logger()
-		ctx = log.ToCtx(ctx, logger)
-
+		ctxLog = inprocPlugin.Logger()
 		publisher = inprocPlugin.Unwrap().(plugin.Publisher)
+	} else {
+		ctxLog = logrus.WithFields(logrus.Fields{
+			"plugin-name":    name,
+			"plugin-version": version,
+		})
 	}
+
+	ctx = log.ToCtx(ctx, ctxLog)
 
 	logF := logger(ctx).WithField("service", "publisher")
 

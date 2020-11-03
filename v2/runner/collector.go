@@ -61,14 +61,13 @@ func StartCollectorWithContext(ctx context.Context, collector plugin.Collector, 
 
 func startCollector(ctx context.Context, collector types.Collector) {
 	var err error
-
 	var opt *plugin.Options
+	var ctxLog logrus.FieldLogger
+
 	inprocPlugin, inProc := collector.Unwrap().(inProcessPlugin)
 	if inProc {
 		opt = inprocPlugin.Options()
-
-		logger := inprocPlugin.Logger()
-		ctx = log.ToCtx(ctx, logger)
+		ctxLog = inprocPlugin.Logger()
 
 		switch collector.Type() {
 		case types.PluginTypeCollector:
@@ -76,7 +75,14 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		case types.PluginTypeStreamingCollector:
 			collector = types.NewStreamingCollector(collector.Name(), collector.Version(), inprocPlugin.Unwrap().(plugin.StreamingCollector))
 		}
+	} else {
+		ctxLog = logrus.WithFields(logrus.Fields{
+			"plugin-name":    collector.Name(),
+			"plugin-version": collector.Version(),
+		})
 	}
+
+	ctx = log.ToCtx(ctx, ctxLog)
 
 	logF := logger(ctx).WithField("service", "collector")
 
