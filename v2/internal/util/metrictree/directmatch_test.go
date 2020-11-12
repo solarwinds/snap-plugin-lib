@@ -64,14 +64,45 @@ var testCases = []testCase{
 		shouldMatch: true,
 	},
 	{
-		ns:          "/kubernetes/[pod=io1453]/cpu",
-		filter:      "/kubernetes/[pod={io[0-9]{4}}]/cpu",
+		ns:          "|kubernetes|[pod=io1453]|cpu",
+		filter:      "|kubernetes|[pod={io[0-9]{4}}]|cpu",
 		shouldMatch: true,
 	},
 	{
 		ns:          "/kubernetes//cpu",
 		filter:      "/kubernetes/[pod={io[0-9]{4}}]/cpu",
 		expectError: true,
+	},
+	{
+		ns:          "|log-files|[file=/tmp/sample.log]|string_line",
+		filter:      "|log-files|[file=/tmp/sample.log]",
+		shouldMatch: true,
+	},
+	{
+		ns:          "|log-files|[file=/tmp/sample1.log]|string_line",
+		filter:      "|log-files|[file=/tmp/sample.log]|string_line",
+		shouldMatch: false,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		filter:      "/syslog/*/[hostname=localhost]/string_line",
+		shouldMatch: true,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		filter:      "/syslog/**/[hostname=localhost]/string_line",
+		shouldMatch: false,
+		expectError: true,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		filter:      "/syslog/[ip_address]/[hostname=localhost]/string_line",
+		shouldMatch: true,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=otherhost]/string_line",
+		filter:      "/syslog/*/[hostname=localhost]/string_line",
+		shouldMatch: false,
 	},
 }
 

@@ -194,7 +194,7 @@ func newStaticAnyElement() *staticAnyElement {
 }
 
 func (*staticAnyElement) Match(s string) bool {
-	return isValidIdentifier(s)
+	return s != "*" && s != "**" && isValidGroupIdentifier(s)
 }
 
 func (sae *staticAnyElement) Compatible(s string) bool {
