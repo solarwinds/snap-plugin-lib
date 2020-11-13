@@ -50,6 +50,11 @@ var testCases = []testCase{
 	},
 	{
 		ns:          "/kubernetes/[pod=io1453]/cpu",
+		filter:      "/kubernetes/[node]",
+		shouldMatch: false,
+	},
+	{
+		ns:          "/kubernetes/[pod=io1453]/cpu",
 		filter:      "/kubernetes/io1453",
 		shouldMatch: true,
 	},
@@ -90,6 +95,16 @@ var testCases = []testCase{
 	},
 	{
 		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		filter:      "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		shouldMatch: true,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.1.1]/[hostname=localhost]/string_line",
+		filter:      "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
+		shouldMatch: false,
+	},
+	{
+		ns:          "/syslog/[ip_address=127.0.0.1]/[hostname=localhost]/string_line",
 		filter:      "/syslog/**/[hostname=localhost]/string_line",
 		shouldMatch: false,
 		expectError: true,
@@ -114,6 +129,26 @@ var testCases = []testCase{
 		filter:      "/",
 		shouldMatch: true,
 	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/*",
+		shouldMatch: true,
+	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/*/metric/d",
+		shouldMatch: false,
+	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/**",
+		shouldMatch: true,
+	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/mock",
+		shouldMatch: true,
+	},
 }
 
 func TestMatchNsToFilter(t *testing.T) {
@@ -127,10 +162,10 @@ func TestMatchNsToFilter(t *testing.T) {
 			require.False(t, match, "Namespace shouldn't match to a given filter")
 		}
 
-		if !te.expectError {
-			require.NoError(t, err, "Expected no error")
-		} else {
+		if te.expectError {
 			require.Error(t, err, "Expected error")
+		} else {
+			require.NoError(t, err, "Expected no error")
 		}
 	}
 }

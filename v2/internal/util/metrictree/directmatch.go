@@ -38,15 +38,12 @@ func MatchNsToFilter(ns string, filter string) (bool, error) {
 
 	var parsedFilter *Namespace
 	if len(el) == 2 { // el[0] is empty
-		if el[1] == "" {
+		if el[1] == "" || el[1] == "*" || el[1] == "**" {
 			return true, nil
 		}
 		ne, errPNE := parseNamespaceElement(el[1], false)
 		if errPNE != nil {
 			return false, fmt.Errorf("invalid filter: %w", errPNE)
-		}
-		if _, ok := ne.(*staticSpecificElement); !ok {
-			return false, fmt.Errorf("invalid filter: %v", filter)
 		}
 
 		parsedFilter = &Namespace{elements: []namespaceElement{ne}}
@@ -54,10 +51,6 @@ func MatchNsToFilter(ns string, filter string) (bool, error) {
 		parsedFilter, err = ParseNamespace(filter, true)
 		if err != nil {
 			return false, err
-		}
-
-		if !parsedFilter.IsUsableForFiltering(true) {
-			return false, fmt.Errorf("invalid format of the filter: %v", filter)
 		}
 	}
 

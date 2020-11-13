@@ -219,7 +219,7 @@ func newStaticRecursiveAnyElement() *staticRecursiveAnyElement {
 }
 
 func (*staticRecursiveAnyElement) Match(s string) bool {
-	return isValidIdentifier(s)
+	return s != "*" && s != "**" && isValidGroupIdentifier(s)
 }
 
 func (*staticRecursiveAnyElement) Compatible(s string) bool {
