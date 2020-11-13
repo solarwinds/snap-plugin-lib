@@ -104,6 +104,16 @@ var testCases = []testCase{
 		filter:      "/syslog/*/[hostname=localhost]/string_line",
 		shouldMatch: false,
 	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/another-plugin",
+		shouldMatch: false,
+	},
+	{
+		ns:          "/mock/metric/c",
+		filter:      "/",
+		shouldMatch: true,
+	},
 }
 
 func TestMatchNsToFilter(t *testing.T) {
