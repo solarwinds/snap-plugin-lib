@@ -38,7 +38,7 @@ func MatchNsToFilter(ns string, filter string) (bool, error) {
 
 	var parsedFilter *Namespace
 	if len(el) == 2 { // el[0] is empty
-		if el[1] == "" || el[1] == "*" || el[1] == "**" {
+		if el[1] == "" || el[1] == staticAnyMatcher || el[1] == staticRecursiveAnyMatcher {
 			return true, nil
 		}
 		ne, errPNE := parseNamespaceElement(el[1], false)
