@@ -195,8 +195,8 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 	{
 		namespaceElement: "*", // valid
 		comparableType:   &staticAnyElement{},
-		shouldMatch:      []string{"metric", "group"},
-		shouldNotMatch:   []string{"*", "**", "", "{memo2}", "[group={id1}]", "[group1=id]"},
+		shouldMatch:      []string{"[group={id1}]", "[group1=id]", "metric", "group"},
+		shouldNotMatch:   []string{"*", "**", "", "{memo2}"},
 		isFilter:         false,
 	},
 	{
