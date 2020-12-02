@@ -34,7 +34,9 @@ func safeListenerAddr(ln net.Listener) net.TCPAddr {
 		return *ln.Addr().(*net.TCPAddr)
 	}
 
-	return net.TCPAddr{}
+	return net.TCPAddr{
+		IP: []byte("channel"),
+	}
 }
 
 func (r *resources) grpcListenerAddr() net.TCPAddr {
