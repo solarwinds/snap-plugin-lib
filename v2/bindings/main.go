@@ -752,6 +752,17 @@ func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, 
 	runner.StartCollector(bCollector, C.GoString(name), C.GoString(version))
 }
 
+//export start_streaming_collector
+func start_streaming_collector(streamingCollectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
+	bCollector := &bridgeCollector{
+		streamingCollectCallback: streamingCollectCallback,
+		loadCallback:    loadCallback,
+		unloadCallback:  unloadCallback,
+		defineCallback:  defineCallback,
+	}
+	runner.StartStreamingCollector(bCollector, C.GoString(name), C.GoString(version))
+}
+
 /***************************************************************************/
 //export start_publisher
 func start_publisher(publishCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
@@ -808,6 +819,7 @@ func (bp *bridgePublisher) callC(ctx plugin.Context, callback *C.callback_t) err
 
 type bridgeCollector struct {
 	collectCallback *C.callback_t
+	streamingCollectCallback *C.callback_t
 	loadCallback    *C.callback_t
 	unloadCallback  *C.callback_t
 	defineCallback  *C.define_callback_t
@@ -823,6 +835,10 @@ func (bc *bridgeCollector) PluginDefinition(def plugin.CollectorDefinition) erro
 
 func (bc *bridgeCollector) Collect(ctx plugin.CollectContext) error {
 	return bc.callC(ctx, bc.collectCallback)
+}
+
+func (bc *bridgeCollector) StreamingCollect(ctx plugin.CollectContext) error {
+	return bc.callC(ctx, bc.streamingCollectCallback)
 }
 
 func (bc *bridgeCollector) Load(ctx plugin.Context) error {
