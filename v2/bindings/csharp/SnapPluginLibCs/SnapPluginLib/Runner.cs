@@ -1,44 +1,54 @@
-﻿namespace SnapPluginLib
+﻿using System;
+
+namespace SnapPluginLib
 {
-    public static class Runner
+    public class Runner : IRunner
     {
-        private static CollectorPluginBase _collector;
+        private ICollectorPlugin _collector;
 
-        internal delegate void DefineHandler();
+        public void StartCollector(ICollectorPlugin collector)
+        {
+            _collector = collector ?? throw new ArgumentNullException(nameof(collector));
 
-        internal delegate void CollectHandler(string taskId);
+            CBridge.start_collector(
+                InvokeCollect, InvokeLoad, InvokeUnload, InvokeDefine,
+                collector.Name, Convertions.ToSemanticVersion(collector.Version));
+        }
 
-        internal delegate void LoadHandler(string taskId);
+        public void StartStreamingCollector(IStreamingCollectorPlugin collector)
+        {
+            _collector = collector ?? throw new ArgumentNullException(nameof(collector));
 
-        internal delegate void UnloadHandler(string taskId);
+            CBridge.start_streaming_collector(
+                InvokeStreamingCollect, InvokeLoad, InvokeUnload, InvokeDefine,
+                collector.Name, Convertions.ToSemanticVersion(collector.Version));
+        }
 
-        private static void DefineHandlerFn()
+
+        private void InvokeDefine()
         {
             _collector.DefinePlugin(new DefineContext());
         }
 
-        private static void CollectHandlerFn(string taskId)
+        private void InvokeCollect(string taskId)
         {
             _collector.Collect(ContextMemory.Get(taskId));
         }
 
-        private static void LoadHandlerFn(string taskId)
+        private void InvokeStreamingCollect(string taskId)
+        {
+            (_collector as IStreamingCollectorPlugin)?.StreamingCollect(ContextMemory.Get(taskId));
+        }
+
+        private void InvokeLoad(string taskId)
         {
             _collector.Load(ContextMemory.Get(taskId));
         }
 
-        private static void UnloadHandlerFn(string taskId)
+        private void InvokeUnload(string taskId)
         {
             _collector.Unload(ContextMemory.Get(taskId));
         }
 
-        public static void StartCollector(CollectorPluginBase collector)
-        {
-            _collector = collector;
-
-            CBridge.start_collector(
-                CollectHandlerFn, LoadHandlerFn, UnloadHandlerFn, DefineHandlerFn,
-                collector.Name, Convertions.ToSemanticVersion(collector.Version));
-        }
     }
 }

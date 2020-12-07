@@ -4,19 +4,21 @@ using SnapPluginLib;
 
 namespace CollectorExample
 {
-    public class CollectorExample : CollectorPluginBase
+    public class CollectorExample : ICollectorPlugin
     {
-        public CollectorExample(string name, Version version) : base(name, version)
+        public CollectorExample(string name, Version version)
         {
+            Name = name;
+            Version = version;
         }
 
-        public override void DefinePlugin(IDefineContext def)
+        public void DefinePlugin(IDefineContext def)
         {
             var exampleConfigYaml = "value: 113\nother: 142";
             def.DefineExampleConfig(exampleConfigYaml);
             def.DefineInstancesLimit(5);
             def.DefineTaskPerInstanceLimit(10);
-            
+
             def.DefineMetric("/example/group1/metric1", "b", false, "metric1 description");
             def.DefineMetric("/example/group1/metric2", "b", false, "metric2 description");
             def.DefineMetric("/example/group1/metric3", "b", false, "metric3 description");
@@ -24,21 +26,21 @@ namespace CollectorExample
             def.DefineMetric("/example/group2/metric5", "b", false, "metric5 description");
         }
 
-        public override void Collect(ICollectContext ctx)
+        public void Collect(ICollectContext ctx)
         {
             // Load object from memory
             var obj = ctx.Load<Dictionary<string, int>>("stored_object");
             obj["counter"]++;
             ctx.Store("stored_object", obj);
-            
+
             // Log messages with information from stored object
             ctx.Log(LogLevel.Info, "Log message from C#", new Dictionary<string, string>
             {
-                {"language", "c#"}, 
+                {"language", "c#"},
                 {"counter", $"{obj["counter"]}"}
             });
             ctx.AddWarning("Warning from C#");
-            
+
             // List requested metrics
             var reqMts = ctx.RequestedMetrics();
             if (reqMts.Count > 0)
@@ -66,7 +68,7 @@ namespace CollectorExample
             );
 
             ctx.AddMetric("/example/group1/metric2", 20);
-            ctx.AddMetric("/example/group1/metric3", (uint) 30);
+            ctx.AddMetric("/example/group1/metric3", (uint)30);
 
             if (ctx.ShouldProcess("/example/group2/metric4"))
             {
@@ -76,7 +78,7 @@ namespace CollectorExample
             ctx.AddMetric("/example/group2/metric5", "string value");
         }
 
-        public override void Load(IContext ctx)
+        public void Load(IContext ctx)
         {
             // Raw Config
             var rCfg = ctx.RawConfig();
@@ -103,5 +105,12 @@ namespace CollectorExample
             };
             ctx.Store("stored_object", obj);
         }
+
+        public void Unload(IContext ctx)
+        {
+        }
+
+        public string Name { get; }
+        public Version Version { get; }
     }
 }

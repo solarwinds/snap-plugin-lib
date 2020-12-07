@@ -14,19 +14,25 @@ namespace SnapPluginLib
         private const string PluginLibDllName = "swisnap-plugin-lib.so";
         #endif        
 
-        // Runner
-        
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void start_collector(
-            Runner.CollectHandler collectHandler,
-            Runner.LoadHandler loadHandler,
-            Runner.UnloadHandler unloadHandler,
-            Runner.DefineHandler defineHandler,
+            TaskHandler collectHandler,
+            TaskHandler loadHandler,
+            TaskHandler unloadHandler,
+            DefineHandler defineHandler,
             string name,
             string version
         );
-        
-        // Collect context related functions
+
+        [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
+        internal static extern void start_streaming_collector(
+            TaskHandler collectHandler,
+            TaskHandler loadHandler,
+            TaskHandler unloadHandler,
+            DefineHandler defineHandler,
+            string name,
+            string version
+        );
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr /* NativeError */
@@ -45,8 +51,6 @@ namespace SnapPluginLib
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr ctx_requested_metrics(string taskId);
 
-        // Context related functions
-
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern IntPtr ctx_config_value(string taskId, string key);
 
@@ -61,8 +65,6 @@ namespace SnapPluginLib
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern string ctx_log(string taskId, int level, string message, IntPtr /* NativeMap */ fields);
-
-        // DefinePlugin related functions 
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void define_metric(string ns, string unit, int idDefault, string description);
