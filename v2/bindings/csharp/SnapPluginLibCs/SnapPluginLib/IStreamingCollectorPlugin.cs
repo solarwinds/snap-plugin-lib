@@ -1,7 +1,8 @@
 ﻿namespace SnapPluginLib
 {
-    public interface IStreamingCollectorPlugin : ICollectorPlugin
+    public interface IStreamingCollectorPlugin : IPlugin
     {
         void StreamingCollect(ICollectContext ctx);
+        
     }
 }

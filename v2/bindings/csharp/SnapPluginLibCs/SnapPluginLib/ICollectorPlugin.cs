@@ -1,14 +1,8 @@
-﻿using System;
-
-namespace SnapPluginLib
+﻿namespace SnapPluginLib
 {
-    public interface ICollectorPlugin
+    public interface ICollectorPlugin : IPlugin
+
     {
-        void DefinePlugin(IDefineContext ctx);
         void Collect(ICollectContext ctx);
-        void Load(IContext ctx);
-        void Unload(IContext ctx);
-        string Name { get; }
-        Version Version { get; }
     }
 }

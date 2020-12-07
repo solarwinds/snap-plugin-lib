@@ -4,11 +4,11 @@ namespace SnapPluginLib
 {
     public class Runner : IRunner
     {
-        private ICollectorPlugin _collector;
+        private IPlugin _plugin;
 
         public void StartCollector(ICollectorPlugin collector)
         {
-            _collector = collector ?? throw new ArgumentNullException(nameof(collector));
+            _plugin = collector ?? throw new ArgumentNullException(nameof(collector));
 
             CBridge.start_collector(
                 InvokeCollect, InvokeLoad, InvokeUnload, InvokeDefine,
@@ -17,7 +17,7 @@ namespace SnapPluginLib
 
         public void StartStreamingCollector(IStreamingCollectorPlugin collector)
         {
-            _collector = collector ?? throw new ArgumentNullException(nameof(collector));
+            _plugin = collector ?? throw new ArgumentNullException(nameof(collector));
 
             CBridge.start_streaming_collector(
                 InvokeStreamingCollect, InvokeLoad, InvokeUnload, InvokeDefine,
@@ -27,27 +27,27 @@ namespace SnapPluginLib
 
         private void InvokeDefine()
         {
-            _collector.DefinePlugin(new DefineContext());
+            _plugin.DefinePlugin(new DefineContext());
         }
 
         private void InvokeCollect(string taskId)
         {
-            _collector.Collect(ContextMemory.Get(taskId));
+            (_plugin as ICollectorPlugin)?.Collect(ContextMemory.Get(taskId));
         }
 
         private void InvokeStreamingCollect(string taskId)
         {
-            (_collector as IStreamingCollectorPlugin)?.StreamingCollect(ContextMemory.Get(taskId));
+            (_plugin as IStreamingCollectorPlugin)?.StreamingCollect(ContextMemory.Get(taskId));
         }
 
         private void InvokeLoad(string taskId)
         {
-            _collector.Load(ContextMemory.Get(taskId));
+            _plugin.Load(ContextMemory.Get(taskId));
         }
 
         private void InvokeUnload(string taskId)
         {
-            _collector.Unload(ContextMemory.Get(taskId));
+            _plugin.Unload(ContextMemory.Get(taskId));
         }
 
     }
