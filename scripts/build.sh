@@ -23,9 +23,9 @@ set -o pipefail
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __proj_dir="$(dirname "$__dir")"
 
-version=${TRAVIS_TAG:-250.0.0}
+version=${CIRCLE_TAG:-250.0.0}
 versionarr=($(echo $version | tr "." "\n"))
-commit=${TRAVIS_COMMIT:-0}
+commit=${CIRCLE_SHA1:-0}
 ubuntu_release=(lsb_release -rs)
 
 # shellcheck source=scripts/common.sh

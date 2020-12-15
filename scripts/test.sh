@@ -92,8 +92,8 @@ test_unit() {
 # run a build as Travis CI does not have a clean and convenient way
 # to share output across build jobs/stages the way CircleCI does with its artifact feature
 if [[ $TEST_TYPE == "build" ]] ; then
-  aosnap-build --version=${TRAVIS_TAG}
-  aosnap upload --build_number=${TRAVIS_BUILD_NUMBER}
+  aosnap-build --version=${CIRCLE_TAG}
+  aosnap upload --build_number=${CIRCLE_BUILD_NUM}
 fi
 if [[ $TEST_TYPE == "lint" ]]; then
   lint

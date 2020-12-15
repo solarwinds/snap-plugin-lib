@@ -1,0 +1,61 @@
+version: 2.1
+
+jobs:
+  "test":
+    parameters:
+      version:
+        type: string
+        default: "latest"
+      golint:
+        type: boolean
+        default: true
+      modules:
+        type: boolean
+        default: true
+      goproxy:
+        type: string
+        default: ""
+    docker:
+      - image: "circleci/golang:<< parameters.version >>"
+    working_directory: /go/src/github.com/solarwinds/snap-plugin-lib
+    environment:
+      GOPROXY: "<< parameters.goproxy >>"
+    steps:
+      - checkout
+      - run:
+          name: "Print the Go version"
+          command: >
+            go version
+      # Only run gofmt, vet & lint against the latest Go version 
+      - run:
+          name: "Run lint"
+          command: >
+            TEST_TYPE="lint" make check 2>&1
+      - run:
+          name: "Staticcheck"
+          command: >
+            go install honnef.co/go/tools/cmd/staticcheck && staticcheck ./...
+      - run:
+          name: "Run build"
+          command: >
+            wget https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && 
+            dpkg -i packages-microsoft-prod.deb && 
+            apt-get update && 
+            apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https dotnet-sdk-3.1 dotnet-runtime-3.1 && 
+            make build 2>&1
+      - run:
+          name: "Run small test"
+          command: >
+            TEST_TYPE="small" make check 2>&1
+      - run:
+          name: "Run medium test"
+          command: >
+            TEST_TYPE="medium" make check 2>&1
+
+workflows:
+  tests:
+    jobs:
+      - test:
+          matrix:
+            parameters:
+              version: ["latest", "1.15", "1.14", "1.13"]
