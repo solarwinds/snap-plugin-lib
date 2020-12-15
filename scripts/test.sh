@@ -88,13 +88,6 @@ test_unit() {
   done
 }
 
-# If "TEST_TYPE" is a build, then run a build, if it's a deploy or large test, also
-# run a build as Travis CI does not have a clean and convenient way
-# to share output across build jobs/stages the way CircleCI does with its artifact feature
-if [[ $TEST_TYPE == "build" ]] ; then
-  aosnap-build --version=${CIRCLE_TAG}
-  aosnap upload --build_number=${CIRCLE_BUILD_NUM}
-fi
 if [[ $TEST_TYPE == "lint" ]]; then
   lint
 elif [[ $TEST_TYPE == "small" ]]; then
@@ -116,9 +109,4 @@ elif [[ $TEST_TYPE == "medium" ]]; then
     echo "mode: count" > profile.cov
     test_unit
   fi
-elif [[ $TEST_TYPE == "large" ]]; then
-    aosnap-s3 download
-    . "${__dir}/large.sh"
-elif [[ $TEST_TYPE == "deploy" ]]; then
-    aosnap-s3 download
 fi

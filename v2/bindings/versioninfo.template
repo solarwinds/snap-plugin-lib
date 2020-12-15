@@ -27,7 +27,7 @@
         "LegalCopyright": "Copyright 2020 SolarWinds, LLC",
         "LegalTrademarks": "",
         "OriginalFilename": "swisnap-plugin-lib.dll",
-        "PrivateBuild": "$TRAVIS_COMMIT",
+        "PrivateBuild": "{commit}",
         "ProductName": "SolarWinds Snap Agent plugin",
         "ProductVersion": "{version}",
         "SpecialBuild": ""
