@@ -205,8 +205,6 @@ func isValidIdentifier(s string) bool {
 		case el == '-' || el == '_':
 		case el == '.':
 		case el == '+':
-		case el == '&':
-		case el == '?':
 		default:
 			return false
 		}

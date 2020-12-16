@@ -209,12 +209,12 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		isFilter:         false,
 	},
 	{
-		namespaceElement: "+group?1",
+		namespaceElement: "+group+1",
 		comparableType:   &staticSpecificElement{},
-		shouldMatch:      []string{"+group?1"},
-		shouldNotMatch:   []string{"+group?2", "+group?", "", "[dyn1=+group?1]", "[+group?1]", "*", "**", "{group}"},
-		compatible:       []string{"+group?1", "{reg.*}", "*", "**"},
-		notCompatible:    []string{"+group?2", "[+group?1]", "[+group?1=val]", "[+group?1={reg.*}]"},
+		shouldMatch:      []string{"+group+1"},
+		shouldNotMatch:   []string{"+group+2", "+group+", "", "[dyn1=+group+1]", "[+group+1]", "*", "**", "{group}"},
+		compatible:       []string{"+group+1", "{reg.*}", "*", "**"},
+		notCompatible:    []string{"+group+2", "[+group+1]", "[+group+1=val]", "[+group+1={reg.*}]"},
 		isFilter:         false,
 	},
 	{
@@ -311,7 +311,7 @@ func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 		"[group=]",
 		"[=id]",
 		"[=]",
-		"[gr^]",
+		"[gr?]",
 		"[group={]",
 		"[gr@={id.*}]",
 	}
