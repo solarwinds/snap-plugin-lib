@@ -209,6 +209,15 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		isFilter:         false,
 	},
 	{
+		namespaceElement: "+group+1",
+		comparableType:   &staticSpecificElement{},
+		shouldMatch:      []string{"+group+1"},
+		shouldNotMatch:   []string{"+group+2", "+group+", "", "[dyn1=+group+1]", "[+group+1]", "*", "**", "{group}"},
+		compatible:       []string{"+group+1", "{reg.*}", "*", "**"},
+		notCompatible:    []string{"+group+2", "[+group+1]", "[+group+1=val]", "[+group+1={reg.*}]"},
+		isFilter:         false,
+	},
+	{
 		namespaceElement: "**",
 		comparableType:   &staticRecursiveAnyElement{},
 		shouldMatch:      []string{"group", "m1", "m2"},
@@ -220,6 +229,20 @@ var parseNamespaceElementValidScenarios = []parseNamespaceElementValidScenario{
 		comparableType:   &staticSpecificAcceptingGroupElement{},
 		shouldMatch:      []string{"metric1", "[dyn1=metric1]", "[dyn4=metric1]"},
 		shouldNotMatch:   []string{"[metric1]", "=metric1]", "[=metric1]", "[dyn1={metric1}]", "*", "**", ""},
+		isFilter:         true,
+	},
+	{
+		namespaceElement: "+metric1",
+		comparableType:   &staticSpecificAcceptingGroupElement{},
+		shouldMatch:      []string{"+metric1", "[dyn1=+metric1]", "[dyn4=+metric1]"},
+		shouldNotMatch:   []string{"[+metric1]", "=+metric1]", "[=+metric1]", "[dyn1={+metric1}]", "*", "**", ""},
+		isFilter:         true,
+	},
+	{
+		namespaceElement: "+metric1+",
+		comparableType:   &staticSpecificAcceptingGroupElement{},
+		shouldMatch:      []string{"+metric1+", "[dyn1=+metric1+]", "[dyn4=+metric1+]"},
+		shouldNotMatch:   []string{"[+metric1+]", "=+metric1+]", "[=+metric1+]", "[dyn1={+metric1+}]", "*", "**", ""},
 		isFilter:         true,
 	},
 	{
@@ -283,14 +306,14 @@ func TestParseNamespaceElement_InvalidScenarios(t *testing.T) {
 		"  metr  ",
 		" metr",
 		"metr ",
-		"asd+",
+		"asd;",
 		"{asd[}",
 		"[group=]",
 		"[=id]",
 		"[=]",
-		"[gr+]",
+		"[gr?]",
 		"[group={]",
-		"[gr+={id.*}]",
+		"[gr@={id.*}]",
 	}
 
 	Convey("Validate parseNamespaceElement - negative scenarios", t, func() {

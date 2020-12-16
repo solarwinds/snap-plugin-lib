@@ -204,6 +204,7 @@ func isValidIdentifier(s string) bool {
 		case el >= '0' && el <= '9':
 		case el == '-' || el == '_':
 		case el == '.':
+		case el == '+':
 		default:
 			return false
 		}

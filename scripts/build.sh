@@ -23,9 +23,9 @@ set -o pipefail
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __proj_dir="$(dirname "$__dir")"
 
-version=${TRAVIS_TAG:-250.0.0}
+version=${CIRCLE_TAG:-${TRAVIS_TAG:-250.0.0}}
 versionarr=($(echo $version | tr "." "\n"))
-commit=${TRAVIS_COMMIT:-0}
+commit=${CIRCLE_SHA1:-${TRAVIS_COMMIT:-0}}
 ubuntu_release=(lsb_release -rs)
 
 # shellcheck source=scripts/common.sh
@@ -47,7 +47,7 @@ sed -i 's/{major_version}/'${versionarr[0]}'/g' versioninfo.json
 sed -i 's/{minor_version}/'${versionarr[1]}'/g' versioninfo.json
 sed -i 's/{patch_version}/'${versionarr[2]}'/g' versioninfo.json
 sed -i 's/{version}/'${version}'/g' versioninfo.json
-sed -i 's/$TRAVIS_COMMIT/'${commit}'/g' versioninfo.json
+sed -i 's/{commit}/'${commit}'/g' versioninfo.json
 go generate
 (export GOOS=windows && export CGO_ENABLED=1 && export CXX=x86_64-w64-mingw32-g++ && export CC=x86_64-w64-mingw32-gcc  \
  && _go_build "--buildmode=c-shared" "swisnap-plugin-lib.dll")
