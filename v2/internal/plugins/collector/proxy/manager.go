@@ -163,14 +163,14 @@ func (cm *ContextManager) collect(id string, context *PluginContext, chunkCh cha
 
 	go func() {
 		defer func() {
-			cm.ReleaseTask(id)
-
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
 				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has ended with panic")
 				logF.WithField("block", "recover").Trace(string(debug.Stack()))
 				err = fmt.Errorf("user-defined function has ended with panic: %v", r)
 			}
+
+			cm.ReleaseTask(id)
 		}()
 
 		startTime := time.Now()
@@ -220,14 +220,14 @@ func (cm *ContextManager) streamingCollect(id string, context *PluginContext, ch
 
 	go func() {
 		defer func() {
-			cm.ReleaseTask(id)
-
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
 				logF.WithError(fmt.Errorf("%v", r)).Error("user-defined function has ended with panic")
 				logF.WithField("block", "recover").Trace(string(debug.Stack()))
 				err = fmt.Errorf("user-defined function has ended with panic: %v", r)
 			}
+
+			cm.ReleaseTask(id)
 		}()
 
 		err = cm.collector.StreamingCollect(context)

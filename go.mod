@@ -7,6 +7,8 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/smartystreets/goconvey v1.6.4
+	github.com/solarwinds/snap-plugin-lib/v2 v2.0.2 // indirect
 	github.com/urfave/cli v1.22.4
 	google.golang.org/grpc v1.32.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
