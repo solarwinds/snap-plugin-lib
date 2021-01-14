@@ -132,6 +132,11 @@ _copyrights() {
   if [[ $copyright_error -eq 1 ]]; then _error "Wrong Copyright(s)"; fi
 }
 
+_go_license() {
+  go get github.com/google/go-licenses
+  go-licenses check ./...
+}
+
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
   # Standard go tooling behavior is to ignore dirs with leading underscors
