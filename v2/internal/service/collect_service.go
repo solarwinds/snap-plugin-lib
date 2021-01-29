@@ -51,23 +51,34 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 
 	chunksCh := cs.proxy.RequestCollect(taskID)
 
-	for chunk := range chunksCh {
-		err := cs.sendWarnings(stream, chunk.Warnings)
-		if err != nil {
-			return fmt.Errorf("can't send all warnings to snap: %v", err)
+	for {
+		select {
+		case chunk, ok := <-chunksCh:
+			err := cs.sendWarnings(stream, chunk.Warnings)
+			logF.WithField("ok", ok).Debug("GRPC chunksCh status")
+			if err != nil {
+				return fmt.Errorf("can't send all warnings to snap: %v", err)
+			}
+
+			if chunk.Err != nil {
+				logF.WithError(fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)).Debug("GRPC Collect errors")
+				return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
+			}
+
+			err = cs.sendMetrics(stream, chunk.Metrics)
+			if err != nil {
+				return fmt.Errorf("can't send all metrics to snap: %v", err)
+			}
+
+			if !ok {
+				logF.Debug("GRPC chunksCh is not ok")
+				return nil
+			}
 		}
 
-		if chunk.Err != nil {
-			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
-		}
-
-		err = cs.sendMetrics(stream, chunk.Metrics)
-		if err != nil {
-			return fmt.Errorf("can't send all metrics to snap: %v", err)
-		}
 	}
 
-	return nil
+	//return nil
 }
 
 func (cs *collectService) Load(ctx context.Context, request *pluginrpc.LoadCollectorRequest) (*pluginrpc.LoadCollectorResponse, error) {
