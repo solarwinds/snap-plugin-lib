@@ -248,7 +248,7 @@ func (cm *ContextManager) handleChunk(id string, err error, context *PluginConte
 	mts := context.Metrics(true)
 	warnings := context.Warnings(true)
 
-	if len(mts) > 0 || len(warnings) > 0 {
+	if len(mts) > 0 || len(warnings) > 0 || err != nil {
 		lastUpdate := time.Now()
 
 		chunkCh <- types.CollectChunk{
