@@ -11,7 +11,7 @@ namespace SnapPluginLib
         {
         }
 
-        public void AddMetric(string ns, int value, params Modifier[] modifiers)
+        public void AddMetric(string ns, long value, params Modifier[] modifiers)
         {
             var nativeValue = new NativeValue
             {
