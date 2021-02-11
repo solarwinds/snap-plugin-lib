@@ -52,18 +52,19 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 	chunksCh := cs.proxy.RequestCollect(taskID)
 
 	for chunk := range chunksCh {
-		err := cs.sendWarnings(stream, chunk.Warnings)
+		// try to send metrics first, even if there were errors during Collect or StreamingCollect
+		err := cs.sendMetrics(stream, chunk.Metrics)
+		if err != nil {
+			return fmt.Errorf("can't send all metrics to snap: %v", err)
+		}
+
+		err = cs.sendWarnings(stream, chunk.Warnings)
 		if err != nil {
 			return fmt.Errorf("can't send all warnings to snap: %v", err)
 		}
 
 		if chunk.Err != nil {
 			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
-		}
-
-		err = cs.sendMetrics(stream, chunk.Metrics)
-		if err != nil {
-			return fmt.Errorf("can't send all metrics to snap: %v", err)
 		}
 	}
 
