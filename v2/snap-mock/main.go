@@ -255,14 +255,18 @@ func main() {
 					doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 				}
 
+				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
+				for _, mt := range chunk.mts {
+					fmt.Printf(" %s\n", grpcMetricToString(mt))
+				}
+
 				fmt.Printf("\nReceived %d warning(s)\n", len(chunk.warnings))
 				for _, warn := range chunk.warnings {
 					fmt.Printf(" %s\n", warn)
 				}
 
-				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
-				for _, mt := range chunk.mts {
-					fmt.Printf(" %s\n", grpcMetricToString(mt))
+				if chunk.err != nil {
+					fmt.Printf("\n!! Ended with error: %s\n", chunk.err)
 				}
 
 				mtsChunks = append(mtsChunks, chunk.mts)
