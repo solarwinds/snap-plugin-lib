@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -255,14 +255,18 @@ func main() {
 					doneCh <- fmt.Errorf("can't send collect request to plugin: %v", err)
 				}
 
+				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
+				for _, mt := range chunk.mts {
+					fmt.Printf(" %s\n", grpcMetricToString(mt))
+				}
+
 				fmt.Printf("\nReceived %d warning(s)\n", len(chunk.warnings))
 				for _, warn := range chunk.warnings {
 					fmt.Printf(" %s\n", warn)
 				}
 
-				fmt.Printf("\nReceived %d metric(s)\n", len(chunk.mts))
-				for _, mt := range chunk.mts {
-					fmt.Printf(" %s\n", grpcMetricToString(mt))
+				if chunk.err != nil {
+					fmt.Printf("\n!! Ended with error: %s\n", chunk.err)
 				}
 
 				mtsChunks = append(mtsChunks, chunk.mts)

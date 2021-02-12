@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/sirupsen/logrus v1.7.0
-	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/solarwinds/snap-plugin-lib/v2 v2.0.0-beta-2
+	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4
 )
+
+replace github.com/solarwinds/snap-plugin-lib/v2 => ../../v2
