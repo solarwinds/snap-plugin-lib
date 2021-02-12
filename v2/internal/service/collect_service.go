@@ -64,7 +64,7 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 		}
 
 		if chunk.Err != nil {
-			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
+			return fmt.Errorf("plugin errored while collecting metrics: %s", chunk.Err)
 		}
 	}
 
