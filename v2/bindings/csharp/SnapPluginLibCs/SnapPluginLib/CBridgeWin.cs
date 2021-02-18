@@ -6,6 +6,7 @@ namespace SnapPluginLib
     /*
      * Responsible for calling all exported (native) C functions 
      */
+    
     internal static class CBridgeWin
     {
         private const string PluginLibDllName = "swisnap-plugin-lib.dll";
