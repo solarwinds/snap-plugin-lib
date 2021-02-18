@@ -2,17 +2,20 @@
 <package>
   <metadata>
     <id>Solarwinds.Snap.SnapPluginLib</id>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <title>Snap Plugin Library - C# bindings</title>
     <authors>SolarWinds</authors>
     <owners>SolarWinds</owners>
-    <licenseUrl>https://github.com/solarwinds/snap-plugin-lib/blob/master/LICENSE</licenseUrl>
+    <license type="expression">Apache-2.0+</license>
     <projectUrl>https://github.com/solarwinds/snap-plugin-lib</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Enable developers writing C# plugins (like collectors and publishers) that are able to work in Snap environment</description>
     <copyright>Copyright (c) 2021 SolarWinds Worldwide, LLC</copyright>
     <tags>solarwinds snap swisnap metric metrics plugin collector publisher</tags>
     <summary>Snap Plugin Library - C# bindings</summary>
+    <dependencies>
+      <group targetFramework="netstandard2.0" />
+    </dependencies>
   </metadata>
   <files>
     <file src="SnapPluginLib\bin\Release\netstandard2.0\*.dll" target="lib\netstandard2.0" />
