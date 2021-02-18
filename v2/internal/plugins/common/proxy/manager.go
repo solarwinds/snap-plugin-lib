@@ -49,7 +49,7 @@ func (cm *ContextManager) AcquireTask(id string) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
-	if _, ok := cm.activeTasks[id]; ok {
+	if h, ok := cm.activeTasks[id]; ok && h.ctx.Err() == nil {
 		return false
 	}
 
