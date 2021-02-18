@@ -265,7 +265,7 @@ namespace SnapPluginLib
                 throw new NotImplementedException(NoImplementedError);
             }
         }
-        
+
         private static bool IsWindows()
         {
             return Environment.OSVersion.Platform == PlatformID.Win32Windows
@@ -278,6 +278,5 @@ namespace SnapPluginLib
         }
 
         private static string NoImplementedError = $"no implementation for {Environment.OSVersion.Platform.ToString()}";
-
     }
 }

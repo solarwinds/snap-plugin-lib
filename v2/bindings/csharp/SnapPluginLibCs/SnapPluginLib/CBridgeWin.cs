@@ -6,13 +6,13 @@ namespace SnapPluginLib
     /*
      * Responsible for calling all exported (native) C functions 
      */
-    
+
     internal static class CBridgeWin
     {
         private const string PluginLibDllName = "swisnap-plugin-lib.dll";
 
         // Runner
-        
+
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern void start_collector(
             Runner.CollectHandler collectHandler,
@@ -22,7 +22,7 @@ namespace SnapPluginLib
             string name,
             string version
         );
-        
+
         // Collect context related functions
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
