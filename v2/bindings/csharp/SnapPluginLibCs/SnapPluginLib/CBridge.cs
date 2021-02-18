@@ -37,14 +37,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_add_metric(taskId, ns, nativeValue, nativeModifiers);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_add_metric(taskId, ns, nativeValue, nativeModifiers);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static IntPtr /* NativeError */
@@ -54,14 +53,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_always_apply(taskId, ns, nativeModifiers);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_always_apply(taskId, ns, nativeModifiers);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static void ctx_dismiss_all_modifiers(string taskId)
@@ -86,14 +84,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_should_process(taskId, ns);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_should_process(taskId, ns);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static IntPtr ctx_requested_metrics(string taskId)
@@ -102,14 +99,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_requested_metrics(taskId);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_requested_metrics(taskId);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         // Context related functions
@@ -120,14 +116,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_config_value(taskId, key);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_config_value(taskId, key);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static IntPtr ctx_config_keys(string taskId)
@@ -136,14 +131,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_config_keys(taskId);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_config_keys(taskId);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static IntPtr ctx_raw_config(string taskId)
@@ -152,14 +146,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_raw_config(taskId);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_raw_config(taskId);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static string ctx_add_warning(string taskId, string message)
@@ -168,14 +161,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_add_warning(taskId, message);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_add_warning(taskId, message);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static string ctx_log(string taskId, int level, string message, IntPtr /* NativeMap */ fields)
@@ -184,14 +176,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.ctx_log(taskId, level, message, fields);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.ctx_log(taskId, level, message, fields);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         // DefinePlugin related functions 
@@ -234,14 +225,13 @@ namespace SnapPluginLib
             {
                 return CBridgeWin.define_example_config(config);
             }
-            else if (IsLinux())
+
+            if (IsLinux())
             {
                 return CBridgeLinux.define_example_config(config);
             }
-            else
-            {
-                throw new NotImplementedException(NoImplementedError);
-            }
+
+            throw new NotImplementedException(NoImplementedError);
         }
 
         internal static void define_tasks_per_instance_limit(int limit)
