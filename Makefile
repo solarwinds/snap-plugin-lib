@@ -45,6 +45,7 @@ test-all:
 	$(MAKE) test-small
 	$(MAKE) test-medium
 check:
+	$(MAKE) deps
 	$(MAKE) test
 
 build:
