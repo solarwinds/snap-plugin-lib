@@ -5,12 +5,9 @@ go 1.13
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/google/go-licenses v0.0.0-20201026145851-73411c8fa237 // indirect
 	github.com/shirou/gopsutil v2.20.9+incompatible
 	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4
 	github.com/stretchr/testify v1.6.1
-	golang.org/x/net v0.0.0-20200930145003-4acb6c075d10 // indirect
-	honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc // indirect
 )
 
 replace github.com/solarwinds/snap-plugin-lib/v2 => ./..
