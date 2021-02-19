@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ func (cm *ContextManager) AcquireTask(id string) bool {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
-	if _, ok := cm.activeTasks[id]; ok {
+	if h, ok := cm.activeTasks[id]; ok && h.ctx.Err() == nil {
 		return false
 	}
 
@@ -66,7 +66,10 @@ func (cm *ContextManager) MarkTaskAsCompleted(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
-	cm.activeTasks[id].cancelFn()
+	if _, ok := cm.activeTasks[id]; ok {
+		cm.activeTasks[id].cancelFn()
+	}
+
 	delete(cm.activeTasks, id)
 }
 
