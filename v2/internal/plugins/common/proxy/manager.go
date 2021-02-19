@@ -66,7 +66,10 @@ func (cm *ContextManager) MarkTaskAsCompleted(id string) {
 	cm.activeTasksMutex.Lock()
 	defer cm.activeTasksMutex.Unlock()
 
-	cm.activeTasks[id].cancelFn()
+	if _, ok := cm.activeTasks[id]; ok {
+		cm.activeTasks[id].cancelFn()
+	}
+
 	delete(cm.activeTasks, id)
 }
 
