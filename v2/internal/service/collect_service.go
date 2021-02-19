@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -52,18 +52,19 @@ func (cs *collectService) Collect(request *pluginrpc.CollectRequest, stream plug
 	chunksCh := cs.proxy.RequestCollect(taskID)
 
 	for chunk := range chunksCh {
-		err := cs.sendWarnings(stream, chunk.Warnings)
+		// try to send metrics first, even if there were errors during Collect or StreamingCollect
+		err := cs.sendMetrics(stream, chunk.Metrics)
+		if err != nil {
+			return fmt.Errorf("can't send all metrics to snap: %v", err)
+		}
+
+		err = cs.sendWarnings(stream, chunk.Warnings)
 		if err != nil {
 			return fmt.Errorf("can't send all warnings to snap: %v", err)
 		}
 
 		if chunk.Err != nil {
-			return fmt.Errorf("plugin is not able to collect metrics: %s", chunk.Err)
-		}
-
-		err = cs.sendMetrics(stream, chunk.Metrics)
-		if err != nil {
-			return fmt.Errorf("can't send all metrics to snap: %v", err)
+			return fmt.Errorf("plugin errored while collecting metrics: %s", chunk.Err)
 		}
 	}
 

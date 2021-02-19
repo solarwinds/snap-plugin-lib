@@ -1,11 +1,5 @@
 /*
-Package proxy:
-1) Manages context for different task created for the same plugin
-2) Serves as an entry point for any "controller" (like. Rpc)
-*/
-
-/*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -20,6 +14,11 @@ Package proxy:
     limitations under the License.
 */
 
+/*
+Package proxy :
+1) Manages context for different task created for the same plugin
+2) Serves as an entry point for any "controller" (like. Rpc)
+*/
 package proxy
 
 import (
@@ -249,7 +248,7 @@ func (cm *ContextManager) handleChunk(id string, err error, context *PluginConte
 	mts := context.Metrics(true)
 	warnings := context.Warnings(true)
 
-	if len(mts) > 0 || len(warnings) > 0 {
+	if len(mts) > 0 || len(warnings) > 0 || err != nil {
 		lastUpdate := time.Now()
 
 		chunkCh <- types.CollectChunk{
