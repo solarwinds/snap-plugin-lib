@@ -1,0 +1,16 @@
+{
+  "scanSettings": {
+    "configMode": "LOCAL",
+    "baseBranches": ["master"]
+  },
+  "checkRunSettings": {
+    "vulnerableCheckRunConclusionLevel": "failure",
+    "enableLicenseViolations": true,
+    "displayMode": "diff"
+  },
+  "issueSettings": {
+    "minSeverityLevel": "LOW",
+    "displayLicenseViolations": true
+  }
+}
+
