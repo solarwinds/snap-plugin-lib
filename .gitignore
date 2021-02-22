@@ -63,4 +63,4 @@ v1/plugin/libtest*
 
 # C#
 obj/
-
+*.nupkg
