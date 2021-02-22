@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Copyright>Copyright (c) 2020 SolarWinds Worldwide, LLC</Copyright>
+        <Copyright>Copyright (c) 2021 SolarWinds Worldwide, LLC</Copyright>
         <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
         <Authors>SolarWinds Worldwide, LLC</Authors>
         <Company>SolarWinds Worldwide, LLC</Company>
