@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Solarwinds.Snap.SnapPluginLib</id>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
     <title>Snap Plugin Library - C# bindings</title>
     <authors>SolarWinds</authors>
     <owners>SolarWinds</owners>
@@ -18,8 +18,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="SnapPluginLib\bin\Release\netstandard2.0\*.dll" target="lib\netstandard2.0" />
-    <file src="swisnap-plugin-lib.dll" target="runtimes\win-x64\native" />
-    <file src="swisnap-plugin-lib.so" target="runtimes\linux-x64\native" />
+    <file src="../../../../build/windows/x86_64/SnapPluginLib.dll" target="lib\netstandard2.0" />
+    <file src="../../../../build/windows/x86_64/swisnap-plugin-lib.dll" target="runtimes\win-x64\native" />
+    <file src="../../../../build/linux/x86_64/swisnap-plugin-lib.so" target="runtimes\linux-x64\native" />
   </files>
 </package>
