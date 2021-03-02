@@ -99,6 +99,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		logF.WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
+	defer statsController.Close()
 
 	ctxMan := proxy.NewContextManager(ctx, collector, statsController)
 

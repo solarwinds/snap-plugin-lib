@@ -119,6 +119,9 @@ func (sc *StatisticsController) run() {
 					stat.ApplyStat()
 				case respCh := <-sc.incomingRequestCh:
 					respCh <- sc.stats
+				case <-sc.ctx.Done():
+					sc.Close()
+					return
 				case <-sc.closeCh:
 					return
 				}
@@ -128,7 +131,7 @@ func (sc *StatisticsController) run() {
 }
 
 func (sc *StatisticsController) Close() {
-	sc.closeCh <- struct{}{}
+	close(sc.closeCh)
 }
 
 func (sc *StatisticsController) RequestStat() chan *Statistics {
