@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -119,6 +119,9 @@ func (sc *StatisticsController) run() {
 					stat.ApplyStat()
 				case respCh := <-sc.incomingRequestCh:
 					respCh <- sc.stats
+				case <-sc.ctx.Done():
+					sc.Close()
+					return
 				case <-sc.closeCh:
 					return
 				}
@@ -128,7 +131,10 @@ func (sc *StatisticsController) run() {
 }
 
 func (sc *StatisticsController) Close() {
-	sc.closeCh <- struct{}{}
+	select {
+	case sc.closeCh <- struct{}{}:
+	default:
+	}
 }
 
 func (sc *StatisticsController) RequestStat() chan *Statistics {

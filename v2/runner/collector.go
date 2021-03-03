@@ -3,7 +3,7 @@ The package "runner" provides simple API to start plugins in different modes.
 */
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		logF.WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
+	defer statsController.Close()
 
 	ctxMan := proxy.NewContextManager(ctx, collector, statsController)
 

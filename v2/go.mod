@@ -3,17 +3,21 @@ module github.com/solarwinds/snap-plugin-lib/v2
 go 1.13
 
 require (
-	github.com/golang/protobuf v1.4.2
+	github.com/golang/protobuf v1.4.3
 	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/sirupsen/logrus v1.7.0
+	github.com/magefile/mage v1.11.0 // indirect
+	github.com/sirupsen/logrus v1.8.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/solarwinds/grpchan v1.1.1
-	github.com/stretchr/objx v0.2.0 // indirect
-	github.com/stretchr/testify v1.6.1
-	golang.org/x/net v0.0.0-20200930145003-4acb6c075d10
-	golang.org/x/text v0.3.2 // indirect
-	google.golang.org/grpc v1.32.0
+	github.com/stretchr/objx v0.3.0 // indirect
+	github.com/stretchr/testify v1.7.0
+	github.com/urfave/cli v1.22.5 // indirect
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
+	golang.org/x/sys v0.0.0-20210303074136-134d130e1a04 // indirect
+	golang.org/x/text v0.3.5 // indirect
+	google.golang.org/genproto v0.0.0-20210302174412-5ede27ff9881 // indirect
+	google.golang.org/grpc v1.36.0
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
