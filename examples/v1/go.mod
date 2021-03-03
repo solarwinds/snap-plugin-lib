@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/solarwinds/snap-plugin-lib v1.0.0-beta-3
