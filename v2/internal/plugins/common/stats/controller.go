@@ -131,7 +131,10 @@ func (sc *StatisticsController) run() {
 }
 
 func (sc *StatisticsController) Close() {
-	close(sc.closeCh)
+	select {
+	case sc.closeCh <- struct{}{}:
+	default:
+	}
 }
 
 func (sc *StatisticsController) RequestStat() chan *Statistics {
