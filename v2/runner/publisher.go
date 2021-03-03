@@ -69,6 +69,7 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 		logF.WithError(err).Error("Error occured when starting statistics controller")
 		os.Exit(errorExitStatus)
 	}
+	defer statsController.Close()
 
 	ctxMan := proxy.NewContextManager(publisher, statsController)
 
