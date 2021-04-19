@@ -205,12 +205,11 @@ func (tt *test) startServer(pt pluginType) {
 		tt.halt = publisherProxy.halt
 	}
 
-	addr := la
 	_, port, err := net.SplitHostPort(lis.Addr().String())
 	if err != nil {
 		tt.t.Fatalf("Failed to parse listener address: %v", err)
 	}
-	addr = "localhost:" + port
+	addr := "localhost:" + port
 
 	go s.Serve(lis)
 	tt.srvAddr = addr

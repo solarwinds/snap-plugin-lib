@@ -195,10 +195,6 @@ func TestCopyNamespace(t *testing.T) {
 	})
 }
 
-type metricInput struct {
-	metrics []Metric
-}
-
 type testCaseMetric struct {
 	input Metric
 }

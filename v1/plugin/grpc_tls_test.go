@@ -34,6 +34,7 @@
 package plugin
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -96,9 +97,7 @@ type grpcOptsBuilder struct {
 }
 
 func (gb *grpcOptsBuilder) build() ([]grpc.DialOption, error) {
-	grpcDialOpts := []grpc.DialOption{
-		grpc.WithTimeout(GrpcTimeoutDefault),
-	}
+	grpcDialOpts := []grpc.DialOption{}
 	if !gb.secure {
 		grpcDialOpts = append(grpcDialOpts, grpc.WithInsecure())
 		return grpcDialOpts, nil
@@ -486,7 +485,8 @@ func startSecureGrpcPlugin(t *testing.T, plugin Plugin, typeOfPlugin pluginType,
 }
 
 func grpcClientConn(serverAddr string, grpcOpts []grpc.DialOption) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(serverAddr, grpcOpts...)
+	ctx, _ := context.WithTimeout(context.Background(), GrpcTimeoutDefault)
+	conn, err := grpc.DialContext(ctx, serverAddr, grpcOpts...)
 	if err != nil {
 		return nil, err
 	}
