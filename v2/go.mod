@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/golang/protobuf v1.4.3
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/magefile/mage v1.11.0 // indirect
