@@ -46,8 +46,6 @@ const (
 	closeDelay         = 1 * time.Second // wait until Unload() causes end of StreamCollect() to avoid GRPC errors
 
 	filterSeparator = ";"
-
-	maxTaskId = 1024
 )
 
 type Options struct {
