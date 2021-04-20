@@ -224,6 +224,9 @@ func (s *PublisherMediumSuite) requestPublish(publishTaskID string, mts []*plugi
 		TaskId:    publishTaskID,
 		MetricSet: mts,
 	})
+	if err != nil {
+		return err
+	}
 
 	_, err = stream.CloseAndRecv()
 	return err
@@ -405,6 +408,7 @@ func (s *PublisherMediumSuite) TestConfigurablePublisher() {
 			completeCh := make(chan bool, 1)
 
 			go func() {
+			loop:
 				for i := 0; i < 2; i++ {
 					select {
 					case <-s.endControllerCh:
@@ -412,7 +416,7 @@ func (s *PublisherMediumSuite) TestConfigurablePublisher() {
 					case <-s.endPublisherCh:
 						// ok
 					case <-time.After(3 * time.Second):
-						break
+						break loop
 					}
 				}
 
@@ -606,6 +610,7 @@ func (s *PublisherMediumSuite) TestSimplePublisher() {
 			completeCh := make(chan bool, 1)
 
 			go func() {
+			loop:
 				for i := 0; i < 2; i++ {
 					select {
 					case <-s.endControllerCh:
@@ -613,7 +618,7 @@ func (s *PublisherMediumSuite) TestSimplePublisher() {
 					case <-s.endPublisherCh:
 						// ok
 					case <-time.After(3 * time.Second):
-						break
+						break loop
 					}
 				}
 
