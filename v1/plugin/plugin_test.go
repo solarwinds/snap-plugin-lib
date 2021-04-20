@@ -39,11 +39,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 	"time"
-
-	"os"
 
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -240,7 +239,7 @@ func TestMakeTLSConfig(t *testing.T) {
 			config := tlsSetupInstance.makeTLSConfig()
 			So(config.ClientAuth, ShouldEqual, tls.RequireAndVerifyClientCert)
 			So(config.PreferServerCipherSuites, ShouldEqual, true)
-			So(config.CipherSuites, ShouldNotBeEmpty)
+			So(config.MinVersion, ShouldNotBeEmpty)
 		})
 	})
 }
