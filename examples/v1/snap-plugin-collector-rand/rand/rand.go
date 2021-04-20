@@ -32,11 +32,10 @@
 package rand
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"time"
-
-	"errors"
 
 	"github.com/solarwinds/snap-plugin-lib/v1/plugin"
 	"github.com/urfave/cli"
@@ -70,7 +69,7 @@ var (
 var req bool = false
 
 func init() {
-	rand.Seed(42)
+	rand.Seed(42) // #nosec G404
 
 	//The required-config flag is added for testing plugin-lib-go.
 	//When the flag is set, an additional policy will be added in GetConfigPolicy().
@@ -117,21 +116,21 @@ func (RandCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error
 			if val, err := mt.Config.GetInt("testint"); err == nil {
 				mts[idx].Data = val
 			} else {
-				mts[idx].Data = rand.Int31()
+				mts[idx].Data = rand.Int31() // #nosec G404
 			}
 			metrics = append(metrics, mts[idx])
 		} else if mt.Namespace[len(mt.Namespace)-1].Value == "float" {
 			if val, err := mt.Config.GetFloat("testfloat"); err == nil {
 				mts[idx].Data = val
 			} else {
-				mts[idx].Data = rand.Float64()
+				mts[idx].Data = rand.Float64() // #nosec G404
 			}
 			metrics = append(metrics, mts[idx])
 		} else if mt.Namespace[len(mt.Namespace)-1].Value == "string" {
 			if val, err := mt.Config.GetString("teststring"); err == nil {
 				mts[idx].Data = val
 			} else {
-				mts[idx].Data = strs[rand.Intn(len(strs)-1)]
+				mts[idx].Data = strs[rand.Intn(len(strs)-1)] // #nosec G404
 			}
 			metrics = append(metrics, mts[idx])
 		} else {

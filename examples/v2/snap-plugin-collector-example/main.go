@@ -97,10 +97,10 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 	log.Trace("Collect executed")
 
 	// Simulate collector processing
-	time.Sleep(time.Duration(rand.Intn(int(maxCollectDuration))))
+	time.Sleep(time.Duration(rand.Intn(int(maxCollectDuration)))) // #nosec G404
 
-	random1 := rand.Intn(10)
-	random2 := int16(rand.Intn(20))
+	random1 := rand.Intn(10)        // #nosec G404
+	random2 := int16(rand.Intn(20)) // #nosec G404
 
 	c.random1History[random1]++
 	c.random2History[random2]++
@@ -113,8 +113,8 @@ func (c *myCollector) Collect(ctx plugin.CollectContext) error {
 
 	configRandom, ok := ctx.Load("random-config")
 	if ok {
-		_ = ctx.AddMetric("/example/config/random4", rand.Intn(configRandom.(int)),
-			plugin.MetricTag("random", fmt.Sprintf("%v", configRandom)))
+		n := rand.Intn(configRandom.(int)) // #nosec G404
+		_ = ctx.AddMetric("/example/config/random4", n, plugin.MetricTag("random", fmt.Sprintf("%v", configRandom)))
 	}
 
 	return nil
@@ -130,7 +130,7 @@ func (c *myCollector) CustomInfo(ctx plugin.Context) interface{} {
 func (*myCollector) Load(ctx plugin.Context) error {
 	log.Tracef("Load executed, configs=%s", ctx.ConfigKeys())
 
-	ctx.Store("random", rand.Intn(50))
+	ctx.Store("random", rand.Intn(50)) // #nosec G404
 
 	v, ok := ctx.ConfigValue("crand")
 	if ok {

@@ -44,7 +44,7 @@ func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 	logrus.Infof("Number of metrics: %v\n", ctx.Count())
 
 	// Simulate publisher processing
-	time.Sleep(time.Duration(rand.Intn(int(1 * time.Second))))
+	time.Sleep(time.Duration(rand.Intn(int(1 * time.Second)))) // #nosec G404
 
 	for _, mt := range ctx.ListAllMetrics() {
 		logrus.Infof(" - %s=%v [%v]\n", mt.Namespace(), mt.Value(), mt.Tags())

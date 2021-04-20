@@ -579,7 +579,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 //export dealloc_charp
 func dealloc_charp(p *C.char) {
 	if p != nil {
-		C.free(unsafe.Pointer(p))
+		C.free(unsafe.Pointer(p)) // #nosec G103
 	}
 }
 

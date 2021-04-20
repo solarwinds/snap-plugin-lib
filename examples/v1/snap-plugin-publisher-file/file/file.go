@@ -67,7 +67,12 @@ func (f FPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 	}
 	fileHandle, _ := os.Create(file)
 	writer := bufio.NewWriter(fileHandle)
-	defer fileHandle.Close()
+	defer func() {
+		err := fileHandle.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	for _, m := range mts {
 		fmt.Fprintf(writer, "%s|%v|%d|%s|%s|%s|%v|%v\n",

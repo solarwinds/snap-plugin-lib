@@ -216,10 +216,7 @@ func (ts tlsServerDefaultSetup) makeTLSConfig() *tls.Config {
 	config := tls.Config{
 		ClientAuth:               tls.RequireAndVerifyClientCert,
 		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-		},
+		MinVersion:               tls.VersionTLS12,
 	}
 	return &config
 }
@@ -267,7 +264,7 @@ func (ts tlsServerDefaultSetup) loadRootCerts(certPaths []string) (rootCAs *x509
 	rootCAs = x509.NewCertPool()
 	numread := 0
 	for _, path = range filepaths {
-		b, err := ioutil.ReadFile(path)
+		b, err := ioutil.ReadFile(filepath.Clean(path))
 		if err != nil {
 			log.WithFields(log.Fields{"path": path, "error": err}).Debug("Unable to read cert file")
 			continue
@@ -288,11 +285,7 @@ func (ts tlsServerDefaultSetup) loadRootCerts(certPaths []string) (rootCAs *x509
 // server, with TLS optionally turned on.
 func makeGRPCCredentials(m *meta) (creds credentials.TransportCredentials, err error) {
 	var config *tls.Config
-	if !m.TLSEnabled {
-		config = &tls.Config{
-			InsecureSkipVerify: true,
-		}
-	} else {
+	if m.TLSEnabled {
 		cert, err := tls.LoadX509KeyPair(m.CertPath, m.KeyPath)
 		if err != nil {
 			return nil, fmt.Errorf("unable to setup credentials for plugin - loading key pair failed: %v", err.Error())

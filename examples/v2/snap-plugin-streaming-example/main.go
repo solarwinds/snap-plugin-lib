@@ -48,7 +48,7 @@ func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) error {
 		case <-ctx.Done():
 			log.Info("Handling end of stream")
 			return nil
-		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))):
+		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))): // #nosec G404
 			log.Debug("Gathering metric")
 
 			c.probeID++
