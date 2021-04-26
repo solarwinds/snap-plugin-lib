@@ -1,3 +1,5 @@
+// +build medium
+
 /*
  Copyright 2016 Intel Corporation
 
@@ -29,64 +31,42 @@
 
 */
 
-package file
+package plugin
 
 import (
-	"bufio"
+	"context"
 	"errors"
-	"fmt"
-	"os"
-
-	"github.com/solarwinds/snap-plugin-lib/v1/plugin"
 )
 
-// FPublisher is a testing publisher.
-type FPublisher struct {
+type mockStreamer struct {
+	mockPlugin
+	err       error
+	inMetric  chan []Metric
+	outMetric chan []Metric
 }
 
-/*
-	GetConfigPolicy() returns the configPolicy for your plugin.
-
-	A config policy is how users can provide configuration info to
-	plugin. Here you define what sorts of config info your plugin
-	needs and/or requires.
-*/
-func (f FPublisher) GetConfigPolicy() (plugin.ConfigPolicy, error) {
-	policy := plugin.NewConfigPolicy()
-	return *policy, nil
+func newMockStreamer() *mockStreamer {
+	return &mockStreamer{}
 }
 
-// Publish test publish function
-func (f FPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
-	file, err := cfg.GetString("file")
-	if err != nil {
-		return err
+func (mc *mockStreamer) GetMetricTypes(cfg Config) ([]Metric, error) {
+	if mc.err != nil {
+		return nil, errors.New("error")
 	}
-	if val, err := cfg.GetBool("return_error"); err == nil && val {
-		return errors.New("Houston we have a problem")
-	}
-	fileHandle, _ := os.Create(file)
-	writer := bufio.NewWriter(fileHandle)
-	defer func() {
-		err := fileHandle.Close()
-		if err != nil {
-			panic(err)
-		}
-	}()
 
-	for _, m := range mts {
-		fmt.Fprintf(writer, "%s|%v|%d|%s|%s|%s|%v|%v\n",
-			m.Namespace.Strings(),
-			m.Data,
-			m.Version,
-			m.Unit,
-			m.Description,
-			m.Timestamp,
-			m.Tags,
-			m.Config,
-		)
+	mts := []Metric{}
+	for _, v := range getMockMetricDataMap() {
+		mts = append(mts, v)
 	}
-	writer.Flush()
+	return mts, nil
+}
 
+func (mc *mockStreamer) StreamMetrics(ctx context.Context, i chan []Metric, o chan []Metric, _ chan string) error {
+
+	if mc.err != nil {
+		return errors.New("error")
+	}
+	mc.inMetric = i
+	mc.outMetric = o
 	return nil
 }

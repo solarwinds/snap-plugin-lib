@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ func (c *streamCollector) StreamingCollect(ctx plugin.CollectContext) error {
 		case <-ctx.Done():
 			log.Info("Handling end of stream")
 			return nil
-		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))):
+		case <-time.After(time.Duration(rand.Intn(int(maxProbeDuration)))): // #nosec G404
 			log.Debug("Gathering metric")
 
 			c.probeID++

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -579,7 +579,7 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 //export dealloc_charp
 func dealloc_charp(p *C.char) {
 	if p != nil {
-		C.free(unsafe.Pointer(p))
+		C.free(unsafe.Pointer(p)) // #nosec G103
 	}
 }
 

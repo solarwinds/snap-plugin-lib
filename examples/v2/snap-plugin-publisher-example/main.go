@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ func (m myPublisher) Publish(ctx plugin.PublishContext) error {
 	logrus.Infof("Number of metrics: %v\n", ctx.Count())
 
 	// Simulate publisher processing
-	time.Sleep(time.Duration(rand.Intn(int(1 * time.Second))))
+	time.Sleep(time.Duration(rand.Intn(int(1 * time.Second)))) // #nosec G404
 
 	for _, mt := range ctx.ListAllMetrics() {
 		logrus.Infof(" - %s=%v [%v]\n", mt.Namespace(), mt.Value(), mt.Tags())

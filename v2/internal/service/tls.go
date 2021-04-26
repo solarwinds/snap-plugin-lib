@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ func tlsCredentials(ctx context.Context, opt *plugin.Options) (credentials.Trans
 		Certificates: []tls.Certificate{cert},
 		ClientAuth:   tls.RequireAndVerifyClientCert,
 		ClientCAs:    clientCA,
+		MinVersion:   tls.VersionTLS12,
 	}
 	tlsCreds := credentials.NewTLS(tlsConfig)
 
@@ -79,7 +80,7 @@ func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
 
 	// read certificate files
 	for _, f := range certFilesToProcess {
-		caCert, err := ioutil.ReadFile(f)
+		caCert, err := ioutil.ReadFile(filepath.Clean(f))
 		if err != nil {
 			return clientCA, fmt.Errorf("can't read client CA Root certificate: %v", err)
 		}

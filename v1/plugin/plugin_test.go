@@ -15,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -39,11 +39,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"testing"
 	"time"
-
-	"os"
 
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -240,7 +239,7 @@ func TestMakeTLSConfig(t *testing.T) {
 			config := tlsSetupInstance.makeTLSConfig()
 			So(config.ClientAuth, ShouldEqual, tls.RequireAndVerifyClientCert)
 			So(config.PreferServerCipherSuites, ShouldEqual, true)
-			So(config.CipherSuites, ShouldNotBeEmpty)
+			So(config.MinVersion, ShouldNotBeEmpty)
 		})
 	})
 }

@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ var (
 )
 
 func init() {
-	rand.Seed(42)
+	rand.Seed(42) // #nosec G404
 }
 
 // Rand collector implementation used as an example of streaming.
@@ -115,21 +115,21 @@ func (r *RandCollector) streamIt(ch chan []plugin.Metric, err chan string) {
 				if val, err := mt.Config.GetInt("testint"); err == nil {
 					r.metrics[idx].Data = val
 				} else {
-					r.metrics[idx].Data = rand.Int31()
+					r.metrics[idx].Data = rand.Int31() // #nosec G404
 				}
 				metrics = append(metrics, r.metrics[idx])
 			} else if mt.Namespace[len(mt.Namespace)-1].Value == "float" {
 				if val, err := mt.Config.GetFloat("testfloat"); err == nil {
 					r.metrics[idx].Data = val
 				} else {
-					r.metrics[idx].Data = rand.Float64()
+					r.metrics[idx].Data = rand.Float64() // #nosec G404
 				}
 				metrics = append(metrics, r.metrics[idx])
 			} else if mt.Namespace[len(mt.Namespace)-1].Value == "string" {
 				if val, err := mt.Config.GetString("teststring"); err == nil {
 					r.metrics[idx].Data = val
 				} else {
-					r.metrics[idx].Data = strs[rand.Intn(len(strs)-1)]
+					r.metrics[idx].Data = strs[rand.Intn(len(strs)-1)] // #nosec G404
 				}
 				metrics = append(metrics, r.metrics[idx])
 			} else {
@@ -137,7 +137,7 @@ func (r *RandCollector) streamIt(ch chan []plugin.Metric, err chan string) {
 			}
 		}
 		ch <- metrics
-		time.Sleep(time.Millisecond * time.Duration(rand.Int63n(1000)))
+		time.Sleep(time.Millisecond * time.Duration(rand.Int63n(1000))) // #nosec G404
 	}
 }
 

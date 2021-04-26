@@ -15,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -205,12 +205,11 @@ func (tt *test) startServer(pt pluginType) {
 		tt.halt = publisherProxy.halt
 	}
 
-	addr := la
 	_, port, err := net.SplitHostPort(lis.Addr().String())
 	if err != nil {
 		tt.t.Fatalf("Failed to parse listener address: %v", err)
 	}
-	addr = "localhost:" + port
+	addr := "localhost:" + port
 
 	go s.Serve(lis)
 	tt.srvAddr = addr

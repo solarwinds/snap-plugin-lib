@@ -21,12 +21,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"google.golang.org/grpc"
 )
@@ -46,8 +46,6 @@ const (
 	closeDelay         = 1 * time.Second // wait until Unload() causes end of StreamCollect() to avoid GRPC errors
 
 	filterSeparator = ";"
-
-	maxTaskId = 1024
 )
 
 type Options struct {
@@ -141,7 +139,7 @@ func parseCmdLine() *Options {
 	flag.Parse()
 
 	if opt.TaskId == defaultTaskID {
-		opt.TaskId = fmt.Sprintf("task-%d", rand.Intn(maxTaskId))
+		opt.TaskId = fmt.Sprintf("task-%s", uuid.New().String())
 	}
 
 	return opt
@@ -150,8 +148,6 @@ func parseCmdLine() *Options {
 ///////////////////////////////////////////////////////////////////////////////
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
 	doneCh := make(chan error)
 
 	opt := parseCmdLine()
