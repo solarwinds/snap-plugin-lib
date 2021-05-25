@@ -172,6 +172,13 @@ func (c *Context) ResetWarnings() {
 	c.sessionWarnings = []types.Warning{}
 }
 
+func (c *Context) RawContext() context.Context {
+	c.ctxMu.RLock()
+	defer c.ctxMu.RUnlock()
+
+	return c.ctx
+}
+
 func (c *Context) IsDone() bool {
 	c.ctxMu.RLock()
 	defer c.ctxMu.RUnlock()

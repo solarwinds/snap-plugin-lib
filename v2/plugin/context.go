@@ -17,6 +17,8 @@
 package plugin
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,6 +45,9 @@ type Context interface {
 
 	// Add warning information to current collect / process operation.
 	AddWarning(msg string)
+
+	// Return raw context associated with task
+	RawContext() context.Context
 
 	// Check if task is completed
 	IsDone() bool
