@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package plugin
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -43,6 +45,9 @@ type Context interface {
 
 	// Add warning information to current collect / process operation.
 	AddWarning(msg string)
+
+	// Return raw context associated with task
+	RawContext() context.Context
 
 	// Check if task is completed
 	IsDone() bool

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -170,6 +170,13 @@ func (c *Context) ResetWarnings() {
 	defer c.warningsMutex.RUnlock()
 
 	c.sessionWarnings = []types.Warning{}
+}
+
+func (c *Context) RawContext() context.Context {
+	c.ctxMu.RLock()
+	defer c.ctxMu.RUnlock()
+
+	return c.ctx
 }
 
 func (c *Context) IsDone() bool {

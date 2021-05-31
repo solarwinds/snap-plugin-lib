@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package mock
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 
@@ -82,6 +84,11 @@ func (m *Context) ShouldProcess(ns string) bool {
 func (m *Context) RequestedMetrics() []string {
 	args := m.Called()
 	return args.Get(0).([]string)
+}
+
+func (m *Context) RawContext() context.Context {
+	args := m.Called()
+	return args.Get(0).(context.Context)
 }
 
 func (m *Context) IsDone() bool {
