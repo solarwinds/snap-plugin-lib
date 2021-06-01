@@ -34,6 +34,14 @@ class BaseCollector(BasePlugin):
         pass
 
 
+class BaseStreamingCollector(BasePlugin):
+    def streaming_collect(self, ctx: CollectContext):
+        pass
+
+    def define_plugin(self, ctx: DefineCollectorContext):
+        pass
+
+
 class BasePublisher(BasePlugin):
     def publish(self, ctx: PublishContext):
         pass

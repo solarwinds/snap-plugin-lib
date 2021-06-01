@@ -60,8 +60,6 @@ func StartCollectorWithContext(ctx context.Context, collector plugin.Collector, 
 }
 
 func startCollector(ctx context.Context, collector types.Collector) {
-	fmt.Printf("-- startCollector\n")
-	
 	var err error
 
 	var opt *plugin.Options

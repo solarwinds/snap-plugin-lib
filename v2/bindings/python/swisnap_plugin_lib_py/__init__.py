@@ -1,4 +1,4 @@
-from .base_plugin import BasePublisher, BaseCollector
+from .base_plugin import BasePublisher, BaseCollector, BaseStreamingCollector
 from .runner import start_collector, start_publisher
 from .snap_ctypes import (
     LOGLEVEL_PANIC,

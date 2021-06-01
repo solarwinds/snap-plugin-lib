@@ -743,8 +743,6 @@ func define_instances_limit(limit int) {
 
 //export start_collector
 func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
-	fmt.Printf("start_collector")
-
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
 		loadCallback:    loadCallback,
@@ -756,8 +754,6 @@ func start_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, 
 
 //export start_streaming_collector
 func start_streaming_collector(collectCallback *C.callback_t, loadCallback *C.callback_t, unloadCallback *C.callback_t, defineCallback *C.define_callback_t, name *C.char, version *C.char) {
-	fmt.Printf("start_streaming_collector")
-
 	bCollector := &bridgeCollector{
 		collectCallback: collectCallback,
 		loadCallback:    loadCallback,
