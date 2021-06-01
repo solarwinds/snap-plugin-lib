@@ -19,6 +19,8 @@ namespace SnapPluginLib
     public static class Runner
     {
         private static CollectorPluginBase _collector;
+        private static StreamingCollectorPluginBase _streamingCollector;
+        private static PluginBase _pluginBase;
 
         internal delegate void DefineHandler();
 
@@ -28,33 +30,50 @@ namespace SnapPluginLib
 
         internal delegate void UnloadHandler(string taskId);
 
-        private static void DefineHandlerFn()
-        {
-            _collector.DefinePlugin(new DefineContext());
-        }
-
         private static void CollectHandlerFn(string taskId)
         {
             _collector.Collect(ContextMemory.Get(taskId));
         }
+        
+        private static void StreamingCollectHandlerFn(string taskId)
+        {
+            _streamingCollector.StreamingCollect(ContextMemory.Get(taskId));
+        }
+        
+        private static void DefineHandlerFn()
+        {
+            _pluginBase.DefinePlugin(new DefineContext());
+        }
 
         private static void LoadHandlerFn(string taskId)
         {
-            _collector.Load(ContextMemory.Get(taskId));
+            _pluginBase.Load(ContextMemory.Get(taskId));
         }
 
         private static void UnloadHandlerFn(string taskId)
         {
-            _collector.Unload(ContextMemory.Get(taskId));
+            _pluginBase.Unload(ContextMemory.Get(taskId));
         }
 
         public static void StartCollector(CollectorPluginBase collector)
         {
             _collector = collector;
+            _pluginBase = collector;
 
             CBridge.start_collector(
                 CollectHandlerFn, LoadHandlerFn, UnloadHandlerFn, DefineHandlerFn,
                 collector.Name, Convertions.ToSemanticVersion(collector.Version));
+        }
+
+        public static void StartStreamingCollector(StreamingCollectorPluginBase collector)
+        {
+            _streamingCollector = collector;
+            _pluginBase = collector;
+            
+            CBridge.start_streaming_collector(
+                StreamingCollectHandlerFn, LoadHandlerFn, UnloadHandlerFn, DefineHandlerFn,
+                collector.Name, Convertions.ToSemanticVersion(collector.Version));
+
         }
     }
 }
