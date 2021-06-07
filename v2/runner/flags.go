@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -120,11 +120,11 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 
 	// custom flags
 
-	if pType == types.PluginTypeCollector {
-		flagParser.BoolVar(&opt.PrintExampleTask,
-			"print-example-task", false,
-			"Print-out example task for a plugin")
+	flagParser.BoolVar(&opt.PrintExampleTask,
+		"print-example-task", false,
+		"Print-out example task for a plugin")
 
+	if pType == types.PluginTypeCollector {
 		flagParser.BoolVar(&opt.DebugMode,
 			"debug-mode", false,
 			"Run plugin in debug mode (standalone)")

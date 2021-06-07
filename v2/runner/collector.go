@@ -111,7 +111,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	}
 
 	if opt.PrintExampleTask {
-		printExampleTask(ctxMan, collector.Name())
+		printExampleTask(ctxMan.ExampleConfig, collector.Name(), types.PluginTypeCollector)
 		os.Exit(normalExitStatus)
 	}
 

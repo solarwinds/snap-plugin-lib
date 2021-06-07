@@ -80,6 +80,11 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 		os.Exit(normalExitStatus)
 	}
 
+	if opt.PrintExampleTask {
+		printExampleTask(ctxMan.ExampleConfig, name, types.PluginTypePublisher)
+		os.Exit(normalExitStatus)
+	}
+
 	r, err := acquireResources(opt)
 	if err != nil {
 		logF.WithError(err).Error("Can't acquire resources for plugin services")

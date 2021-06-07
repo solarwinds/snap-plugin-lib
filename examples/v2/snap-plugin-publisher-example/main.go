@@ -35,6 +35,8 @@ type myPublisher struct {
 }
 
 func (m myPublisher) PluginDefinition(def plugin.PublisherDefinition) error {
+	_ = def.DefineExampleConfig("{}")
+
 	_ = def.DefineTasksPerInstanceLimit(4)
 	_ = def.DefineInstancesLimit(3)
 	return nil
