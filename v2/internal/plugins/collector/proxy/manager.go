@@ -373,7 +373,7 @@ func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, d
 
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
-		logF.WithFields(moduleFields).WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
+		logF.WithFields(moduleFields).WithError(err).WithFields(logrus.Fields{"namespace": ns}).Fatal("Wrong metric definition")
 	}
 
 	cm.metricsMetadata[ns] = metricMetadata{
