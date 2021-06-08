@@ -54,6 +54,8 @@ func printExampleTask(exampleConfig yaml.Node, pluginName string, pluginType typ
 		switch pluginType {
 		case types.PluginTypeCollector:
 			filledTemplate = fmt.Sprintf(template, pluginName, "publisher-appoptics")
+		case types.PluginTypeStreamingCollector:
+			filledTemplate = fmt.Sprintf(template, pluginName, "publisher-appoptics")
 		case types.PluginTypePublisher:
 			filledTemplate = fmt.Sprintf(template, "collector-name", pluginName)
 		default:

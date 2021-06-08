@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -88,6 +88,10 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 
 	if pc.IsDone() {
 		return fmt.Errorf("task has been canceled")
+	}
+
+	if !pc.isValidValueType(v) {
+		return fmt.Errorf("invalid value type (%T) for metric: %s", v, ns)
 	}
 
 	parsedNs, err := metrictree.ParseNamespace(ns, false)
@@ -263,4 +267,28 @@ func (pc *PluginContext) RequestedMetrics() []string {
 
 func (pc *PluginContext) TaskID() string {
 	return pc.taskID
+}
+
+func (pc *PluginContext) isValidValueType(value interface{}) bool {
+	// when adding new type(s) apply changes also in toGRPCValue() function
+	switch value.(type) {
+	case string:
+	case float64:
+	case float32:
+	case int32:
+	case int:
+	case int64:
+	case uint32:
+	case uint64:
+	case uint:
+	case []byte:
+	case bool:
+	case int16:
+	case uint16:
+	case nil:
+	default:
+		return false
+	}
+
+	return true
 }

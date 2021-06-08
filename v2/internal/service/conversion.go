@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ func fromGRPCTime(t *pluginrpc.Time) time.Time {
 func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 	grpcValue := &pluginrpc.MetricValue{}
 
+	// when adding new type(s) apply changes also in PluginContext.isValidValueType() function
 	switch t := v.(type) {
 	case string:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VString{VString: t}
