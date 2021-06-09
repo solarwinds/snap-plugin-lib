@@ -17,13 +17,13 @@
 using System;
 using SnapPluginLib;
 
-namespace CollectorExample
+namespace StreamingCollectorExample
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Runner.StartCollector(new CollectorExample("collector-example", new Version(0, 0, 1)));
+            Runner.StartStreamingCollector(new StreamingCollectorExample("streaming-collector-example", new Version(0, 0, 1)));
         }
     }
 }

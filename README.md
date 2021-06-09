@@ -58,8 +58,9 @@ if __name__ == '__main__':
 More complicated examples can be found in:
 * (Go) [Examples folder](examples/v2)
 * (Go) [Tutorial](v2/tutorial/09-config/collector)
-* (Python) [Collector Example](v2/plugin-lib/swisnap-collector-plugin-lib-example.py)
-* (Python) [Publisher Example](v2/plugin-lib/swisnap-publisher-plugin-lib-example.py)
+* (Python) [Collector Example](v2/bindings/python/swisnap-collector-plugin-lib-example.py)
+* (Python) [Publisher Example](v2/bindings/python/swisnap-publisher-plugin-lib-example.py)
+* (C#) [Collector Example](v2/bindings/csharp/SnapPluginLibCs/CollectorExample)
 
 ## Documentation
 

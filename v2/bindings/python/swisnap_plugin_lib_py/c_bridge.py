@@ -153,14 +153,14 @@ class PublishContext(Context):
 class CollectContext(Context):
     @throw_exception_if_error
     def add_metric(
-        self,
-        namespace,
-        value,
-        *,
-        tags=None,
-        timestamp=None,
-        description=None,
-        unit=None
+            self,
+            namespace,
+            value,
+            *,
+            tags=None,
+            timestamp=None,
+            description=None,
+            unit=None
     ):
         return PLUGIN_LIB_OBJ.ctx_add_metric(
             self._ctx_id(),
@@ -170,14 +170,14 @@ class CollectContext(Context):
         )
 
     def always_apply(
-        self,
-        namespace,
-        *,
-        tags_to_add=None,
-        tags_to_remove=None,
-        timestamp=None,
-        description=None,
-        unit=None
+            self,
+            namespace,
+            *,
+            tags_to_add=None,
+            tags_to_remove=None,
+            timestamp=None,
+            description=None,
+            unit=None
     ):
         return PLUGIN_LIB_OBJ.ctx_always_apply(
             self._ctx_id(),
@@ -240,6 +240,11 @@ def collector_handler(ctx_id):
 
 
 @CFUNCTYPE(None, c_char_p)
+def streaming_collector_handler(ctx_id):
+    plugin_py.streaming_collect(CollectContext(ctx_id))
+
+
+@CFUNCTYPE(None, c_char_p)
 def publisher_handler(ctx_id):
     plugin_py.publish(PublishContext(ctx_id))
 
@@ -267,6 +272,23 @@ def start_c_collector(collector):
 
     PLUGIN_LIB_OBJ.start_collector(
         collector_handler,
+        load_handler,
+        unload_handler,
+        define_collector_handler,
+        string_to_bytes(name),
+        string_to_bytes(version),
+    )
+
+
+def start_c_streaming_collector(collector):
+    global plugin_py
+
+    name = collector.name()
+    version = collector.version()
+    plugin_py = collector
+
+    PLUGIN_LIB_OBJ.start_streaming_collector(
+        streaming_collector_handler,
         load_handler,
         unload_handler,
         define_collector_handler,

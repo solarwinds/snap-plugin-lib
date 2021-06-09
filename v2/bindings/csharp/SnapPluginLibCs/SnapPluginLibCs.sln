@@ -2,7 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapPluginLib", "SnapPluginLib\SnapPluginLib.csproj", "{9EDA6FB3-A30E-4D8C-9B62-D6A8FFC413E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectorExample", "CollectorExample\CollectorExample.csproj", "{FC5A023F-D1D8-4319-97CF-50091AB3F8A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectorExample", "CollectorExample\CollectorExample.csproj", "{84D89B49-2013-4BD8-843C-19F72C354885}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamingCollectorExample", "StreamingCollectorExample\StreamingCollectorExample.csproj", "{FF4887A3-4DA7-40F5-9566-C39DC5B18386}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +12,17 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FC5A023F-D1D8-4319-97CF-50091AB3F8A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC5A023F-D1D8-4319-97CF-50091AB3F8A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC5A023F-D1D8-4319-97CF-50091AB3F8A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC5A023F-D1D8-4319-97CF-50091AB3F8A6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EDA6FB3-A30E-4D8C-9B62-D6A8FFC413E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EDA6FB3-A30E-4D8C-9B62-D6A8FFC413E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EDA6FB3-A30E-4D8C-9B62-D6A8FFC413E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EDA6FB3-A30E-4D8C-9B62-D6A8FFC413E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84D89B49-2013-4BD8-843C-19F72C354885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84D89B49-2013-4BD8-843C-19F72C354885}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84D89B49-2013-4BD8-843C-19F72C354885}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84D89B49-2013-4BD8-843C-19F72C354885}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF4887A3-4DA7-40F5-9566-C39DC5B18386}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF4887A3-4DA7-40F5-9566-C39DC5B18386}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF4887A3-4DA7-40F5-9566-C39DC5B18386}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF4887A3-4DA7-40F5-9566-C39DC5B18386}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

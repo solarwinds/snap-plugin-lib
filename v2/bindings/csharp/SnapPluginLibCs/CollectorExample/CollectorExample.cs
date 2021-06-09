@@ -32,7 +32,7 @@ namespace CollectorExample
             def.DefineExampleConfig(exampleConfigYaml);
             def.DefineInstancesLimit(5);
             def.DefineTaskPerInstanceLimit(10);
-            
+
             def.DefineMetric("/example/group1/metric1", "b", false, "metric1 description");
             def.DefineMetric("/example/group1/metric2", "b", false, "metric2 description");
             def.DefineMetric("/example/group1/metric3", "b", false, "metric3 description");
@@ -46,15 +46,15 @@ namespace CollectorExample
             var obj = ctx.Load<Dictionary<string, int>>("stored_object");
             obj["counter"]++;
             ctx.Store("stored_object", obj);
-            
+
             // Log messages with information from stored object
             ctx.Log(LogLevel.Info, "Log message from C#", new Dictionary<string, string>
             {
-                {"language", "c#"}, 
-                {"counter", $"{obj["counter"]}"}
+                { "language", "c#" },
+                { "counter", $"{obj["counter"]}" }
             });
             ctx.AddWarning("Warning from C#");
-            
+
             // List requested metrics
             var reqMts = ctx.RequestedMetrics();
             if (reqMts.Count > 0)
@@ -69,20 +69,20 @@ namespace CollectorExample
             // Add metrics
             ctx.AlwaysApply("/example/group1/*", Modifiers.Tags(new Dictionary<string, string>
             {
-                {"virtualization", "VirtualBox"}
+                { "virtualization", "VirtualBox" }
             }));
 
             ctx.AddMetric("/example/group1/metric1", 12.4,
                 Modifiers.Tags(new Dictionary<string, string>
                 {
-                    {"origin", "C# lang"},
-                    {"system", "Windows"}
+                    { "origin", "C# lang" },
+                    { "system", "Windows" }
                 }),
                 Modifiers.Description("new custom description")
             );
 
             ctx.AddMetric("/example/group1/metric2", 20);
-            ctx.AddMetric("/example/group1/metric3", (uint) 30);
+            ctx.AddMetric("/example/group1/metric3", 30);
 
             if (ctx.ShouldProcess("/example/group2/metric4"))
             {
@@ -102,7 +102,7 @@ namespace CollectorExample
             var keys = ctx.ConfigKeys();
             if (keys.Count > 0)
             {
-                Console.WriteLine($"Config keys:");
+                Console.WriteLine("Config keys:");
                 foreach (var k in keys)
                 {
                     Console.WriteLine($"- {k}");
@@ -114,8 +114,8 @@ namespace CollectorExample
             // Store object for a later use
             var obj = new Dictionary<string, int>
             {
-                {"iteration", 20},
-                {"counter", 0}
+                { "iteration", 20 },
+                { "counter", 0 }
             };
             ctx.Store("stored_object", obj);
         }
