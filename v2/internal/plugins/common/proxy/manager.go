@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
+	"gopkg.in/yaml.v3"
 )
 
 type contextHolder struct {
@@ -35,6 +36,8 @@ type ContextManager struct {
 
 	TasksLimit     int
 	InstancesLimit int
+
+	ExampleConfig yaml.Node // example config
 }
 
 func NewContextManager() *ContextManager {
@@ -104,5 +107,14 @@ func (cm *ContextManager) DefineInstancesLimit(limit int) error {
 	}
 
 	cm.InstancesLimit = limit
+	return nil
+}
+
+func (cm *ContextManager) DefineExampleConfig(cfg string) error {
+	err := yaml.Unmarshal([]byte(cfg), &cm.ExampleConfig)
+	if err != nil {
+		return fmt.Errorf("invalid YAML provided by user: %v", err)
+	}
+
 	return nil
 }

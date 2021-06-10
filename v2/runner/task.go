@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -19,18 +19,11 @@ package runner
 import (
 	"fmt"
 
-	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/collector/proxy"
+	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 	"gopkg.in/yaml.v3"
 )
 
-func printExampleTask(ctxMan *proxy.ContextManager, pluginName string) {
-	var b []byte
-	var err error
-
-	if len(ctxMan.ExampleConfig.Content) != 0 {
-		b, err = yaml.Marshal(&ctxMan.ExampleConfig)
-	} else {
-		template := fmt.Sprintf(`
+const template = `
 # THIS IS GENERIC EXAMPLE TASK TEMPLATE
 ---
 version: 2
@@ -46,11 +39,30 @@ plugins:
 	# metrics:
 
     publish:
-      - plugin_name: publisher-appoptics
-        binary_name: snap-plugin-publisher-appoptics
+      - plugin_name: %s
+`
 
-`, pluginName)
-		b = []byte(template)
+func printExampleTask(exampleConfig yaml.Node, pluginName string, pluginType types.PluginType) {
+	var b []byte
+	var err error
+
+	if len(exampleConfig.Content) != 0 {
+		b, err = yaml.Marshal(&exampleConfig)
+	} else {
+		var filledTemplate string
+
+		switch pluginType {
+		case types.PluginTypeCollector:
+			filledTemplate = fmt.Sprintf(template, pluginName, "publisher-appoptics")
+		case types.PluginTypeStreamingCollector:
+			filledTemplate = fmt.Sprintf(template, pluginName, "publisher-appoptics")
+		case types.PluginTypePublisher:
+			filledTemplate = fmt.Sprintf(template, "collector-name", pluginName)
+		default:
+			err = fmt.Errorf("invalid plugin type")
+		}
+
+		b = []byte(filledTemplate)
 	}
 
 	if err != nil {

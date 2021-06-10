@@ -32,8 +32,6 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
-
 	commonProxy "github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/proxy"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/plugins/common/stats"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/log"
@@ -79,8 +77,6 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
 	statsController stats.Controller // reference to statistics controller
-
-	ExampleConfig yaml.Node // example config
 }
 
 func NewContextManager(ctx context.Context, collector types.Collector, statsController stats.Controller) *ContextManager {
@@ -373,7 +369,7 @@ func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, d
 
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
-		logF.WithFields(moduleFields).WithError(err).WithFields(logrus.Fields{"namespace": ns}).Errorf("Wrong metric definition")
+		logF.WithFields(moduleFields).WithError(err).WithFields(logrus.Fields{"namespace": ns}).Fatal("Wrong metric definition")
 	}
 
 	cm.metricsMetadata[ns] = metricMetadata{
@@ -386,15 +382,6 @@ func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, d
 // Define description for dynamic element
 func (cm *ContextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
-}
-
-func (cm *ContextManager) DefineExampleConfig(cfg string) error {
-	err := yaml.Unmarshal([]byte(cfg), &cm.ExampleConfig)
-	if err != nil {
-		return fmt.Errorf("invalid YAML provided by user: %v", err)
-	}
-
-	return nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////

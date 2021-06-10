@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -50,4 +50,7 @@ type PublishContext interface {
 // PublisherDefinition provides API for specifying plugin (publisher) metadata (supported metrics, descriptions etc)
 type PublisherDefinition interface {
 	Definition
+
+	// Define example config (which will be presented when example task is printed)
+	DefineExampleConfig(cfg string) error
 }
