@@ -43,6 +43,25 @@ namespace SnapPluginLib
                 throw new NotImplementedException(NoImplementedError);
             }
         }
+        
+        internal static void start_streaming_collector(
+            Runner.CollectHandler collectHandler, Runner.LoadHandler loadHandler, Runner.UnloadHandler unloadHandler,
+            Runner.DefineHandler defineHandler, string name, string version
+        )
+        {
+            if (IsWindows())
+            {
+                CBridgeWin.start_streaming_collector(collectHandler, loadHandler, unloadHandler, defineHandler, name, version);
+            }
+            else if (IsLinux())
+            {
+                CBridgeLinux.start_streaming_collector(collectHandler, loadHandler, unloadHandler, defineHandler, name, version);
+            }
+            else
+            {
+                throw new NotImplementedException(NoImplementedError);
+            }
+        }
 
         // Collect context related functions
 

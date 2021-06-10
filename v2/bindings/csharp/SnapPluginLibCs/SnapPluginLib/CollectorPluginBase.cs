@@ -18,22 +18,18 @@ using System;
 
 namespace SnapPluginLib
 {
-    public abstract class CollectorPluginBase
+    public class PluginBase
     {
         public string Name { get; }
         public Version Version { get; }
 
-        protected CollectorPluginBase(string name, Version version)
+        protected PluginBase(string name, Version version)
         {
             Name = name;
             Version = version;
         }
 
         public virtual void DefinePlugin(IDefineContext ctx)
-        {
-        }
-
-        public virtual void Collect(ICollectContext ctx)
         {
         }
 
@@ -44,5 +40,23 @@ namespace SnapPluginLib
         public virtual void Unload(IContext ctx)
         {
         }
+    }
+
+    public abstract class CollectorPluginBase : PluginBase
+    {
+        public CollectorPluginBase(string name, Version version) : base(name, version)
+        {
+        }
+
+        public abstract void Collect(ICollectContext ctx);
+    }
+
+    public abstract class StreamingCollectorPluginBase : PluginBase
+    {
+        public StreamingCollectorPluginBase(string name, Version version) : base(name, version)
+        {
+        }
+
+        public abstract void StreamingCollect(ICollectContext ctx);
     }
 }

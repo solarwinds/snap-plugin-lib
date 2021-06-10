@@ -39,6 +39,16 @@ namespace SnapPluginLib
             string version
         );
 
+        [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
+        internal static extern void start_streaming_collector(
+            Runner.CollectHandler collectHandler,
+            Runner.LoadHandler loadHandler,
+            Runner.UnloadHandler unloadHandler,
+            Runner.DefineHandler defineHandler,
+            string name,
+            string version
+        );
+
         // Collect context related functions
 
         [DllImport(PluginLibDllName, CharSet = CharSet.Ansi, SetLastError = true)]
