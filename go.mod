@@ -8,7 +8,6 @@ require (
 	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/securego/gosec/v2 v2.8.0 // indirect
 	github.com/sirupsen/logrus v1.8.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/stretchr/testify v1.6.1 // indirect
@@ -20,5 +19,4 @@ require (
 	google.golang.org/genproto v0.0.0-20210302174412-5ede27ff9881 // indirect
 	google.golang.org/grpc v1.36.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )
