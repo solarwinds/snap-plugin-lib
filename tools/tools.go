@@ -12,6 +12,8 @@
 */
 // +build tools
 
+//lint:file-ignore U1000 Ignore linter imports
+
 package tools
 
 import (
