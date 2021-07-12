@@ -24,19 +24,19 @@ import (
 )
 
 const template = `
-# THIS IS GENERIC EXAMPLE TASK TEMPLATE
----
+# THIS IS AN AUTOMATICALLY GENERATED TASK TEMPLATE EXAMPLE
+
 version: 2
 schedule:
-    type: cron
-    interval: "0 * * * * *"
+  type: cron
+  interval: "0 * * * * *"
 plugins:
   - plugin_name: %s
-	# plugin_binary:
- 
-	# config:
+    # plugin_binary:
 
-	# metrics:
+    # config:
+
+    # metrics:
 
     publish:
       - plugin_name: %s
