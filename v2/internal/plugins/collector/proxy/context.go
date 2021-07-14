@@ -94,12 +94,8 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 		return fmt.Errorf("invalid value type (%T) for metric: %s", v, ns)
 	}
 
-	parsedNs, err := metrictree.ParseNamespace(ns, false)
-	if err != nil {
-		return fmt.Errorf("invalid format of namespace: %v", err)
-	}
-	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), false) {
-		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %v", err)
+	if ok, err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, false); !ok || err != nil {
+		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %w", err)
 	}
 
 	matchDefinition, groupPositions := pc.ctxManager.metricsDefinition.IsValid(ns)
@@ -178,11 +174,7 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 }
 
 func (pc *PluginContext) ShouldProcess(ns string) bool {
-	parsedNs, err := metrictree.ParseNamespace(ns, false)
-	if err != nil {
-		return false
-	}
-	if !parsedNs.IsUsableForAddition(pc.ctxManager.metricsDefinition.HasRules(), true) {
+	if ok, err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, true); !ok || err != nil {
 		return false
 	}
 

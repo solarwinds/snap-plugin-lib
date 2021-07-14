@@ -82,12 +82,16 @@ const minNamespaceLength = 2
 
 // Check is namespace selector can be used for metric definition
 // First and last element should be static names, middle elements can be group (ie. [group])
-func (ns *Namespace) IsUsableForDefinition() bool {
+func (ns *Namespace) IsUsableForDefinition(tc TreeConstraints) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
-	if !ns.isFirstAndLastElementStatic() {
+	if !ns.isFirstElementStatic() {
+		return false
+	}
+
+	if !ns.isLastElementStatic() && tc&TreeConstraintLastNamespaceElementMustBeStatic != 0 {
 		return false
 	}
 
@@ -108,13 +112,17 @@ func (ns *Namespace) IsUsableForDefinition() bool {
 //
 // metricDefinitionPresent - In case plugin doesn't provide metric definition, added elements should be only static names.
 // allowAnyMatch - When true, using '*' is allowed (ie. ctx.ShouldProcess("/plugin/group/*/*/metric1")
-func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool, allowAnyMatch bool) bool {
+func (ns *Namespace) IsUsableForAddition(tc TreeConstraints, metricDefinitionPresent bool, allowAnyMatch bool) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
 
-	if (allowAnyMatch && !ns.isFirstElementStatic()) || (!allowAnyMatch && !ns.isFirstAndLastElementStatic()) {
+	if !ns.isFirstElementStatic() {
 		return false
+	}
+
+	if !allowAnyMatch && tc&TreeConstraintLastNamespaceElementMustBeStatic != 0 {
+		return ns.isLastElementStatic()
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
@@ -138,7 +146,7 @@ func (ns *Namespace) IsUsableForAddition(metricDefinitionPresent bool, allowAnyM
 
 // Check if namespace selector can be used for metric filters
 // !! Note: If metric definition is not provided in plugin, matcher with dynamic element can't be used in filter (to avoid ambiguity)
-func (ns *Namespace) IsUsableForFiltering(metricDefinitionPresent bool) bool {
+func (ns *Namespace) IsUsableForFiltering(_ TreeConstraints, metricDefinitionPresent bool) bool {
 	if len(ns.elements) < minNamespaceLength {
 		return false
 	}
@@ -161,13 +169,11 @@ func (ns *Namespace) IsUsableForFiltering(metricDefinitionPresent bool) bool {
 	return true
 }
 
-func (ns *Namespace) isFirstAndLastElementStatic() bool {
-	for _, nsElem := range []namespaceElement{ns.elements[0], ns.elements[len(ns.elements)-1]} {
-		switch nsElem.(type) {
-		case *staticSpecificElement: // ok
-		default:
-			return false
-		}
+func (ns *Namespace) isLastElementStatic() bool {
+	switch ns.elements[len(ns.elements)-1].(type) {
+	case *staticSpecificElement: // ok
+	default:
+		return false
 	}
 
 	return true

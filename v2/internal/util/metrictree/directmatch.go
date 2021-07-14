@@ -26,7 +26,7 @@ func MatchNsToFilter(ns string, filter string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if !parsedNs.IsUsableForAddition(true, false) {
+	if !parsedNs.IsUsableForAddition(defaultTreeConstraints(), true, false) {
 		return false, fmt.Errorf("invalid format of the namespace: %v", ns)
 	}
 

@@ -101,10 +101,10 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 				// Assert
 				So(ns, ShouldNotBeNil)
 				So(err, ShouldBeNil)
-				So(ns.IsUsableForDefinition(), ShouldEqual, tc.usableForDefinition)
-				So(ns.IsUsableForAddition(false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
-				So(ns.IsUsableForAddition(true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
-				So(ns.IsUsableForFiltering(true), ShouldBeTrue)
+				So(ns.IsUsableForDefinition(defaultTreeConstraints()), ShouldEqual, tc.usableForDefinition)
+				So(ns.IsUsableForAddition(defaultTreeConstraints(), false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
+				So(ns.IsUsableForAddition(defaultTreeConstraints(), true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
+				So(ns.IsUsableForFiltering(defaultTreeConstraints(), true), ShouldBeTrue)
 			})
 		}
 	})

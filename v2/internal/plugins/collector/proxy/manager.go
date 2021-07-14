@@ -384,6 +384,14 @@ func (cm *ContextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
 }
 
+func (cm *ContextManager) AllowDynamicLastElement() {
+	cm.metricsDefinition.AllowDynamicLastElement()
+}
+
+func (cm *ContextManager) AllowSubmittingUndefinedMetrics() {
+	cm.metricsDefinition.AllowSubmittingUndefinedMetrics()
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {

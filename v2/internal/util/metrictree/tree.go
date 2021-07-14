@@ -62,10 +62,20 @@ import (
 	"strings"
 )
 
+type TreeStrategy int
+
 const (
 	_ TreeStrategy = iota
 	metricDefinitionStrategy
 	metricFilteringStrategy
+)
+
+type TreeConstraints int
+
+const (
+	_ TreeConstraints = 1 << iota
+	TreeConstraintLastNamespaceElementMustBeStatic
+	TreeConstraintRejectUndefinedNamespaces
 )
 
 const ( // nodeType const
@@ -76,11 +86,10 @@ const ( // nodeType const
 	leafLevel
 )
 
-type TreeStrategy int
-
 type TreeValidator struct {
-	strategy       TreeStrategy   // used to distinguish between definition and filtering tree
-	definitionTree *TreeValidator // used in filtering tree (reference to definition tree)
+	strategy       TreeStrategy    // used to distinguish between definition and filtering tree
+	constraints    TreeConstraints // used to tighten/loosen validation rules
+	definitionTree *TreeValidator  // used in filtering tree (reference to definition tree)
 
 	head *Node
 }
@@ -94,15 +103,21 @@ type Node struct {
 	subNodes map[string]*Node
 }
 
+func defaultTreeConstraints() TreeConstraints {
+	return TreeConstraintLastNamespaceElementMustBeStatic | TreeConstraintRejectUndefinedNamespaces
+}
+
 func NewMetricDefinition() *TreeValidator {
 	return &TreeValidator{
-		strategy: metricDefinitionStrategy,
+		strategy:    metricDefinitionStrategy,
+		constraints: defaultTreeConstraints(),
 	}
 }
 
 func NewMetricFilter(definitionTree *TreeValidator) *TreeValidator {
 	return &TreeValidator{
 		strategy:       metricFilteringStrategy,
+		constraints:    defaultTreeConstraints(),
 		definitionTree: definitionTree,
 	}
 }
@@ -115,12 +130,12 @@ func (tv *TreeValidator) AddRule(ns string) error {
 
 	switch tv.strategy {
 	case metricDefinitionStrategy:
-		if !parsedNs.IsUsableForDefinition() {
+		if !parsedNs.IsUsableForDefinition(tv.constraints) {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in definition", ns)
 		}
 	case metricFilteringStrategy:
 		defPresent := tv.definitionTree.HasRules()
-		if !parsedNs.IsUsableForFiltering(defPresent) {
+		if !parsedNs.IsUsableForFiltering(tv.constraints, defPresent) {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in filtering when metric definition wasn't provided", ns)
 		}
 
@@ -132,6 +147,15 @@ func (tv *TreeValidator) AddRule(ns string) error {
 	}
 
 	return tv.updateTree(parsedNs)
+}
+
+func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) (bool, error) {
+	parsedNs, err := ParseNamespace(ns, isFilter)
+	if err != nil {
+		return false, fmt.Errorf("invalid format of namespace: %v", err)
+	}
+
+	return parsedNs.IsUsableForAddition(tv.constraints, tv.HasRules(), false), nil
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
@@ -151,6 +175,14 @@ func (tv *TreeValidator) IsCompatible(ns string) bool {
 
 func (tv *TreeValidator) HasRules() bool {
 	return tv.head != nil
+}
+
+func (tv *TreeValidator) AllowDynamicLastElement() {
+	tv.constraints &= ^TreeConstraintLastNamespaceElementMustBeStatic
+}
+
+func (tv *TreeValidator) AllowSubmittingUndefinedMetrics() {
+	tv.constraints &= ^TreeConstraintRejectUndefinedNamespaces
 }
 
 func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bool) (bool, []string) {
