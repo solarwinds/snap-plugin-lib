@@ -84,4 +84,14 @@ type CollectorDefinition interface {
 
 	// Define example config (which will be presented when example task is printed)
 	DefineExampleConfig(cfg string) error
+
+	// Allow last namespace element (the one that actually holds value) to be defined as dynamic
+	// which will allow submitting list-like metrics
+	AllowDynamicLastElement()
+
+	// Allow submitting metrics with namespace not being explicitly defined earlier
+	// The olny requirement here is that metrics should have matching root namespace element
+	// This allows implementing DefineMetric/DefineGroup thus having dynamic metrics but
+	// allows some a priori unknown metrics namespaces at the same
+	AllowSubmittingUndefinedMetrics()
 }

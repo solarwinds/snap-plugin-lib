@@ -44,6 +44,14 @@ func (m *CollectorDefinition) DefineGroup(name string, description string) {
 	m.Called(name, description)
 }
 
+func (m *CollectorDefinition) AllowDynamicLastElement() {
+	m.Called()
+}
+
+func (m *CollectorDefinition) AllowSubmittingUndefinedMetrics() {
+	m.Called()
+}
+
 func (m *CollectorDefinition) DefineExampleConfig(cfg string) error {
 	args := m.Called(cfg)
 	return args.Error(0)
