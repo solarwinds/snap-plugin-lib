@@ -135,12 +135,12 @@ func (tv *TreeValidator) AddRule(ns string) error {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in definition", ns)
 		}
 	case metricFilteringStrategy:
-		defPresent := tv.definitionTree.HasRules()
+		defPresent := tv.definitionTree.hasRules()
 		if !parsedNs.IsUsableForFiltering(tv.constraints, defPresent) {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in filtering when metric definition wasn't provided", ns)
 		}
 
-		if !tv.definitionTree.IsCompatible(ns) {
+		if !tv.definitionTree.isCompatible(ns) {
 			return fmt.Errorf("can't add rule (%s) - not compatible with any metric definition", ns)
 		}
 	default:
@@ -150,31 +150,42 @@ func (tv *TreeValidator) AddRule(ns string) error {
 	return tv.updateTree(parsedNs, tv.constraints)
 }
 
-func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) (bool, error) {
+func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) error {
 	parsedNs, err := ParseNamespace(ns, isFilter)
 	if err != nil {
-		return false, fmt.Errorf("invalid format of namespace: %v", err)
+		return fmt.Errorf("invalid format of namespace: %v", err)
 	}
 
-	return parsedNs.IsUsableForAddition(tv.constraints, tv.HasRules(), false), nil
+	ok := parsedNs.IsUsableForAddition(tv.constraints, tv.hasRules(), false)
+	if !ok {
+		return errors.New("metric not usable for addition")
+	}
+
+	return nil
 }
 
+// IsPartiallyValid does a partial metric validation in metricFilteringStrategy
+// is used by ctx.ShouldProcess to provide quick-return optimization in collecting metrics routine(s)
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
 	isValid, _ := tv.isValid(ns, false)
 	return isValid
 }
 
+// IsValid does full metric validation in metricFilteringStrategy
+// tests metric eligibility for adding, is called by ctx.AddMetric
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
 	isValid, trace := tv.isValid(ns, true)
 	return isValid, trace
 }
 
-func (tv *TreeValidator) IsCompatible(ns string) bool {
+// isCompatible does partial metric validation in metricDefinitionStrategy
+// is used by AddRule to assure the new metric definition does not break out of the existing tree structure
+func (tv *TreeValidator) isCompatible(ns string) bool {
 	isCompatible, _ := tv.isValid(ns, false)
 	return isCompatible
 }
 
-func (tv *TreeValidator) HasRules() bool {
+func (tv *TreeValidator) hasRules() bool {
 	return tv.head != nil
 }
 
@@ -375,7 +386,6 @@ func (n *Node) attachNode(attachedNode *Node) error {
 		return errors.New("there can be only one dynamic element at current level")
 	}
 
-	fmt.Println(attachedNode.currentElement.String())
 	n.subNodes[attachedNode.currentElement.String()] = attachedNode
 	attachedNode.parent = n
 
