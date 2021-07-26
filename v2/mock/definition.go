@@ -44,11 +44,11 @@ func (m *CollectorDefinition) DefineGroup(name string, description string) {
 	m.Called(name, description)
 }
 
-func (m *CollectorDefinition) AllowDynamicLastElement() {
+func (m *CollectorDefinition) SetAllowDynamicLastElement() {
 	m.Called()
 }
 
-func (m *CollectorDefinition) AllowSubmittingUndefinedMetrics() {
+func (m *CollectorDefinition) SetAllowSubmittingUndefinedMetrics() {
 	m.Called()
 }
 

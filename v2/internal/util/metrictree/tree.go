@@ -328,7 +328,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 	if len(ns.elements) == 1 {
 		return &Node{
 			currentElement: ns.elements[0],
-			subNodes:       nil,
+			subNodes:       map[string]*Node{},
 			nodeType:       leafLevel,
 			level:          level,
 		}
@@ -369,6 +369,7 @@ func (n *Node) attachNode(attachedNode *Node) error {
 		return errors.New("there can be only one dynamic element at current level")
 	}
 
+	fmt.Println(attachedNode.currentElement.String())
 	n.subNodes[attachedNode.currentElement.String()] = attachedNode
 	attachedNode.parent = n
 

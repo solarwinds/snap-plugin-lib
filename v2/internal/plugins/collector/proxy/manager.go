@@ -384,11 +384,11 @@ func (cm *ContextManager) DefineGroup(name string, description string) {
 	cm.groupsDescription[name] = description
 }
 
-func (cm *ContextManager) AllowDynamicLastElement() {
+func (cm *ContextManager) SetAllowDynamicLastElement() {
 	cm.metricsDefinition.AllowDynamicLastElement()
 }
 
-func (cm *ContextManager) AllowSubmittingUndefinedMetrics() {
+func (cm *ContextManager) SetAllowSubmittingUndefinedMetrics() {
 	cm.metricsDefinition.AllowSubmittingUndefinedMetrics()
 }
 
