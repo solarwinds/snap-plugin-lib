@@ -86,6 +86,9 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.AddRule("/plugin/group3/[dyn4]/metric7"), ShouldBeError) // 2 dynamic elements on the same level
 		So(v.AddRule("/plugin/group1/metric1"), ShouldBeError)        // the rules already exists
 		So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeError) // the rules already exists
+
+		// Validate some negative scenarios with their flag-based counterparts
+		So(v.AddRule("/plugin/group1/metric1/another1"), ShouldBeError) // can't redefine element as non-leaf one
 	})
 }
 

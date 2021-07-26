@@ -392,6 +392,10 @@ func (cm *ContextManager) SetAllowSubmittingUndefinedMetrics() {
 	cm.metricsDefinition.AllowSubmittingUndefinedMetrics()
 }
 
+func (cm *ContextManager) SetAllowValuesAtAnyNamespaceLevel() {
+	cm.metricsDefinition.AllowValuesAtAnyNamespaceLevel()
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 func (cm *ContextManager) RequestPluginDefinition() {

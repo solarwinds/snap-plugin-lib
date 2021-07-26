@@ -91,7 +91,7 @@ func (ns *Namespace) IsUsableForDefinition(tc TreeConstraints) bool {
 		return false
 	}
 
-	if !ns.isLastElementStatic() && tc&TreeConstraintLastNamespaceElementMustBeStatic != 0 {
+	if !ns.isLastElementStatic() && tc&LastNamespaceElementMustBeStatic != 0 {
 		return false
 	}
 
@@ -121,7 +121,7 @@ func (ns *Namespace) IsUsableForAddition(tc TreeConstraints, metricDefinitionPre
 		return false
 	}
 
-	if !allowAnyMatch && tc&TreeConstraintLastNamespaceElementMustBeStatic != 0 {
+	if !allowAnyMatch && tc&LastNamespaceElementMustBeStatic != 0 {
 		return ns.isLastElementStatic()
 	}
 

@@ -94,4 +94,7 @@ type CollectorDefinition interface {
 	// This allows implementing DefineMetric/DefineGroup thus having dynamic metrics but
 	// allows some a priori unknown metrics namespaces at the same
 	SetAllowSubmittingUndefinedMetrics()
+
+	// Allow metrics values not only on leaves but at any namespace level
+	SetAllowValuesAtAnyNamespaceLevel()
 }

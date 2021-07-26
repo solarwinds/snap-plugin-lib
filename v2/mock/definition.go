@@ -52,6 +52,10 @@ func (m *CollectorDefinition) SetAllowSubmittingUndefinedMetrics() {
 	m.Called()
 }
 
+func (m *CollectorDefinition) SetAllowValuesAtAnyNamespaceLevel() {
+	m.Called()
+}
+
 func (m *CollectorDefinition) DefineExampleConfig(cfg string) error {
 	args := m.Called(cfg)
 	return args.Error(0)

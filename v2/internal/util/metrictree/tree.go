@@ -74,8 +74,9 @@ type TreeConstraints int
 
 const (
 	_ TreeConstraints = 1 << iota
-	TreeConstraintLastNamespaceElementMustBeStatic
-	TreeConstraintRejectUndefinedNamespaces
+	LastNamespaceElementMustBeStatic
+	OnlyLeavesCanHoldValues
+	RejectUndefinedNamespaces
 )
 
 const ( // nodeType const
@@ -104,7 +105,7 @@ type Node struct {
 }
 
 func defaultTreeConstraints() TreeConstraints {
-	return TreeConstraintLastNamespaceElementMustBeStatic | TreeConstraintRejectUndefinedNamespaces
+	return LastNamespaceElementMustBeStatic | OnlyLeavesCanHoldValues | RejectUndefinedNamespaces
 }
 
 func NewMetricDefinition() *TreeValidator {
@@ -146,7 +147,7 @@ func (tv *TreeValidator) AddRule(ns string) error {
 		panic("invalid strategy")
 	}
 
-	return tv.updateTree(parsedNs)
+	return tv.updateTree(parsedNs, tv.constraints)
 }
 
 func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) (bool, error) {
@@ -159,17 +160,17 @@ func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) (bool, er
 }
 
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValid(ns, false, false)
+	isValid, _ := tv.isValid(ns, false)
 	return isValid
 }
 
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.isValid(ns, true, false)
+	isValid, trace := tv.isValid(ns, true)
 	return isValid, trace
 }
 
 func (tv *TreeValidator) IsCompatible(ns string) bool {
-	isCompatible, _ := tv.isValid(ns, false, true)
+	isCompatible, _ := tv.isValid(ns, false)
 	return isCompatible
 }
 
@@ -178,18 +179,18 @@ func (tv *TreeValidator) HasRules() bool {
 }
 
 func (tv *TreeValidator) AllowDynamicLastElement() {
-	tv.constraints &= ^TreeConstraintLastNamespaceElementMustBeStatic
+	tv.constraints &= ^LastNamespaceElementMustBeStatic
+}
+
+func (tv *TreeValidator) AllowValuesAtAnyNamespaceLevel() {
+	tv.constraints &= ^OnlyLeavesCanHoldValues
 }
 
 func (tv *TreeValidator) AllowSubmittingUndefinedMetrics() {
-	tv.constraints &= ^TreeConstraintRejectUndefinedNamespaces
+	tv.constraints &= ^RejectUndefinedNamespaces
 }
 
-func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bool) (bool, []string) {
-	if compatibilityMode && tv.strategy != metricDefinitionStrategy {
-		panic("compatibilityMode can be only used for definition tree")
-	}
-
+func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	nsElems, _, err := SplitNamespace(ns)
 	if err != nil {
 		return false, nil
@@ -214,13 +215,12 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bo
 		}
 
 		if nsElems[visitedNode.level] != staticAnyMatcher {
-			switch compatibilityMode {
-			case false:
-				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
+			if tv.strategy == metricDefinitionStrategy {
+				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
 					continue
 				}
-			case true:
-				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
+			} else {
+				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
 					continue
 				}
 			}
@@ -276,10 +276,10 @@ func (tv *TreeValidator) ListRules() []string {
 }
 
 // this function looks where to put new namespace elements and if tree conditions are met, updates the tree
-func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
+func (tv *TreeValidator) updateTree(parsedNs *Namespace, tc TreeConstraints) error {
 	// special case - tree doesn't contain anything
 	if tv.head == nil {
-		tv.head = tv.createNodes(parsedNs, 0)
+		tv.head = tv.createNodes(parsedNs, 0, tc)
 		return nil
 	}
 
@@ -288,7 +288,7 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 		return err
 	}
 
-	nodesToAttach := tv.createNodes(namespacesToAttach, nodeToUpdate.level+1)
+	nodesToAttach := tv.createNodes(namespacesToAttach, nodeToUpdate.level+1, tc)
 	return nodeToUpdate.attachNode(nodesToAttach)
 }
 
@@ -321,17 +321,23 @@ func (tv *TreeValidator) findNodeToUpdate(head *Node, parsedNs *Namespace) (*Nod
 
 // will create the entire branch of nodes from namespace (not update the tree, only returns branch)
 // ie. /plugin/group1/metric will create branch consisting of 3 elements (node plugin -> node group1 -> leaf metric)
-func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
+func (tv *TreeValidator) createNodes(ns *Namespace, level int, tc TreeConstraints) *Node {
 	if len(ns.elements) == 0 {
 		return nil
 	}
 	if len(ns.elements) == 1 {
-		return &Node{
+		n := &Node{
 			currentElement: ns.elements[0],
-			subNodes:       map[string]*Node{},
+			subNodes:       nil,
 			nodeType:       leafLevel,
 			level:          level,
 		}
+
+		if tc&OnlyLeavesCanHoldValues == 0 {
+			n.subNodes = map[string]*Node{}
+		}
+
+		return n
 	}
 
 	currNode := &Node{
@@ -339,7 +345,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 		subNodes:       map[string]*Node{},
 		level:          level,
 	}
-	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1)
+	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1, tc)
 	nextNode.parent = currNode
 
 	if tv.strategy == metricFilteringStrategy {
