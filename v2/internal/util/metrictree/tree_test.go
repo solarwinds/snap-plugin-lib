@@ -111,11 +111,14 @@ func TestMetricDefinitionValidator(t *testing.T) {
 			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  now can define dynamic leaf
 		})
 
-		SkipConvey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
-			// v.AllowAddingUndefinedMetrics()
+		Convey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
+			v.AllowAddingUndefinedMetrics()
+
+			// now can submit metrics that were not defined previously
 			for _, mt := range []string{
-				// "/plugin/group7/metric8/another1", // now can submit a metric that was not defined previously
-				// "/plugin/group3/[dyn1]/metric6",   // now can submit a metric that was not defined previously
+				"/plugin/group7/metric8/another1",
+				"/plugin/group3/[dyn1]/metric6",
+				"/plugin/group1/metric3/another2/another3",
 			} {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeTrue)
