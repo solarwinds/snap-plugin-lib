@@ -89,13 +89,16 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		})
 
 		Convey("Try some edge cases to validate default constraints", func() {
+			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeError)         //  can't define dynamic leaf
 			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeError) //  can't define dynamic leaf
 			So(v.AddRule("/plugin/group1/metric1/[dyn4]"), ShouldBeError) // can't define dynamic leaf
 
 			for _, mt := range []string{
 				"/plugin/group7/metric8/another1", // can't submit a metric that was not defined previously
 				"/plugin/group3/[dyn1]/metric6",   // can't submit a metric that was not defined previously
-				"/plugin/group1/metric1/another1", // can't redefine element as non-leaf one
+
+				"/plugin/group1/metric1/another1",         // can't attach next ns element to a leaf one
+				"/plugin/group1/metric2/metric2/another2", // can't attach next ns element to a leaf one
 			} {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeFalse)
@@ -104,14 +107,15 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		Convey("Try some edge cases to validate constraints working: AllowDynamicLastElement", func() {
 			v.AllowDynamicLastElement()
+			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  now can define dynamic leaf
 			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  now can define dynamic leaf
 		})
 
-		Convey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
-			v.AllowAddingUndefinedMetrics()
+		SkipConvey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
+			// v.AllowAddingUndefinedMetrics()
 			for _, mt := range []string{
-				// "/plugin/group7/metric8/another1", // can't submit a metric that was not defined previously
-				// "/plugin/group3/[dyn1]/metric6", // can't submit a metric that was not defined previously
+				// "/plugin/group7/metric8/another1", // now can submit a metric that was not defined previously
+				// "/plugin/group3/[dyn1]/metric6",   // now can submit a metric that was not defined previously
 			} {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeTrue)
@@ -120,10 +124,17 @@ func TestMetricDefinitionValidator(t *testing.T) {
 
 		Convey("Try some edge cases to validate constraints working: AllowValuesAtAnyNamespaceLevel", func() {
 			v.AllowValuesAtAnyNamespaceLevel()
-			So(v.AddRule("/plugin/group1/metric1/another1"), ShouldBeNil) // now can define dynamic leaf
 
+			// namespaces can be defined so that metrics can have tree descendants
+			So(v.AddRule("/plugin/group1/metric3"), ShouldBeNil)
+			So(v.AddRule("/plugin/group1/metric3/another1"), ShouldBeNil)          // now can attach next ns element to a leaf one
+			So(v.AddRule("/plugin/group1/metric3/another2/another3"), ShouldBeNil) // now can attach next ns element to a leaf one
+
+			// and the data can be added at both levels
 			for _, mt := range []string{
-				"/plugin/group1/metric1/another1", // can't redefine element as non-leaf one
+				"/plugin/group1/metric3",
+				"/plugin/group1/metric3/another1",
+				"/plugin/group1/metric3/another2/another3",
 			} {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeTrue)

@@ -349,12 +349,18 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int, tc TreeConstraint
 		return nil
 	}
 	if len(ns.elements) == 1 {
-		return &Node{
+		n := &Node{
 			currentElement: ns.elements[0],
-			subNodes:       map[string]*Node{},
+			subNodes:       nil,
 			nodeType:       leafLevel,
 			level:          level,
 		}
+
+		if !tc.onlyLeavesCanHoldValues() {
+			n.subNodes = map[string]*Node{}
+		}
+
+		return n
 	}
 
 	currNode := &Node{
