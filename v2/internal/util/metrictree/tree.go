@@ -74,9 +74,9 @@ type TreeConstraints int
 
 const (
 	_ TreeConstraints = 1 << iota
-	LastNamespaceElementMustBeStatic
-	OnlyLeavesCanHoldValues
-	RejectUndefinedNamespaces
+	lastNamespaceElementMustBeStatic
+	onlyLeavesCanHoldValues
+	rejectUndefinedNamespaces
 )
 
 const ( // nodeType const
@@ -105,7 +105,7 @@ type Node struct {
 }
 
 func defaultTreeConstraints() TreeConstraints {
-	return LastNamespaceElementMustBeStatic | OnlyLeavesCanHoldValues | RejectUndefinedNamespaces
+	return lastNamespaceElementMustBeStatic | onlyLeavesCanHoldValues | rejectUndefinedNamespaces
 }
 
 func NewMetricDefinition() *TreeValidator {
@@ -190,15 +190,27 @@ func (tv *TreeValidator) hasRules() bool {
 }
 
 func (tv *TreeValidator) AllowDynamicLastElement() {
-	tv.constraints &= ^LastNamespaceElementMustBeStatic
+	tv.constraints &= ^lastNamespaceElementMustBeStatic
 }
 
 func (tv *TreeValidator) AllowValuesAtAnyNamespaceLevel() {
-	tv.constraints &= ^OnlyLeavesCanHoldValues
+	tv.constraints &= ^onlyLeavesCanHoldValues
 }
 
-func (tv *TreeValidator) AllowSubmittingUndefinedMetrics() {
-	tv.constraints &= ^RejectUndefinedNamespaces
+func (tv *TreeValidator) AllowAddingUndefinedMetrics() {
+	tv.constraints &= ^rejectUndefinedNamespaces
+}
+
+func (tc TreeConstraints) lastNamespaceElementMustBeStatic() bool {
+	return tc&lastNamespaceElementMustBeStatic != 0
+}
+
+func (tc TreeConstraints) onlyLeavesCanHoldValues() bool {
+	return tc&onlyLeavesCanHoldValues != 0
+}
+
+func (tc TreeConstraints) rejectUndefinedNamespaces() bool {
+	return tc&rejectUndefinedNamespaces != 0
 }
 
 func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
@@ -337,18 +349,12 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int, tc TreeConstraint
 		return nil
 	}
 	if len(ns.elements) == 1 {
-		n := &Node{
+		return &Node{
 			currentElement: ns.elements[0],
-			subNodes:       nil,
+			subNodes:       map[string]*Node{},
 			nodeType:       leafLevel,
 			level:          level,
 		}
-
-		if tc&OnlyLeavesCanHoldValues == 0 {
-			n.subNodes = map[string]*Node{}
-		}
-
-		return n
 	}
 
 	currNode := &Node{

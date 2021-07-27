@@ -48,7 +48,7 @@ func (m *CollectorDefinition) SetAllowDynamicLastElement() {
 	m.Called()
 }
 
-func (m *CollectorDefinition) SetAllowSubmittingUndefinedMetrics() {
+func (m *CollectorDefinition) SetAllowAddingUndefinedMetrics() {
 	m.Called()
 }
 

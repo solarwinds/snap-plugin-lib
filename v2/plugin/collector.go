@@ -93,7 +93,7 @@ type CollectorDefinition interface {
 	// The olny requirement here is that metrics should have matching root namespace element
 	// This allows implementing DefineMetric/DefineGroup thus having dynamic metrics but
 	// allows some a priori unknown metrics namespaces at the same
-	SetAllowSubmittingUndefinedMetrics()
+	SetAllowAddingUndefinedMetrics()
 
 	// Allow metrics values not only on leaves but at any namespace level
 	SetAllowValuesAtAnyNamespaceLevel()

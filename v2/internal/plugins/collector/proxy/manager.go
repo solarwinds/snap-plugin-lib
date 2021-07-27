@@ -388,8 +388,8 @@ func (cm *ContextManager) SetAllowDynamicLastElement() {
 	cm.metricsDefinition.AllowDynamicLastElement()
 }
 
-func (cm *ContextManager) SetAllowSubmittingUndefinedMetrics() {
-	cm.metricsDefinition.AllowSubmittingUndefinedMetrics()
+func (cm *ContextManager) SetAllowAddingUndefinedMetrics() {
+	cm.metricsDefinition.AllowAddingUndefinedMetrics()
 }
 
 func (cm *ContextManager) SetAllowValuesAtAnyNamespaceLevel() {

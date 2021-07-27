@@ -38,9 +38,7 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		So(v.AddRule("/plugin/group6/metric1"), ShouldBeNil)        // ok - last element may be repeated if there is no ambiguity
 
 		// Double-check that rules were applied
-		defer func() {
-			So(len(v.ListRules()), ShouldEqual, 7)
-		}()
+		So(len(v.ListRules()), ShouldEqual, 7)
 
 		Convey("Try to validate (filter) incoming metrics - positive scenarios", func() {
 			validMetricsToAdd := []string{
@@ -103,6 +101,34 @@ func TestMetricDefinitionValidator(t *testing.T) {
 				So(ok, ShouldBeFalse)
 			}
 		})
+
+		Convey("Try some edge cases to validate constraints working: AllowDynamicLastElement", func() {
+			v.AllowDynamicLastElement()
+			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  now can define dynamic leaf
+		})
+
+		Convey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
+			v.AllowAddingUndefinedMetrics()
+			for _, mt := range []string{
+				// "/plugin/group7/metric8/another1", // can't submit a metric that was not defined previously
+				// "/plugin/group3/[dyn1]/metric6", // can't submit a metric that was not defined previously
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+		})
+
+		Convey("Try some edge cases to validate constraints working: AllowValuesAtAnyNamespaceLevel", func() {
+			v.AllowValuesAtAnyNamespaceLevel()
+			So(v.AddRule("/plugin/group1/metric1/another1"), ShouldBeNil) // now can define dynamic leaf
+
+			for _, mt := range []string{
+				"/plugin/group1/metric1/another1", // can't redefine element as non-leaf one
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+		})
 	})
 }
 
@@ -118,9 +144,7 @@ func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
 
 		// Double-check that rules were applied
-		defer func() {
-			So(len(v.ListRules()), ShouldEqual, 4)
-		}()
+		So(len(v.ListRules()), ShouldEqual, 4)
 
 		Convey("Add invalid rules", func() {
 			So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeError) // dynamic element with no definition
@@ -181,10 +205,8 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 		So(v.AddRule("_plugin_group4_**"), ShouldBeNil)
 
 		// Double-check that rules were applied
-		defer func() {
-			So(len(d.ListRules()), ShouldEqual, 6)
-			So(len(v.ListRules()), ShouldEqual, 5)
-		}()
+		So(len(d.ListRules()), ShouldEqual, 6)
+		So(len(v.ListRules()), ShouldEqual, 5)
 
 		Convey("Add invalid filtering rules (no compatible with definitions)", func() {
 			So(v.AddRule(".plugin.group1.id1.metric12"), ShouldBeError)
