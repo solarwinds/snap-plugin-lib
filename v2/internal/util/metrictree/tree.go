@@ -230,6 +230,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	toVisit := nodeStack{}
 	toVisit.Push(tv.head)
 
+	deepestLevelMatched := -1
 	for !toVisit.Empty() {
 		visitedNode, _ := toVisit.Pop()
 
@@ -266,6 +267,11 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 			toVisit.Push(subNode)
 		}
 
+		deepestLevelMatched = visitedNode.level
+	}
+
+	if !tv.constraints.rejectUndefinedNamespaces() && deepestLevelMatched >= 0 {
+		return true, groupIndicator
 	}
 
 	return false, groupIndicator

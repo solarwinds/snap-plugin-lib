@@ -142,6 +142,14 @@ func TestMetricDefinitionValidator(t *testing.T) {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeTrue)
 			}
+
+			// still have to match at least the plugin name (the very first namespace element)
+			for _, mt := range []string{
+				"/otherplugin/group1/metric3",
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
 		})
 	})
 }
