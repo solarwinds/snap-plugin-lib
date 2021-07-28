@@ -89,9 +89,9 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		})
 
 		Convey("Try some edge cases to validate default constraints", func() {
-			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeError)         //  can't define dynamic leaf
-			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeError) //  can't define dynamic leaf
-			So(v.AddRule("/plugin/group1/metric1/[dyn4]"), ShouldBeError) // can't define dynamic leaf
+			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  can't define dynamic leaf
+			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  can't define dynamic leaf
+			So(v.AddRule("/plugin/group1/metric1/[dyn4]"), ShouldBeNil) // can't define dynamic leaf
 
 			for _, mt := range []string{
 				"/plugin/group7/metric8/another1", // can't submit a metric that was not defined previously
@@ -103,12 +103,6 @@ func TestMetricDefinitionValidator(t *testing.T) {
 				ok, _ := v.IsValid(mt)
 				So(ok, ShouldBeFalse)
 			}
-		})
-
-		Convey("Try some edge cases to validate constraints working: AllowDynamicLastElement", func() {
-			v.AllowDynamicLastElement()
-			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  now can define dynamic leaf
-			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  now can define dynamic leaf
 		})
 
 		Convey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
