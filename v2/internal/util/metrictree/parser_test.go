@@ -73,9 +73,9 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 	},
 	{ // 6
 		namespace:                         "/plugin/metric/**",
-		usableForDefinition:               false,
-		usableForAdditionWhenDefinition:   false,
-		usableForAdditionWhenNoDefinition: false,
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
 	{ // 7
 		namespace:                         "/plugin/metric",
@@ -85,15 +85,15 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 	},
 	{ // 8
 		namespace:                         "/plugin/**",
-		usableForDefinition:               false,
-		usableForAdditionWhenDefinition:   false,
-		usableForAdditionWhenNoDefinition: false,
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
 }
 
 func TestParseNamespace_ValidScenarios(t *testing.T) {
 	Convey("Validate ParseNamespace - valid scenarios", t, func() {
-		for i, tc := range parseNamespaceValidScenarios {
+		for i, tc := range parseNamespaceValidScenarios[:7] {
 			Convey(fmt.Sprintf("Scenario %d", i), func() {
 				// Act
 				ns, err := ParseNamespace(tc.namespace, false)
@@ -102,8 +102,8 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 				So(ns, ShouldNotBeNil)
 				So(err, ShouldBeNil)
 				So(ns.IsUsableForDefinition(defaultTreeConstraints()), ShouldEqual, tc.usableForDefinition)
-				So(ns.IsUsableForAddition(defaultTreeConstraints(), false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
 				So(ns.IsUsableForAddition(defaultTreeConstraints(), true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
+				So(ns.IsUsableForAddition(defaultTreeConstraints(), false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
 				So(ns.IsUsableForFiltering(defaultTreeConstraints(), true), ShouldBeTrue)
 			})
 		}
