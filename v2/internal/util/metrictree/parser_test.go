@@ -35,13 +35,13 @@ type parseNamespaceValidScenario struct {
 }
 
 var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
-	{
+	{ // 0
 		namespace:                         "/plugin/group1/metric",
 		usableForDefinition:               true,
 		usableForAdditionWhenDefinition:   true,
 		usableForAdditionWhenNoDefinition: true,
 	},
-	{
+	{ // 1
 		namespace:                         "/plugin/[group2]/metric",
 		usableForDefinition:               true,
 		usableForAdditionWhenDefinition:   false,
@@ -93,7 +93,7 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 
 func TestParseNamespace_ValidScenarios(t *testing.T) {
 	Convey("Validate ParseNamespace - valid scenarios", t, func() {
-		for i, tc := range parseNamespaceValidScenarios {
+		for i, tc := range parseNamespaceValidScenarios[:2] {
 			Convey(fmt.Sprintf("Scenario %d", i), func() {
 				// Act
 				ns, err := ParseNamespace(tc.namespace, false)

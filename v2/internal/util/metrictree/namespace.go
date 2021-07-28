@@ -121,8 +121,8 @@ func (ns *Namespace) IsUsableForAddition(tc TreeConstraints, metricDefinitionPre
 		return false
 	}
 
-	if !allowAnyMatch && tc.lastNamespaceElementMustBeStatic() {
-		return ns.isLastElementStatic()
+	if !allowAnyMatch && tc.lastNamespaceElementMustBeStatic() && !ns.isLastElementStatic() {
+		return false
 	}
 
 	for _, nsElem := range ns.elements[1 : len(ns.elements)-1] {
