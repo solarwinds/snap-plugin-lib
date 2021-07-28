@@ -89,12 +89,11 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		})
 
 		Convey("Try some edge cases to validate default constraints", func() {
-			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  can't define dynamic leaf
-			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  can't define dynamic leaf
-			So(v.AddRule("/plugin/group1/metric1/[dyn4]"), ShouldBeNil) // can't define dynamic leaf
+			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  can define dynamic leaf
+			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  can define dynamic leaf
 
 			for _, mt := range []string{
-				"/plugin/group7/metric8/another1", // can't submit a metric that was not defined previously
+				"/plugin/group7/metric9/another1", // can't submit a metric that was not defined previously
 				"/plugin/group3/[dyn1]/metric6",   // can't submit a metric that was not defined previously
 
 				"/plugin/group1/metric1/another1",         // can't attach next ns element to a leaf one
