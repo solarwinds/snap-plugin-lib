@@ -86,7 +86,7 @@ type CollectorDefinition interface {
 	DefineExampleConfig(cfg string) error
 
 	// Allow submitting metrics with namespace not being explicitly defined earlier
-	// The olny requirement here is that metrics should have matching root namespace element
+	// The only requirement here is that metrics should have matching root namespace element
 	// This allows implementing DefineMetric/DefineGroup thus having dynamic metrics but
 	// allows some a priori unknown metrics namespaces at the same
 	AllowUndefinedMetrics()
