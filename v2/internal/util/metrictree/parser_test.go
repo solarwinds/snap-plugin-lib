@@ -93,7 +93,7 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 
 func TestParseNamespace_ValidScenarios(t *testing.T) {
 	Convey("Validate ParseNamespace - valid scenarios", t, func() {
-		for i, tc := range parseNamespaceValidScenarios[:2] {
+		for i, tc := range parseNamespaceValidScenarios {
 			Convey(fmt.Sprintf("Scenario %d", i), func() {
 				// Act
 				ns, err := ParseNamespace(tc.namespace, false)

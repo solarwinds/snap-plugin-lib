@@ -105,7 +105,7 @@ type Node struct {
 }
 
 func defaultTreeConstraints() TreeConstraints {
-	return lastNamespaceElementMustBeStatic | onlyLeavesCanHoldValues | rejectUndefinedNamespaces
+	return ^lastNamespaceElementMustBeStatic | onlyLeavesCanHoldValues | rejectUndefinedNamespaces
 }
 
 func NewMetricDefinition() *TreeValidator {
@@ -187,10 +187,6 @@ func (tv *TreeValidator) isCompatible(ns string) bool {
 
 func (tv *TreeValidator) hasRules() bool {
 	return tv.head != nil
-}
-
-func (tv *TreeValidator) AllowDynamicLastElement() {
-	tv.constraints &= ^lastNamespaceElementMustBeStatic
 }
 
 func (tv *TreeValidator) AllowValuesAtAnyNamespaceLevel() {

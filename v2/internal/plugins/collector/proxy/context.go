@@ -177,7 +177,10 @@ func (pc *PluginContext) ShouldProcess(ns string) bool {
 	logF := log.WithCtx(pc.ctx).WithFields(moduleFields).WithField("service", "metrics")
 
 	if err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, true); err != nil {
-		logF.WithError(err).Debug("Should NOT process metric")
+		if logrus.GetLevel() >= logrus.DebugLevel {
+			logF.WithError(err).WithField("namespace", ns).Debug("Should NOT process metric")
+		}
+
 		return false
 	}
 
