@@ -151,12 +151,12 @@ func (tv *TreeValidator) AddRule(ns string) error {
 }
 
 func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) error {
-	parsedNs, err := ParseNamespace(ns, isFilter)
+	parsedNs, err := ParseNamespace(ns, false)
 	if err != nil {
 		return fmt.Errorf("invalid format of namespace: %v", err)
 	}
 
-	ok := parsedNs.IsUsableForAddition(tv.constraints, tv.hasRules(), false)
+	ok := parsedNs.IsUsableForAddition(tv.constraints, tv.hasRules(), isFilter)
 	if !ok {
 		return errors.New("metric not usable for addition")
 	}
