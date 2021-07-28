@@ -197,18 +197,6 @@ func (tv *TreeValidator) AllowAddingUndefinedMetrics() {
 	tv.constraints &= ^rejectUndefinedNamespaces
 }
 
-func (tc TreeConstraints) lastNamespaceElementMustBeStatic() bool {
-	return tc&lastNamespaceElementMustBeStatic != 0
-}
-
-func (tc TreeConstraints) onlyLeavesCanHoldValues() bool {
-	return tc&onlyLeavesCanHoldValues != 0
-}
-
-func (tc TreeConstraints) rejectUndefinedNamespaces() bool {
-	return tc&rejectUndefinedNamespaces != 0
-}
-
 func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	nsElems, _, err := SplitNamespace(ns)
 	if err != nil {
@@ -442,4 +430,16 @@ func (n *Node) groupIndicator() []string {
 	}
 
 	return groupIndicator
+}
+
+func (tc TreeConstraints) lastNamespaceElementMustBeStatic() bool {
+	return tc&lastNamespaceElementMustBeStatic != 0
+}
+
+func (tc TreeConstraints) onlyLeavesCanHoldValues() bool {
+	return tc&onlyLeavesCanHoldValues != 0
+}
+
+func (tc TreeConstraints) rejectUndefinedNamespaces() bool {
+	return tc&rejectUndefinedNamespaces != 0
 }
