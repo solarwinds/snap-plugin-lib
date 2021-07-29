@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ func MatchNsToFilter(ns string, filter string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if !parsedNs.IsUsableForAddition(true, false) {
+	if !parsedNs.IsUsableForAddition(defaultTreeConstraints(), true, false) {
 		return false, fmt.Errorf("invalid format of the namespace: %v", ns)
 	}
 

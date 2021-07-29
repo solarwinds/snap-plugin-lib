@@ -4,7 +4,7 @@ which allows to perform any collection-related operation.
 */
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -84,4 +84,13 @@ type CollectorDefinition interface {
 
 	// Define example config (which will be presented when example task is printed)
 	DefineExampleConfig(cfg string) error
+
+	// Allow submitting metrics with namespace not being explicitly defined earlier
+	// The only requirement here is that metrics should have matching root namespace element
+	// This allows implementing DefineMetric/DefineGroup thus having dynamic metrics but
+	// allows some a priori unknown metrics namespaces at the same
+	AllowUndefinedMetrics()
+
+	// Allow metrics values not only on leaves but at any namespace level
+	AllowValuesAtAnyNamespaceLevel()
 }
