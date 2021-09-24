@@ -1,3 +1,4 @@
+//go:build medium || small
 // +build medium small
 
 /*
