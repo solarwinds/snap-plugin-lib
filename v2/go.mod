@@ -3,10 +3,8 @@ module github.com/solarwinds/snap-plugin-lib/v2
 go 1.13
 
 require (
-	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/golang/protobuf v1.4.3
-	github.com/google/uuid v1.1.2 // indirect
-	github.com/josephspurrier/goversioninfo v1.2.0 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.8.0
@@ -14,7 +12,6 @@ require (
 	github.com/solarwinds/grpchan v1.1.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	github.com/urfave/cli v1.22.5 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 	golang.org/x/sys v0.0.0-20210303074136-134d130e1a04 // indirect
 	golang.org/x/text v0.3.5 // indirect
