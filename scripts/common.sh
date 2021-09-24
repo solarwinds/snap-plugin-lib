@@ -86,7 +86,7 @@ _go_get() {
 
   _util=$(basename "${_url}")
 
-  type -p "${_util}" > /dev/null || go get "${_url}" && _debug "go get ${_util} ${_url}"
+  type -p "${_util}" > /dev/null || go get "${_url}@latest" && _debug "go get ${_util} ${_url}"
 }
 
 _gofmt() {
