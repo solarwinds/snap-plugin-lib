@@ -9,7 +9,6 @@ require (
 	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4
 	github.com/stretchr/testify v1.7.0
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
-	google.golang.org/grpc v1.36.0 // indirect
 )
 
 replace github.com/solarwinds/snap-plugin-lib/v2 => ./..
