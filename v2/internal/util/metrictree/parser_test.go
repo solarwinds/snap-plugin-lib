@@ -1,7 +1,7 @@
 // +build small
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ type parseNamespaceValidScenario struct {
 }
 
 var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
-	{
+	{ // 0
 		namespace:                         "/plugin/group1/metric",
 		usableForDefinition:               true,
 		usableForAdditionWhenDefinition:   true,
 		usableForAdditionWhenNoDefinition: true,
 	},
-	{
+	{ // 1
 		namespace:                         "/plugin/[group2]/metric",
 		usableForDefinition:               true,
 		usableForAdditionWhenDefinition:   false,
@@ -73,9 +73,9 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 	},
 	{ // 6
 		namespace:                         "/plugin/metric/**",
-		usableForDefinition:               false,
-		usableForAdditionWhenDefinition:   false,
-		usableForAdditionWhenNoDefinition: false,
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
 	{ // 7
 		namespace:                         "/plugin/metric",
@@ -85,9 +85,9 @@ var parseNamespaceValidScenarios = []parseNamespaceValidScenario{
 	},
 	{ // 8
 		namespace:                         "/plugin/**",
-		usableForDefinition:               false,
-		usableForAdditionWhenDefinition:   false,
-		usableForAdditionWhenNoDefinition: false,
+		usableForDefinition:               true,
+		usableForAdditionWhenDefinition:   true,
+		usableForAdditionWhenNoDefinition: true,
 	},
 }
 
@@ -101,10 +101,10 @@ func TestParseNamespace_ValidScenarios(t *testing.T) {
 				// Assert
 				So(ns, ShouldNotBeNil)
 				So(err, ShouldBeNil)
-				So(ns.IsUsableForDefinition(), ShouldEqual, tc.usableForDefinition)
-				So(ns.IsUsableForAddition(false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
-				So(ns.IsUsableForAddition(true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
-				So(ns.IsUsableForFiltering(true), ShouldBeTrue)
+				So(ns.IsUsableForDefinition(defaultTreeConstraints()), ShouldEqual, tc.usableForDefinition)
+				So(ns.IsUsableForAddition(defaultTreeConstraints(), true, false), ShouldEqual, tc.usableForAdditionWhenDefinition)
+				So(ns.IsUsableForAddition(defaultTreeConstraints(), false, false), ShouldEqual, tc.usableForAdditionWhenNoDefinition)
+				So(ns.IsUsableForFiltering(defaultTreeConstraints(), true), ShouldBeTrue)
 			})
 		}
 	})

@@ -38,7 +38,7 @@ Filtering tree looks very similar, although can contain more sophisticated nodes
 */
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -62,10 +62,21 @@ import (
 	"strings"
 )
 
+type TreeStrategy int
+
 const (
 	_ TreeStrategy = iota
 	metricDefinitionStrategy
 	metricFilteringStrategy
+)
+
+type TreeConstraints int
+
+const (
+	_ TreeConstraints = 1 << iota
+	lastNamespaceElementMustBeStatic
+	onlyLeavesCanHoldValues
+	rejectUndefinedNamespaces
 )
 
 const ( // nodeType const
@@ -76,11 +87,10 @@ const ( // nodeType const
 	leafLevel
 )
 
-type TreeStrategy int
-
 type TreeValidator struct {
-	strategy       TreeStrategy   // used to distinguish between definition and filtering tree
-	definitionTree *TreeValidator // used in filtering tree (reference to definition tree)
+	strategy       TreeStrategy    // used to distinguish between definition and filtering tree
+	constraints    TreeConstraints // used to tighten/loosen validation rules
+	definitionTree *TreeValidator  // used in filtering tree (reference to definition tree)
 
 	head *Node
 }
@@ -94,15 +104,21 @@ type Node struct {
 	subNodes map[string]*Node
 }
 
+func defaultTreeConstraints() TreeConstraints {
+	return ^lastNamespaceElementMustBeStatic | onlyLeavesCanHoldValues | rejectUndefinedNamespaces
+}
+
 func NewMetricDefinition() *TreeValidator {
 	return &TreeValidator{
-		strategy: metricDefinitionStrategy,
+		strategy:    metricDefinitionStrategy,
+		constraints: defaultTreeConstraints(),
 	}
 }
 
 func NewMetricFilter(definitionTree *TreeValidator) *TreeValidator {
 	return &TreeValidator{
 		strategy:       metricFilteringStrategy,
+		constraints:    defaultTreeConstraints(),
 		definitionTree: definitionTree,
 	}
 }
@@ -115,49 +131,73 @@ func (tv *TreeValidator) AddRule(ns string) error {
 
 	switch tv.strategy {
 	case metricDefinitionStrategy:
-		if !parsedNs.IsUsableForDefinition() {
+		if !parsedNs.IsUsableForDefinition(tv.constraints) {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in definition", ns)
 		}
 	case metricFilteringStrategy:
-		defPresent := tv.definitionTree.HasRules()
-		if !parsedNs.IsUsableForFiltering(defPresent) {
+		defPresent := tv.definitionTree.hasRules()
+		if !parsedNs.IsUsableForFiltering(tv.constraints, defPresent) {
 			return fmt.Errorf("can't add rule (%s) - some namespace elements are not allowed in filtering when metric definition wasn't provided", ns)
 		}
 
-		if !tv.definitionTree.IsCompatible(ns) {
+		if !tv.definitionTree.isCompatible(ns) {
 			return fmt.Errorf("can't add rule (%s) - not compatible with any metric definition", ns)
 		}
 	default:
 		panic("invalid strategy")
 	}
 
-	return tv.updateTree(parsedNs)
+	return tv.updateTree(parsedNs, tv.constraints)
 }
 
+func (tv *TreeValidator) IsUsableForAddition(ns string, isFilter bool) error {
+	parsedNs, err := ParseNamespace(ns, false)
+	if err != nil {
+		return fmt.Errorf("invalid format of namespace: %v", err)
+	}
+
+	ok := parsedNs.IsUsableForAddition(tv.constraints, tv.hasRules(), isFilter)
+	if !ok {
+		return errors.New("metric not usable for addition")
+	}
+
+	return nil
+}
+
+// IsPartiallyValid does a partial metric validation in metricFilteringStrategy
+// is used by ctx.ShouldProcess to provide quick-return optimization in collecting metrics routine(s)
 func (tv *TreeValidator) IsPartiallyValid(ns string) bool {
-	isValid, _ := tv.isValid(ns, false, false)
+	isValid, _ := tv.isValid(ns, false)
 	return isValid
 }
 
+// IsValid does full metric validation in metricFilteringStrategy
+// tests metric eligibility for adding, is called by ctx.AddMetric
 func (tv *TreeValidator) IsValid(ns string) (bool, []string) {
-	isValid, trace := tv.isValid(ns, true, false)
+	isValid, trace := tv.isValid(ns, true)
 	return isValid, trace
 }
 
-func (tv *TreeValidator) IsCompatible(ns string) bool {
-	isCompatible, _ := tv.isValid(ns, false, true)
+// isCompatible does partial metric validation in metricDefinitionStrategy
+// is used by AddRule to assure the new metric definition does not break out of the existing tree structure
+func (tv *TreeValidator) isCompatible(ns string) bool {
+	isCompatible, _ := tv.isValid(ns, false)
 	return isCompatible
 }
 
-func (tv *TreeValidator) HasRules() bool {
+func (tv *TreeValidator) hasRules() bool {
 	return tv.head != nil
 }
 
-func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bool) (bool, []string) {
-	if compatibilityMode && tv.strategy != metricDefinitionStrategy {
-		panic("compatibilityMode can be only used for definition tree")
-	}
+func (tv *TreeValidator) AllowValuesAtAnyNamespaceLevel() {
+	tv.constraints &= ^onlyLeavesCanHoldValues
+}
 
+func (tv *TreeValidator) AllowAddingUndefinedMetrics() {
+	tv.constraints &= ^rejectUndefinedNamespaces
+}
+
+func (tv *TreeValidator) isValid(ns string, fullMatch bool) (bool, []string) {
 	nsElems, _, err := SplitNamespace(ns)
 	if err != nil {
 		return false, nil
@@ -174,6 +214,7 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bo
 	toVisit := nodeStack{}
 	toVisit.Push(tv.head)
 
+	deepestLevelMatched := -1
 	for !toVisit.Empty() {
 		visitedNode, _ := toVisit.Pop()
 
@@ -182,13 +223,12 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bo
 		}
 
 		if nsElems[visitedNode.level] != staticAnyMatcher {
-			switch compatibilityMode {
-			case false:
-				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
+			if tv.strategy == metricDefinitionStrategy {
+				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
 					continue
 				}
-			case true:
-				if !visitedNode.currentElement.Compatible(nsElems[visitedNode.level]) {
+			} else {
+				if !visitedNode.currentElement.Match(nsElems[visitedNode.level]) {
 					continue
 				}
 			}
@@ -211,6 +251,11 @@ func (tv *TreeValidator) isValid(ns string, fullMatch bool, compatibilityMode bo
 			toVisit.Push(subNode)
 		}
 
+		deepestLevelMatched = visitedNode.level
+	}
+
+	if !tv.constraints.rejectUndefinedNamespaces() && deepestLevelMatched >= 0 {
+		return true, groupIndicator
 	}
 
 	return false, groupIndicator
@@ -244,10 +289,10 @@ func (tv *TreeValidator) ListRules() []string {
 }
 
 // this function looks where to put new namespace elements and if tree conditions are met, updates the tree
-func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
+func (tv *TreeValidator) updateTree(parsedNs *Namespace, tc TreeConstraints) error {
 	// special case - tree doesn't contain anything
 	if tv.head == nil {
-		tv.head = tv.createNodes(parsedNs, 0)
+		tv.head = tv.createNodes(parsedNs, 0, tc)
 		return nil
 	}
 
@@ -256,7 +301,7 @@ func (tv *TreeValidator) updateTree(parsedNs *Namespace) error {
 		return err
 	}
 
-	nodesToAttach := tv.createNodes(namespacesToAttach, nodeToUpdate.level+1)
+	nodesToAttach := tv.createNodes(namespacesToAttach, nodeToUpdate.level+1, tc)
 	return nodeToUpdate.attachNode(nodesToAttach)
 }
 
@@ -289,17 +334,23 @@ func (tv *TreeValidator) findNodeToUpdate(head *Node, parsedNs *Namespace) (*Nod
 
 // will create the entire branch of nodes from namespace (not update the tree, only returns branch)
 // ie. /plugin/group1/metric will create branch consisting of 3 elements (node plugin -> node group1 -> leaf metric)
-func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
+func (tv *TreeValidator) createNodes(ns *Namespace, level int, tc TreeConstraints) *Node {
 	if len(ns.elements) == 0 {
 		return nil
 	}
 	if len(ns.elements) == 1 {
-		return &Node{
+		n := &Node{
 			currentElement: ns.elements[0],
 			subNodes:       nil,
 			nodeType:       leafLevel,
 			level:          level,
 		}
+
+		if !tc.onlyLeavesCanHoldValues() {
+			n.subNodes = map[string]*Node{}
+		}
+
+		return n
 	}
 
 	currNode := &Node{
@@ -307,7 +358,7 @@ func (tv *TreeValidator) createNodes(ns *Namespace, level int) *Node {
 		subNodes:       map[string]*Node{},
 		level:          level,
 	}
-	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1)
+	nextNode := tv.createNodes(&Namespace{elements: ns.elements[1:]}, level+1, tc)
 	nextNode.parent = currNode
 
 	if tv.strategy == metricFilteringStrategy {
@@ -379,4 +430,16 @@ func (n *Node) groupIndicator() []string {
 	}
 
 	return groupIndicator
+}
+
+func (tc TreeConstraints) lastNamespaceElementMustBeStatic() bool {
+	return tc&lastNamespaceElementMustBeStatic != 0
+}
+
+func (tc TreeConstraints) onlyLeavesCanHoldValues() bool {
+	return tc&onlyLeavesCanHoldValues != 0
+}
+
+func (tc TreeConstraints) rejectUndefinedNamespaces() bool {
+	return tc&rejectUndefinedNamespaces != 0
 }

@@ -1,7 +1,7 @@
 // +build small
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -25,9 +25,7 @@ import (
 )
 
 func TestMetricDefinitionValidator(t *testing.T) {
-
 	Convey("Validate that operations can be done on definition tree", t, func() {
-
 		v := NewMetricDefinition()
 
 		// Add valid rules
@@ -42,55 +40,114 @@ func TestMetricDefinitionValidator(t *testing.T) {
 		// Double-check that rules were applied
 		So(len(v.ListRules()), ShouldEqual, 7)
 
-		// Try to validate (filter) incoming metrics - positive scenarios
-		validMetricsToAdd := []string{
-			"/plugin/group1/metric1",
-			"/plugin/group2/metric2",
-			".plugin.group3.[dyn1=/id1/].metric4",
-			"/plugin/group3/id2/metric4",
-			"/plugin/group6/metric1",
-		}
+		Convey("Try to validate (filter) incoming metrics - positive scenarios", func() {
+			validMetricsToAdd := []string{
+				"/plugin/group1/metric1",
+				"/plugin/group2/metric2",
+				".plugin.group3.[dyn1=/id1/].metric4",
+				"/plugin/group3/id2/metric4",
+				"/plugin/group6/metric1",
+				"/plugin/group5/[dyn3]/metric4",
+			}
 
-		for _, mt := range validMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeTrue)
-		}
+			for _, mt := range validMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
 
-		So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
-		So(v.IsPartiallyValid("-plugin-group3-[dyn1=/id1]"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
-		So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
+			So(v.IsPartiallyValid("/plugin/group1"), ShouldBeTrue)
+			So(v.IsPartiallyValid("/plugin/group2"), ShouldBeTrue)
+			So(v.IsPartiallyValid("-plugin-group3-[dyn1=/id1]"), ShouldBeTrue)
+			So(v.IsPartiallyValid("/plugin/group3/id1"), ShouldBeTrue)
+			So(v.IsPartiallyValid("/plugin/group6"), ShouldBeTrue)
+		})
 
-		// Try to validate (filter) incoming metrics - negative scenarios
-		invalidMetricsToAdd := []string{
-			"/plugin/group5/[dyn3]/metric4",
-			"/plugin/group1/metric1/",
-			".plugin.group1.metric2",
-			"/plugin/group1",
-			"/plugin",
-			"/plugin/[group1=group1]/metric1",
-			"/plugin/group1/metric2/metric2",
-			"",
-			"/",
-			"a/",
-		}
+		Convey("Try to validate (filter) incoming metrics - negative scenarios", func() {
+			invalidMetricsToAdd := []string{
+				"/plugin/group1/metric1/",
+				".plugin.group1.metric2",
+				"/plugin/group1",
+				"/plugin",
+				"/plugin/[group1=group1]/metric1",
+				"/plugin/group1/metric2/metric2",
+				"",
+				"/",
+				"a/",
+			}
 
-		for _, mt := range invalidMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeFalse)
-		}
+			for _, mt := range invalidMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
+		})
 
-		// Try to add invalid rules (in current validator state)
-		So(v.AddRule("/plugin/[dyn3]/metric6"), ShouldBeError)        // dynamic element on the level where static element is already defined
-		So(v.AddRule("/plugin/group3/[dyn4]/metric7"), ShouldBeError) // 2 dynamic elements on the same level
-		So(v.AddRule("/plugin/group1/metric1"), ShouldBeError)        // the rules already exists
-		So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeError) // the rules already exists
+		Convey("Try to add invalid rules (in current validator state)", func() {
+			So(v.AddRule("/plugin/[dyn3]/metric6"), ShouldBeError)        // dynamic element on the level where static element is already defined
+			So(v.AddRule("/plugin/group3/[dyn4]/metric7"), ShouldBeError) // 2 dynamic elements on the same level
+			So(v.AddRule("/plugin/group1/metric1"), ShouldBeError)        // the rules already exists
+			So(v.AddRule("/plugin/group3/[dyn1]/metric4"), ShouldBeError) // the rules already exists
+		})
+
+		Convey("Try some edge cases to validate default constraints", func() {
+			So(v.AddRule("/plugin/group7/[dyn4]"), ShouldBeNil)         //  can define dynamic leaf
+			So(v.AddRule("/plugin/group7/metric8/[dyn4]"), ShouldBeNil) //  can define dynamic leaf
+
+			for _, mt := range []string{
+				"/plugin/group7/metric9/another1", // can't submit a metric that was not defined previously
+				"/plugin/group3/[dyn1]/metric6",   // can't submit a metric that was not defined previously
+
+				"/plugin/group1/metric1/another1",         // can't attach next ns element to a leaf one
+				"/plugin/group1/metric2/metric2/another2", // can't attach next ns element to a leaf one
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
+		})
+
+		Convey("Try some edge cases to validate constraints working: AllowAddingUndefinedMetrics", func() {
+			v.AllowAddingUndefinedMetrics()
+
+			// now can submit metrics that were not defined previously
+			for _, mt := range []string{
+				"/plugin/group7/metric8/another1",
+				"/plugin/group3/[dyn1]/metric6",
+				"/plugin/group1/metric3/another2/another3",
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+		})
+
+		Convey("Try some edge cases to validate constraints working: AllowValuesAtAnyNamespaceLevel", func() {
+			v.AllowValuesAtAnyNamespaceLevel()
+
+			// namespaces can be defined so that metrics can have tree descendants
+			So(v.AddRule("/plugin/group1/metric3"), ShouldBeNil)
+			So(v.AddRule("/plugin/group1/metric3/another1"), ShouldBeNil)          // now can attach next ns element to a leaf one
+			So(v.AddRule("/plugin/group1/metric3/another2/another3"), ShouldBeNil) // now can attach next ns element to a leaf one
+
+			// and the data can be added at both levels
+			for _, mt := range []string{
+				"/plugin/group1/metric3",
+				"/plugin/group1/metric3/another1",
+				"/plugin/group1/metric3/another2/another3",
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+
+			// still have to match at least the plugin name (the very first namespace element)
+			for _, mt := range []string{
+				"/otherplugin/group1/metric3",
+			} {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
+		})
 	})
 }
 
 func TestMetricFilterValidator_NoDefinition(t *testing.T) {
-
 	Convey("Validate that operations can be done on filtering tree", t, func() {
 		d := NewMetricDefinition()
 		v := NewMetricFilter(d)
@@ -101,46 +158,48 @@ func TestMetricFilterValidator_NoDefinition(t *testing.T) {
 		So(v.AddRule("/plugin/{.*}/group3/{.*}"), ShouldBeNil)
 		So(v.AddRule("/plugin/group4/**"), ShouldBeNil)
 
-		// Add invalid rules
-		So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeError) // dynamic element with no definition
-		So(v.AddRule("/plugin"), ShouldBeError)                        // len < 2
-		So(v.AddRule("/plugin/{af[}/metric4"), ShouldBeError)          // invalid regexp
-
 		// Double-check that rules were applied
 		So(len(v.ListRules()), ShouldEqual, 4)
 
-		// Try to validate (filter) incoming metrics - positive scenarios
-		validMetricsToAdd := []string{
-			"/plugin/group1/metric1",
-			"/plugin/id2/metric4",
-			".plugin.id15.group3.metric3",
-			"/plugin/group4/m1",
-			"/plugin/group4/m1/m2",
-		}
+		Convey("Add invalid rules", func() {
+			So(v.AddRule("/plugin/[group3={id[234]{1,}}]"), ShouldBeError) // dynamic element with no definition
+			So(v.AddRule("/plugin"), ShouldBeError)                        // len < 2
+			So(v.AddRule("/plugin/{af[}/metric4"), ShouldBeError)          // invalid regexp
+		})
 
-		for _, mt := range validMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeTrue)
-		}
+		Convey("Try to validate (filter) incoming metrics - positive scenarios", func() {
+			validMetricsToAdd := []string{
+				"/plugin/group1/metric1",
+				"/plugin/id2/metric4",
+				".plugin.id15.group3.metric3",
+				"/plugin/group4/m1",
+				"/plugin/group4/m1/m2",
+			}
 
-		// Try to validate (filter) incoming metrics - negative scenarios
-		invalidMetricsToAdd := []string{
-			"/plugin/group2/metric4",
-			"/plugin/[group2=group2]/metric4",
-			"/plugin/id15/group4/metric4",
-			"/plugin/group4",
-		}
+			for _, mt := range validMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+		})
 
-		for _, mt := range invalidMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeFalse)
-		}
+		Convey("Try to validate (filter) incoming metrics - negative scenarios", func() {
+			invalidMetricsToAdd := []string{
+				"/plugin/group2/metric4",
+				"/plugin/[group2=group2]/metric4",
+				"/plugin/id15/group4/metric4",
+				"/plugin/group4",
+			}
+
+			for _, mt := range invalidMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
+		})
 	})
 
 }
 
 func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
-
 	Convey("Validate that operations can be done on filtering tree", t, func() {
 		d := NewMetricDefinition()
 		v := NewMetricFilter(d)
@@ -160,40 +219,43 @@ func TestMetricFilterValidator_MetricDefinition(t *testing.T) {
 		So(v.AddRule("/plugin/group3/{id3+}/[dyn3={id4+}]/metric2"), ShouldBeNil)
 		So(v.AddRule("_plugin_group4_**"), ShouldBeNil)
 
-		// Add invalid filtering rules (no compatible with definitions)
-		So(v.AddRule(".plugin.group1.id1.metric12"), ShouldBeError)
-		So(v.AddRule("/plugins/group1/id1/metric1"), ShouldBeError)
-		So(v.AddRule("/plugin/group2/[sub2]/{metric[123]+}"), ShouldBeError)
-		So(v.AddRule("/plugin/group3/[dyn2]/[dyn4=val]/metric2"), ShouldBeError)
-
 		// Double-check that rules were applied
 		So(len(d.ListRules()), ShouldEqual, 6)
 		So(len(v.ListRules()), ShouldEqual, 5)
 
-		// Try to validate (filter) incoming metrics - positive scenarios
-		validMetricsToAdd := []string{
-			"/plugin/group1/id1/metric1",
-			"/plugin/group2/sub2/metric2",
-			"/plugin/group3/id1/[dyn3=id2]/metric2",
-			".plugin.group3.[dyn2=id1].[dyn3=id2].metric2",
-		}
+		Convey("Add invalid filtering rules (no compatible with definitions)", func() {
+			So(v.AddRule(".plugin.group1.id1.metric12"), ShouldBeError)
+			So(v.AddRule("/plugins/group1/id1/metric1"), ShouldBeError)
+			So(v.AddRule("/plugin/group2/[sub2]/{metric[123]+}"), ShouldBeError)
+			So(v.AddRule("/plugin/group3/[dyn2]/[dyn4=val]/metric2"), ShouldBeError)
+		})
 
-		for _, mt := range validMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeTrue)
-		}
+		Convey("Try to validate (filter) incoming metrics - positive scenarios", func() {
+			validMetricsToAdd := []string{
+				"/plugin/group1/id1/metric1",
+				"/plugin/group2/sub2/metric2",
+				"/plugin/group3/id1/[dyn3=id2]/metric2",
+				".plugin.group3.[dyn2=id1].[dyn3=id2].metric2",
+			}
 
-		// Try to validate (filter) incoming metrics - negative scenarios
-		invalidMetricsToAdd := []string{
-			"/plugin/group1/id1/metric4",
-			"/plugin/group2/sub2/metric4",
-			"/plugin/group3/[dyn2=id2]/[dyn3=id2]/metric2",
-		}
+			for _, mt := range validMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeTrue)
+			}
+		})
 
-		for _, mt := range invalidMetricsToAdd {
-			ok, _ := v.IsValid(mt)
-			So(ok, ShouldBeFalse)
-		}
+		Convey("Try to validate (filter) incoming metrics - negative scenarios", func() {
+			invalidMetricsToAdd := []string{
+				"/plugin/group1/id1/metric4",
+				"/plugin/group2/sub2/metric4",
+				"/plugin/group3/[dyn2=id2]/[dyn3=id2]/metric2",
+			}
+
+			for _, mt := range invalidMetricsToAdd {
+				ok, _ := v.IsValid(mt)
+				So(ok, ShouldBeFalse)
+			}
+		})
 	})
 
 }

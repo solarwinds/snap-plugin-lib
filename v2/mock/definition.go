@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -42,6 +42,14 @@ func (m *CollectorDefinition) DefineMetric(namespace string, unit string, isDefa
 
 func (m *CollectorDefinition) DefineGroup(name string, description string) {
 	m.Called(name, description)
+}
+
+func (m *CollectorDefinition) AllowUndefinedMetrics() {
+	m.Called()
+}
+
+func (m *CollectorDefinition) AllowValuesAtAnyNamespaceLevel() {
+	m.Called()
 }
 
 func (m *CollectorDefinition) DefineExampleConfig(cfg string) error {
