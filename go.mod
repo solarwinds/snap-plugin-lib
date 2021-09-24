@@ -6,6 +6,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-licenses v0.0.0-20210816172045-3099c18c36e1 // indirect
+	github.com/josephspurrier/goversioninfo v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
