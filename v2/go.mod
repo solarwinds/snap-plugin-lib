@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
+	github.com/josephspurrier/goversioninfo v1.3.0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/smartystreets/goconvey v1.6.4
