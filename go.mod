@@ -17,4 +17,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0 // indirect
 	google.golang.org/grpc v1.40.0
+	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )
