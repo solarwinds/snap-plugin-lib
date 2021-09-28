@@ -118,7 +118,11 @@ _license() {
 }
 
 _gofmt() {
-  test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
+  if [ -z "$(go version | grep '1.16')" ]; then
+    gofmt -l -d $(_test_files) | tee /dev/stderr
+  else
+    test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
+  fi
 }
 
 _goimports() {
