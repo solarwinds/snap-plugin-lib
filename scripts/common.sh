@@ -119,15 +119,18 @@ _license() {
 
 _gofmt() {
   if ! go version | grep -q '1.16'; then
-    echo "skip go fmt check on newer go"
+    echo "skip go fmt check on go other than 1.16"
   else
     test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
   fi
 }
 
 _goimports() {
-  _go_install golang.org/x/tools/cmd/goimports
-  test -z "$(goimports -l -d $(_test_files) | tee /dev/stderr)"
+  if ! go version | grep -q '1.16'; then
+    echo "skip go imports check on go other than 1.16"
+  else
+    test -z "$(goimports -l -d $(_test_files) | tee /dev/stderr)"
+  fi
 }
 
 _golint() {
