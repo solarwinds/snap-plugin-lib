@@ -118,7 +118,7 @@ _license() {
 }
 
 _gofmt() {
-  if go version | grep '1.16' > /dev/null; then
+  if ! go version | grep -q '1.16'; then
     echo "skip go fmt check on newer go"
   else
     test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
