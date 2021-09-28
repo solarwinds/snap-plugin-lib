@@ -138,13 +138,19 @@ _golint() {
 _go_sec() {
   _go_install github.com/securego/gosec/v2/cmd/gosec
   _info "Code analysis using securego/gosec $(gosec --version)"
-  # TODO: Don't exclude G104: Audit errors not checked (AO-18915)
-  gosec --exclude G104 ./...
+
+  for d in $(_test_dirs)
+  do
+    pushd "$d"
+    # TODO: Don't exclude G104: Audit errors not checked (AO-18915)
+    gosec --exclude G104 ./...
+    popd
+  done
 }
 
 _go_vet() {
   for d in $(_test_dirs)
-  do 
+  do
     pushd "$d"
     go vet .
     popd
@@ -178,7 +184,7 @@ _go_license() {
 
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
-  # Standard go tooling behavior is to ignore dirs with leading underscors
+  # Standard go tooling behavior is to ignore dirs with leading underscores
   for dir in $(_test_dirs);
   do
     if [[ -z ${go_cover+x} ]]; then
