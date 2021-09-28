@@ -3,6 +3,7 @@ module github.com/solarwinds/snap-plugin-lib/examples/v1
 go 1.13
 
 require (
+	github.com/josephspurrier/goversioninfo v1.3.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/securego/gosec/v2 v2.8.1
 	github.com/smartystreets/goconvey v1.6.4

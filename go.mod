@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/golang/protobuf v1.5.2
+	github.com/josephspurrier/goversioninfo v1.3.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/securego/gosec/v2 v2.8.1
 	github.com/sirupsen/logrus v1.8.0
