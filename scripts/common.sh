@@ -119,9 +119,9 @@ _license() {
 
 _gofmt() {
   if [ -z "$(go version | grep '1.16')" ]; then
-    gofmt -l -d $(_test_files)
-  else
     test -z "$(gofmt -l -d $(_test_files) | tee /dev/stderr)"
+  else
+    gofmt -l -d $(_test_files)
   fi
 }
 
