@@ -118,7 +118,7 @@ _license() {
 }
 
 _gofmt() {
-  echo "boooo"
+  echo "$(go version)"
 
   if [ ! -z "$(go version | grep '1.16')" ]; then
     echo "skip go fmt check on newer go"
