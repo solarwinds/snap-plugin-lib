@@ -46,7 +46,7 @@ detect_go_dep() {
   [[ -f "${__proj_dir}/glide.yaml" ]] && _dep='glide'
   [[ -f "${__proj_dir}/vendor/vendor.json" ]] && _dep='govendor'
   [[ -f "${__proj_dir}/Gopkg.toml" ]] && _dep='dep'
-  [[ -f "${__proj_dir}/go.mod" ]] && _dep='gomod'
+  [[ -f "${__proj_dir}/go.mod" ]] && _dep='mod'
   _info "golang dependency tool: ${_dep}"
   echo "${_dep}"
 }
@@ -56,16 +56,19 @@ install_go_dep() {
   _info "ensuring ${_dep} is available"
   case $_dep in
     godep)
-      _go_get github.com/tools/godep
+      _go_install github.com/tools/godep
       ;;
     dep)
-      _go_get github.com/golang/dep/cmd/dep
+      _go_install github.com/golang/dep/cmd/dep
+      ;;
+    mod)
+      _info "nothing special to do for go modules"
       ;;
     glide)
-      _go_get github.com/Masterminds/glide
+      _go_install github.com/Masterminds/glide
       ;;
     govendor)
-      _go_get github.com/kardianos/govendor
+      _go_install github.com/kardianos/govendor
       ;;
   esac
 }
@@ -86,12 +89,22 @@ restore_go_dep() {
     dep)
       (cd "${__proj_dir}" && dep ensure -v -vendor-only)
       ;;
-    gomod)
+    mod)
       (cd "${__proj_dir}" && go mod download)
       ;;
   esac
 }
 
 _dep=$(detect_go_dep)
+
+if [ $_dep != "mod" ]; then
+  _warning "Deprecated dependencies management tool, please update to go modules"
+
+  if [ $_dep != "dep" ]; then
+    _error "No even using dep, you need to update the Go dependencies management tool"
+    exit 1
+  fi
+fi
+
 install_go_dep
 restore_go_dep

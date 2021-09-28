@@ -26,7 +26,6 @@ jobs:
           name: "Print the Go version"
           command: >
             go version
-      # Only run gofmt, vet & lint against the latest Go version 
       - run:
           name: "Run lint"
           command: >

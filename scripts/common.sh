@@ -80,13 +80,41 @@ _test_dirs() {
   echo "${test_dirs}"
 }
 
-_go_get() {
+_go_install() {
   local _url=$1
   local _util
 
   _util=$(basename "${_url}")
 
-  type -p "${_util}" > /dev/null || go get "${_url}@latest" && _debug "go get ${_util} ${_url}"
+  go install "${_url}" && _debug "go install ${_util} ${_url}"
+}
+
+_staticcheck() {
+  go get -v honnef.co/go/tools/cmd/staticcheck
+
+  _info "Using $(staticcheck --version)"
+
+  for os in linux windows darwin; do
+    for test_level in small medium legacy; do
+      _info "staticcheck for $os / $test_level"
+      GOOS=$os staticcheck --tests --tags $test_level ./...
+    done
+  done
+}
+
+_license() {
+  error_code=0
+  used_licenses=($(go list -compiled=false -test=false -export=false -deps=false -find=false -f '{{ join .Imports "\n" }}' ./... | sort | uniq | grep -v 'solarwinds\|librato' | grep '\.'))
+
+  for used_license in "${used_licenses[@]}"; do
+    lic=$(cut -d '/' -f1-3 <<< "$used_license" )
+    if ! grep -q $lic ${LICENSE_FILE}; then
+      error_code=1
+      _warning "license entry for $used_license is MISSING (looked for $lic)"
+    fi
+  done
+
+  return ${error_code}
 }
 
 _gofmt() {
@@ -94,13 +122,20 @@ _gofmt() {
 }
 
 _goimports() {
-  _go_get golang.org/x/tools/cmd/goimports
+  _go_install golang.org/x/tools/cmd/goimports
   test -z "$(goimports -l -d $(_test_files) | tee /dev/stderr)"
 }
 
 _golint() {
-  _go_get golang.org/x/lint/golint
+  _go_install golang.org/x/lint/golint
   golint $(go list ./... | grep -v /vendor/)
+}
+
+_go_sec() {
+  _go_install github.com/securego/gosec/v2/cmd/gosec
+  _info "Code analysis using securego/gosec $(gosec --version)"
+  # TODO: Don't exclude G104: Audit errors not checked (AO-18915)
+  gosec --exclude G104 ./...
 }
 
 _go_vet() {
@@ -142,19 +177,17 @@ _go_test() {
   # Standard go tooling behavior is to ignore dirs with leading underscors
   for dir in $(_test_dirs);
   do
-    pushd "${dir}"
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
-      go test -v --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" ./...
+      go test -v --failfast --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" ./...
       if [ -f "profile.tmp" ]; then
         tail -n +2 "profile.tmp" >> profile.cov
         rm "profile.tmp"
       fi
     else
       _debug "running go test without cover in ${dir}"
-      go test -v --tags="${TEST_TYPE}" ./...
+      go test -v --failfast --tags="${TEST_TYPE}" ./...
     fi
-    popd
   done
 }
 
