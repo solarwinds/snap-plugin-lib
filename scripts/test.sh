@@ -59,8 +59,10 @@ lint() {
   # 2. goimports     (https://github.com/bradfitz/goimports)
   # 3. golint        (https://github.com/golang/lint)
   # 4. go vet        (http://golang.org/cmd/vet)
-  # 5. copyrights
-  # 6. go-license    (https://github.com/google/go-licenses)
+  # 5. staticcheck   (https://staticcheck.io)
+  # 6. copyrights
+  # 7. go-license    (https://github.com/google/go-licenses)
+  # 8. gosec         (https://github.com/securego/gosec)
   local go_analyzers
   go_analyzers=(gofmt goimports golint go_vet staticcheck copyrights go_license go_sec)
 
