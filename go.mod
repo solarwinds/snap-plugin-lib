@@ -18,4 +18,4 @@ require (
 )
 
 // Freeze as in the next commit there was //go:embed added (supported since go 1.16)
-replace github.com/google/licenseclassifier => github.com/google/licenseclassifier v0.0.0-20210325184830-bb04aff29e72
+replace github.com/google/licenseclassifier => github.com/google/licenseclassifier bb04aff29e72e636ba260ec61150c6e15f111d7e
