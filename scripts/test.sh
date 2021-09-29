@@ -33,7 +33,7 @@
 
 # Support travis.ci environment matrix:
 TEST_TYPE="${TEST_TYPE:-$1}"
-UNIT_TEST="${UNIT_TEST:-"gofmt goimports go_vet go_test go_cover"}"
+UNIT_TEST="${UNIT_TEST:-"go_test go_cover"}"
 TEST_K8S="${TEST_K8S:-0}"
 DEBUG="${DEBUG:-}"
 
@@ -59,10 +59,12 @@ lint() {
   # 2. goimports     (https://github.com/bradfitz/goimports)
   # 3. golint        (https://github.com/golang/lint)
   # 4. go vet        (http://golang.org/cmd/vet)
-  # 5. copyrights
-  # 6. go-license    (https://github.com/google/go-licenses)
+  # 5. staticcheck   (https://staticcheck.io)
+  # 6. copyrights
+  # 7. go-license    (https://github.com/google/go-licenses)
+  # 8. gosec         (https://github.com/securego/gosec)
   local go_analyzers
-  go_analyzers=(gofmt goimports golint go_vet copyrights go_license)
+  go_analyzers=(gofmt goimports golint go_vet staticcheck copyrights go_license go_sec)
 
   ((n_elements=${#go_analyzers[@]}, max=n_elements - 1))
   for ((i = 0; i <= max; i++)); do
@@ -90,8 +92,16 @@ test_unit() {
   done
 }
 
+if [[ $TEST_TYPE == "build" ]] ; then
+  aosnap-build --version=${TRAVIS_TAG}
+  aosnap upload --build_number=${TRAVIS_BUILD_NUMBER}
+fi
 if [[ $TEST_TYPE == "lint" ]]; then
   lint
+elif [[ $TEST_TYPE == "license" ]]; then
+  _info "Running license check"
+  _license
+  exit 0
 elif [[ $TEST_TYPE == "small" ]]; then
   if [[ -f "${__dir}/small.sh" ]]; then
     . "${__dir}/small.sh"

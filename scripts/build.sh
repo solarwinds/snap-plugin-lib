@@ -41,7 +41,7 @@ _info "Building swisnap-plugin-lib.so"
 
 # Build CGO for windows 
 _info "Building swisnap-plugin-lib.dll"
-_go_get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+_go_install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 cp versioninfo.template versioninfo.json
 sed -i 's/{major_version}/'${versionarr[0]}'/g' versioninfo.json
 sed -i 's/{minor_version}/'${versionarr[1]}'/g' versioninfo.json

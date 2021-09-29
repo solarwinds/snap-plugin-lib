@@ -5,9 +5,9 @@ language: go
 dist: xenial
 
 go:
+  - 1.17.x
+  - 1.16.x
   - 1.15.x
-  - 1.14.x
-  - 1.13.x
 
 env:
   global:
@@ -33,7 +33,7 @@ install:
   - make deps
 
 script:
-  - if [ "$TEST_TYPE" = "lint" ]; then make check 2>&1 && go get honnef.co/go/tools/cmd/staticcheck@v0.0.1-2020.1.5 && staticcheck ./...; fi
+  - if [ "$TEST_TYPE" = "lint" ]; then make check 2>&1; fi
   - if [ "$TEST_TYPE" = "build" ]; then wget https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && sudo dpkg -i packages-microsoft-prod.deb && 
        sudo apt-get update && sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https dotnet-sdk-3.1 dotnet-runtime-3.1 && make build 2>&1; fi
   - if [ "$TEST_TYPE" = "small" ]; then make check 2>&1; fi

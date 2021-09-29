@@ -972,7 +972,7 @@ func printRuntimeDetails(m meta) {
 func printContactUs() {
 	fmt.Print(
 		`Thank you for using this SWISnap plugin. If you have questions or are running
-into errors, please contact us on support@appoptics.com.
+into errors, please contact us on technicalsupport@solarwinds.com.
 Thank you.`)
 }
 

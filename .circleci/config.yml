@@ -26,15 +26,10 @@ jobs:
           name: "Print the Go version"
           command: >
             go version
-      # Only run gofmt, vet & lint against the latest Go version 
       - run:
-          name: "Run lint"
+          name: "Run linters"
           command: >
             TEST_TYPE="lint" make check 2>&1
-      - run:
-          name: "Staticcheck"
-          command: >
-            go install honnef.co/go/tools/cmd/staticcheck && staticcheck ./...
       - run:
           name: "Run build"
           command: >
@@ -58,4 +53,4 @@ workflows:
       - test:
           matrix:
             parameters:
-              version: ["latest", "1.16"]
+              version: ["latest", "1.16", "1.15"]
