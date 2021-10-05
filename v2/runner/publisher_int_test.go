@@ -84,7 +84,7 @@ func (s *PublisherMediumSuite) startCollector(collector plugin.Collector) net.Li
 	go func() {
 		statsController, _ := stats.NewEmptyController()
 		contextManager := collProxy.NewContextManager(context.Background(), types.NewCollector("test-collector", "1.0.0", collector), statsController)
-		service.StartCollectorGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0)
+		service.StartCollectorGRPC(context.Background(), grpc.NewServer(), contextManager, ln, 0, 0, defaultCollectChunkSize)
 		s.endControllerCh <- true
 	}()
 

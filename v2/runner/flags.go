@@ -37,10 +37,12 @@ const (
 	defaultPProfPort = 0
 	defaultStatsPort = 0
 
-	defaultConfig          = "{}"
-	defaultFilter          = ""
-	defaultCollectInterval = 5 * time.Second
-	defaultCollectCount    = 1
+	defaultConfig = "{}"
+	defaultFilter = ""
+
+	defaultCollectInterval  = 5 * time.Second
+	defaultCollectCount     = 1
+	defaultCollectChunkSize = 100
 
 	defaultLogLevel = logrus.WarnLevel
 
@@ -136,6 +138,10 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 		flagParser.DurationVar(&opt.DebugCollectInterval,
 			"debug-collect-interval", defaultCollectInterval,
 			"Interval between consecutive collect requests")
+
+		flagParser.UintVar(&opt.CollectChunkSize,
+			"collect-chunk-size", defaultCollectChunkSize,
+			"Collected metrics chunk size")
 
 		flagParser.StringVar(&opt.PluginConfig,
 			"plugin-config", defaultConfig,

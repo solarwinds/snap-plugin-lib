@@ -152,7 +152,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		}
 
 		// main blocking operation
-		service.StartCollectorGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+		service.StartCollectorGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed, opt.CollectChunkSize)
 	}
 }
 
