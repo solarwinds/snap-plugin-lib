@@ -45,7 +45,7 @@ type Options struct {
 	UseAPIv2 bool
 	AsThread bool
 
-	CollectChunkSize uint
+	CollectChunkSize int
 
 	PrintExampleTask     bool          `json:"-"`
 	DebugMode            bool          `json:"-"`

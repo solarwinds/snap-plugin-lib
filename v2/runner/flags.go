@@ -139,7 +139,7 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 			"debug-collect-interval", defaultCollectInterval,
 			"Interval between consecutive collect requests")
 
-		flagParser.UintVar(&opt.CollectChunkSize,
+		flagParser.IntVar(&opt.CollectChunkSize,
 			"collect-chunk-size", defaultCollectChunkSize,
 			"Collected metrics chunk size")
 
