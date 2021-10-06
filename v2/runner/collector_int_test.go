@@ -1022,7 +1022,11 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 			Count: 14,
 			Sum:   3.54,
 		}
+
 		err = ctx.AddMetric("/coll/otel/summary", counter, plugin.MetricTypeSummary())
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/summary_ptr", &counter, plugin.MetricTypeSummary())
 		So(err, ShouldBeNil)
 
 		histogram := plugin.Histogram{
@@ -1038,7 +1042,11 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 			Count: 10,
 			Sum:   50,
 		}
-		err = ctx.AddMetric("/coll/otel/gauge", histogram, plugin.MetricTypeHistogram())
+
+		err = ctx.AddMetric("/coll/otel/histogram", histogram, plugin.MetricTypeHistogram())
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/histogram_ptr", &histogram, plugin.MetricTypeHistogram())
 		So(err, ShouldBeNil)
 	})
 
