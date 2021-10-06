@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"testing"
 	"time"
@@ -995,5 +996,74 @@ func (s *SuiteT) TestCollectorWithAlwaysApply() {
 				So(mts.MetricSet[9].Tags, ShouldBeNil)
 			})
 		}
+	})
+}
+
+/*****************************************************************************/
+
+type collectorWithOTELMetrics struct {
+	t *testing.T
+}
+
+func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
+	var err error
+
+	Convey("Validate AddMetrics won't return errors", c.t, func() {
+		err = ctx.AddMetric("/coll/otel/default", 10)
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/gauge", 10.5, plugin.MetricTypeGauge())
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/counter", 67, plugin.MetricTypeCounter())
+		So(err, ShouldBeNil)
+
+		counter := plugin.Counter{
+			Count: 14,
+			Sum:   3.54,
+		}
+		err = ctx.AddMetric("/coll/otel/summary", counter, plugin.MetricTypeSummary())
+		So(err, ShouldBeNil)
+
+		histogram := plugin.Histogram{
+			DataPoints: map[float64]float64{
+				0.10:        10,
+				0.20:        20,
+				0.50:        25,
+				1:           10,
+				5:           25,
+				10:          50,
+				math.Inf(1): 100,
+			},
+			Count: 10,
+			Sum:   50,
+		}
+		err = ctx.AddMetric("/coll/otel/gauge", histogram, plugin.MetricTypeHistogram())
+		So(err, ShouldBeNil)
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestCollectingOTELTypes() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	collector := &collectorWithOTELMetrics{t: s.T()}
+	ln := s.startCollector(collector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate collector can collect OTEL-types metrics", s.T(), func() {
+		_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+
+		mts, err := s.sendCollect("task-1")
+
+		So(err, ShouldBeNil)
+		So(mts.MetricSet, ShouldNotBeNil)
+		So(len(mts.MetricSet), ShouldEqual, 5)
+
+		//So(mts.MetricSet[0].Type_, ShouldEqual, gauge) // todo: adamik
+
 	})
 }
