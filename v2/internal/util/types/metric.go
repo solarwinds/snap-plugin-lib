@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -23,8 +23,17 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
+type MetricType int
+
 const (
 	metricSeparator = "/"
+)
+
+const (
+	GaugeType MetricType = iota
+	CounterType
+	SummaryType
+	HistogramType
 )
 
 type Metric struct {
@@ -34,6 +43,7 @@ type Metric struct {
 	Unit_        string
 	Timestamp_   time.Time
 	Description_ string
+	Type_        MetricType
 }
 
 func (m Metric) Namespace() plugin.Namespace {
@@ -60,6 +70,10 @@ func (m Metric) Unit() string {
 
 func (m Metric) Description() string {
 	return m.Description_
+}
+
+func (m Metric) Type() MetricType {
+	return m.Type_
 }
 
 func (m Metric) Timestamp() time.Time {
@@ -96,4 +110,8 @@ func (m *Metric) SetUnit(unit string) {
 
 func (m *Metric) SetTimestamp(timestamp time.Time) {
 	m.Timestamp_ = timestamp
+}
+
+func (m *Metric) SetType(type_ MetricType) {
+	m.Type_ = type_
 }
