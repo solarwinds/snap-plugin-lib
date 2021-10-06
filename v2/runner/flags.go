@@ -139,7 +139,7 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 			"debug-collect-interval", defaultCollectInterval,
 			"Interval between consecutive collect requests")
 
-		flagParser.IntVar(&opt.CollectChunkSize,
+		flagParser.UintVar(&opt.CollectChunkSize,
 			"collect-chunk-size", defaultCollectChunkSize,
 			"Collected metrics chunk size")
 
@@ -227,6 +227,10 @@ func ValidateOptions(opt *plugin.Options) error {
 
 	if opt.PluginFilter == "" {
 		opt.PluginFilter = defaultFilter
+	}
+
+	if opt.CollectChunkSize <= 0 {
+		return fmt.Errorf("-collect-chunk-size should be > 0")
 	}
 
 	grpcIp := net.ParseIP(opt.PluginIP)

@@ -29,10 +29,10 @@ import (
 type collectService struct {
 	proxy            CollectorProxy
 	ctx              context.Context
-	collectChunkSize int
+	collectChunkSize uint
 }
 
-func newCollectService(ctx context.Context, proxy CollectorProxy, collectChunkSize int) pluginrpc.CollectorServer {
+func newCollectService(ctx context.Context, proxy CollectorProxy, collectChunkSize uint) pluginrpc.CollectorServer {
 	return &collectService{
 		ctx:              ctx,
 		proxy:            proxy,
@@ -142,7 +142,7 @@ func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, 
 			protoMts = append(protoMts, protoMt)
 		}
 
-		if len(protoMts) == cs.collectChunkSize || i == len(pluginMts)-1 {
+		if len(protoMts) == int(cs.collectChunkSize) || i == len(pluginMts)-1 {
 			err = stream.Send(&pluginrpc.CollectResponse{
 				MetricSet: protoMts,
 			})
