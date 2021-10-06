@@ -23,17 +23,8 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
-type MetricType int
-
 const (
 	metricSeparator = "/"
-)
-
-const (
-	GaugeType MetricType = iota
-	CounterType
-	SummaryType
-	HistogramType
 )
 
 type Metric struct {
@@ -43,7 +34,7 @@ type Metric struct {
 	Unit_        string
 	Timestamp_   time.Time
 	Description_ string
-	Type_        MetricType
+	Type_        plugin.MetricType
 }
 
 func (m Metric) Namespace() plugin.Namespace {
@@ -72,7 +63,7 @@ func (m Metric) Description() string {
 	return m.Description_
 }
 
-func (m Metric) Type() MetricType {
+func (m Metric) Type() plugin.MetricType {
 	return m.Type_
 }
 
@@ -112,6 +103,6 @@ func (m *Metric) SetTimestamp(timestamp time.Time) {
 	m.Timestamp_ = timestamp
 }
 
-func (m *Metric) SetType(type_ MetricType) {
+func (m *Metric) SetType(type_ plugin.MetricType) {
 	m.Type_ = type_
 }

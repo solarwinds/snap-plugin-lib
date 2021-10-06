@@ -18,8 +18,6 @@ package plugin
 
 import (
 	"time"
-
-	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 )
 
 type MetricModifier interface {
@@ -64,25 +62,25 @@ func MetricUnit(unit string) MetricModifier {
 
 func MetricTypeGauge() MetricModifier {
 	return &metricType{
-		type_: types.GaugeType,
+		type_: GaugeType,
 	}
 }
 
 func MetricTypeCounter() MetricModifier {
 	return &metricType{
-		type_: types.CounterType,
+		type_: CounterType,
 	}
 }
 
 func MetricTypeSummary() MetricModifier {
 	return &metricType{
-		type_: types.SummaryType,
+		type_: SummaryType,
 	}
 }
 
 func MetricTypeHistogram() MetricModifier {
 	return &metricType{
-		type_: types.HistogramType,
+		type_: HistogramType,
 	}
 }
 
@@ -129,7 +127,7 @@ func (m metricUnit) UpdateMetric(mt MetricSetter) {
 }
 
 type metricType struct {
-	type_ types.MetricType
+	type_ MetricType
 }
 
 func (m metricType) UpdateMetric(mt MetricSetter) {

@@ -18,8 +18,6 @@ package plugin
 
 import (
 	"time"
-
-	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
 )
 
 // Representation of AppOptics measurement
@@ -61,7 +59,7 @@ type MetricSetter interface {
 	SetTimestamp(time.Time)
 
 	// Set type
-	SetType(type_ types.MetricType)
+	SetType(type_ MetricType)
 }
 
 // Representation of AppOptics measurement name

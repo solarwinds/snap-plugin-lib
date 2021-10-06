@@ -14,7 +14,16 @@
     limitations under the License.
 */
 
-package types
+package plugin
+
+type MetricType int
+
+const (
+	GaugeType MetricType = iota
+	CounterType
+	SummaryType
+	HistogramType
+)
 
 type Histogram struct {
 	DataPoints map[float64]float64
