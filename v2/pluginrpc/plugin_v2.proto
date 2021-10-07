@@ -141,6 +141,8 @@ message MetricValue {
         string v_string = 9;
         int32 v_int16 = 10; // there is no int16 protobuf type, will be packed in int32
         uint32 v_uint16 = 11; // there is no uint16 protobuf type, will be packed in uint32
+        Summary v_summary = 12;
+        Histogram v_histogram = 13;
     }
 }
 
@@ -152,6 +154,18 @@ message Time {
 message Warning {
     string message = 1;
     Time timestamp = 2;
+}
+
+message Summary {
+    int64 count = 1;
+    double sum = 2;
+}
+
+message Histogram {
+    int64 count = 1;
+    double sum = 2;
+    repeated double bounds = 3; // can't use map<double, double>
+    repeated double values = 4;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

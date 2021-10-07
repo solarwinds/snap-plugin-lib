@@ -16,8 +16,7 @@ require (
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/tools v0.1.3
-	google.golang.org/genproto v0.0.0-20210302174412-5ede27ff9881 // indirect
-	google.golang.org/grpc v1.36.0
+	google.golang.org/grpc v1.29.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	honnef.co/go/tools v0.0.1-2020.1.4
 )
