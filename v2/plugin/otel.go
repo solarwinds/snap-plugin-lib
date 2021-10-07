@@ -31,7 +31,7 @@ type Histogram struct {
 	Sum        float64
 }
 
-type Counter struct {
+type Summary struct {
 	Count int
 	Sum   float64
 }

@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 )
 
@@ -138,6 +139,14 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt16{VInt16: int32(t)}
 	case uint16:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint16{VUint16: uint32(t)}
+	case plugin.Summary:
+		grpcValue.DataVariant = toGRPCValueSummary(&t)
+	case *plugin.Summary:
+		grpcValue.DataVariant = toGRPCValueSummary(t)
+	case plugin.Histogram:
+		grpcValue.DataVariant = toGRPCValueHistogram(&t)
+	case *plugin.Histogram:
+		grpcValue.DataVariant = toGRPCValueHistogram(t)
 	case nil:
 		grpcValue.DataVariant = nil
 	default:
@@ -145,6 +154,30 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 	}
 
 	return grpcValue, nil
+}
+
+func toGRPCValueSummary(t *plugin.Summary) *pluginrpc.MetricValue_VSummary {
+	return &pluginrpc.MetricValue_VSummary{VSummary: &pluginrpc.Summary{
+		Count: int64(t.Count),
+		Sum:   t.Sum,
+	}}
+}
+
+func toGRPCValueHistogram(t *plugin.Histogram) *pluginrpc.MetricValue_VHistogram {
+	var bounds []float64
+	var values []float64
+
+	for b, v := range t.DataPoints {
+		bounds = append(bounds, b)
+		values = append(values, v)
+	}
+
+	return &pluginrpc.MetricValue_VHistogram{VHistogram: &pluginrpc.Histogram{
+		Count:  int64(t.Count),
+		Sum:    t.Sum,
+		Bounds: bounds,
+		Values: values,
+	}}
 }
 
 func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
