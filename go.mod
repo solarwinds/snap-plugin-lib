@@ -10,6 +10,7 @@ require (
 	github.com/sirupsen/logrus v1.8.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/solarwinds/grpchan v1.1.1 // indirect
+	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/tools v0.1.3
