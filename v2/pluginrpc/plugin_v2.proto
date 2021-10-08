@@ -114,10 +114,11 @@ message UnloadPublisherResponse {
 // Common messages definition
 
 enum MetricType {
-    GAUGE = 0;
-    COUNTER = 1;
-    SUMMARY = 2;
-    HISTOGRAM = 3;
+    UNKNOWN = 0;
+    GAUGE = 1;
+    COUNTER = 2;
+    SUMMARY = 3;
+    HISTOGRAM = 4;
 }
 
 message Metric {

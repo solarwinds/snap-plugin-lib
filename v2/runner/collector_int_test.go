@@ -1071,7 +1071,7 @@ func (s *SuiteT) TestCollectingOTELTypes() {
 		So(mts.MetricSet, ShouldNotBeNil)
 		So(len(mts.MetricSet), ShouldEqual, 7)
 
-		So(mts.MetricSet[0].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
+		So(mts.MetricSet[0].Type, ShouldEqual, pluginrpc.MetricType_UNKNOWN)
 		So(mts.MetricSet[0].Value.GetVInt64(), ShouldEqual, 10)
 
 		So(mts.MetricSet[1].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
@@ -1081,10 +1081,23 @@ func (s *SuiteT) TestCollectingOTELTypes() {
 		So(mts.MetricSet[2].Value.GetVInt64(), ShouldEqual, 67)
 
 		So(mts.MetricSet[3].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+		So(mts.MetricSet[3].Value.GetVSummary().Sum, ShouldEqual, 3.54)
+		So(mts.MetricSet[3].Value.GetVSummary().Count, ShouldEqual, 14)
 
 		So(mts.MetricSet[4].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+		So(mts.MetricSet[4].Value.GetVSummary().Sum, ShouldEqual, 3.54)
+		So(mts.MetricSet[4].Value.GetVSummary().Count, ShouldEqual, 14)
 
 		So(mts.MetricSet[5].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
+		So(mts.MetricSet[5].Value.GetVHistogram().Sum, ShouldEqual, 50)
+		So(mts.MetricSet[5].Value.GetVHistogram().Count, ShouldEqual, 10)
+		So(mts.MetricSet[5].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
+		So(mts.MetricSet[5].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
+
 		So(mts.MetricSet[6].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
+		So(mts.MetricSet[6].Value.GetVHistogram().Sum, ShouldEqual, 50)
+		So(mts.MetricSet[6].Value.GetVHistogram().Count, ShouldEqual, 10)
+		So(mts.MetricSet[6].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
+		So(mts.MetricSet[6].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
 	})
 }

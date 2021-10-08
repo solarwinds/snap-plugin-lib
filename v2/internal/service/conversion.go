@@ -18,6 +18,7 @@ package service
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
@@ -105,6 +106,8 @@ func fromGRPCNamespace(ns []*pluginrpc.Namespace) []types.NamespaceElement {
 
 func toGRPCMetricType(t plugin.MetricType) pluginrpc.MetricType {
 	switch t {
+	case plugin.UnknownType:
+		return pluginrpc.MetricType_UNKNOWN
 	case plugin.GaugeType:
 		return pluginrpc.MetricType_GAUGE
 	case plugin.CounterType:
@@ -120,6 +123,8 @@ func toGRPCMetricType(t plugin.MetricType) pluginrpc.MetricType {
 
 func fromGRPCMetricType(t pluginrpc.MetricType) (plugin.MetricType, error) {
 	switch t {
+	case pluginrpc.MetricType_UNKNOWN:
+		return plugin.UnknownType, nil
 	case pluginrpc.MetricType_GAUGE:
 		return plugin.GaugeType, nil
 	case pluginrpc.MetricType_COUNTER:
@@ -204,9 +209,13 @@ func toGRPCValueHistogram(t *plugin.Histogram) *pluginrpc.MetricValue_VHistogram
 	var bounds []float64
 	var values []float64
 
-	for b, v := range t.DataPoints {
+	for b := range t.DataPoints {
 		bounds = append(bounds, b)
-		values = append(values, v)
+	}
+	sort.Float64s(bounds)
+
+	for _, b := range bounds {
+		values = append(values, t.DataPoints[b])
 	}
 
 	return &pluginrpc.MetricValue_VHistogram{VHistogram: &pluginrpc.Histogram{

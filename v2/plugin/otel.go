@@ -19,7 +19,8 @@ package plugin
 type MetricType int
 
 const (
-	GaugeType MetricType = iota
+	UnknownType MetricType = iota
+	GaugeType
 	CounterType
 	SummaryType
 	HistogramType
