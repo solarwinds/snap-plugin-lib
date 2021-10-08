@@ -58,6 +58,12 @@ func StartPublisherWithContext(ctx context.Context, publisher plugin.Publisher, 
 		}
 	}
 
+	opt, err = AddEnvOptions(os.Environ(), opt)
+	if err != nil {
+		logF.WithError(err).Error("Error occurred during plugin startup while parsing env")
+		os.Exit(errorExitStatus)
+	}
+
 	err = ValidateOptions(opt)
 	if err != nil {
 		logF.WithError(err).Error("Invalid plugin options")

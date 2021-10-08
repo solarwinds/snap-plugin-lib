@@ -47,6 +47,8 @@ const (
 	defaultLogLevel = logrus.WarnLevel
 
 	filterSeparator = ";"
+
+	envOptionPrefix = "SNAP_PLUGIN_OPT_"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,7 +141,7 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 			"debug-collect-interval", defaultCollectInterval,
 			"Interval between consecutive collect requests")
 
-		flagParser.UintVar(&opt.CollectChunkSize,
+		flagParser.Uint64Var(&opt.CollectChunkSize,
 			"collect-chunk-size", defaultCollectChunkSize,
 			"Collected metrics chunk size")
 
@@ -207,6 +209,34 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	v := flagParser.Args()
 	if len(v) > 0 {
 		return opt, fmt.Errorf("unexpected option(s) provided: %v %v", v, len(v))
+	}
+
+	return opt, nil
+}
+
+func AddEnvOptions(environ []string, opt *plugin.Options) (*plugin.Options, error) {
+	if opt == nil {
+		opt = &plugin.Options{
+			LogLevel: defaultLogLevel,
+		}
+	}
+
+	for _, e := range environ {
+		pair := strings.SplitN(e, "=", 2)
+
+		if strings.HasPrefix(pair[0], envOptionPrefix) {
+			key := strings.TrimPrefix(pair[0], envOptionPrefix)
+			val := pair[1]
+
+			var err error
+			switch key {
+			case "COLLECT_CHUNK_SIZE":
+				opt.CollectChunkSize, err = strconv.ParseUint(val, 10, 0)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse %v: %w", key, err)
+			}
+		}
 	}
 
 	return opt, nil

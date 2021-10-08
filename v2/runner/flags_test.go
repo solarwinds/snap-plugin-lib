@@ -25,85 +25,84 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type parseScenario struct {
-	inputCmdLine   string
-	shouldBeParsed bool
-	shouldBeValid  bool
-}
-
-var parseScenarios = []parseScenario{
-	{ // 0
-		inputCmdLine:   "-plugin-ip=1.2.3.4 --grpc-port=456 --log-level=warning",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-	{ // 1
-		inputCmdLine:   "-plugin-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3 --plugin-config={}",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-	{ // 2
-		inputCmdLine:   "",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-	{ // 3
-		inputCmdLine:   "--grpc-port=abc",
-		shouldBeParsed: false,
-		shouldBeValid:  false,
-	},
-	{ // 4
-		inputCmdLine:   "--debug-level=invalid",
-		shouldBeParsed: false,
-		shouldBeValid:  false,
-	},
-	{ // 5
-		inputCmdLine:   "--debug-level=8",
-		shouldBeParsed: false,
-		shouldBeValid:  false,
-	},
-	{ // 6
-		inputCmdLine:   "--plugin-ip=1.2.3.4.5",
-		shouldBeParsed: true,
-		shouldBeValid:  false,
-	},
-	{ // 7
-		inputCmdLine:   "--pprof-port=5678",
-		shouldBeParsed: true,
-		shouldBeValid:  false,
-	},
-	{ // 8
-		inputCmdLine:   "--enable-profiling=1 --pprof-port=5678",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-	{ // 9
-		inputCmdLine:   "--stats-port=5678",
-		shouldBeParsed: true,
-		shouldBeValid:  false,
-	},
-	{ // 10
-		inputCmdLine:   "--enable-stats=1 --enable-stats-server=1 --stats-port=5678",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-	{ // 11
-		inputCmdLine:   "--debug-collect-counts=11",
-		shouldBeParsed: true,
-		shouldBeValid:  false,
-	},
-	{ // 12
-		inputCmdLine:   "--debug-mode=1 --debug-collect-counts=11",
-		shouldBeParsed: true,
-		shouldBeValid:  true,
-	},
-}
-
 func TestParseCmdLineOptions(t *testing.T) {
+	parseScenarios := []struct {
+		inputCmdLine   string
+		shouldBeParsed bool
+		shouldBeValid  bool
+	}{
+		{ // 0
+			inputCmdLine:   "-plugin-ip=1.2.3.4 --grpc-port=456 --log-level=warning",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+		{ // 1
+			inputCmdLine:   "-plugin-ip=1.2.3.56 --log-level=4 --grpc-ping-timeout=5s --grpc-ping-max-missed=3 --plugin-config={}",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+		{ // 2
+			inputCmdLine:   "",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+		{ // 3
+			inputCmdLine:   "--grpc-port=abc",
+			shouldBeParsed: false,
+			shouldBeValid:  false,
+		},
+		{ // 4
+			inputCmdLine:   "--debug-level=invalid",
+			shouldBeParsed: false,
+			shouldBeValid:  false,
+		},
+		{ // 5
+			inputCmdLine:   "--debug-level=8",
+			shouldBeParsed: false,
+			shouldBeValid:  false,
+		},
+		{ // 6
+			inputCmdLine:   "--plugin-ip=1.2.3.4.5",
+			shouldBeParsed: true,
+			shouldBeValid:  false,
+		},
+		{ // 7
+			inputCmdLine:   "--pprof-port=5678",
+			shouldBeParsed: true,
+			shouldBeValid:  false,
+		},
+		{ // 8
+			inputCmdLine:   "--enable-profiling=1 --pprof-port=5678",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+		{ // 9
+			inputCmdLine:   "--stats-port=5678",
+			shouldBeParsed: true,
+			shouldBeValid:  false,
+		},
+		{ // 10
+			inputCmdLine:   "--enable-stats=1 --enable-stats-server=1 --stats-port=5678",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+		{ // 11
+			inputCmdLine:   "--debug-collect-counts=11",
+			shouldBeParsed: true,
+			shouldBeValid:  false,
+		},
+		{ // 12
+			inputCmdLine:   "--debug-mode=1 --debug-collect-counts=11",
+			shouldBeParsed: true,
+			shouldBeValid:  true,
+		},
+	}
+
 	Convey("Validate that options can be parsed", t, func() {
 		for i, testCase := range parseScenarios {
 			Convey(fmt.Sprintf("Scenario %d [%s]", i, testCase.inputCmdLine), func() {
@@ -131,6 +130,46 @@ func TestParseCmdLineOptions(t *testing.T) {
 					}
 				} else {
 					So(err, ShouldBeError)
+				}
+			})
+		}
+	})
+}
+
+func TestAddEnvOptions(t *testing.T) {
+	testCases := []struct {
+		name    string
+		environ []string
+		opt     *plugin.Options
+		wantOpt *plugin.Options
+		wantErr string
+	}{
+		{
+			"chunk size",
+			[]string{
+				"SNAP_PLUGIN_OPT_COLLECT_CHUNK_SIZE=15",
+			},
+			nil,
+			&plugin.Options{
+				LogLevel:         defaultLogLevel,
+				CollectChunkSize: 15,
+			},
+			"",
+		},
+	}
+
+	Convey("Validate that environmental variables are parsed and applied to options", t, func() {
+		for _, tc := range testCases {
+			Convey(fmt.Sprintf("Scenario: %v", tc.name), func() {
+				opt, err := AddEnvOptions(tc.environ, tc.opt)
+
+				if tc.wantErr != "" {
+					So(err, ShouldBeError)
+					So(err.Error(), ShouldContainSubstring, tc.wantErr)
+				} else {
+					So(err, ShouldBeNil)
+
+					So(opt, ShouldResemble, tc.wantOpt)
 				}
 			})
 		}

@@ -29,10 +29,10 @@ import (
 type collectService struct {
 	proxy            CollectorProxy
 	ctx              context.Context
-	collectChunkSize uint
+	collectChunkSize uint64
 }
 
-func newCollectService(ctx context.Context, proxy CollectorProxy, collectChunkSize uint) pluginrpc.CollectorServer {
+func newCollectService(ctx context.Context, proxy CollectorProxy, collectChunkSize uint64) pluginrpc.CollectorServer {
 	return &collectService{
 		ctx:              ctx,
 		proxy:            proxy,
