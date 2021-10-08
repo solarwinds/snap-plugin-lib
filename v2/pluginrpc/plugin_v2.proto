@@ -129,7 +129,6 @@ message Metric {
     string description = 5;
     string unit = 6;
     MetricType type = 7;
-
 }
 
 message Namespace {
