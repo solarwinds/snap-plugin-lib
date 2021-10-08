@@ -1009,13 +1009,13 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 	var err error
 
 	Convey("Validate AddMetrics won't return errors", c.t, func() {
-		err = ctx.AddMetric("/coll/otel/default", 10)
+		err = ctx.AddMetric("/coll/otel/default", 10) // result in mts.MetricSet[0]
 		So(err, ShouldBeNil)
 
-		err = ctx.AddMetric("/coll/otel/gauge", 10.5, plugin.MetricTypeGauge())
+		err = ctx.AddMetric("/coll/otel/gauge", 10.5, plugin.MetricTypeGauge()) // result in mts.MetricSet[1]
 		So(err, ShouldBeNil)
 
-		err = ctx.AddMetric("/coll/otel/counter", 67, plugin.MetricTypeCounter())
+		err = ctx.AddMetric("/coll/otel/counter", 67, plugin.MetricTypeCounter()) // result in mts.MetricSet[2]
 		So(err, ShouldBeNil)
 
 		counter := plugin.Summary{
@@ -1023,10 +1023,10 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 			Sum:   3.54,
 		}
 
-		err = ctx.AddMetric("/coll/otel/summary", counter, plugin.MetricTypeSummary())
+		err = ctx.AddMetric("/coll/otel/summary", counter, plugin.MetricTypeSummary()) // result in mts.MetricSet[3]
 		So(err, ShouldBeNil)
 
-		err = ctx.AddMetric("/coll/otel/summary_ptr", &counter, plugin.MetricTypeSummary())
+		err = ctx.AddMetric("/coll/otel/summary_ptr", &counter, plugin.MetricTypeSummary()) // result in mts.MetricSet[4]
 		So(err, ShouldBeNil)
 
 		histogram := plugin.Histogram{
@@ -1043,10 +1043,10 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 			Sum:   50,
 		}
 
-		err = ctx.AddMetric("/coll/otel/histogram", histogram, plugin.MetricTypeHistogram())
+		err = ctx.AddMetric("/coll/otel/histogram", histogram, plugin.MetricTypeHistogram()) // result in mts.MetricSet[5]
 		So(err, ShouldBeNil)
 
-		err = ctx.AddMetric("/coll/otel/histogram_ptr", &histogram, plugin.MetricTypeHistogram())
+		err = ctx.AddMetric("/coll/otel/histogram_ptr", &histogram, plugin.MetricTypeHistogram()) // result in mts.MetricSet[6]
 		So(err, ShouldBeNil)
 	})
 
@@ -1080,24 +1080,18 @@ func (s *SuiteT) TestCollectingOTELTypes() {
 		So(mts.MetricSet[2].Type, ShouldEqual, pluginrpc.MetricType_COUNTER)
 		So(mts.MetricSet[2].Value.GetVInt64(), ShouldEqual, 67)
 
-		So(mts.MetricSet[3].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
-		So(mts.MetricSet[3].Value.GetVSummary().Sum, ShouldEqual, 3.54)
-		So(mts.MetricSet[3].Value.GetVSummary().Count, ShouldEqual, 14)
+		for _, i := range []int{3, 4} {
+			So(mts.MetricSet[i].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+			So(mts.MetricSet[i].Value.GetVSummary().Sum, ShouldEqual, 3.54)
+			So(mts.MetricSet[i].Value.GetVSummary().Count, ShouldEqual, 14)
+		}
 
-		So(mts.MetricSet[4].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
-		So(mts.MetricSet[4].Value.GetVSummary().Sum, ShouldEqual, 3.54)
-		So(mts.MetricSet[4].Value.GetVSummary().Count, ShouldEqual, 14)
-
-		So(mts.MetricSet[5].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
-		So(mts.MetricSet[5].Value.GetVHistogram().Sum, ShouldEqual, 50)
-		So(mts.MetricSet[5].Value.GetVHistogram().Count, ShouldEqual, 10)
-		So(mts.MetricSet[5].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
-		So(mts.MetricSet[5].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
-
-		So(mts.MetricSet[6].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
-		So(mts.MetricSet[6].Value.GetVHistogram().Sum, ShouldEqual, 50)
-		So(mts.MetricSet[6].Value.GetVHistogram().Count, ShouldEqual, 10)
-		So(mts.MetricSet[6].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
-		So(mts.MetricSet[6].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
+		for _, i := range []int{5, 6} {
+			So(mts.MetricSet[i].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
+			So(mts.MetricSet[i].Value.GetVHistogram().Sum, ShouldEqual, 50)
+			So(mts.MetricSet[i].Value.GetVHistogram().Count, ShouldEqual, 10)
+			So(mts.MetricSet[i].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
+			So(mts.MetricSet[i].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
+		}
 	})
 }
