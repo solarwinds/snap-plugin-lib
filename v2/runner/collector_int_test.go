@@ -1071,7 +1071,20 @@ func (s *SuiteT) TestCollectingOTELTypes() {
 		So(mts.MetricSet, ShouldNotBeNil)
 		So(len(mts.MetricSet), ShouldEqual, 7)
 
-		//So(mts.MetricSet[0].Type_, ShouldEqual, gauge) // todo: adamik
+		So(mts.MetricSet[0].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
+		So(mts.MetricSet[0].Value.GetVInt64(), ShouldEqual, 10)
 
+		So(mts.MetricSet[1].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
+		So(mts.MetricSet[1].Value.GetVDouble(), ShouldEqual, 10.5)
+
+		So(mts.MetricSet[2].Type, ShouldEqual, pluginrpc.MetricType_COUNTER)
+		So(mts.MetricSet[2].Value.GetVInt64(), ShouldEqual, 67)
+
+		So(mts.MetricSet[3].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+
+		So(mts.MetricSet[4].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+
+		So(mts.MetricSet[5].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
+		So(mts.MetricSet[6].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
 	})
 }
