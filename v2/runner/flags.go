@@ -17,6 +17,7 @@
 package runner
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -214,11 +215,9 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	return opt, nil
 }
 
-func AddEnvOptions(environ []string, opt *plugin.Options) (*plugin.Options, error) {
+func ParseEnvOptions(environ []string, opt *plugin.Options) (*plugin.Options, error) {
 	if opt == nil {
-		opt = &plugin.Options{
-			LogLevel: defaultLogLevel,
-		}
+		return nil, errors.New("empty options")
 	}
 
 	for _, e := range environ {

@@ -136,7 +136,7 @@ func TestParseCmdLineOptions(t *testing.T) {
 	})
 }
 
-func TestAddEnvOptions(t *testing.T) {
+func TestParseEnvOptions(t *testing.T) {
 	testCases := []struct {
 		name    string
 		environ []string
@@ -149,9 +149,8 @@ func TestAddEnvOptions(t *testing.T) {
 			[]string{
 				"SNAP_PLUGIN_OPT_COLLECT_CHUNK_SIZE=15",
 			},
-			nil,
+			&plugin.Options{},
 			&plugin.Options{
-				LogLevel:         defaultLogLevel,
 				CollectChunkSize: 15,
 			},
 			"",
@@ -161,7 +160,7 @@ func TestAddEnvOptions(t *testing.T) {
 	Convey("Validate that environmental variables are parsed and applied to options", t, func() {
 		for _, tc := range testCases {
 			Convey(fmt.Sprintf("Scenario: %v", tc.name), func() {
-				opt, err := AddEnvOptions(tc.environ, tc.opt)
+				opt, err := ParseEnvOptions(tc.environ, tc.opt)
 
 				if tc.wantErr != "" {
 					So(err, ShouldBeError)
