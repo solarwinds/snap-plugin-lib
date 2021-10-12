@@ -223,8 +223,8 @@ func ParseEnvOptions(environ []string, opt *plugin.Options) (*plugin.Options, er
 	for _, e := range environ {
 		pair := strings.SplitN(e, "=", 2)
 
-		if strings.HasPrefix(pair[0], envOptionPrefix) {
-			key := strings.TrimPrefix(pair[0], envOptionPrefix)
+		if strings.HasPrefix(pair[0], EnvOptionPrefix) {
+			key := strings.TrimPrefix(pair[0], EnvOptionPrefix)
 			val := pair[1]
 
 			var err error
