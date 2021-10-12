@@ -111,7 +111,7 @@ func toGRPCMetricType(t plugin.MetricType) pluginrpc.MetricType {
 	case plugin.GaugeType:
 		return pluginrpc.MetricType_GAUGE
 	case plugin.SumType:
-		return pluginrpc.MetricType_COUNTER
+		return pluginrpc.MetricType_SUM
 	case plugin.SummaryType:
 		return pluginrpc.MetricType_SUMMARY
 	case plugin.HistogramType:
@@ -127,7 +127,7 @@ func fromGRPCMetricType(t pluginrpc.MetricType) (plugin.MetricType, error) {
 		return plugin.UnknownType, nil
 	case pluginrpc.MetricType_GAUGE:
 		return plugin.GaugeType, nil
-	case pluginrpc.MetricType_COUNTER:
+	case pluginrpc.MetricType_SUM:
 		return plugin.SumType, nil
 	case pluginrpc.MetricType_SUMMARY:
 		return plugin.SummaryType, nil
