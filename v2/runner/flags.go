@@ -49,7 +49,7 @@ const (
 
 	filterSeparator = ";"
 
-	envOptionPrefix = "SNAP_PLUGIN_OPT_"
+	EnvOptionPrefix = "SNAP_PLUGIN_OPT_"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
