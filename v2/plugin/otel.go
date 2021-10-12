@@ -21,7 +21,7 @@ type MetricType int
 const (
 	UnknownType MetricType = iota
 	GaugeType
-	CounterType
+	SumType
 	SummaryType
 	HistogramType
 )

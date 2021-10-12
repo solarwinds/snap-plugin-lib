@@ -66,9 +66,9 @@ func MetricTypeGauge() MetricModifier {
 	}
 }
 
-func MetricTypeCounter() MetricModifier {
+func MetricTypeSum() MetricModifier {
 	return &metricType{
-		type_: CounterType,
+		type_: SumType,
 	}
 }
 

@@ -116,7 +116,7 @@ message UnloadPublisherResponse {
 enum MetricType {
     UNKNOWN = 0;
     GAUGE = 1;
-    COUNTER = 2;
+    SUM = 2;
     SUMMARY = 3;
     HISTOGRAM = 4;
 }

@@ -1015,7 +1015,7 @@ func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
 		err = ctx.AddMetric("/coll/otel/gauge", 10.5, plugin.MetricTypeGauge()) // result in mts.MetricSet[1]
 		So(err, ShouldBeNil)
 
-		err = ctx.AddMetric("/coll/otel/counter", 67, plugin.MetricTypeCounter()) // result in mts.MetricSet[2]
+		err = ctx.AddMetric("/coll/otel/sum", 67, plugin.MetricTypeSum()) // result in mts.MetricSet[2]
 		So(err, ShouldBeNil)
 
 		counter := plugin.Summary{
@@ -1077,7 +1077,7 @@ func (s *SuiteT) TestCollectingOTELTypes() {
 		So(mts.MetricSet[1].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
 		So(mts.MetricSet[1].Value.GetVDouble(), ShouldEqual, 10.5)
 
-		So(mts.MetricSet[2].Type, ShouldEqual, pluginrpc.MetricType_COUNTER)
+		So(mts.MetricSet[2].Type, ShouldEqual, pluginrpc.MetricType_SUM)
 		So(mts.MetricSet[2].Value.GetVInt64(), ShouldEqual, 67)
 
 		for _, i := range []int{3, 4} {
