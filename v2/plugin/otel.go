@@ -32,6 +32,7 @@ type Histogram struct {
 	Sum        float64
 }
 
+// TODO: https://swicloud.atlassian.net/browse/AO-20547: Add support for Summary Quantiles
 type Summary struct {
 	Count int
 	Sum   float64
