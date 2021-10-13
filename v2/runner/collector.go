@@ -83,9 +83,15 @@ func startCollector(ctx context.Context, collector types.Collector) {
 	if opt == nil {
 		opt, err = ParseCmdLineOptions(os.Args[0], types.PluginTypeCollector, os.Args[1:])
 		if err != nil {
-			logF.WithError(err).Error("Error occured during plugin startup")
+			logF.WithError(err).Error("Error occurred during plugin startup while parsing commandline options")
 			os.Exit(errorExitStatus)
 		}
+	}
+
+	opt, err = ParseEnvOptions(os.Environ(), opt)
+	if err != nil {
+		logF.WithError(err).Error("Error occurred during plugin startup while parsing env")
+		os.Exit(errorExitStatus)
 	}
 
 	err = ValidateOptions(opt)
@@ -152,7 +158,7 @@ func startCollector(ctx context.Context, collector types.Collector) {
 		}
 
 		// main blocking operation
-		service.StartCollectorGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed)
+		service.StartCollectorGRPC(ctx, srv, ctxMan, r.grpcListener, opt.GRPCPingTimeout, opt.GRPCPingMaxMissed, opt.CollectChunkSize)
 	}
 }
 

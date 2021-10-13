@@ -26,19 +26,17 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 )
 
-const (
-	maxCollectChunkSize = 100
-)
-
 type collectService struct {
-	proxy CollectorProxy
-	ctx   context.Context
+	proxy            CollectorProxy
+	ctx              context.Context
+	collectChunkSize uint64
 }
 
-func newCollectService(ctx context.Context, proxy CollectorProxy) pluginrpc.CollectorServer {
+func newCollectService(ctx context.Context, proxy CollectorProxy, collectChunkSize uint64) pluginrpc.CollectorServer {
 	return &collectService{
-		proxy: proxy,
-		ctx:   ctx,
+		ctx:              ctx,
+		proxy:            proxy,
+		collectChunkSize: collectChunkSize,
 	}
 }
 
@@ -135,7 +133,7 @@ func (cs *collectService) sendWarnings(stream pluginrpc.Collector_CollectServer,
 func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, pluginMts []*types.Metric) error {
 	logF := cs.logger()
 
-	protoMts := make([]*pluginrpc.Metric, 0, maxCollectChunkSize)
+	protoMts := make([]*pluginrpc.Metric, 0, cs.collectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
 
@@ -145,7 +143,7 @@ func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, 
 			protoMts = append(protoMts, protoMt)
 		}
 
-		if len(protoMts) == maxCollectChunkSize || i == len(pluginMts)-1 {
+		if len(protoMts) == int(cs.collectChunkSize) || i == len(pluginMts)-1 {
 			err = stream.Send(&pluginrpc.CollectResponse{
 				MetricSet: protoMts,
 			})
