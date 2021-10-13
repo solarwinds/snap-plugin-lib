@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ type Options struct {
 	GRPCPort          int
 	GRPCPingTimeout   time.Duration
 	GRPCPingMaxMissed uint
-	AsThread          bool
 
 	EnableTLS         bool // GRPC Server
 	TLSServerCertPath string
@@ -38,11 +37,15 @@ type Options struct {
 
 	LogLevel          logrus.Level
 	EnableProfiling   bool
+	PProfPort         int  `json:",omitempty"`
 	EnableStats       bool // enable calculation statistics
 	EnableStatsServer bool // if true, start statistics HTTP server
-	PProfPort         int  `json:",omitempty"`
 	StatsPort         int  `json:",omitempty"`
-	UseAPIv2          bool
+
+	UseAPIv2 bool
+	AsThread bool
+
+	CollectChunkSize uint64
 
 	PrintExampleTask     bool          `json:"-"`
 	DebugMode            bool          `json:"-"`

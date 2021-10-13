@@ -17,6 +17,7 @@
 package runner
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net"
@@ -37,14 +38,18 @@ const (
 	defaultPProfPort = 0
 	defaultStatsPort = 0
 
-	defaultConfig          = "{}"
-	defaultFilter          = ""
-	defaultCollectInterval = 5 * time.Second
-	defaultCollectCount    = 1
+	defaultConfig = "{}"
+	defaultFilter = ""
+
+	defaultCollectInterval  = 5 * time.Second
+	defaultCollectCount     = 1
+	defaultCollectChunkSize = 100
 
 	defaultLogLevel = logrus.WarnLevel
 
 	filterSeparator = ";"
+
+	EnvOptionPrefix = "SNAP_PLUGIN_OPT_"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,6 +142,10 @@ func newFlagParser(name string, pType types.PluginType, opt *plugin.Options) *fl
 			"debug-collect-interval", defaultCollectInterval,
 			"Interval between consecutive collect requests")
 
+		flagParser.Uint64Var(&opt.CollectChunkSize,
+			"collect-chunk-size", defaultCollectChunkSize,
+			"Collected metrics chunk size")
+
 		flagParser.StringVar(&opt.PluginConfig,
 			"plugin-config", defaultConfig,
 			"Collector configuration in debug mode")
@@ -206,6 +215,32 @@ func ParseCmdLineOptions(pluginName string, pluginType types.PluginType, args []
 	return opt, nil
 }
 
+func ParseEnvOptions(environ []string, opt *plugin.Options) (*plugin.Options, error) {
+	if opt == nil {
+		return nil, errors.New("empty options")
+	}
+
+	for _, e := range environ {
+		pair := strings.SplitN(e, "=", 2)
+
+		if strings.HasPrefix(pair[0], EnvOptionPrefix) {
+			key := strings.TrimPrefix(pair[0], EnvOptionPrefix)
+			val := pair[1]
+
+			var err error
+			switch key {
+			case "COLLECT_CHUNK_SIZE":
+				opt.CollectChunkSize, err = strconv.ParseUint(val, 10, 0)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse %v: %w", key, err)
+			}
+		}
+	}
+
+	return opt, nil
+}
+
 func ValidateOptions(opt *plugin.Options) error {
 	if opt.DebugCollectCounts == 0 {
 		opt.DebugCollectCounts = defaultCollectCount
@@ -221,6 +256,10 @@ func ValidateOptions(opt *plugin.Options) error {
 
 	if opt.PluginFilter == "" {
 		opt.PluginFilter = defaultFilter
+	}
+
+	if opt.CollectChunkSize <= 0 {
+		return fmt.Errorf("-collect-chunk-size should be > 0")
 	}
 
 	grpcIp := net.ParseIP(opt.PluginIP)

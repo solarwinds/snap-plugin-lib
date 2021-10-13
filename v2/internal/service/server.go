@@ -6,7 +6,7 @@ Package rpc:
 */
 
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ func NewGRPCServer(ctx context.Context, opt *plugin.Options) (Server, error) {
 	return grpc.NewServer(grpc.Creds(tlsCreds)), nil
 }
 
-func StartCollectorGRPC(ctx context.Context, srv Server, proxy CollectorProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint) {
-	pluginrpc.RegisterHandlerCollector(srv, newCollectService(ctx, proxy))
+func StartCollectorGRPC(ctx context.Context, srv Server, proxy CollectorProxy, grpcLn net.Listener, pingTimeout time.Duration, pingMaxMissedCount uint, collectChunkSize uint64) {
+	pluginrpc.RegisterHandlerCollector(srv, newCollectService(ctx, proxy, collectChunkSize))
 	startGRPC(ctx, srv, grpcLn, pingTimeout, pingMaxMissedCount)
 }
 
