@@ -193,14 +193,14 @@ _go_test() {
     pushd "${dir}"
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
-      go test -v --failfast --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" ./...
+      go test -v --failfast --tags="${TEST_TYPE}" -covermode=count -coverprofile="profile.tmp" .
       if [ -f "profile.tmp" ]; then
         tail -n +2 "profile.tmp" >> profile.cov
         rm "profile.tmp"
       fi
     else
       _debug "running go test without cover in ${dir}"
-      go test -v --failfast --tags="${TEST_TYPE}" ./...
+      go test -v --failfast --tags="${TEST_TYPE}" .
     fi
     popd
   done
