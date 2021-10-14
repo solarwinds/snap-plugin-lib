@@ -41,9 +41,12 @@ test-small:
 	bash -c "./scripts/test.sh small"
 test-medium:
 	bash -c "./scripts/test.sh medium"
+test-tutorial:
+	bash -c "./scripts/test.sh tutorial"
 test-all:
 	$(MAKE) test-small
 	$(MAKE) test-medium
+	$(MAKE) test-tutorial
 check:
 	$(MAKE) test
 
