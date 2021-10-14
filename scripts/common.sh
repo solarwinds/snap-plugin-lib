@@ -80,6 +80,12 @@ _test_dirs() {
   echo "${test_dirs}"
 }
 
+_mod_dirs() {
+  local mod_dirs=$(for d in $(find . -type f -name 'go.mod' -exec dirname {} \; ) ; do echo $d | sed 's#^.$#./v1#'; done)
+  _debug "go module directories ${mod_dirs}"
+  echo "${mod_dirs}"
+}
+
 _go_install() {
   local _url=$1
   local _util
@@ -188,7 +194,7 @@ _go_license() {
 _go_test() {
   _info "running test type: ${TEST_TYPE}"
   # Standard go tooling behavior is to ignore dirs with leading underscores
-  for dir in $(_test_dirs);
+  for dir in $(_mod_dirs);
   do
     if [[ -z ${go_cover+x} ]]; then
       _debug "running go test with cover in ${dir}"
