@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package plugin
 
-import "time"
+import (
+	"time"
+)
 
 type MetricModifier interface {
 	UpdateMetric(mt MetricSetter)
@@ -55,6 +57,30 @@ func MetricDescription(description string) MetricModifier {
 func MetricUnit(unit string) MetricModifier {
 	return &metricUnit{
 		unit: unit,
+	}
+}
+
+func MetricTypeGauge() MetricModifier {
+	return &metricType{
+		type_: GaugeType,
+	}
+}
+
+func MetricTypeSum() MetricModifier {
+	return &metricType{
+		type_: SumType,
+	}
+}
+
+func MetricTypeSummary() MetricModifier {
+	return &metricType{
+		type_: SummaryType,
+	}
+}
+
+func MetricTypeHistogram() MetricModifier {
+	return &metricType{
+		type_: HistogramType,
 	}
 }
 
@@ -98,4 +124,12 @@ type metricUnit struct {
 
 func (m metricUnit) UpdateMetric(mt MetricSetter) {
 	mt.SetUnit(m.unit)
+}
+
+type metricType struct {
+	type_ MetricType
+}
+
+func (m metricType) UpdateMetric(mt MetricSetter) {
+	mt.SetType(m.type_)
 }

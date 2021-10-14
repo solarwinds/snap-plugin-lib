@@ -284,6 +284,10 @@ func (pc *PluginContext) isValidValueType(value interface{}) bool {
 	case int16:
 	case uint16:
 	case nil:
+	case plugin.Summary:
+	case *plugin.Summary:
+	case plugin.Histogram:
+	case *plugin.Histogram:
 	default:
 		return false
 	}

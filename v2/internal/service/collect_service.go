@@ -136,6 +136,7 @@ func (cs *collectService) sendMetrics(stream pluginrpc.Collector_CollectServer, 
 	protoMts := make([]*pluginrpc.Metric, 0, cs.collectChunkSize)
 	for i, pluginMt := range pluginMts {
 		protoMt, err := toGRPCMetric(pluginMt)
+
 		if err != nil {
 			logF.WithError(err).WithField("metric", pluginMt.Namespace).Errorf("can't send metric over GRPC")
 		} else {

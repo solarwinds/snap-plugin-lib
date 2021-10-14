@@ -18,9 +18,11 @@ package service
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/solarwinds/snap-plugin-lib/v2/internal/util/types"
+	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 )
 
@@ -35,6 +37,7 @@ func toGRPCMetric(mt *types.Metric) (*pluginrpc.Metric, error) {
 		Namespace:   toGRPCNamespace(mt.Namespace_),
 		Tags:        mt.Tags_,
 		Value:       value,
+		Type:        toGRPCMetricType(mt.Type_),
 		Unit:        mt.Unit_,
 		Timestamp:   toGRPCTime(mt.Timestamp_),
 		Description: mt.Description_,
@@ -46,7 +49,12 @@ func toGRPCMetric(mt *types.Metric) (*pluginrpc.Metric, error) {
 func fromGRPCMetric(mt *pluginrpc.Metric) (types.Metric, error) {
 	data, err := fromGRPCValue(mt.Value)
 	if err != nil {
-		return types.Metric{}, fmt.Errorf("can't convert metric from GRPC structure: %v", err)
+		return types.Metric{}, fmt.Errorf("can't convert metric value from GRPC structure: %w", err)
+	}
+
+	typ, err := fromGRPCMetricType(mt.Type)
+	if err != nil {
+		return types.Metric{}, fmt.Errorf("can't convert metric type from GRPC structure: %w", err)
 	}
 
 	tags := map[string]string{}
@@ -59,6 +67,7 @@ func fromGRPCMetric(mt *pluginrpc.Metric) (types.Metric, error) {
 		Value_:       data,
 		Tags_:        tags,
 		Unit_:        mt.Unit,
+		Type_:        typ,
 		Timestamp_:   fromGRPCTime(mt.Timestamp),
 		Description_: mt.Description,
 	}
@@ -93,6 +102,40 @@ func fromGRPCNamespace(ns []*pluginrpc.Namespace) []types.NamespaceElement {
 	}
 
 	return retNsElem
+}
+
+func toGRPCMetricType(t plugin.MetricType) pluginrpc.MetricType {
+	switch t {
+	case plugin.UnknownType:
+		return pluginrpc.MetricType_UNKNOWN
+	case plugin.GaugeType:
+		return pluginrpc.MetricType_GAUGE
+	case plugin.SumType:
+		return pluginrpc.MetricType_SUM
+	case plugin.SummaryType:
+		return pluginrpc.MetricType_SUMMARY
+	case plugin.HistogramType:
+		return pluginrpc.MetricType_HISTOGRAM
+	}
+
+	return 0
+}
+
+func fromGRPCMetricType(t pluginrpc.MetricType) (plugin.MetricType, error) {
+	switch t {
+	case pluginrpc.MetricType_UNKNOWN:
+		return plugin.UnknownType, nil
+	case pluginrpc.MetricType_GAUGE:
+		return plugin.GaugeType, nil
+	case pluginrpc.MetricType_SUM:
+		return plugin.SumType, nil
+	case pluginrpc.MetricType_SUMMARY:
+		return plugin.SummaryType, nil
+	case pluginrpc.MetricType_HISTOGRAM:
+		return plugin.HistogramType, nil
+	default:
+		return 0, fmt.Errorf("unknown metric type: %d (%s)", t, t.String())
+	}
 }
 
 func toGRPCTime(t time.Time) *pluginrpc.Time {
@@ -138,6 +181,14 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VInt16{VInt16: int32(t)}
 	case uint16:
 		grpcValue.DataVariant = &pluginrpc.MetricValue_VUint16{VUint16: uint32(t)}
+	case plugin.Summary:
+		grpcValue.DataVariant = toGRPCValueSummary(&t)
+	case *plugin.Summary:
+		grpcValue.DataVariant = toGRPCValueSummary(t)
+	case plugin.Histogram:
+		grpcValue.DataVariant = toGRPCValueHistogram(&t)
+	case *plugin.Histogram:
+		grpcValue.DataVariant = toGRPCValueHistogram(t)
 	case nil:
 		grpcValue.DataVariant = nil
 	default:
@@ -145,6 +196,34 @@ func toGRPCValue(v interface{}) (*pluginrpc.MetricValue, error) {
 	}
 
 	return grpcValue, nil
+}
+
+func toGRPCValueSummary(t *plugin.Summary) *pluginrpc.MetricValue_VSummary {
+	return &pluginrpc.MetricValue_VSummary{VSummary: &pluginrpc.Summary{
+		Count: int64(t.Count),
+		Sum:   t.Sum,
+	}}
+}
+
+func toGRPCValueHistogram(t *plugin.Histogram) *pluginrpc.MetricValue_VHistogram {
+	var bounds []float64
+	var values []float64
+
+	for b := range t.DataPoints {
+		bounds = append(bounds, b)
+	}
+	sort.Float64s(bounds)
+
+	for _, b := range bounds {
+		values = append(values, t.DataPoints[b])
+	}
+
+	return &pluginrpc.MetricValue_VHistogram{VHistogram: &pluginrpc.Histogram{
+		Count:  int64(t.Count),
+		Sum:    t.Sum,
+		Bounds: bounds,
+		Values: values,
+	}}
 }
 
 func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
@@ -171,6 +250,35 @@ func fromGRPCValue(v *pluginrpc.MetricValue) (interface{}, error) {
 		return int16(v.GetVInt16()), nil
 	case *pluginrpc.MetricValue_VUint16:
 		return uint16(v.GetVUint16()), nil
+	case *pluginrpc.MetricValue_VSummary:
+		summary := v.GetVSummary()
+		return plugin.Summary{
+			Count: int(summary.GetCount()),
+			Sum:   summary.GetSum(),
+		}, nil
+	case *pluginrpc.MetricValue_VHistogram:
+		histogram := v.GetVHistogram()
+		dataPoints := map[float64]float64{}
+
+		bounds := histogram.GetBounds()
+		values := histogram.GetValues()
+		boundsLen := len(bounds)
+		valuesLen := len(values)
+
+		if boundsLen != valuesLen {
+			return nil, fmt.Errorf("invalid histogram data: bounds and values count not equal (%d != %d)",
+				boundsLen, valuesLen)
+		}
+
+		for i := 0; i < boundsLen; i++ {
+			dataPoints[bounds[i]] = values[i]
+		}
+
+		return plugin.Histogram{
+			Count:      int(histogram.GetCount()),
+			Sum:        histogram.GetSum(),
+			DataPoints: dataPoints,
+		}, nil
 	}
 
 	return nil, fmt.Errorf("unknown type of metric value: %T", v.DataVariant)
