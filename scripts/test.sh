@@ -51,7 +51,7 @@ _debug "script directory ${__dir}"
 _debug "project directory ${__proj_dir}"
 _info "skipping go test in following directories: ${NO_GO_TEST}"
 
-[[ "$TEST_TYPE" =~ ^(lint|small|medium|large|deploy|build)$ ]] || _error "invalid TEST_TYPE (value must be 'lint', 'small', 'medium', 'large', 'deploy', or 'build' recieved:${TEST_TYPE}"
+[[ "$TEST_TYPE" =~ ^(lint|small|medium|large|tutorial|deploy|build)$ ]] || _error "invalid TEST_TYPE (value must be 'lint', 'small', 'medium', 'large', 'tutorial', 'deploy', or 'build' recieved:${TEST_TYPE}"
 
 lint() {
   # This function runs various linters and static analysis tools
@@ -121,4 +121,13 @@ elif [[ $TEST_TYPE == "medium" ]]; then
     echo "mode: count" > profile.cov
     test_unit
   fi
+elif [[ $TEST_TYPE == "tutorial" ]]; then
+  if [[ -f "${__dir}/tutorial.sh" ]]; then
+    . "${__dir}/tutorial.sh"
+  else
+    echo "mode: count" > profile.cov
+    test_unit
+  fi
 fi
+
+

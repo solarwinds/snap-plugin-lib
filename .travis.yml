@@ -19,6 +19,7 @@ env:
     - TEST_TYPE=build
     - TEST_TYPE=small
     - TEST_TYPE=medium
+    - TEST_TYPE=tutorial
   
 cache:
   directories:
@@ -45,4 +46,4 @@ stages:
   - name: build
     if: env(TEST_TYPE) IS "build"
   - name: test
-    if: env(TEST_TYPE) IN ("small", "medium")
+    if: env(TEST_TYPE) IN ("small", "medium", "tutorial")

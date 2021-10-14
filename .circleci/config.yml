@@ -46,7 +46,10 @@ jobs:
           name: "Run medium test"
           command: >
             TEST_TYPE="medium" make check 2>&1
-
+      - run:
+          name: "Run tutorial test"
+          command: >
+            TEST_TYPE="tutorial" make check 2>&1
 workflows:
   tests:
     jobs:
