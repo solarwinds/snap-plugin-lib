@@ -259,7 +259,7 @@ func ValidateOptions(opt *plugin.Options) error {
 	}
 
 	if opt.CollectChunkSize <= 0 {
-		return fmt.Errorf("-collect-chunk-size should be > 0")
+		opt.CollectChunkSize = defaultCollectChunkSize
 	}
 
 	grpcIp := net.ParseIP(opt.PluginIP)
