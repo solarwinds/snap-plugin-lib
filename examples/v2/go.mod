@@ -6,6 +6,7 @@ require (
 	github.com/josephspurrier/goversioninfo v1.3.0
 	github.com/securego/gosec/v2 v2.8.1
 	github.com/sirupsen/logrus v1.8.0
+	github.com/solarwinds/grpchan v1.1.1 // indirect
 	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/tools v0.1.3

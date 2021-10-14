@@ -8,6 +8,7 @@ require (
 	github.com/josephspurrier/goversioninfo v1.3.0
 	github.com/securego/gosec/v2 v2.8.1
 	github.com/shirou/gopsutil v3.21.2+incompatible
+	github.com/solarwinds/grpchan v1.1.1 // indirect
 	github.com/solarwinds/snap-plugin-lib/v2 v2.0.4
 	github.com/stretchr/testify v1.7.0
 	github.com/tklauser/go-sysconf v0.3.4 // indirect

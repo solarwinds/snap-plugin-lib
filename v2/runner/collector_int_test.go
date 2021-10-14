@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"testing"
 	"time"
@@ -994,6 +995,103 @@ func (s *SuiteT) TestCollectorWithAlwaysApply() {
 				So(mts.MetricSet[8].Tags, ShouldResemble, map[string]string{"kb": "vb"})
 				So(mts.MetricSet[9].Tags, ShouldBeNil)
 			})
+		}
+	})
+}
+
+/*****************************************************************************/
+
+type collectorWithOTELMetrics struct {
+	t *testing.T
+}
+
+func (c *collectorWithOTELMetrics) Collect(ctx plugin.CollectContext) error {
+	var err error
+
+	Convey("Validate AddMetrics won't return errors", c.t, func() {
+		err = ctx.AddMetric("/coll/otel/default", 10) // result in mts.MetricSet[0]
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/gauge", 10.5, plugin.MetricTypeGauge()) // result in mts.MetricSet[1]
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/sum", 67, plugin.MetricTypeSum()) // result in mts.MetricSet[2]
+		So(err, ShouldBeNil)
+
+		counter := plugin.Summary{
+			Count: 14,
+			Sum:   3.54,
+		}
+
+		err = ctx.AddMetric("/coll/otel/summary", counter, plugin.MetricTypeSummary()) // result in mts.MetricSet[3]
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/summary_ptr", &counter, plugin.MetricTypeSummary()) // result in mts.MetricSet[4]
+		So(err, ShouldBeNil)
+
+		histogram := plugin.Histogram{
+			DataPoints: map[float64]float64{
+				0.10:        10,
+				0.20:        20,
+				0.50:        25,
+				1:           10,
+				5:           25,
+				10:          50,
+				math.Inf(1): 100,
+			},
+			Count: 10,
+			Sum:   50,
+		}
+
+		err = ctx.AddMetric("/coll/otel/histogram", histogram, plugin.MetricTypeHistogram()) // result in mts.MetricSet[5]
+		So(err, ShouldBeNil)
+
+		err = ctx.AddMetric("/coll/otel/histogram_ptr", &histogram, plugin.MetricTypeHistogram()) // result in mts.MetricSet[6]
+		So(err, ShouldBeNil)
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestCollectingOTELTypes() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	var mtsSelector []string
+
+	collector := &collectorWithOTELMetrics{t: s.T()}
+	ln := s.startCollector(collector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate collector can collect OTEL-types metrics", s.T(), func() {
+		_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+
+		mts, err := s.sendCollect("task-1")
+
+		So(err, ShouldBeNil)
+		So(mts.MetricSet, ShouldNotBeNil)
+		So(len(mts.MetricSet), ShouldEqual, 7)
+
+		So(mts.MetricSet[0].Type, ShouldEqual, pluginrpc.MetricType_UNKNOWN)
+		So(mts.MetricSet[0].Value.GetVInt64(), ShouldEqual, 10)
+
+		So(mts.MetricSet[1].Type, ShouldEqual, pluginrpc.MetricType_GAUGE)
+		So(mts.MetricSet[1].Value.GetVDouble(), ShouldEqual, 10.5)
+
+		So(mts.MetricSet[2].Type, ShouldEqual, pluginrpc.MetricType_SUM)
+		So(mts.MetricSet[2].Value.GetVInt64(), ShouldEqual, 67)
+
+		for _, i := range []int{3, 4} {
+			So(mts.MetricSet[i].Type, ShouldEqual, pluginrpc.MetricType_SUMMARY)
+			So(mts.MetricSet[i].Value.GetVSummary().Sum, ShouldEqual, 3.54)
+			So(mts.MetricSet[i].Value.GetVSummary().Count, ShouldEqual, 14)
+		}
+
+		for _, i := range []int{5, 6} {
+			So(mts.MetricSet[i].Type, ShouldEqual, pluginrpc.MetricType_HISTOGRAM)
+			So(mts.MetricSet[i].Value.GetVHistogram().Sum, ShouldEqual, 50)
+			So(mts.MetricSet[i].Value.GetVHistogram().Count, ShouldEqual, 10)
+			So(mts.MetricSet[i].Value.GetVHistogram().Bounds, ShouldResemble, []float64{0.10, 0.20, 0.50, 1, 5, 10, math.Inf(1)})
+			So(mts.MetricSet[i].Value.GetVHistogram().Values, ShouldResemble, []float64{10, 20, 25, 10, 25, 50, 100})
 		}
 	})
 }

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ type Metric struct {
 	Unit_        string
 	Timestamp_   time.Time
 	Description_ string
+	Type_        plugin.MetricType
 }
 
 func (m Metric) Namespace() plugin.Namespace {
@@ -60,6 +61,10 @@ func (m Metric) Unit() string {
 
 func (m Metric) Description() string {
 	return m.Description_
+}
+
+func (m Metric) Type() plugin.MetricType {
+	return m.Type_
 }
 
 func (m Metric) Timestamp() time.Time {
@@ -96,4 +101,8 @@ func (m *Metric) SetUnit(unit string) {
 
 func (m *Metric) SetTimestamp(timestamp time.Time) {
 	m.Timestamp_ = timestamp
+}
+
+func (m *Metric) SetType(type_ plugin.MetricType) {
+	m.Type_ = type_
 }

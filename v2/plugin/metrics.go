@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package plugin
 
-import "time"
+import (
+	"time"
+)
 
 // Representation of AppOptics measurement
 type Metric interface {
@@ -55,6 +57,9 @@ type MetricSetter interface {
 
 	// Set custom timestamp
 	SetTimestamp(time.Time)
+
+	// Set type
+	SetType(type_ MetricType)
 }
 
 // Representation of AppOptics measurement name
