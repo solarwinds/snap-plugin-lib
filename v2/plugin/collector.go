@@ -93,4 +93,6 @@ type CollectorDefinition interface {
 
 	// Allow metrics values not only on leaves but at any namespace level
 	AllowValuesAtAnyNamespaceLevel()
+
+	SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error
 }
