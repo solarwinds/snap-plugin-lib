@@ -1127,10 +1127,13 @@ func (c *collectorWithGlobalPrefix) PluginDefinition(ctx plugin.CollectorDefinit
 }
 
 func (c *collectorWithGlobalPrefix) Collect(ctx plugin.CollectContext) error {
-	ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/phase/Pending", 12)
-	ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/phase/Succeeded", 11)
-	ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/condition/ready", 7)
-	ctx.AddMetric("/rabbitmq/queue/count", 15)
+	Convey("Validate AddMetric", c.t, func() {
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/phase/Pending", 12), ShouldBeNil)
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/phase/Succeeded", 11), ShouldBeNil)
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/condition/ready", 7), ShouldBeNil)
+		So(ctx.AddMetric("/rabbitmq/queue/count", 15), ShouldBeNil)
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/condition/scheduled", 18), ShouldBeNil)
+	})
 
 	return nil
 }
@@ -1138,7 +1141,12 @@ func (c *collectorWithGlobalPrefix) Collect(ctx plugin.CollectContext) error {
 func (s *SuiteT) TestCollectorWithGlobalPrefix_RemoveFromOutput() {
 	// Arrange
 	jsonConfig := []byte(`{}`)
-	var mtsSelector []string
+	mtsSelector := []string{
+		"/kubernetes/pod/node1/*/*/status/phase/Pending",
+		"/kubernetes/pod/node1/*/*/status/phase/Succeeded",
+		"/kubernetes/pod/node1/ns1/pod1/status/condition/ready",
+		"/rabbitmq/**",
+	}
 
 	collector := &collectorWithGlobalPrefix{
 		t:                s.T(),
@@ -1154,7 +1162,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_RemoveFromOutput() {
 
 		mts, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
-		So(len(mts.MetricSet), ShouldEqual, 4)
+		So(len(mts.MetricSet), ShouldEqual, 4) // /kubernetes/pod/node1/ns1/pod1/status/condition/scheduled is filtered out
 
 		So(mts.MetricSet[0].Namespace[0].Value, ShouldEqual, "kubernetes")
 		So(mts.MetricSet[1].Namespace[0].Value, ShouldEqual, "kubernetes")
@@ -1182,7 +1190,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_LeaveInOutput() {
 
 		mts, err := s.sendCollect("task-1")
 		So(err, ShouldBeNil)
-		So(len(mts.MetricSet), ShouldEqual, 4)
+		So(len(mts.MetricSet), ShouldEqual, 5)
 
 		for i := 0; i < len(mts.MetricSet); i++ {
 			So(mts.MetricSet[i].Namespace[0].Value, ShouldEqual, "swi")
