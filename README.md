@@ -1,5 +1,6 @@
 # Snap Plugin Library
 
+
 Snap Plugin Library helps developers writing plugins (like collectors and publishers) that are able to work in Snap environment:
 * a collector is a small application whose role is to gather metrics from a monitored system (like CPU usage, db metrics, etc.)
 * a publisher is a small application whose role is to send metrics to a specific backend 
