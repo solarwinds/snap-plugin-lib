@@ -64,6 +64,12 @@ type metricMetadata struct {
 	unit        string
 }
 
+type globalPrefix struct {
+	enabled          bool
+	name             string
+	removeFromOutput bool
+}
+
 type ContextManager struct {
 	*commonProxy.ContextManager
 	ctx context.Context
@@ -77,6 +83,8 @@ type ContextManager struct {
 	groupsDescription map[string]string         // description associated with each group (dynamic element)
 
 	statsController stats.Controller // reference to statistics controller
+
+	globalPrefix globalPrefix
 }
 
 func NewContextManager(ctx context.Context, collector types.Collector, statsController stats.Controller) *ContextManager {
@@ -277,6 +285,10 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 			continue
 		}
 
+		if cm.globalPrefix.enabled {
+			mtFilter = fmt.Sprintf("%s%s", cm.globalPrefix.name, mtFilter)
+		}
+
 		err := newCtx.metricsFilters.AddRule(mtFilter)
 		if err != nil {
 			return fmt.Errorf("wrong filtering rule (%v): %v", mtFilter, err)
@@ -367,6 +379,10 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	logF := cm.logger()
 
+	if cm.globalPrefix.enabled {
+		ns = fmt.Sprintf("%s%s", cm.globalPrefix.name, ns)
+	}
+
 	err := cm.metricsDefinition.AddRule(ns)
 	if err != nil {
 		logF.WithFields(moduleFields).WithError(err).WithFields(logrus.Fields{"namespace": ns}).Fatal("Wrong metric definition")
@@ -390,6 +406,24 @@ func (cm *ContextManager) AllowUndefinedMetrics() {
 
 func (cm *ContextManager) AllowValuesAtAnyNamespaceLevel() {
 	cm.metricsDefinition.AllowValuesAtAnyNamespaceLevel()
+}
+
+func (cm *ContextManager) SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error {
+	if len(prefix) < 2 {
+		return fmt.Errorf("invalid prefix")
+	}
+
+	if len(cm.metricsDefinition.ListRules()) != 0 {
+		return fmt.Errorf("global prefix must be set before any metric definition is provided")
+	}
+
+	cm.globalPrefix = globalPrefix{
+		enabled:          true,
+		name:             prefix,
+		removeFromOutput: removePrefixFromOutput,
+	}
+
+	return nil
 }
 
 ///////////////////////////////////////////////////////////////////////////////

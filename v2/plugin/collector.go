@@ -93,4 +93,11 @@ type CollectorDefinition interface {
 
 	// Allow metrics values not only on leaves but at any namespace level
 	AllowValuesAtAnyNamespaceLevel()
+
+	// Set global namespace prefix for all metrics
+	// This is used by "swi" collector (plugins bundle) for metrics have different root names
+	// - prefix should contain separator, ie "/swi", "#swi"
+	// - removePrefixFromOutput set to true removes global prefix from all namespaces when result is to be sent to agent.
+	// !! Should be set before any call to DefineMetric
+	SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error
 }

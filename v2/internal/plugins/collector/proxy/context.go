@@ -94,6 +94,10 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 		return fmt.Errorf("invalid value type (%T) for metric: %s", v, ns)
 	}
 
+	if pc.ctxManager.globalPrefix.enabled {
+		ns = fmt.Sprintf("%s%s", pc.ctxManager.globalPrefix.name, ns)
+	}
+
 	if err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, false); err != nil {
 		return fmt.Errorf("invalid namespace (some elements can't be used when adding metric): %w", err)
 	}
@@ -256,6 +260,14 @@ func (pc *PluginContext) Metrics(clear bool) []*types.Metric {
 	if clear {
 		pc.sessionMts = nil
 	}
+
+	globalPrefix := pc.ctxManager.globalPrefix
+	if globalPrefix.enabled && globalPrefix.removeFromOutput {
+		for i := 0; i < len(mts); i++ {
+			mts[i].Namespace_ = mts[i].Namespace_[1:]
+		}
+	}
+
 	return mts
 }
 
