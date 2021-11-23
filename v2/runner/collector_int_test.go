@@ -1242,7 +1242,6 @@ func (c *collectorWithGlobalPrefixDifferentSeparators) Collect(ctx plugin.Collec
 	return nil
 }
 
-///\._@-#&^?'%|
 func (s *SuiteT) TestCollectorWithGlobalPrefix_DifferentSeparators() {
 	// Arrange
 	jsonConfig := []byte(`{}`)
