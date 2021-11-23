@@ -285,8 +285,12 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 			continue
 		}
 
+		if len(mtFilter) == 0 {
+			return fmt.Errorf("wrong filtering rule: empty string")
+		}
+
 		if cm.globalPrefix.enabled {
-			mtFilter = fmt.Sprintf("%s%s", cm.globalPrefix.name, mtFilter)
+			mtFilter = fmt.Sprintf("%s%s%s", string(mtFilter[0]), cm.globalPrefix.name, mtFilter)
 		}
 
 		err := newCtx.metricsFilters.AddRule(mtFilter)
@@ -379,8 +383,12 @@ func (cm *ContextManager) CustomInfo(id string) ([]byte, error) {
 func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, description string) {
 	logF := cm.logger()
 
+	if len(ns) == 0 {
+		logF.WithFields(moduleFields).WithFields(logrus.Fields{"namespace": ns}).Fatal("Empty metric definition")
+	}
+
 	if cm.globalPrefix.enabled {
-		ns = fmt.Sprintf("%s%s", cm.globalPrefix.name, ns)
+		ns = fmt.Sprintf("%s%s%s", string(ns[0]), cm.globalPrefix.name, ns)
 	}
 
 	err := cm.metricsDefinition.AddRule(ns)

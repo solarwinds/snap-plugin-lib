@@ -94,8 +94,12 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 		return fmt.Errorf("invalid value type (%T) for metric: %s", v, ns)
 	}
 
+	if len(ns) == 0 {
+		return fmt.Errorf("empty namespace")
+	}
+
 	if pc.ctxManager.globalPrefix.enabled {
-		ns = fmt.Sprintf("%s%s", pc.ctxManager.globalPrefix.name, ns)
+		ns = fmt.Sprintf("%s%s%s", string(ns[0]), pc.ctxManager.globalPrefix.name, ns)
 	}
 
 	if err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, false); err != nil {
