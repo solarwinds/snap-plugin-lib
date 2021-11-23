@@ -286,7 +286,7 @@ func (cm *ContextManager) LoadTask(id string, rawConfig []byte, mtsFilter []stri
 		}
 
 		if cm.globalPrefix.enabled {
-			mtFilter = fmt.Sprintf("/%s%s", cm.globalPrefix.name, mtFilter)
+			mtFilter = fmt.Sprintf("%s%s", cm.globalPrefix.name, mtFilter)
 		}
 
 		err := newCtx.metricsFilters.AddRule(mtFilter)
@@ -380,7 +380,7 @@ func (cm *ContextManager) DefineMetric(ns string, unit string, isDefault bool, d
 	logF := cm.logger()
 
 	if cm.globalPrefix.enabled {
-		ns = fmt.Sprintf("/%s%s", cm.globalPrefix.name, ns)
+		ns = fmt.Sprintf("%s%s", cm.globalPrefix.name, ns)
 	}
 
 	err := cm.metricsDefinition.AddRule(ns)
@@ -409,8 +409,12 @@ func (cm *ContextManager) AllowValuesAtAnyNamespaceLevel() {
 }
 
 func (cm *ContextManager) SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error {
-	if len(prefix) == 0 {
+	if len(prefix) < 2 {
 		return fmt.Errorf("invalid prefix")
+	}
+
+	if len(cm.metricsDefinition.ListRules()) != 0 {
+		return fmt.Errorf("global prefix must be set before any metric definition is provided")
 	}
 
 	cm.globalPrefix = globalPrefix{

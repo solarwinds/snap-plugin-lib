@@ -1150,7 +1150,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_RemoveFromOutput() {
 
 	collector := &collectorWithGlobalPrefix{
 		t:                s.T(),
-		prefixName:       "swi",
+		prefixName:       "/swi",
 		removeFromOutput: true,
 	}
 
@@ -1178,7 +1178,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_LeaveInOutput() {
 
 	collector := &collectorWithGlobalPrefix{
 		t:                s.T(),
-		prefixName:       "swi",
+		prefixName:       "/swi",
 		removeFromOutput: false,
 	}
 

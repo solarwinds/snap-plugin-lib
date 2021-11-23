@@ -95,7 +95,7 @@ func (pc *PluginContext) AddMetric(ns string, v interface{}, modifiers ...plugin
 	}
 
 	if pc.ctxManager.globalPrefix.enabled {
-		ns = fmt.Sprintf("/%s%s", pc.ctxManager.globalPrefix.name, ns)
+		ns = fmt.Sprintf("%s%s", pc.ctxManager.globalPrefix.name, ns)
 	}
 
 	if err := pc.ctxManager.metricsDefinition.IsUsableForAddition(ns, false); err != nil {
