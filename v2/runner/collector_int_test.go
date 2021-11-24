@@ -1150,7 +1150,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_RemoveFromOutput() {
 
 	collector := &collectorWithGlobalPrefix{
 		t:                s.T(),
-		prefixName:       "/swi",
+		prefixName:       "swi",
 		removeFromOutput: true,
 	}
 
@@ -1178,7 +1178,7 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_LeaveInOutput() {
 
 	collector := &collectorWithGlobalPrefix{
 		t:                s.T(),
-		prefixName:       "/swi",
+		prefixName:       "swi",
 		removeFromOutput: false,
 	}
 
@@ -1195,5 +1195,84 @@ func (s *SuiteT) TestCollectorWithGlobalPrefix_LeaveInOutput() {
 		for i := 0; i < len(mts.MetricSet); i++ {
 			So(mts.MetricSet[i].Namespace[0].Value, ShouldEqual, "swi")
 		}
+	})
+}
+
+/*****************************************************************************/
+
+type collectorWithGlobalPrefixDifferentSeparators struct {
+	t                *testing.T
+	prefixName       string
+	removeFromOutput bool
+}
+
+func (c *collectorWithGlobalPrefixDifferentSeparators) PluginDefinition(ctx plugin.CollectorDefinition) error {
+	ctx.SetGlobalMetricPrefix(c.prefixName, c.removeFromOutput)
+
+	ctx.DefineGroup("node", "kubernetes node name")
+	ctx.DefineGroup("namespace", "kubernetes namespace")
+	ctx.DefineGroup("pod", "kubernetes pod")
+	ctx.DefineGroup("container", "kubernetes container")
+	ctx.DefineGroup("deployment", "kubernetes deployment")
+
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|phase|Pending", "", true, "this includes time before being bound to a node, as well as time spent pulling images onto the host")
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|phase|Running", "count", true, "the pod has been bound to a node and all of the containers have been started")
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|phase|Succeeded", "", true, "all containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers")
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|phase|Failed", "", true, "all containers in the pod have terminated, and at least one container has terminated in a failure")
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|phase|Unknown", "", true, "for some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod")
+	ctx.DefineMetric("|kubernetes|pod|[node]|[namespace]|[pod]|status|condition|ready", "", false, "specifies if the pod is ready to serve requests")
+	ctx.DefineMetric(".kubernetes.pod.[node].[namespace].[pod].status.condition.scheduled", "", false, "status of the scheduling process for the pod")
+
+	ctx.DefineMetric("/rabbitmq/queue/count", "", false, "number of defined queues")
+	ctx.DefineMetric("#mongodb#db#writes", "", false, "number of defined queues")
+
+	return nil
+}
+
+func (c *collectorWithGlobalPrefixDifferentSeparators) Collect(ctx plugin.CollectContext) error {
+	Convey("Validate AddMetric", c.t, func() {
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/phase/Pending", 12), ShouldBeNil)
+		So(ctx.AddMetric("&kubernetes&pod&node1&ns1&pod1&status&phase&Succeeded", 11), ShouldBeNil)
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/condition/ready", 7), ShouldBeNil)
+		So(ctx.AddMetric("#rabbitmq#queue#count", 15), ShouldBeNil)
+		So(ctx.AddMetric("@mongodb@db@writes", 15), ShouldBeNil)
+		So(ctx.AddMetric("/kubernetes/pod/node1/ns1/pod1/status/condition/scheduled", 18), ShouldBeNil)
+	})
+
+	return nil
+}
+
+func (s *SuiteT) TestCollectorWithGlobalPrefix_DifferentSeparators() {
+	// Arrange
+	jsonConfig := []byte(`{}`)
+	mtsSelector := []string{
+		"^kubernetes^pod^node1^*^*^status^phase^Pending",
+		"|kubernetes|pod|node1|*|*|status|phase|Succeeded",
+		"/kubernetes/pod/node1/ns1/pod1/status/condition/ready",
+		"/rabbitmq/**",
+		"@mongodb@db@*",
+	}
+
+	collector := &collectorWithGlobalPrefixDifferentSeparators{
+		t:                s.T(),
+		prefixName:       "swi",
+		removeFromOutput: true,
+	}
+
+	ln := s.startCollector(collector)
+	s.startClient(ln.Addr().String())
+
+	Convey("Validate collector can define metrics with different namespace root when globalPrefix is set", s.T(), func() {
+		_, _ = s.sendLoad("task-1", jsonConfig, mtsSelector)
+
+		mts, err := s.sendCollect("task-1")
+		So(err, ShouldBeNil)
+		So(len(mts.MetricSet), ShouldEqual, 5) // /kubernetes/pod/node1/ns1/pod1/status/condition/scheduled is filtered out
+
+		So(mts.MetricSet[0].Namespace[0].Value, ShouldEqual, "kubernetes")
+		So(mts.MetricSet[1].Namespace[0].Value, ShouldEqual, "kubernetes")
+		So(mts.MetricSet[2].Namespace[0].Value, ShouldEqual, "kubernetes")
+		So(mts.MetricSet[3].Namespace[0].Value, ShouldEqual, "rabbitmq")
+		So(mts.MetricSet[4].Namespace[0].Value, ShouldEqual, "mongodb")
 	})
 }
