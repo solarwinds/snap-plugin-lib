@@ -39,6 +39,9 @@ type Metric interface {
 
 	// Time, when measurement was taken
 	Timestamp() time.Time
+
+	// OTel type of metric
+	Type() MetricType
 }
 
 // Interface for setting custom metric metadata
