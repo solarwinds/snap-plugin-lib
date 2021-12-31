@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,8 +16,26 @@
 
 package runner
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+	"strings"
+)
 
 func printVersion(name string, version string) {
 	fmt.Printf("%s version %s\n", name, version)
+
+	buildInfo, ok := debug.ReadBuildInfo()
+	if ok {
+		fmt.Printf("\tbuilt with:\n")
+
+		for _, dep := range buildInfo.Deps {
+			if strings.Contains(dep.Path, "snap-") {
+				path := strings.SplitAfter(dep.Path, "snap-")[1]
+				path = strings.Split(path, "/")[0]
+				fmt.Printf("\t%v (%v)\n", path, dep.Version)
+			}
+		}
+	}
+
 }

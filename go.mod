@@ -3,9 +3,11 @@ module github.com/solarwinds/snap-plugin-lib
 go 1.13
 
 require (
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/josephspurrier/goversioninfo v1.3.0
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/securego/gosec/v2 v2.8.1
 	github.com/sirupsen/logrus v1.8.0
 	github.com/smartystreets/goconvey v1.6.4
