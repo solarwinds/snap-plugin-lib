@@ -47,6 +47,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -221,7 +222,7 @@ func (tt *test) clientConn() *grpc.ClientConn {
 	}
 
 	var err error
-	tt.cc, err = grpc.Dial(tt.srvAddr, grpc.WithInsecure())
+	tt.cc, err = grpc.Dial(tt.srvAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		tt.t.Fatalf("Dial(%q) = %v", tt.srvAddr, err)
 	}

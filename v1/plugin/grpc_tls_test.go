@@ -53,6 +53,7 @@ import (
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -99,7 +100,7 @@ type grpcOptsBuilder struct {
 func (gb *grpcOptsBuilder) build() ([]grpc.DialOption, error) {
 	grpcDialOpts := []grpc.DialOption{}
 	if !gb.secure {
-		grpcDialOpts = append(grpcDialOpts, grpc.WithInsecure())
+		grpcDialOpts = append(grpcDialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		return grpcDialOpts, nil
 	}
 	tlsConfig := tls.Config{}

@@ -29,6 +29,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -158,7 +159,7 @@ func main() {
 	}
 	// Create connection
 	grpcServerCollAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.CollectorPort)
-	clColl, err := grpc.Dial(grpcServerCollAddr, grpc.WithInsecure())
+	clColl, err := grpc.Dial(grpcServerCollAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerCollAddr, err)
 		os.Exit(1)
@@ -168,7 +169,7 @@ func main() {
 	var clPub *grpc.ClientConn
 	if usePublisher {
 		grpcServerPubAddr := fmt.Sprintf("%s:%d", opt.PluginIP, opt.PublisherPort)
-		clPub, err = grpc.Dial(grpcServerPubAddr, grpc.WithInsecure())
+		clPub, err = grpc.Dial(grpcServerPubAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			fmt.Printf("Can't start GRPC Server on %s (%v)", grpcServerPubAddr, err)
 			os.Exit(1)

@@ -37,6 +37,7 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 /*****************************************************************************/
@@ -107,7 +108,7 @@ func (s *SuiteT) startStreamingCollector(collector plugin.StreamingCollector) ne
 }
 
 func (s *SuiteT) startClient(addr string) {
-	s.grpcConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
+	s.grpcConnection, _ = grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	s.collectorClient = pluginrpc.NewCollectorClient(s.grpcConnection)
 	s.controlClient = pluginrpc.NewControllerClient(s.grpcConnection)
