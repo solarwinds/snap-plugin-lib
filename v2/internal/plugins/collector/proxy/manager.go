@@ -215,13 +215,14 @@ func (cm *ContextManager) collect(id string, context *PluginContext, chunkCh cha
 
 func (cm *ContextManager) streamingCollect(id string, context *PluginContext, chunkCh chan<- types.CollectChunk) {
 	logF := cm.logger()
-	var err error
+	errCh := make(chan error, 1)
 
 	startTime := time.Now()
 
 	taskCtx := cm.TaskContext(id)
 
 	go func() {
+		var err error
 		defer func() {
 			// catch panics (since it's running in it's own goroutine)
 			if r := recover(); r != nil {
@@ -230,19 +231,31 @@ func (cm *ContextManager) streamingCollect(id string, context *PluginContext, ch
 				err = fmt.Errorf("user-defined function has ended with panic: %v", r)
 			}
 
+			errCh <- err
 			cm.ReleaseTask(id)
 		}()
 
 		err = cm.collector.StreamingCollect(context)
 	}()
 
+	var err error
 	for {
 		select {
 		case <-taskCtx.Done():
+			select {
+			case err = <-errCh:
+			default:
+			}
+
 			cm.handleChunk(id, err, context, chunkCh, startTime)
 			close(chunkCh)
 			return
 		case <-time.After(streamingCheckInterval):
+			select {
+			case err = <-errCh:
+			default:
+			}
+
 			cm.handleChunk(id, err, context, chunkCh, startTime)
 		}
 	}
