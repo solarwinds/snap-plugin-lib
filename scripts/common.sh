@@ -90,13 +90,13 @@ _go_install() {
 }
 
 _staticcheck() {
-  go get -v honnef.co/go/tools/cmd/staticcheck
+  _go_install honnef.co/go/tools/cmd/staticcheck
 
   _info "Using $(staticcheck --version)"
 
   for os in linux windows darwin; do
-    for test_level in small medium legacy; do
-      _info "staticcheck for $os / $test_level"
+    for test_level in small medium tutorial; do
+      _info "staticcheck for $os / tests: $test_level"
       GOOS=$os staticcheck --tests --tags $test_level ./...
     done
   done
@@ -126,6 +126,8 @@ _gofmt() {
 }
 
 _goimports() {
+  _go_install golang.org/x/tools/cmd/goimports
+
   if ! go version | grep -q '1.16'; then
     echo "skip go imports check on go other than 1.16"
   else
@@ -181,7 +183,7 @@ _copyrights() {
 }
 
 _go_license() {
-  go get github.com/google/go-licenses
+  _go_install github.com/google/go-licenses
   go-licenses check ./...
 }
 
