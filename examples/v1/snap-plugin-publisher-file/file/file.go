@@ -67,6 +67,7 @@ func (f FPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 	}
 	fileHandle, _ := os.Create(file)
 	writer := bufio.NewWriter(fileHandle)
+	// #nosec G307
 	defer func() {
 		err := fileHandle.Close() // #nosec G307
 		if err != nil {
