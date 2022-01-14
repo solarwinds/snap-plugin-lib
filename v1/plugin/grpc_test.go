@@ -15,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/solarwinds/snap-plugin-lib/v1/plugin/rpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -221,7 +222,7 @@ func (tt *test) clientConn() *grpc.ClientConn {
 	}
 
 	var err error
-	tt.cc, err = grpc.Dial(tt.srvAddr, grpc.WithInsecure())
+	tt.cc, err = grpc.Dial(tt.srvAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		tt.t.Fatalf("Dial(%q) = %v", tt.srvAddr, err)
 	}

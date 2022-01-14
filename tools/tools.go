@@ -1,7 +1,7 @@
 // +build tools
 
 /*
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 package tools
 
 import (
+	_ "github.com/google/go-licenses"
 	_ "github.com/josephspurrier/goversioninfo/cmd/goversioninfo"
 	_ "github.com/securego/gosec/v2/cmd/gosec"
 	_ "golang.org/x/lint/golint"

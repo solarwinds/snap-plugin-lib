@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -67,8 +67,9 @@ func (f FPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 	}
 	fileHandle, _ := os.Create(file)
 	writer := bufio.NewWriter(fileHandle)
+	// #nosec G307
 	defer func() {
-		err := fileHandle.Close()
+		err := fileHandle.Close() // #nosec G307
 		if err != nil {
 			panic(err)
 		}

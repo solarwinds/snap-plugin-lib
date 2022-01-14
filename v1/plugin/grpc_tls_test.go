@@ -15,7 +15,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import (
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
@@ -99,7 +100,7 @@ type grpcOptsBuilder struct {
 func (gb *grpcOptsBuilder) build() ([]grpc.DialOption, error) {
 	grpcDialOpts := []grpc.DialOption{}
 	if !gb.secure {
-		grpcDialOpts = append(grpcDialOpts, grpc.WithInsecure())
+		grpcDialOpts = append(grpcDialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		return grpcDialOpts, nil
 	}
 	tlsConfig := tls.Config{}

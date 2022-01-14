@@ -1,7 +1,7 @@
 // +build medium
 
 /*
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/pluginrpc"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,14 +109,14 @@ func (s *PublisherMediumSuite) startPublisher(publisher plugin.Publisher) net.Li
 }
 
 func (s *PublisherMediumSuite) startCollectorClient(addr string) {
-	s.collectorGRPCConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
+	s.collectorGRPCConnection, _ = grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	s.collectorClient = pluginrpc.NewCollectorClient(s.collectorGRPCConnection)
 	s.collectorControlClient = pluginrpc.NewControllerClient(s.collectorGRPCConnection)
 }
 
 func (s *PublisherMediumSuite) startPublisherClient(addr string) {
-	s.publisherGRPCConnection, _ = grpc.Dial(addr, grpc.WithInsecure())
+	s.publisherGRPCConnection, _ = grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	s.publisherClient = pluginrpc.NewPublisherClient(s.publisherGRPCConnection)
 	s.publisherControlClient = pluginrpc.NewControllerClient(s.publisherGRPCConnection)
