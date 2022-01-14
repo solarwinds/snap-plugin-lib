@@ -12,6 +12,7 @@ require (
 	github.com/solarwinds/grpchan v1.1.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
+	github.com/urfave/cli v1.22.5 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
