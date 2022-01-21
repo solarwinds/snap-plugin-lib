@@ -184,12 +184,21 @@ static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nse
 	time_ptr->nsec = nsec;
 }
 
+enum metric_type_t {
+	METRIC_TYPE_UNKNOWN,
+	METRIC_TYPE_GAUGE,
+	METRIC_TYPE_SUM,
+	METRIC_TYPE_SUMMARY,
+	METRIC_TYPE_HISTOGRAM
+};
+
 typedef struct {
 	map_t * tags_to_add;
 	map_t * tags_to_remove;
 	time_with_ns_t * timestamp;
 	char * description;
 	char * unit;
+	int metric_type;
 } modifiers_t;
 
 
@@ -570,7 +579,26 @@ func toGoModifiers(modifiers *C.modifiers_t) []plugin.MetricModifier {
 		appliedModifiers = append(appliedModifiers, plugin.MetricUnit(C.GoString(modifiers.unit)))
 	}
 
+	if modifiers.metric_type != C.METRIC_TYPE_UNKNOWN {
+		appliedModifiers = append(appliedModifiers, toGoMetricTypeModifier(modifiers.metric_type))
+	}
+
 	return appliedModifiers
+}
+
+func toGoMetricTypeModifier(metricType C.int) plugin.MetricModifier {
+	switch metricType {
+	case C.METRIC_TYPE_GAUGE:
+		return plugin.MetricTypeGauge()
+	case C.METRIC_TYPE_SUM:
+		return plugin.MetricTypeSum()
+	case C.METRIC_TYPE_SUMMARY:
+		return plugin.MetricTypeSummary()
+	case C.METRIC_TYPE_HISTOGRAM:
+		return plugin.MetricTypeHistogram()
+	default:
+		panic(fmt.Sprintf("Invalid metric type %v", metricType))
+	}
 }
 
 /*****************************************************************************/

@@ -141,4 +141,19 @@ namespace SnapPluginLib
 
         private readonly string _unit;
     }
+
+    internal class MetricType : Modifier
+    {
+        public MetricType(NativeMetricType type)
+        {
+            _type = type;
+        }
+
+        internal override void Apply(NativeModifiers nModifier)
+        {
+            nModifier.metric_type = (int)_type;
+        }
+
+        private readonly NativeMetricType _type;
+    }
 }

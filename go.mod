@@ -3,7 +3,6 @@ module github.com/solarwinds/snap-plugin-lib
 go 1.13
 
 require (
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-licenses v0.0.0-00010101000000-000000000000
 	github.com/josephspurrier/goversioninfo v1.4.0
