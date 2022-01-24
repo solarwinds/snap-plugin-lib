@@ -81,8 +81,15 @@ namespace CollectorExample
                 Modifiers.Description("new custom description")
             );
 
-            ctx.AddMetric("/example/group1/metric2", 20);
-            ctx.AddMetric("/example/group1/metric3", 30);
+            ctx.AddMetric("/example/group1/metric2", 20,
+                Modifiers.Unit("s"),
+                Modifiers.GaugeType()
+            );
+
+            ctx.AddMetric("/example/group1/metric3", 30,
+                Modifiers.Unit("min"),
+                Modifiers.SumType()
+            );
 
             if (ctx.ShouldProcess("/example/group2/metric4"))
             {

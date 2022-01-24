@@ -91,7 +91,7 @@ namespace SnapPluginLib
     internal enum NativeMetricType {
         Unknown,
         Gauge,
-        Sym,
+        Sum,
         Summary,
         Histogram,
     }
