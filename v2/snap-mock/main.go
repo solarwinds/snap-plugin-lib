@@ -528,7 +528,7 @@ func grpcMetricToString(metric *pluginrpc.Metric) string {
 		nsStr = append(nsStr, ns.Value)
 	}
 
-	return fmt.Sprintf("%s %v [%v]", strings.Join(nsStr, "."), metric.Value, metric.Tags)
+	return fmt.Sprintf("%s value: %v unit: %v type: %v tags: [%v]", strings.Join(nsStr, "."), metric.Value, metric.Unit, metric.Type, metric.Tags)
 }
 
 func grpcWarningToString(warning *pluginrpc.Warning) string {
