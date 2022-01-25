@@ -136,36 +136,41 @@ Now, in other console, you should locate snap-mock, compile it and execute:
 ```bash
 cd $GOPATH/src/github.com/solarwinds/snap-plugin-lib/v2/snap-mock
 go build
-./snap-mock -plugin-port=50123 -max-collect-requests=3 -collect-interval=5s -send-kill=1
+./snap-mock -collector-port=50123 -max-collect-requests=3 -collect-interval=5s -send-kill=1
 ```
 
-> Make sure that `-grpc-port` (provided for plugin) and `-plugin-port` (provided for snap-mock) are the same.
+> Make sure that `-grpc-port` (provided for plugin) and `-collector-port` (provided for snap-mock) are the same.
 
 > `-send-kill` flag causes both, plugin and snap-mock, to complete with an execute.
 
 Output of snap-mock:
 ```
+Received 5 metric(s)
+ example.date.day value: v_int64:25  unit:  type: UNKNOWN tags: [map[]]
+ example.date.month value: v_int64:1  unit:  type: UNKNOWN tags: [map[]]
+ example.time.hour value: v_int64:15  unit:  type: UNKNOWN tags: [map[]]
+ example.time.minute value: v_int64:0  unit:  type: UNKNOWN tags: [map[]]
+ example.time.second value: v_int64:8  unit:  type: UNKNOWN tags: [map[]]
+
+Received 0 warning(s)
 
 Received 5 metric(s)
- example.date.day v_int64:3  [map[]]
- example.date.month v_int64:9  [map[]]
- example.time.hour v_int64:16  [map[]]
- example.time.minute v_int64:39  [map[]]
- example.time.second v_int64:30  [map[]]
+ example.date.day value: v_int64:25  unit:  type: UNKNOWN tags: [map[]]
+ example.date.month value: v_int64:1  unit:  type: UNKNOWN tags: [map[]]
+ example.time.hour value: v_int64:15  unit:  type: UNKNOWN tags: [map[]]
+ example.time.minute value: v_int64:0  unit:  type: UNKNOWN tags: [map[]]
+ example.time.second value: v_int64:13  unit:  type: UNKNOWN tags: [map[]]
+
+Received 0 warning(s)
 
 Received 5 metric(s)
- example.date.day v_int64:3  [map[]]
- example.date.month v_int64:9  [map[]]
- example.time.hour v_int64:16  [map[]]
- example.time.minute v_int64:39  [map[]]
- example.time.second v_int64:35  [map[]]
+ example.date.day value: v_int64:25  unit:  type: UNKNOWN tags: [map[]]
+ example.date.month value: v_int64:1  unit:  type: UNKNOWN tags: [map[]]
+ example.time.hour value: v_int64:15  unit:  type: UNKNOWN tags: [map[]]
+ example.time.minute value: v_int64:0  unit:  type: UNKNOWN tags: [map[]]
+ example.time.second value: v_int64:18  unit:  type: UNKNOWN tags: [map[]]
 
-Received 5 metric(s)
- example.date.day v_int64:3  [map[]]
- example.date.month v_int64:9  [map[]]
- example.time.hour v_int64:16  [map[]]
- example.time.minute v_int64:39  [map[]]
- example.time.second v_int64:40  [map[]]
+Received 0 warning(s)
 ```
 
 Output of plugin:
