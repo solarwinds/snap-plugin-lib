@@ -42,6 +42,8 @@ namespace SnapPluginLib
         
         [MarshalAs(UnmanagedType.LPStr)] public string description;
         [MarshalAs(UnmanagedType.LPStr)] public string unit;
+
+        public int metric_type;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -84,5 +86,13 @@ namespace SnapPluginLib
     internal class NativeError
     {
         public string errorMessage;
+    }
+
+    internal enum NativeMetricType {
+        Unknown,
+        Gauge,
+        Sum,
+        Summary,
+        Histogram,
     }
 }

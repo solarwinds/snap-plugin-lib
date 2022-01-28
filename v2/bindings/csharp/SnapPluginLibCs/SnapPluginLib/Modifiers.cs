@@ -59,6 +59,26 @@ namespace SnapPluginLib
         {
             return new MetricUnit(unit);
         }
+
+        public static Modifier GaugeType()
+        {
+            return new MetricType(NativeMetricType.Gauge);
+        }
+
+        public static Modifier SumType()
+        {
+            return new MetricType(NativeMetricType.Sum);
+        }
+
+        public static Modifier SummaryType()
+        {
+            return new MetricType(NativeMetricType.Summary);
+        }
+
+        public static Modifier HistogramType()
+        {
+            return new MetricType(NativeMetricType.Histogram);
+        }
     }
 
     internal class MetricTags : Modifier
@@ -93,7 +113,7 @@ namespace SnapPluginLib
 
     internal class MetricTimestamp : Modifier
     {
-        const int MilliToNanoFactor = (int) 1e6;
+        const int MilliToNanoFactor = (int)1e6;
 
         public MetricTimestamp(DateTime timestamp)
         {
@@ -140,5 +160,20 @@ namespace SnapPluginLib
         }
 
         private readonly string _unit;
+    }
+
+    internal class MetricType : Modifier
+    {
+        public MetricType(NativeMetricType type)
+        {
+            _type = type;
+        }
+
+        internal override void Apply(NativeModifiers nModifier)
+        {
+            nModifier.metric_type = (int)_type;
+        }
+
+        private readonly NativeMetricType _type;
     }
 }

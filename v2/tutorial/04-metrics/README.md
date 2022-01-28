@@ -162,6 +162,18 @@ with additional modifiers:
 		plugin.MetricUnit("HH"))
 ```
 
+Another metric metadata which can be set during `AddMetric()` call is its `Type`:
+
+```go
+	ctx.AddMetric("/example/time/minute", minute,
+		plugin.MetricUnit("min"),
+		plugin.MetricTypeGauge())
+
+	ctx.AddMetric("/example/time/unix_time", minute,
+		plugin.MetricUnit("s"),
+		plugin.MetricTypeSum())
+```
+
 ----
 
 * [Table of contents](/v2/README.md)

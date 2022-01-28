@@ -44,8 +44,8 @@ enum value_type_t {
 	TYPE_DOUBLE,
 	TYPE_BOOL,
 	TYPE_CSTRING,
-    TYPE_INT16,
-    TYPE_UINT16
+	TYPE_INT16,
+	TYPE_UINT16
 };
 
 typedef struct {
@@ -58,7 +58,7 @@ typedef struct {
 		double v_double;
 		int v_bool;
 		char * v_cstring;
-        short int v_int16;
+		short int v_int16;
 		unsigned short int v_uint16;
 	} value;
 	int vtype; // value_type_t;
@@ -187,12 +187,21 @@ static inline void set_time_with_ns_t(time_with_ns_t* time_ptr, int sec, int nse
 	time_ptr->nsec = nsec;
 }
 
+enum metric_type_t {
+	METRIC_TYPE_UNKNOWN,
+	METRIC_TYPE_GAUGE,
+	METRIC_TYPE_SUM,
+	METRIC_TYPE_SUMMARY,
+	METRIC_TYPE_HISTOGRAM
+};
+
 typedef struct {
 	map_t * tags_to_add;
 	map_t * tags_to_remove;
 	time_with_ns_t * timestamp;
 	char * description;
 	char * unit;
+	int metric_type;
 } modifiers_t;
 
 
@@ -366,56 +375,33 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-
-extern void dealloc_charp(char* p0);
-
-extern void dealloc_str_array(char** p0);
-
-extern void dealloc_error(error_t* p0);
-
-extern void dealloc_metric_array(metric_t** p0, GoInt p1);
-
-extern error_t* ctx_add_metric(char* p0, char* p1, value_t* p2, modifiers_t* p3);
-
-extern error_t* ctx_always_apply(char* p0, char* p1, modifiers_t* p2);
-
-extern void ctx_dismiss_all_modifiers(char* p0);
-
-extern GoInt ctx_should_process(char* p0, char* p1);
-
-extern char** ctx_requested_metrics(char* p0);
-
-extern GoInt ctx_count(char* p0);
-
-extern metric_t** ctx_list_all_metrics(char* p0);
-
-extern char* ctx_config_value(char* p0, char* p1);
-
-extern char** ctx_config_keys(char* p0);
-
-extern char* ctx_raw_config(char* p0);
-
-extern void ctx_add_warning(char* p0, char* p1);
-
-extern GoInt ctx_is_done(char* p0);
-
-extern void ctx_log(char* p0, int p1, char* p2, map_t* p3);
-
-extern void define_metric(char* p0, char* p1, GoInt p2, char* p3);
-
-extern void define_group(char* p0, char* p1);
-
-extern error_t* define_example_config(char* p0);
-
-extern void define_tasks_per_instance_limit(GoInt p0);
-
-extern void define_instances_limit(GoInt p0);
-
-extern void start_collector(callback_t* p0, callback_t* p1, callback_t* p2, define_callback_t* p3, char* p4, char* p5);
+extern __declspec(dllexport) void dealloc_charp(char* p);
+extern __declspec(dllexport) void dealloc_str_array(char** p);
+extern __declspec(dllexport) void dealloc_error(error_t* p);
+extern __declspec(dllexport) void dealloc_metric_array(metric_t** p, GoInt size);
+extern __declspec(dllexport) error_t* ctx_add_metric(char* ctxID, char* ns, value_t* v, modifiers_t* modifiers);
+extern __declspec(dllexport) error_t* ctx_always_apply(char* ctxID, char* ns, modifiers_t* modifiers);
+extern __declspec(dllexport) void ctx_dismiss_all_modifiers(char* ctxID);
+extern __declspec(dllexport) GoInt ctx_should_process(char* ctxID, char* ns);
+extern __declspec(dllexport) char** ctx_requested_metrics(char* ctxID);
+extern __declspec(dllexport) GoInt ctx_count(char* ctxID);
+extern __declspec(dllexport) metric_t** ctx_list_all_metrics(char* ctxID);
+extern __declspec(dllexport) char* ctx_config_value(char* ctxID, char* key);
+extern __declspec(dllexport) char** ctx_config_keys(char* ctxID);
+extern __declspec(dllexport) char* ctx_raw_config(char* ctxID);
+extern __declspec(dllexport) void ctx_add_warning(char* ctxID, char* message);
+extern __declspec(dllexport) GoInt ctx_is_done(char* ctxID);
+extern __declspec(dllexport) void ctx_log(char* ctxID, int level, char* message, map_t* fields);
+extern __declspec(dllexport) void define_metric(char* namespace, char* unit, GoInt isDefault, char* description);
+extern __declspec(dllexport) void define_group(char* name, char* description);
+extern __declspec(dllexport) error_t* define_example_config(char* cfg);
+extern __declspec(dllexport) void define_tasks_per_instance_limit(GoInt limit);
+extern __declspec(dllexport) void define_instances_limit(GoInt limit);
+extern __declspec(dllexport) void start_collector(callback_t* collectCallback, callback_t* loadCallback, callback_t* unloadCallback, define_callback_t* defineCallback, char* name, char* version);
+extern __declspec(dllexport) void start_streaming_collector(callback_t* collectCallback, callback_t* loadCallback, callback_t* unloadCallback, define_callback_t* defineCallback, char* name, char* version);
 
 /***************************************************************************/
-
-extern void start_publisher(callback_t* p0, callback_t* p1, callback_t* p2, define_callback_t* p3, char* p4, char* p5);
+extern __declspec(dllexport) void start_publisher(callback_t* publishCallback, callback_t* loadCallback, callback_t* unloadCallback, define_callback_t* defineCallback, char* name, char* version);
 
 #ifdef __cplusplus
 }

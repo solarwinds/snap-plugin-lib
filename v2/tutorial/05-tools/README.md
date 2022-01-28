@@ -89,8 +89,8 @@ To enable this feature simply run plugin with the following arguments:
 
 To simulate two independent tasks, call snap-mock twice:
 ```bash
-./snap-mock -plugin-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=1 &
-./snap-mock -plugin-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=2 &
+./snap-mock -collector-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=1 &
+./snap-mock -collector-port=50123 -max-collect-requests=12 -collect-interval=5s -task-id=2 &
 ```
 
 To see output of stats server, open a browser on address http://127.0.0.1:8080/stats.
