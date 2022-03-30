@@ -36,6 +36,11 @@ type CollectorDefinition struct {
 	Definition
 }
 
+func (m *CollectorDefinition) SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error {
+	args := m.Called(prefix, removePrefixFromOutput)
+	return args.Error(0)
+}
+
 func (m *CollectorDefinition) DefineMetric(namespace string, unit string, isDefault bool, description string) {
 	m.Called(namespace, unit, isDefault, description)
 }
