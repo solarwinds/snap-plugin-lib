@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ func (m *Definition) DefineInstancesLimit(limit int) error {
 
 type CollectorDefinition struct {
 	Definition
+}
+
+func (m *CollectorDefinition) SetGlobalMetricPrefix(prefix string, removePrefixFromOutput bool) error {
+	args := m.Called(prefix, removePrefixFromOutput)
+	return args.Error(0)
 }
 
 func (m *CollectorDefinition) DefineMetric(namespace string, unit string, isDefault bool, description string) {
