@@ -56,4 +56,4 @@ workflows:
       - test:
           matrix:
             parameters:
-              version: ["latest", "1.16", "1.15"]
+              version: ["1.18"]
