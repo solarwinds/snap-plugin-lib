@@ -1,3 +1,4 @@
+//go:build tutorial
 // +build tutorial
 
 /*
