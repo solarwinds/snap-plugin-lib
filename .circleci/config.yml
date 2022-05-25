@@ -17,7 +17,7 @@ jobs:
         default: ""
     docker:
       - image: "cimg/go:<< parameters.version >>"
-    working_directory: /go/src/github.com/solarwinds/snap-plugin-lib
+    working_directory: /tmp/snap-plugin-lib
     environment:
       GOPROXY: "<< parameters.goproxy >>"
     steps:
