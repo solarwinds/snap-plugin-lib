@@ -5,6 +5,7 @@ language: go
 dist: xenial
 
 go:
+  - 1.18.z
   - 1.17.x
   - 1.16.x
   - 1.15.x

@@ -16,8 +16,8 @@ jobs:
         type: string
         default: ""
     docker:
-      - image: "circleci/golang:<< parameters.version >>"
-    working_directory: /go/src/github.com/solarwinds/snap-plugin-lib
+      - image: "cimg/go:<< parameters.version >>"
+    working_directory: /tmp/snap-plugin-lib
     environment:
       GOPROXY: "<< parameters.goproxy >>"
     steps:
@@ -56,4 +56,4 @@ workflows:
       - test:
           matrix:
             parameters:
-              version: ["latest", "1.16", "1.15"]
+              version: ["1.18.2"]
