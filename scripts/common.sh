@@ -81,12 +81,14 @@ _test_dirs() {
 }
 
 _go_install() {
+  set -x
   local _url=$1
   local _util
 
   _util=$(basename "${_url}")
 
   go install "${_url}" && _debug "go install ${_util} ${_url}"
+  set +x
 }
 
 _staticcheck() {
