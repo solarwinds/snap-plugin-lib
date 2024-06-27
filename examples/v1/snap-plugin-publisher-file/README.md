@@ -117,7 +117,7 @@ An example using some arbitrary values::
 ```
 
 ## Testing
-For testing reference the [Snap Testing Guidelines](https://github.com/librato/snap/blob/master/CONTRIBUTING.md#testing-guidelines). To test your plugin with Snap you will need to have [Snap](https://github.com/librato/snap) installed, check out these docs for [Snap setup details](https://github.com/librato/snap/blob/master/docs/BUILD_AND_TEST.md#getting-started).
+For testing reference the [Snap Testing Guidelines](https://github.com/solarwinds-cloud/snap/blob/master/CONTRIBUTING.md#testing-guidelines). To test your plugin with Snap you will need to have [Snap](https://github.com/solarwinds-cloud/snap) installed, check out these docs for [Snap setup details](https://github.com/solarwinds-cloud/snap/blob/master/docs/BUILD_AND_TEST.md#getting-started).
 
 Each test file should specify the appropriate build tag such as "small", "medium", "large" (e.g. // +build small).
 
@@ -138,5 +138,5 @@ package rand
 ## Ready to Share
 You've made a plugin! Now it's time to share it. Create a release by following these [steps](https://help.github.com/articles/creating-releases/). We recommend that your release version match your plugin version, see example [here](/examples/v1/snap-plugin-publisher-file/main.go#L29).
 
-Don't forget to announce your plugin release on [slack](https://intelsdi-x.herokuapp.com/) and get your plugin added to the [Plugin Catalog](https://github.com/librato/snap/blob/master/docs/PLUGIN_CATALOG.md)!
+Don't forget to announce your plugin release on [slack](https://intelsdi-x.herokuapp.com/) and get your plugin added to the [Plugin Catalog](https://github.com/solarwinds-cloud/snap/blob/master/docs/PLUGIN_CATALOG.md)!
 

@@ -337,7 +337,6 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
-import "C"
 
 var contextMap = sync.Map{}
 var pluginDef plugin.Definition
