@@ -30,36 +30,38 @@ jobs:
       #     name: "Run linters"
       #     command: >
       #       TEST_TYPE="lint" make check 2>&1
-      - run:
-          name: "Run build"
-          command: >
-            wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb &&
-            sudo dpkg -i packages-microsoft-prod.deb && 
-            wget https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add - &&  
-            sudo apt-get update --fix-missing &&
-            sudo apt-get install -y libssl1.1 &&
-            sudo apt-get install -y --reinstall gcc-multilib gcc-mingw-w64 apt-transport-https dotnet-sdk-3.1 dotnet-runtime-3.1 &&
-
-            make build 2>&1
       # - run:
-      #     name: Install .NET SDK and dependencies
-      #     command: |
-      #         wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-      #         chmod +x dotnet-install.sh
-      #         ./dotnet-install.sh --channel 3.1 --install-dir ~/dotnet
-      #         sudo apt-get update
-      #         sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https libssl-dev
-      #         echo "export PATH=$PATH:~/dotnet" >> $BASH_ENV
-      #         echo "export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu" >> $BASH_ENV
-      #         echo "export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $BASH_ENV
-      # - run: 
-      #     name: "Verify .NET installation"
-      #     command: >
-      #       dotnet --info
-      # - run: 
       #     name: "Run build"
       #     command: >
-      #       make build 2>&1                
+      #       wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb &&
+      #       sudo dpkg -i packages-microsoft-prod.deb && 
+      #       wget https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add - &&  
+      #       sudo apt-get update --fix-missing &&
+      #       sudo apt-get install -y libssl1.1 &&
+      #       sudo apt-get install -y --reinstall gcc-multilib gcc-mingw-w64 apt-transport-https dotnet-sdk-3.1 dotnet-runtime-3.1 &&
+
+      #       make build 2>&1
+      - run:
+          name: Install .NET SDK and dependencies
+          command: |
+              wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+              chmod +x dotnet-install.sh
+              ./dotnet-install.sh --channel 6.0 --install-dir ~/dotnet
+              sudo apt-get update
+              sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https
+              echo "export PATH=$PATH:~/dotnet" >> $BASH_ENV
+              echo "export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu" >> $BASH_ENV
+              echo "export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $BASH_ENV
+
+
+      - run: 
+          name: "Verify .NET installation"
+          command: >
+            dotnet --info
+      - run: 
+          name: "Run build"
+          command: >
+            make build 2>&1                
       - run:
           name: "Run small test"
           command: >
