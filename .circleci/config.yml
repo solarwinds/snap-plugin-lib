@@ -26,10 +26,10 @@ jobs:
           name: "Print the Go version"
           command: >
             go version
-      # - run:
-      #     name: "Run linters"
-      #     command: >
-      #       TEST_TYPE="lint" make check 2>&1
+      - run:
+          name: "Run linters"
+          command: >
+            TEST_TYPE="lint" make check 2>&1
       - run:
           name: "Run build"
           command: >
