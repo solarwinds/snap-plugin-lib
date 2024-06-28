@@ -57,6 +57,3 @@ workflows:
           matrix:
             parameters:
               version: ["1.22.4"]
-          context:
-            - docker-hub          
-            - common-build-creds              
