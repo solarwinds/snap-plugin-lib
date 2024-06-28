@@ -41,11 +41,12 @@ jobs:
       - run:
           name: Install .NET SDK and dependencies
           command: |
-            wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-            chmod +x dotnet-install.sh
-            ./dotnet-install.sh --channel 3.1 --runtime aspnetcore
-            sudo apt-get update
-            sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https 
+              wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+              chmod +x dotnet-install.sh
+              ./dotnet-install.sh --channel 3.1 --runtime aspnetcore --install-dir /usr/share/dotnet
+              sudo apt-get update
+              sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https 
+              echo "export PATH=$PATH:/usr/share/dotnet" >> $BASH_ENV
       - run: 
           name: "Verify .NET installation"
           command: >
