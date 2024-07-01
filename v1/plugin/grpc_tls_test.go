@@ -16,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2022 SolarWinds Worldwide, LLC
+ Copyright (c) 2024 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -113,7 +112,7 @@ func (gb *grpcOptsBuilder) build() ([]grpc.DialOption, error) {
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
 	if gb.caCertPath != "" {
-		b, err := ioutil.ReadFile(gb.caCertPath)
+		b, err := os.ReadFile(gb.caCertPath)
 		if err != nil {
 			return nil, err
 		}
