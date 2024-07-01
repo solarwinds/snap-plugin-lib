@@ -2,7 +2,7 @@
 // +build medium
 
 /*
- Copyright (c) 2022 SolarWinds Worldwide, LLC
+ Copyright (c) 2024 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ package service
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"net"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -91,7 +91,7 @@ func TestConnectingToSecureGRPC(t *testing.T) {
 
 		// Arrange (GRPC Client)
 		caCertPath := filepath.Join(certificateFolderName, "ca.crt")
-		caCert, _ := ioutil.ReadFile(caCertPath)
+		caCert, _ := os.ReadFile(caCertPath)
 		certPool := x509.NewCertPool()
 		certPool.AppendCertsFromPEM(caCert)
 

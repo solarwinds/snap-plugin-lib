@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
- Copyright (c) 2021 SolarWinds Worldwide, LLC
+ Copyright (c) 2024 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -117,11 +116,11 @@ type Publisher interface {
 var App *cli.App
 
 /*
- StreamCollector is a Collector that can send back metrics within configurable limits defined in task manifest.
- These limits might be determined by user by set a value of:
+StreamCollector is a Collector that can send back metrics within configurable limits defined in task manifest.
+These limits might be determined by user by set a value of:
   - `max-metrics-buffer`, default to 0 what means no buffering and sending reply with streaming metrics immediately
   - `max-collect-duration`, default to 10s what means after 10s no new metrics are received, send a reply whatever data it has
-  in buffer instead of waiting longer
+    in buffer instead of waiting longer
 */
 type StreamCollector interface {
 	Plugin
@@ -248,8 +247,8 @@ func (ts tlsServerDefaultSetup) loadRootCerts(certPaths []string) (rootCAs *x509
 			filepaths = append(filepaths, path)
 			continue
 		}
-		var subfiles []os.FileInfo
-		if subfiles, err = ioutil.ReadDir(path); err != nil {
+		var subfiles []os.DirEntry
+		if subfiles, err = os.ReadDir(path); err != nil {
 			return nil, fmt.Errorf("unable to process CA cert source directory %s: %v", path, err)
 		}
 		for _, subfile := range subfiles {
@@ -264,7 +263,7 @@ func (ts tlsServerDefaultSetup) loadRootCerts(certPaths []string) (rootCAs *x509
 	rootCAs = x509.NewCertPool()
 	numread := 0
 	for _, path = range filepaths {
-		b, err := ioutil.ReadFile(filepath.Clean(path))
+		b, err := os.ReadFile(filepath.Clean(path))
 		if err != nil {
 			log.WithFields(log.Fields{"path": path, "error": err}).Debug("Unable to read cert file")
 			continue
