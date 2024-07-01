@@ -239,7 +239,7 @@ func TestMakeTLSConfig(t *testing.T) {
 		Convey("plugin lib should use TLS config requiring verified clients and specific cipher suites", func() {
 			config := tlsSetupInstance.makeTLSConfig()
 			So(config.ClientAuth, ShouldEqual, tls.RequireAndVerifyClientCert)
-			//So(config.PreferServerCipherSuites, ShouldEqual, true) //nolint:SA1019
+			So(len(config.CipherSuites), ShouldBeGreaterThan, 0)
 			So(config.MinVersion, ShouldNotBeEmpty)
 		})
 	})
@@ -266,7 +266,7 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
-					//So(configReport.ClientCAs.Subjects(), ShouldNotBeEmpty) //nolint:SA1019
+					So(configReport.RootCAs.Subjects(), ShouldNotBeEmpty)
 				})
 			})
 			Convey("but with invalid server cert path", func() {
