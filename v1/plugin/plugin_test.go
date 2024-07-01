@@ -361,7 +361,6 @@ func buildTLSCerts(caCN, srvCN, cliCN string) (resFiles []string, err error) {
 }
 
 func setUpTestMain() {
-	rand.New(rand.NewSource(time.Now().UnixMilli())
 	if tlsTestFiles, err := buildTLSCerts(tlsTestCA, tlsTestSrv, tlsTestCli); err != nil {
 		panic(err)
 	} else {
