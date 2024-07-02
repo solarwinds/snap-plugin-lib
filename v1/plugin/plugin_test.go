@@ -103,7 +103,7 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
 
 		// Correctly call the mocked readRootCAs
-		// var err error
+		var err error
 		if tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths); err != nil {
 			//panic("Failed to load root CAs in mock setup: " + err.Error())
 			fmt.Printf("FILE NAME : " + m.RootCertPaths)
