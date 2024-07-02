@@ -87,16 +87,14 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mo
 	mockSetup.doMakeTLSConfig = func() *tls.Config {
 		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
 
-		// Mock the readRootCAs function (moved outside)
 		mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
-			// Load root certificates (adjust the file path as needed)
 			caCert, err := os.ReadFile(rootCertPaths)
 			if err != nil {
 				return nil, fmt.Errorf("unable to read root CAs: %v", err)
 			}
 			caCertPool := x509.NewCertPool()
 			caCertPool.AppendCertsFromPEM(caCert)
-			return &caCertPool, nil
+			return *caCertPool, nil
 		}
 
 		*configReportPtr = tlsConfig // Update the external pointer (before readRootCAs)
