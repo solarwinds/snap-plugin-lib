@@ -48,7 +48,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 func init() {
@@ -280,30 +279,29 @@ func TestMakeGRPCCredentials(t *testing.T) {
 			var configReport *tls.Config
 			mockServerSetupInUse := newMockTLSSetup(tlsSetup, &configReport, &m)
 			tlsSetup = mockServerSetupInUse
-			// Convey("library should build GRPC credentials without issues", func() {
-			// 	_, err := makeGRPCCredentials(&m)
-			// 	So(err, ShouldBeNil)
-			// 	Convey("certificate and client root certs should be loaded", func() {
-			// 		So(configReport.Certificates, ShouldNotBeEmpty)
-			// 		So(configReport.RootCAs, ShouldNotBeNil)
-			// 	})
-			// })
+			Convey("library should build GRPC credentials without issues", func() {
+				_, err := makeGRPCCredentials(&m)
+				So(err, ShouldBeNil)
+				Convey("certificate and client root certs should be loaded", func() {
+					So(configReport.Certificates, ShouldNotBeEmpty)
+					So(configReport.RootCAs, ShouldNotBeNil)
+				})
+			})
 
 			// Temporarily create tls.Config directly
-			certPool := x509.NewCertPool()
-			caCert, err := os.ReadFile(m.RootCertPaths)
-			if err != nil {
-				t.Fatalf("Failed to load root CA: %v", err)
-			}
-			certPool.AppendCertsFromPEM(caCert)
+			// certPool := x509.NewCertPool()
+			// caCert, err := os.ReadFile(m.RootCertPaths)
+			// if err != nil {
+			// 	t.Fatalf("Failed to load root CA: %v", err)
+			// }
+			// certPool.AppendCertsFromPEM(caCert)
 
-			config := &tls.Config{
-				RootCAs: certPool,
-			}
-			creds := credentials.NewTLS(config)
+			// config := &tls.Config{
+			// 	RootCAs: certPool,
+			// }
+			// creds := credentials.NewTLS(config)
 
-			// Continue your test assertions
-			So(creds, ShouldNotBeNil)
+			// So(creds, ShouldNotBeNil)
 
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
