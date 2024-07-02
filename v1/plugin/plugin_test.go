@@ -87,6 +87,9 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
 
 	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
+		if rootCertPaths == "MANY-MISSING-FILES" {
+			return nil, fmt.Errorf("unable to read root CAs: invalid path")
+		}
 		caCert, err := os.ReadFile(rootCertPaths)
 		if err != nil {
 			return nil, fmt.Errorf("unable to read root CAs: %v", err)
