@@ -96,13 +96,17 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
-		*configReportPtr = &tls.Config{ClientCAs: caCertPool}
 		return caCertPool, nil
 	}
 
 	mockSetup.doMakeTLSConfig = func() *tls.Config {
 		tlsConfig := prevSetup.makeTLSConfig()
-		tlsConfig.ClientCAs, _ = mockSetup.readRootCAs(m.RootCertPaths)
+		var err error
+		tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths)
+		if err != nil {
+			tlsConfig.ClientCAs = nil
+		}
+		*configReportPtr = tlsConfig
 		return tlsConfig
 	}
 
