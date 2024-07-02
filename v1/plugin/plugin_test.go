@@ -104,7 +104,8 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 		var err error
 		tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths)
 		if err != nil {
-			tlsConfig.ClientCAs = nil
+			*configReportPtr = nil
+			return tlsConfig
 		}
 		*configReportPtr = tlsConfig
 		return tlsConfig
