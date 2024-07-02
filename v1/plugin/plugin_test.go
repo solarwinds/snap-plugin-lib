@@ -86,6 +86,7 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
 
 	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
+		fmt.Println("Root Cert Path : " + rootCertPaths)
 		if rootCertPaths == "MANY-MISSING-FILES" {
 			return nil, fmt.Errorf("unable to read root CAs: invalid path")
 		}
@@ -287,21 +288,6 @@ func TestMakeGRPCCredentials(t *testing.T) {
 					So(configReport.RootCAs, ShouldNotBeNil)
 				})
 			})
-
-			// Temporarily create tls.Config directly
-			// certPool := x509.NewCertPool()
-			// caCert, err := os.ReadFile(m.RootCertPaths)
-			// if err != nil {
-			// 	t.Fatalf("Failed to load root CA: %v", err)
-			// }
-			// certPool.AppendCertsFromPEM(caCert)
-
-			// config := &tls.Config{
-			// 	RootCAs: certPool,
-			// }
-			// creds := credentials.NewTLS(config)
-
-			// So(creds, ShouldNotBeNil)
 
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
