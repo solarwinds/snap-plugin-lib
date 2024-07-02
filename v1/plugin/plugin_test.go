@@ -94,7 +94,7 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mo
 			if err != nil {
 				return nil, fmt.Errorf("unable to read root CAs: %v", err)
 			}
-			caCertPool := x509.NewCertPool()
+			caCertPool := &x509.NewCertPool()
 			caCertPool.AppendCertsFromPEM(caCert)
 			return caCertPool, nil
 		}
