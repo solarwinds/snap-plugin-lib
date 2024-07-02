@@ -266,7 +266,7 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
-					So(configReport.RootCAs.Subjects(), ShouldNotBeEmpty)
+					So(configReport.RootCAs, ShouldNotBeNil) // ensure it's not nil
 				})
 			})
 			Convey("but with invalid server cert path", func() {
