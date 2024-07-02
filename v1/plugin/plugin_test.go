@@ -95,10 +95,11 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mo
 		return caCertPool, nil
 	}
 
-	mockSetup.doMakeTLSConfig = func() *tls.Config {
+	mockSetup.doMakeTLSConfig = func(m *meta) *tls.Config {
 		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
 
 		// Correctly call the mocked readRootCAs
+		var err error
 		if tlsConfig.ClientCAs, err = mockSetup.doReadRootCAs(m.RootCertPaths); err != nil {
 			panic("Failed to load root CAs in mock setup: " + err.Error())
 		}
@@ -279,13 +280,8 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				RootCertPaths: tlsTestCA + crtFileExt,
 			}
 			var configReport *tls.Config
-			mockServerSetupInUse := newMockTLSSetup(tlsSetup, &configReport)
+			mockServerSetupInUse := newMockTLSSetup(tlsSetup, &configReport, &m)
 			tlsSetup = mockServerSetupInUse
-			mockServerSetupInUse.doMakeTLSConfig = func() *tls.Config {
-				tlsConfig := mockServerSetupInUse.prevSetup.makeTLSConfig()
-				configReport = tlsConfig
-				return tlsConfig
-			}
 			Convey("library should build GRPC credentials without issues", func() {
 				_, err := makeGRPCCredentials(&m)
 				So(err, ShouldBeNil)
