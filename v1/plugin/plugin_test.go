@@ -84,25 +84,32 @@ type mockTLSSetup struct {
 
 func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mockTLSSetup {
 	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
+
+	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
+		caCert, err := os.ReadFile(rootCertPaths)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read root CAs: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		return caCertPool, nil
+	}
+
 	mockSetup.doMakeTLSConfig = func() *tls.Config {
 		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
 
-		mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
-			caCert, err := os.ReadFile(rootCertPaths)
-			if err != nil {
-				return nil, fmt.Errorf("unable to read root CAs: %v", err)
-			}
-			caCertPool := new(x509.NewCertPool())
-			caCertPool.AppendCertsFromPEM(caCert)
-			return *caCertPool, nil
+		// Correctly call the mocked readRootCAs
+		if tlsConfig.ClientCAs, err = mockSetup.doReadRootCAs(m.RootCertPaths); err != nil {
+			panic("Failed to load root CAs in mock setup: " + err.Error())
 		}
 
-		*configReportPtr = tlsConfig // Update the external pointer (before readRootCAs)
+		*configReportPtr = tlsConfig
 		return tlsConfig
 	}
 
+	// Mock the updateServerOptions function
 	mockSetup.doUpdateServerOptions = func(options ...grpc.ServerOption) []grpc.ServerOption {
-		return options // By default, return the same options
+		return options
 	}
 
 	return mockSetup
