@@ -82,7 +82,7 @@ type mockTLSSetup struct {
 	doUpdateServerOptions func(options ...grpc.ServerOption) []grpc.ServerOption
 }
 
-func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mockTLSSetup {
+func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *meta) *mockTLSSetup {
 	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
 
 	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
@@ -95,12 +95,12 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config) *mo
 		return caCertPool, nil
 	}
 
-	mockSetup.doMakeTLSConfig = func(m *meta) *tls.Config {
+	mockSetup.doMakeTLSConfig = func() *tls.Config {
 		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
 
 		// Correctly call the mocked readRootCAs
 		var err error
-		if tlsConfig.ClientCAs, err = mockSetup.doReadRootCAs(m.RootCertPaths); err != nil {
+		if tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths); err != nil {
 			panic("Failed to load root CAs in mock setup: " + err.Error())
 		}
 
