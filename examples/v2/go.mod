@@ -1,6 +1,6 @@
 module github.com/solarwinds/snap-plugin-lib/examples/v2
 
-go 1.22.4
+go 1.22.5
 
 require (
 	github.com/josephspurrier/goversioninfo v1.4.0
