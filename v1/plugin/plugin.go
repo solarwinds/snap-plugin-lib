@@ -300,7 +300,7 @@ func makeGRPCCredentials(m *meta) (creds credentials.TransportCredentials, err e
 		}
 		config = tlsSetup.makeTLSConfig()
 		config.Certificates = []tls.Certificate{cert}
-		config.RootCAs = rootCAs
+		config.ClientCAs, config.RootCAs = rootCAs, rootCAs
 	}
 	creds = credentials.NewTLS(config)
 	return creds, nil
