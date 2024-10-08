@@ -65,6 +65,7 @@ lint() {
   # 8. gosec         (https://github.com/securego/gosec)
   local go_analyzers
   go_analyzers=(gofmt goimports golint go_vet staticcheck copyrights go_license go_sec)
+  
   ((n_elements=${#go_analyzers[@]}, max=n_elements - 1))
   for ((i = 0; i <= max; i++)); do
     _info "running ${go_analyzers[i]}"
