@@ -1,6 +1,6 @@
 module github.com/solarwinds/snap-plugin-lib/examples/v1
 
-go 1.22.5
+go 1.23.2
 
 require (
 	github.com/josephspurrier/goversioninfo v1.4.0
@@ -9,13 +9,13 @@ require (
 	github.com/solarwinds/snap-plugin-lib v1.0.0
 	github.com/urfave/cli v1.22.5
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/tools v0.6.0
+	golang.org/x/tools v0.12.1-0.20230825192346-2191a27a6dc5
 	google.golang.org/grpc v1.56.3
-	honnef.co/go/tools v0.2.2
+	honnef.co/go/tools v0.4.7
 )
 
 require (
-	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -30,7 +30,8 @@ require (
 	github.com/sirupsen/logrus v1.8.0 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
-	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
+	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
