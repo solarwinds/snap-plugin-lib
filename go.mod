@@ -3,17 +3,17 @@ module github.com/solarwinds/snap-plugin-lib
 go 1.23.2
 
 require (
-	github.com/golang/protobuf v1.5.4
+	github.com/golang/protobuf v1.5.3
 	github.com/google/go-licenses v0.0.0-00010101000000-000000000000
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/securego/gosec/v2 v2.20.0
-	github.com/sirupsen/logrus v1.9.3
-	github.com/smartystreets/goconvey v1.8.1
-	github.com/urfave/cli v1.22.15
+	github.com/sirupsen/logrus v1.8.1
+	github.com/smartystreets/goconvey v1.7.2
+	github.com/urfave/cli v1.22.5
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/tools v0.22.0
-	google.golang.org/grpc v1.65.0
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
+	google.golang.org/grpc v1.56.3
 	honnef.co/go/tools v0.4.7
 )
 
@@ -36,7 +36,7 @@ require (
 	github.com/otiai10/copy v1.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/smarty/assertions v1.15.0 // indirect
+	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/spf13/cobra v1.3.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/src-d/gcfg v1.4.0 // indirect
