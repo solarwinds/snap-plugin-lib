@@ -57,7 +57,3 @@ workflows:
           matrix:
             parameters:
               version: ["1.22.4"]
-          context:
-            - docker-hub          
-            - solarwinds-cloud-github-read-access
-            - common-build-creds              
