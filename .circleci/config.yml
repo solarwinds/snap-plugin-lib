@@ -46,7 +46,7 @@ jobs:
               ./dotnet-install.sh --channel 3.1 --runtime aspnetcore --install-dir /usr/share/dotnet
               sudo apt-get update
               sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https 
-              echo "export PATH=$PATH:~/dotnet >> $BASH_ENV
+              echo "export PATH=$PATH:/usr/share/dotnet" >> $BASH_ENV
       - run: 
           name: "Verify .NET installation"
           command: >
