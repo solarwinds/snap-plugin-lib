@@ -48,7 +48,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 func init() {
@@ -270,23 +269,6 @@ func TestMakeGRPCCredentials(t *testing.T) {
 					So(configReport.ClientCAs.Subjects(), ShouldNotBeEmpty)
 				})
 			})
-
-			// Temporarily create tls.Config directly
-			certPool := x509.NewCertPool()
-			caCert, err := os.ReadFile(m.RootCertPaths)
-			if err != nil {
-				t.Fatalf("Failed to load root CA: %v", err)
-			}
-			certPool.AppendCertsFromPEM(caCert)
-
-			config := &tls.Config{
-				RootCAs: certPool,
-			}
-			creds := credentials.NewTLS(config)
-
-			// Continue your test assertions
-			So(creds, ShouldNotBeNil)
-
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
 				Convey("library should fail to build GRPC credentials, reporting an error", func() {
