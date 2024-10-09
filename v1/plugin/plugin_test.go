@@ -48,6 +48,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func init() {
@@ -287,7 +288,6 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
-<<<<<<< HEAD
 					So(configReport.RootCAs, ShouldNotBeNil)
 				})
 			})
@@ -308,11 +308,6 @@ func TestMakeGRPCCredentials(t *testing.T) {
 			// Continue your test assertions
 			So(creds, ShouldNotBeNil)
 
-=======
-					// So(configReport.RootCAs, ShouldNotBeNil)
-				})
-			})
->>>>>>> parent of 6ffa15d (isolating makeGRPCCredentials() function call)
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
 				Convey("library should fail to build GRPC credentials, reporting an error", func() {
