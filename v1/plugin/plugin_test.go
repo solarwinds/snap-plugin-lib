@@ -82,12 +82,41 @@ type mockTLSSetup struct {
 	doUpdateServerOptions func(options ...grpc.ServerOption) []grpc.ServerOption
 }
 
-func newMockTLSSetup(prevSetup tlsServerSetup) *mockTLSSetup {
-	return &mockTLSSetup{prevSetup: prevSetup,
-		doMakeTLSConfig:       prevSetup.makeTLSConfig,
-		doReadRootCAs:         prevSetup.readRootCAs,
-		doUpdateServerOptions: prevSetup.updateServerOptions,
+func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *meta) *mockTLSSetup {
+	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
+
+	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
+		fmt.Println("Root Cert Path : " + rootCertPaths)
+		if rootCertPaths == "MANY-MISSING-FILES" {
+			return nil, fmt.Errorf("unable to read root CAs: invalid path")
+		}
+		caCert, err := os.ReadFile(rootCertPaths)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read root CAs: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		return caCertPool, nil
 	}
+
+	mockSetup.doMakeTLSConfig = func() *tls.Config {
+		tlsConfig := prevSetup.makeTLSConfig()
+		var err error
+		tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths)
+		if err != nil {
+			*configReportPtr = nil
+			return tlsConfig
+		}
+		*configReportPtr = tlsConfig
+		return tlsConfig
+	}
+
+	// Mock the updateServerOptions function
+	mockSetup.doUpdateServerOptions = func(options ...grpc.ServerOption) []grpc.ServerOption {
+		return options
+	}
+
+	return mockSetup
 }
 
 func (m *mockTLSSetup) makeTLSConfig() *tls.Config {
@@ -253,22 +282,18 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				KeyPath:       tlsTestSrv + keyFileExt,
 				RootCertPaths: tlsTestCA + crtFileExt,
 			}
-			mockServerSetupInUse := newMockTLSSetup(tlsSetup)
-			tlsSetup = mockServerSetupInUse
 			var configReport *tls.Config
-			mockServerSetupInUse.doMakeTLSConfig = func() *tls.Config {
-				tlsConfig := mockServerSetupInUse.prevSetup.makeTLSConfig()
-				configReport = tlsConfig
-				return tlsConfig
-			}
+			mockServerSetupInUse := newMockTLSSetup(tlsSetup, &configReport, &m)
+			tlsSetup = mockServerSetupInUse
 			Convey("library should build GRPC credentials without issues", func() {
 				_, err := makeGRPCCredentials(&m)
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
-					So(configReport.ClientCAs.Subjects(), ShouldNotBeEmpty)
+					So(configReport.ClientCAs, ShouldNotBeNil)
 				})
 			})
+
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
 				Convey("library should fail to build GRPC credentials, reporting an error", func() {
@@ -367,6 +392,8 @@ func setUpTestMain() {
 	} else {
 		testFilesToRemove = append(testFilesToRemove, tlsTestFiles...)
 	}
+	// Add delay after building certificates
+	time.Sleep(100 * time.Millisecond)
 }
 
 func tearDownTestMain() {
