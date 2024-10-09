@@ -48,7 +48,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 func init() {
@@ -87,9 +86,6 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 	mockSetup := &mockTLSSetup{prevSetup: prevSetup}
 
 	mockSetup.doReadRootCAs = func(rootCertPaths string) (*x509.CertPool, error) {
-		if rootCertPaths == "MANY-MISSING-FILES" {
-			return nil, fmt.Errorf("unable to read root CAs: invalid path")
-		}
 		caCert, err := os.ReadFile(rootCertPaths)
 		if err != nil {
 			return nil, fmt.Errorf("unable to read root CAs: %v", err)
@@ -100,8 +96,14 @@ func newMockTLSSetup(prevSetup tlsServerSetup, configReportPtr **tls.Config, m *
 	}
 
 	mockSetup.doMakeTLSConfig = func() *tls.Config {
-		tlsConfig := prevSetup.makeTLSConfig()
-		tlsConfig.ClientCAs, _ = mockSetup.readRootCAs(m.RootCertPaths)
+		tlsConfig := prevSetup.makeTLSConfig() // Call original makeTLSConfig
+
+		// Correctly call the mocked readRootCAs
+		var err error
+		if tlsConfig.ClientCAs, err = mockSetup.readRootCAs(m.RootCertPaths); err != nil {
+			panic("Failed to load root CAs in mock setup: " + err.Error())
+		}
+
 		*configReportPtr = tlsConfig
 		return tlsConfig
 	}
@@ -285,6 +287,7 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
+<<<<<<< HEAD
 					So(configReport.RootCAs, ShouldNotBeNil)
 				})
 			})
@@ -305,6 +308,11 @@ func TestMakeGRPCCredentials(t *testing.T) {
 			// Continue your test assertions
 			So(creds, ShouldNotBeNil)
 
+=======
+					// So(configReport.RootCAs, ShouldNotBeNil)
+				})
+			})
+>>>>>>> parent of 6ffa15d (isolating makeGRPCCredentials() function call)
 			Convey("but with invalid server cert path", func() {
 				m.CertPath = "MISSING-FILE"
 				Convey("library should fail to build GRPC credentials, reporting an error", func() {
