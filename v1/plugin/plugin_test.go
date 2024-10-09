@@ -240,7 +240,7 @@ func TestMakeTLSConfig(t *testing.T) {
 		Convey("plugin lib should use TLS config requiring verified clients and specific cipher suites", func() {
 			config := tlsSetupInstance.makeTLSConfig()
 			So(config.ClientAuth, ShouldEqual, tls.RequireAndVerifyClientCert)
-			So(config.PreferServerCipherSuites, ShouldEqual, true) //nolint:SA1019
+			So(config.PreferServerCipherSuites, ShouldEqual, true)
 			So(config.MinVersion, ShouldNotBeEmpty)
 		})
 	})
@@ -267,7 +267,7 @@ func TestMakeGRPCCredentials(t *testing.T) {
 				So(err, ShouldBeNil)
 				Convey("certificate and client root certs should be loaded", func() {
 					So(configReport.Certificates, ShouldNotBeEmpty)
-					So(configReport.ClientCAs.Subjects(), ShouldNotBeEmpty) //nolint:SA1019
+					So(configReport.ClientCAs.Subjects(), ShouldNotBeEmpty)
 				})
 			})
 
@@ -379,7 +379,7 @@ func buildTLSCerts(caCN, srvCN, cliCN string) (resFiles []string, err error) {
 }
 
 func setUpTestMain() {
-	rand.Seed(time.Now().Unix()) //nolint:SA1019
+	rand.Seed(time.Now().Unix())
 	if tlsTestFiles, err := buildTLSCerts(tlsTestCA, tlsTestSrv, tlsTestCli); err != nil {
 		panic(err)
 	} else {
