@@ -41,12 +41,11 @@ jobs:
       - run:
           name: Install .NET SDK and dependencies
           command: |
-              wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-              chmod +x dotnet-install.sh
-              ./dotnet-install.sh --channel 3.1 --runtime aspnetcore --install-dir /usr/share/dotnet
-              sudo apt-get update
-              sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https 
-              echo "export PATH=$PATH:/usr/share/dotnet" >> $BASH_ENV
+            wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+            chmod +x dotnet-install.sh
+            ./dotnet-install.sh --channel 3.1 --runtime aspnetcore
+            sudo apt-get update
+            sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https 
       - run: 
           name: "Verify .NET installation"
           command: >
@@ -54,7 +53,11 @@ jobs:
       - run: 
           name: "Run build"
           command: >
-            make build 2>&1                
+            wget https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && 
+            sudo dpkg -i packages-microsoft-prod.deb && 
+            sudo apt-get update && 
+            sudo apt-get install -y gcc-multilib gcc-mingw-w64 apt-transport-https dotnet-sdk-3.1 dotnet-runtime-3.1 && 
+            make build 2>&1
       - run:
           name: "Run small test"
           command: >
