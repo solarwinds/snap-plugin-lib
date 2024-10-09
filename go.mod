@@ -13,13 +13,13 @@ require (
 	github.com/spf13/cobra v1.3.0 // indirect
 	github.com/urfave/cli v1.22.5
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/tools v0.12.1-0.20230825192346-2191a27a6dc5
+	golang.org/x/tools v0.6.0
 	google.golang.org/grpc v1.56.3
-	honnef.co/go/tools v0.4.7
+	honnef.co/go/tools v0.3.2
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
@@ -44,8 +44,8 @@ require (
 	github.com/xanzy/ssh-agent v0.2.1 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
-	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/exp/typeparams v0.0.0-20220218215828-6cf2b201936e // indirect
+	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
