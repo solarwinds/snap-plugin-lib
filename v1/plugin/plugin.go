@@ -290,14 +290,11 @@ func makeGRPCCredentials(m *meta) (creds credentials.TransportCredentials, err e
 		if err != nil {
 			return nil, fmt.Errorf("unable to setup credentials for plugin - loading key pair failed: %v", err.Error())
 		}
-		var rootCAs *x509.CertPool
-		rootCAs, err = tlsServerDefaultSetup{}.readRootCAs(m.RootCertPaths)
-		if err != nil {
-			return nil, fmt.Errorf("unable to read root CAs: %v", err.Error())
-		}
 		config = tlsSetup.makeTLSConfig()
 		config.Certificates = []tls.Certificate{cert}
-		config.ClientCAs, config.RootCAs = rootCAs, rootCAs
+		if config.ClientCAs, err = tlsSetup.readRootCAs(m.RootCertPaths); err != nil {
+			return nil, fmt.Errorf("unable to read root CAs: %v", err.Error())
+		}
 	}
 	creds = credentials.NewTLS(config)
 	return creds, nil
