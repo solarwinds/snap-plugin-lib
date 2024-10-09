@@ -5,7 +5,7 @@ Here you will find example plugins that cover the basics for writing collector, 
 
 To get these example plugins to build properly and work with Snap you will need to have [glide](https://glide.sh/) installed in your $PATH. You should also add snaptel and snapteld in your $PATH. 
 
-To test these plugins with Snap, you will need to have [Snap](https://github.com/solarwinds-cloud/snap) installed, check out these docs for [Snap setup details](https://github.com/solarwinds-cloud/snap/blob/master/docs/BUILD_AND_TEST.md#getting-started).
+To test these plugins with Snap, you will need to have [Snap](https://github.com/librato/snap) installed, check out these docs for [Snap setup details](https://github.com/librato/snap/blob/master/docs/BUILD_AND_TEST.md#getting-started).
 
 ### 1. Get the plugin library repo:
 `go get github.com/solarwinds/snap-plugin-lib/...` will add the repo to your $GOPATH
@@ -58,7 +58,7 @@ $ go build -o example-streaming-collector examples/snap-plugin-collector-rand-st
 ```
 
 ### 4. Run Snap, Load Plugins, and Run Tasks
-You can now try [running Snap](https://github.com/solarwinds-cloud/snap#running-snap), [loading plugins](https://github.com/solarwinds-cloud/snap#load-plugins), and [running tasks](https://github.com/solarwinds-cloud/snap#running-tasks). You'll find a sample task.yml file for these examples at the bottom of this README.md.
+You can now try [running Snap](https://github.com/librato/snap#running-snap), [loading plugins](https://github.com/librato/snap#load-plugins), and [running tasks](https://github.com/librato/snap#running-tasks). You'll find a sample task.yml file for these examples at the bottom of this README.md.
 
 Below are some sample commands to try:
 
@@ -107,7 +107,7 @@ test-file-publisher 	 1 		 publisher 	 false 		 loaded 	 Fri, 23 Sep 2016 17:44:
 
 ### Create a task.
 You can create a task.yml file for these examples using the following code.
-Discover [how tasks work](https://github.com/solarwinds-cloud/snap/blob/master/docs/TASKS.md).
+Discover [how tasks work](https://github.com/librato/snap/blob/master/docs/TASKS.md).
 
 task.yml
 

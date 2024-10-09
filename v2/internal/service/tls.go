@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2024 SolarWinds Worldwide, LLC
+ Copyright (c) 2021 SolarWinds Worldwide, LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -79,7 +80,7 @@ func loadCACerts(ctx context.Context, caPath string) (*x509.CertPool, error) {
 
 	// read certificate files
 	for _, f := range certFilesToProcess {
-		caCert, err := os.ReadFile(filepath.Clean(f))
+		caCert, err := ioutil.ReadFile(filepath.Clean(f))
 		if err != nil {
 			return clientCA, fmt.Errorf("can't read client CA Root certificate: %v", err)
 		}
