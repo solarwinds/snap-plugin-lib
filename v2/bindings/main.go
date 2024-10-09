@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2024 SolarWinds Worldwide, LLC
+ Copyright (c) 2022 SolarWinds Worldwide, LLC
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -337,6 +337,7 @@ import (
 	"github.com/solarwinds/snap-plugin-lib/v2/plugin"
 	"github.com/solarwinds/snap-plugin-lib/v2/runner"
 )
+import "C"
 
 var contextMap = sync.Map{}
 var pluginDef plugin.Definition
