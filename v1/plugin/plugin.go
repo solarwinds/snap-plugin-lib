@@ -774,8 +774,7 @@ func printConfigPolicy(p *pluginProxy, conf Config) error {
 	w.Flush()
 	if requiredConfigs != "" {
 		requiredConfigs += "! Please provide config in form of: -config '{\"key\":\"kelly\", \"spirit-animal\":\"coatimundi\"}'\n"
-		err := fmt.Errorf(requiredConfigs)
-		return err
+		return fmt.Errorf("%s", requiredConfigs)
 	}
 
 	return nil
